@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Волшебные квадраты</title>
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:'Segoe UI',Arial,sans-serif;background:linear-gradient(135deg,#ede9fe,#dbeafe,#ecfdf5);min-height:100vh;color:#1e293b;padding:16px}
+        .container{max-width:1100px;margin:0 auto}
+        h1{text-align:center;color:#5b21b6;font-size:2em;margin:14px 0 4px}
+        .sub{text-align:center;color:#6d28d9;margin-bottom:20px}
+        .card{background:#fff;border-radius:16px;padding:22px 24px;margin-bottom:24px;box-shadow:0 3px 14px rgba(0,0,0,.06);border:2px solid #e2e8f0}
+        .card.purple{border-left:6px solid #8b5cf6} .card.purple h2{color:#5b21b6}
+        .card.blue{border-left:6px solid #3b82f6} .card.blue h2{color:#1d4ed8}
+        .card.green{border-left:6px solid #10b981} .card.green h2{color:#059669}
+        .card.amber{border-left:6px solid #f59e0b} .card.amber h2{color:#92400e}
+        .card.pink{border-left:6px solid #ec4899} .card.pink h2{color:#be185d}
+        .card h2{color:#5b21b6;font-size:1.25em;margin-bottom:10px}
+        h3{color:#334155;margin:14px 0 8px;font-size:1.05em}
+        p,.card li{margin-bottom:8px;font-size:1.05em}
+        ul,ol{padding-left:20px;margin:6px 0 12px}
+        .hl{color:#dc2626;font-weight:700}
+
+        .rule{background:#f5f3ff;border:2px solid #ddd6fe;border-radius:12px;padding:14px 18px;margin:12px 0;text-align:center;color:#5b21b6;font-size:1.05em}
+        .info{border-radius:10px;padding:14px 18px;margin:12px 0}
+        .info.purple{background:#f5f3ff;border:1px solid #ddd6fe;color:#5b21b6}
+        .info.blue{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af}
+        .info.amber{background:#fffbeb;border:1px solid #fde68a;color:#92400e}
+        .info.green{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46}
+
+        .compare{display:flex;gap:16px;flex-wrap:wrap;margin:14px 0}
+        .compare-box{flex:1;min-width:250px;background:#f8fafc;border:2px solid #e2e8f0;border-radius:12px;padding:16px}
+        .compare-box h3{margin-top:0}
+        .compare-box.magic{border-color:#c4b5fd;background:#faf5ff}
+        .compare-box.latin{border-color:#93c5fd;background:#eff6ff}
+
+        .copies{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+        .copy-block{background:#f8fafc;border:2px solid #e2e8f0;border-radius:14px;padding:14px;text-align:center;min-width:140px}
+
+        .single-block{display:flex;justify-content:center;margin:14px 0}
+        .single-inner{background:#f8fafc;border:2px solid #ddd6fe;border-radius:14px;padding:18px;text-align:center}
+
+        .sq{display:inline-grid;gap:0;margin:4px auto}
+        .sq .c{width:46px;height:46px;border:2px solid #94a3b8;display:flex;align-items:center;justify-content:center;font-size:1.2em;font-weight:700;background:#fff;color:#1e293b}
+        .sq .c.given{background:#dbeafe;color:#1d4ed8}
+        .sq .c input{width:100%;height:100%;border:none;background:transparent;text-align:center;font-size:1.15em;font-weight:700;color:#5b21b6}
+        .sq .c input:focus{outline:2px solid #8b5cf6;outline-offset:-2px;background:#f5f3ff}
+
+        .check-btn{background:#7c3aed;border:none;border-radius:8px;padding:8px 20px;color:#fff;font-size:1em;font-weight:600;cursor:pointer;margin-top:10px}
+        .check-btn:hover{background:#6d28d9}
+        .fb{font-size:.95em;margin-top:8px;min-height:22px;font-weight:600}
+        .fb.ok{color:#059669} .fb.no{color:#dc2626}
+
+        @media(max-width:600px){.sq .c{width:36px;height:36px;font-size:1em}.copy-block{min-width:110px;padding:10px}.compare{flex-direction:column}}
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <h1>🔮 Волшебные квадраты</h1>
+    <p class="sub"></p>
+
+    <!-- ===== ИСТОРИЧЕСКАЯ СПРАВКА ===== -->
+    <div class="card purple">
+        <h2>📜 Немного истории</h2>
+        <p>Волшебные (магические) квадраты — одна из древнейших математических головоломок. Самый старый известный магический квадрат появился в Китае более <span class="hl">4000 лет назад</span>. По легенде, император Юй увидел на панцире черепахи, выползшей из реки Ло, загадочный узор из точек — квадрат 3×3, в котором сумма чисел по любой строке, столбцу и диагонали равнялась 15.</p>
+        <p>Этот квадрат называли <strong>«Ло Шу»</strong> и считали священным символом гармонии.</p>
+        <p>Позже магические квадраты изучали в Индии, арабских странах и Европе. Знаменитый немецкий художник <strong>Альбрехт Дюрер</strong> в 1514 году поместил магический квадрат 4×4 на свою гравюру «Меланхолия». А великий математик <strong>Леонард Эйлер</strong> в XVIII веке создал теорию латинских квадратов — они сейчас используются в науке и даже лежат в основе популярной головоломки <strong>судоку</strong>!</p>
+
+        <div style="text-align:center;margin:14px 0">
+            <img src="turtle_loshu.png" alt="Черепаха Ло Шу" style="max-width:200px;border-radius:12px;margin-bottom:12px;border:2px solid #ddd6fe">
+            <br>
+            <div class="sq" style="grid-template-columns:repeat(3,46px)">
+                <div class="c given">2</div><div class="c given">7</div><div class="c given">6</div>
+                <div class="c given">9</div><div class="c given">5</div><div class="c given">1</div>
+                <div class="c given">4</div><div class="c given">3</div><div class="c given">8</div>
+            </div>
+            <p style="font-size:.9em;color:#6d28d9;margin-top:6px">Квадрат Ло Шу — каждая строка, столбец и диагональ = 15</p>
+        </div>
+    </div>
+
+    <!-- ===== МАГИЧЕСКИЙ vs ЛАТИНСКИЙ ===== -->
+    <div class="card blue">
+        <h2>🔮 Два вида квадратов</h2>
+
+        <div class="compare">
+            <div class="compare-box magic">
+                <h3>🌟 Магический квадрат</h3>
+                <ul>
+                    <li>Числа <strong>не повторяются</strong></li>
+                    <li>Сумма одинакова в каждой <strong>строке, столбце и диагонали</strong></li>
+                    <li>Пример: числа 1–9 в квадрате 3×3, сумма = 15</li>
+                </ul>
+                <div style="text-align:center">
+                    <div class="sq" style="grid-template-columns:repeat(3,38px)">
+                        <div class="c given" style="width:38px;height:38px;font-size:1em">8</div><div class="c given" style="width:38px;height:38px;font-size:1em">1</div><div class="c given" style="width:38px;height:38px;font-size:1em">6</div>
+                        <div class="c given" style="width:38px;height:38px;font-size:1em">3</div><div class="c given" style="width:38px;height:38px;font-size:1em">5</div><div class="c given" style="width:38px;height:38px;font-size:1em">7</div>
+                        <div class="c given" style="width:38px;height:38px;font-size:1em">4</div><div class="c given" style="width:38px;height:38px;font-size:1em">9</div><div class="c given" style="width:38px;height:38px;font-size:1em">2</div>
+                    </div>
+                </div>
+            </div>
+            <div class="compare-box latin">
+                <h3>🔤 Латинский квадрат</h3>
+                <ul>
+                    <li>В каждой строке и столбце — <strong>все числа разные</strong></li>
+                    <li>Каждое число встречается <strong>ровно по одному разу</strong> в каждой строке и столбце</li>
+                    <li>Диагонали проверять <strong>не нужно</strong></li>
+                </ul>
+                <div style="text-align:center">
+                    <div class="sq" style="grid-template-columns:repeat(3,38px)">
+                        <div class="c given" style="width:38px;height:38px;font-size:1em;background:#dbeafe">1</div><div class="c given" style="width:38px;height:38px;font-size:1em;background:#d1fae5">2</div><div class="c given" style="width:38px;height:38px;font-size:1em;background:#fce7f3">3</div>
+                        <div class="c given" style="width:38px;height:38px;font-size:1em;background:#fce7f3">3</div><div class="c given" style="width:38px;height:38px;font-size:1em;background:#dbeafe">1</div><div class="c given" style="width:38px;height:38px;font-size:1em;background:#d1fae5">2</div>
+                        <div class="c given" style="width:38px;height:38px;font-size:1em;background:#d1fae5">2</div><div class="c given" style="width:38px;height:38px;font-size:1em;background:#fce7f3">3</div><div class="c given" style="width:38px;height:38px;font-size:1em;background:#dbeafe">1</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАНИЕ 0 (общее, 1 экземпляр) ===== -->
+    <div class="card green">
+        <h2>🤝 Задание 0 — Разбираем вместе</h2>
+        <p>Впиши цифры <span class="hl">1, 2 или 3</span> так, чтобы сумма чисел в каждой строке и каждом столбце была равна <span class="hl">6</span>. Цифры могут повторяться.</p>
+
+        <div class="single-block">
+            <div class="single-inner" id="demo-wrap"></div>
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАНИЯ 1–6 (по 5 экземпляров) ===== -->
+    <div id="tasks"></div>
+
+</div>
+
+<script>
+// ===== DEMO (task 0, single copy with check) =====
+const demo = {size:3, target:6, checkType:'rowcol', given:[{r:1,c:1,v:2}], allowed:[1,2,3]};
+
+function buildSq(task, prefix, n) {
+    let h = `<div class="sq" style="grid-template-columns:repeat(${n},46px)">`;
+    for (let r = 0; r < n; r++) {
+        for (let c = 0; c < n; c++) {
+            const g = task.given.find(g => g.r === r && g.c === c);
+            if (g) {
+                h += `<div class="c given">${g.v}</div>`;
+            } else {
+                h += `<div class="c"><input id="${prefix}_${r}_${c}" maxlength="2"></div>`;
+            }
+        }
+    }
+    h += '</div>';
+    return h;
+}
+
+// Demo
+(function(){
+    const w = document.getElementById('demo-wrap');
+    let h = buildSq(demo, 'demo', 3);
+    h += `<br><button class="check-btn" onclick="checkSq(demo,'demo')">Проверить</button>`;
+    h += `<div class="fb" id="fb_demo"></div>`;
+    w.innerHTML = h;
+})();
+
+// ===== TASKS from the book (5 copies each, no check button) =====
+const tasks = [
+    // Book task 1 (p.126): 3x3, sum of rows and cols = 3, given: bottom-right = 1
+    {
+        id:'t1', size:3, title:'Задание 1',
+        desc:'Впиши в свободные клетки такие цифры, чтобы сумма чисел в каждом горизонтальном и вертикальном ряду была равна <strong>3</strong>.',
+        given:[{r:2,c:2,v:1}], allowed:[0,1,2,3]
+    },
+    // Book task 2 (p.126): 3x3, sum rows/cols/diags equal, given: (0,1)=1, (2,0)=2
+    {
+        id:'t2', size:3, title:'Задание 2',
+        desc:'Помести в пустые клетки цифры <strong>1, 2 или 3</strong> так, чтобы сумма чисел в каждом горизонтальном, вертикальном и трёхклеточном диагональном ряду была одинакова.',
+        given:[{r:0,c:1,v:1},{r:2,c:0,v:2}], allowed:[1,2,3]
+    },
+    // Book task 3 (p.127): 3x3, sum rows/cols/diags equal, can't fill all with 1s, given: (2,2)=1
+    {
+        id:'t3', size:3, title:'Задание 3',
+        desc:'Впиши цифры <strong>1, 2 или 3</strong> так, чтобы сумма в каждой строке, столбце и трёхклеточной диагонали была одинакова. Но нельзя все клетки заполнить единичками!',
+        given:[{r:2,c:2,v:1}], allowed:[1,2,3]
+    },
+    // Book task 4 (p.127): 3x3, sum rows/cols/diags = 6, given: (2,1)=3
+    {
+        id:'t4', size:3, title:'Задание 4',
+        desc:'Помести в пустые клетки цифры <strong>1, 2 или 3</strong> так, чтобы сумма по каждой горизонтали, вертикали и трёхклеточной диагонали была равна <strong>6</strong>.',
+        given:[{r:2,c:1,v:3}], allowed:[1,2,3]
+    },
+    // Book task 5 (p.127-128): 3x3 magic square, numbers 1-9 no repeats, sum=15, given: (1,2)=6, (2,1)=3
+    {
+        id:'t5', size:3, title:'Задание 5 — Магический квадрат',
+        desc:'Расположи в пустых клетках недостающие числа от <strong>1 до 9</strong> так, чтобы их сумма в каждом горизонтальном, вертикальном и трёхклеточном диагональном ряду равнялась <strong>15</strong>. Цифры не должны повторяться!',
+        given:[{r:1,c:2,v:6},{r:2,c:1,v:3}], allowed:[1,2,3,4,5,6,7,8,9]
+    },
+    // Book task 7 (p.129): 4x4 Latin square, nums 1-4, sum rows/cols=10, no repeats, given: (0,3)=3, (1,1)=3, (1,2)=2, (3,0)=1
+    {
+        id:'t6', size:4, title:'Задание 6 — Латинский квадрат 4×4 ⭐',
+        desc:'Заполни пустые клетки числами от <strong>1 до 4</strong> так, чтобы сумма в каждом горизонтальном и вертикальном ряду равнялась <strong>10</strong>. Ни в одном ряду по вертикали или горизонтали не должно быть одинаковых цифр.',
+        given:[{r:0,c:3,v:3},{r:1,c:1,v:3},{r:1,c:2,v:2},{r:3,c:0,v:1}], allowed:[1,2,3,4]
+    },
+    // Book task 8 (p.130): 4x4 Latin square, nums 1-4, no repeats in rows/cols, given: (0,3)=4, (1,1)=2, (1,2)=1, (3,0)=1
+    {
+        id:'t7', size:4, title:'Задание 7 — Латинский квадрат 4×4 ⭐',
+        desc:'Расположи числа от <strong>1 до 4</strong> так, чтобы ни в одном вертикальном и горизонтальном ряду не было одинаковых цифр.',
+        given:[{r:0,c:3,v:4},{r:1,c:1,v:2},{r:1,c:2,v:1},{r:3,c:0,v:1}], allowed:[1,2,3,4]
+    },
+    // Book task 13 (p.133): 5x5 magic square, nums 1-5, sum rows/cols/diags=15, no repeats, given: (0,0)=1, (0,3)=2, (2,4)=4, (3,1)=3
+    {
+        id:'t8', size:5, title:'Задание 8 — Магический квадрат 5×5 ⭐⭐',
+        desc:'Заполни пустые клетки числами от <strong>1 до 5</strong> так, чтобы их сумма в каждом горизонтальном, вертикальном и пятиклеточном диагональном ряду была равна <strong>15</strong>. Ни в одном из этих рядов цифры не должны повторяться.',
+        given:[{r:0,c:0,v:1},{r:0,c:3,v:2},{r:2,c:4,v:4},{r:3,c:1,v:3}], allowed:[1,2,3,4,5]
+    },
+    // Book task 14 (p.134): 5x5 Latin square, nums 1-5, no repeats in rows/cols/diags, given: (1,0)=4, (1,4)=2, (2,2)=3, (4,1)=1
+    {
+        id:'t9', size:5, title:'Задание 9 — Латинский квадрат 5×5 ⭐⭐',
+        desc:'Впиши числа от <strong>1 до 5</strong> так, чтобы цифры в каждом ряду по вертикали, горизонтали и пятиклеточной диагонали были разными.',
+        given:[{r:1,c:0,v:4},{r:1,c:4,v:2},{r:2,c:2,v:3},{r:4,c:1,v:1}], allowed:[1,2,3,4,5]
+    }
+];
+
+function renderTasks() {
+    const area = document.getElementById('tasks');
+    let html = '';
+    tasks.forEach(task => {
+        const n = task.size;
+        html += `<div class="card amber">`;
+        html += `<h2>🔮 ${task.title}</h2>`;
+        html += `<p>${task.desc}</p>`;
+        html += `<div class="copies">`;
+        for (let i = 0; i < 5; i++) {
+            html += `<div class="copy-block">`;
+            html += buildSq(task, task.id + '_' + i, n);
+            html += `</div>`;
+        }
+        html += `</div></div>`;
+    });
+    area.innerHTML = html;
+}
+
+// ===== CHECK (only for demo) =====
+function checkSq(task, prefix) {
+    const n = task.size;
+    const grid = [];
+    for (let r = 0; r < n; r++) {
+        const row = [];
+        for (let c = 0; c < n; c++) {
+            const g = task.given.find(g => g.r === r && g.c === c);
+            if (g) { row.push(g.v); }
+            else {
+                const inp = document.getElementById(`${prefix}_${r}_${c}`);
+                const v = parseInt(inp.value);
+                row.push(isNaN(v) ? 0 : v);
+            }
+        }
+        grid.push(row);
+    }
+    const fb = document.getElementById(`fb_${prefix}`);
+
+    for (let r = 0; r < n; r++)
+        for (let c = 0; c < n; c++)
+            if (grid[r][c] === 0) { fb.className = 'fb no'; fb.textContent = '✏️ Заполни все клетки!'; return; }
+
+    for (let r = 0; r < n; r++)
+        for (let c = 0; c < n; c++)
+            if (!task.allowed.includes(grid[r][c])) { fb.className = 'fb no'; fb.textContent = '❌ Используй только числа ' + task.allowed.join(', '); return; }
+
+    const target = task.target;
+    let ok = true;
+    for (let r = 0; r < n; r++) {
+        if (grid[r].reduce((a, b) => a + b, 0) !== target) { ok = false; break; }
+    }
+    if (ok) for (let c = 0; c < n; c++) {
+        let s = 0; for (let r = 0; r < n; r++) s += grid[r][c];
+        if (s !== target) { ok = false; break; }
+    }
+    if (ok) { fb.className = 'fb ok'; fb.textContent = '✅ Верно! Молодец!'; }
+    else { fb.className = 'fb no'; fb.textContent = '🤔 Пока не верно. Проверь суммы строк и столбцов!'; }
+}
+
+renderTasks();
+</script>
+</body>
+</html>
