@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Задачи «на части» — бассейн, работа, путь</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(180deg, #e0f2fe 0%, #bae6fd 40%, #e0f7fa 100%);
+            color: #0c4a6e;
+            line-height: 1.75;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 860px; margin: 0 auto; }
+        h1 { text-align: center; color: #0369a1; font-size: 2em; margin-bottom: 6px; }
+        .sub { text-align: center; color: #0c4a6e; margin-bottom: 24px; font-size: 1.05em; }
+
+        .card {
+            background: #fff;
+            border-radius: 18px;
+            padding: 26px 30px;
+            margin-bottom: 22px;
+            box-shadow: 0 3px 16px rgba(0,100,180,0.08);
+            border: 2px solid #bae6fd;
+        }
+        .card h2 { color: #0369a1; font-size: 1.35em; margin-bottom: 12px; }
+        .card.sky    { border-left: 6px solid #38bdf8; } .card.sky h2    { color: #0284c7; }
+        .card.blue   { border-left: 6px solid #2563eb; } .card.blue h2   { color: #1d4ed8; }
+        .card.teal   { border-left: 6px solid #14b8a6; } .card.teal h2   { color: #0d9488; }
+        .card.cyan   { border-left: 6px solid #06b6d4; } .card.cyan h2   { color: #0891b2; }
+        .card.indigo { border-left: 6px solid #6366f1; } .card.indigo h2 { color: #4f46e5; }
+
+        p, li { font-size: 1.05em; }
+        .hl { color: #dc2626; font-weight: 700; }
+        .key {
+            background: #e0f2fe; border: 2px solid #7dd3fc; border-radius: 14px;
+            padding: 18px 22px; margin: 16px 0; text-align: center; font-size: 1.15em;
+        }
+        .info { border-radius: 10px; padding: 14px 18px; margin: 12px 0; }
+        .info.warm { background: #fffbeb; border: 1px solid #fde68a; color: #78350f; }
+
+        .task {
+            background: #f0f9ff; border: 2px dashed #93c5fd; border-radius: 12px;
+            padding: 16px 20px; margin-bottom: 34px;
+        }
+        .task-label {
+            display: inline-block; padding: 3px 14px; border-radius: 20px;
+            font-size: 0.85em; font-weight: 600; color: #fff; margin-bottom: 8px;
+        }
+        .task-label.sky  { background: #0ea5e9; }
+        .task-label.blue { background: #2563eb; }
+        .task-label.teal { background: #14b8a6; }
+        .task-label.star { background: #f59e0b; }
+
+        .grid-space {
+            margin-top: 14px;
+            background:
+                repeating-linear-gradient(0deg, transparent, transparent 23px, #c7d8e8 23px, #c7d8e8 24px),
+                repeating-linear-gradient(90deg, transparent, transparent 23px, #c7d8e8 23px, #c7d8e8 24px);
+            background-size: 24px 24px;
+            border: 1px solid #93c5fd; border-radius: 8px; min-height: 168px;
+        }
+
+        /* Check answer row */
+        .check-row {
+            display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 14px;
+        }
+        .check-row label { font-weight: 600; color: #0c4a6e; }
+        .check-row input {
+            border: 2px solid #93c5fd; border-radius: 8px; padding: 8px 12px;
+            font-size: 1.15em; width: 120px; text-align: center; color: #0c4a6e;
+            background: #fff;
+        }
+        .check-row input:focus { outline: none; border-color: #2563eb; }
+        .check-btn {
+            background: #0ea5e9; border: none; border-radius: 8px; padding: 8px 20px;
+            color: #fff; font-size: 1em; font-weight: 600; cursor: pointer; transition: background 0.2s;
+        }
+        .check-btn:hover { background: #0284c7; }
+        .check-btn:disabled { background: #94a3b8; cursor: default; }
+
+        .feedback {
+            margin-top: 8px; padding: 10px 14px; border-radius: 8px;
+            font-weight: 600; display: none; font-size: 1em;
+        }
+        .feedback.show { display: block; animation: fadeIn 0.3s ease; }
+        .feedback.ok  { background: #d1fae5; border: 1px solid #10b981; color: #065f46; }
+        .feedback.no  { background: #fef3c7; border: 1px solid #fbbf24; color: #78350f; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+
+        @media print { .check-row, .feedback { display: none !important; } }
+        @media (max-width: 500px) { h1 { font-size: 1.5em; } .card { padding: 18px 16px; } }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <h1>Задачи «на части»</h1>
+    <p class="sub">Бассейн, работа, путь — учимся находить части от целого</p>
+
+    <!-- ВВЕДЕНИЕ -->
+    <div class="card sky">
+        <h2>Главная идея</h2>
+        <div class="key">
+            Если вся работа выполняется за <strong>N</strong> часов, то за 1 час выполняется <strong>1/N</strong> работы.
+        </div>
+        <div class="info warm">
+            <p><strong>Найти часть от числа:</strong> a/b от N → раздели N на b, умножь на a.</p>
+            <p><strong>Найти целое по части:</strong> a/b = K → раздели K на a, умножь на b.</p>
+            <p><strong>Что осталось:</strong> использовали a/b → осталось (b−a)/b.</p>
+        </div>
+    </div>
+
+    <!-- РАЗМИНКА -->
+    <div class="card cyan">
+        <h2>Разминка</h2>
+        <div class="task" id="q1">
+            <span class="task-label sky">1</span>
+            <p>Рабочий может выполнить заказ за 5 часов. Какую часть заказа выполнит рабочий за 1 час?</p>
+            <div class="grid-space"></div>
+            <div class="check-row">
+                <label>Ответ:</label><input type="number" id="a1n" placeholder="?" style="width:60px;">/
+                <input type="number" id="a1d" placeholder="?" style="width:60px;">
+                <button class="check-btn" onclick="chkFrac2(1,1,5)">Проверить</button>
+            </div>
+            <div class="feedback" id="f1"></div>
+        </div>
+
+        <div class="task" id="q2">
+            <span class="task-label sky">2</span>
+            <p>Бассейн наполняется водой через трубу за 9 часов. Какая часть бассейна наполнится за 1 час?</p>
+            <div class="grid-space"></div>
+            <div class="check-row">
+                <label>Ответ:</label><input type="number" id="a2n" placeholder="?" style="width:60px;">/
+                <input type="number" id="a2d" placeholder="?" style="width:60px;">
+                <button class="check-btn" onclick="chkFrac2(2,1,9)">Проверить</button>
+            </div>
+            <div class="feedback" id="f2"></div>
+        </div>
+
+        <div class="task" id="q3">
+            <span class="task-label sky">3</span>
+            <p>Маша съедает шоколадку за 6 секунд. Какую часть шоколадки Маша съедает за 1 секунду?</p>
+            <div class="grid-space"></div>
+            <div class="check-row">
+                <label>Ответ:</label><input type="number" id="a3n" placeholder="?" style="width:60px;">/
+                <input type="number" id="a3d" placeholder="?" style="width:60px;">
+                <button class="check-btn" onclick="chkFrac2(3,1,6)">Проверить</button>
+            </div>
+            <div class="feedback" id="f3"></div>
+        </div>
+
+        <div class="task" id="q4">
+            <span class="task-label sky">4</span>
+            <p>Бассейн наполняется трубой за 11 минут. Какая часть бассейна останется незаполненной, если открыть кран на 3 минуты?</p>
+            <div class="grid-space"></div>
+            <div class="check-row">
+                <label>Ответ:</label><input type="number" id="a4n" placeholder="?" style="width:60px;">/
+                <input type="number" id="a4d" placeholder="?" style="width:60px;">
+                <button class="check-btn" onclick="chkFrac2(4,8,11)">Проверить</button>
+            </div>
+            <div class="feedback" id="f4"></div>
+        </div>
+
+        <div class="task" id="q5">
+            <span class="task-label sky">5</span>
+            <p>Турист проходит маршрут за 9 часов. Какую часть маршрута ему останется пройти после 4 часов пути?</p>
+            <div class="grid-space"></div>
+            <div class="check-row">
+                <label>Ответ:</label><input type="number" id="a5n" placeholder="?" style="width:60px;">/
+                <input type="number" id="a5d" placeholder="?" style="width:60px;">
+                <button class="check-btn" onclick="chkFrac2(5,5,9)">Проверить</button>
+            </div>
+            <div class="feedback" id="f5"></div>
+        </div>
+
+        <div class="task" id="q6">
+            <span class="task-label sky">6</span>
+            <p>За 1 час труба наполняет 1/12 бассейна. За сколько часов труба наполнит весь бассейн?</p>
+            <div class="grid-space"></div>
+            <div class="check-row">
+                <label>Ответ:</label><input type="number" id="a6" placeholder="?"> часов
+                <button class="check-btn" onclick="chkNum(6,12)">Проверить</button>
+            </div>
+            <div class="feedback" id="f6"></div>
+        </div>
+    </div>
+
+    <!-- БЛОК 1 -->
+    <div class="card teal">
+        <h2>Блок 1. Находим часть от числа</h2>
+
+        <div class="task">
+            <span class="task-label teal">Задача 1</span>
+            <p>Для самостоятельной работы приготовили <strong>35 листов</strong> бумаги. Израсходовали <strong>5/7</strong> всей бумаги. Сколько листов израсходовали?</p>
+            <div class="grid-space"></div>
+            <div class="check-row">
+                <label>Ответ:</label><input type="number" id="a7" placeholder="?"> листов
+                <button class="check-btn" onclick="chkNum(7,25)">Проверить</button>
+            </div>
+            <div class="feedback" id="f7"></div>
+        </div>
+
+        <div class="task">
+            <span class="task-label teal">Задача 2</span>
+            <p><strong>5/8</strong> учеников класса составляют девочки. Сколько девочек в классе, если в нём <strong>32 ученика</strong>?</p>
+            <div class="grid-space"></div>
+            <div class="check-row">
+                <label>Ответ:</label><input type="number" id="a8" placeholder="?"> девочек
+                <button class="check-btn" onclick="chkNum(8,20)">Проверить</button>
+            </div>
+            <div class="feedback" id="f8"></div>
+        </div>
+
+        <div class="task">
+            <span class="task-label teal">Задача 3</span>
+            <p><strong>3/7</strong> деревьев в саду — вишни. Сколько вишен, если всего <strong>42 дерева</strong>?</p>
+            <div class="grid-space"></div>
+            <div class="check-row">
+                <label>Ответ:</label><input type="number" id="a9" placeholder="?"> вишен
+                <button class="check-btn" onclick="chkNum(9,18)">Проверить</button>
+            </div>
+            <div class="feedback" id="f9"></div>
+        </div>
+
+        <div class="task">
+            <span class="task-label teal">Задача 4</span>
+            <p>Учитель поставил <strong>28 отметок</strong>. <strong>4/7</strong> — пятёрки, остальные — четвёрки. Сколько четвёрок?</p>
+            <div class="grid-space"></div>
+            <div class="check-row">
+                <label>Ответ:</label><input type="number" id="a10" placeholder="?"> четвёрок
+                <button class="check-btn" onclick="chkNum(10,12)">Проверить</button>
+            </div>
+            <div class="feedback" id="f10"></div>
+        </div>
+
+        <div class="task">
+            <span class="task-label teal">Задача 5</span>
+            <p>В книге <strong>600 страниц</strong>. В первый день прочитали половину, во второй — треть оставшихся. Сколько осталось?</p>
+            <div class="grid-space"></div>
+            <div class="check-row">
+                <label>Ответ:</label><input type="number" id="a11" placeholder="?"> страниц
+                <button class="check-btn" onclick="chkNum(11,200)">Проверить</button>
+            </div>
+            <div class="feedback" id="f11"></div>
+        </div>
+    </div>
+
+    <!-- БЛОК 2 -->
+    <div class="card blue">
+        <h2>Блок 2. Находим целое по части</h2>
+
+        <div class="task">
+            <span class="task-label blue">Задача 6</span>
+            <p>Турист прошёл <strong>24 км</strong> — это <strong>3/8</strong> всего пути. Каков весь путь?</p>
+            <div class="grid-space"></div>
+            <div class="check-row">
+                <label>Ответ:</label><input type="number" id="a12" placeholder="?"> км
+                <button class="check-btn" onclick="chkNum(12,64)">Проверить</button>
+            </div>
+            <div class="feedback" id="f12"></div>
+        </div>
+
+        <div class="task">
+            <span class="task-label blue">Задача 7</span>
+            <p>Дочери <strong>12 лет</strong> — это <strong>2/5</strong> возраста матери. Сколько лет матери?</p>
+            <div class="grid-space"></div>
+            <div class="check-row">
+                <label>Ответ:</label><input type="number" id="a13" placeholder="?"> лет
+                <button class="check-btn" onclick="chkNum(13,30)">Проверить</button>
+            </div>
+            <div class="feedback" id="f13"></div>
+        </div>
+
+        <div class="task">
+            <span class="task-label blue">Задача 8</span>
+            <p>В первый день турист прошёл <strong>2/5</strong> пути, во второй — оставшиеся <strong>15 км</strong>. Каков весь путь?</p>
+            <div class="grid-space"></div>
+            <div class="check-row">
+                <label>Ответ:</label><input type="number" id="a14" placeholder="?"> км
+                <button class="check-btn" onclick="chkNum(14,25)">Проверить</button>
+            </div>
+            <div class="feedback" id="f14"></div>
+        </div>
+
+        <div class="task">
+            <span class="task-label blue">Задача 9</span>
+            <p>Машинистка перепечатала <strong>1/7</strong> рукописи, потом — оставшиеся <strong>42 страницы</strong>. Сколько страниц в рукописи?</p>
+            <div class="grid-space"></div>
+            <div class="check-row">
+                <label>Ответ:</label><input type="number" id="a15" placeholder="?"> страниц
+                <button class="check-btn" onclick="chkNum(15,49)">Проверить</button>
+            </div>
+            <div class="feedback" id="f15"></div>
+        </div>
+
+        <div class="task">
+            <span class="task-label blue">Задача 10</span>
+            <p>Билет подорожал на <strong>1/5</strong> стоимости и стал стоить <strong>24 рубля</strong>. Сколько стоил до подорожания?</p>
+            <div class="grid-space"></div>
+            <div class="check-row">
+                <label>Ответ:</label><input type="number" id="a16" placeholder="?"> руб.
+                <button class="check-btn" onclick="chkNum(16,20)">Проверить</button>
+            </div>
+            <div class="feedback" id="f16"></div>
+        </div>
+    </div>
+
+    <!-- БЛОК 3 -->
+    <div class="card indigo">
+        <h2>Блок 3. Задачи посложнее</h2>
+
+        <div class="task">
+            <span class="task-label star">Задача 11</span>
+            <p>Учитель поставил <strong>24 отметки</strong>. <strong>3/8</strong> — пятёрки, <strong>1/3</strong> — четвёрки, остальные — тройки. Сколько троек?</p>
+            <div class="grid-space"></div>
+            <div class="check-row">
+                <label>Ответ:</label><input type="number" id="a17" placeholder="?"> троек
+                <button class="check-btn" onclick="chkNum(17,7)">Проверить</button>
+            </div>
+            <div class="feedback" id="f17"></div>
+        </div>
+
+        <div class="task">
+            <span class="task-label star">Задача 12</span>
+            <p>За три дня проехали <strong>5200 км</strong>. 1-й день: <strong>4/13</strong> пути, 2-й: <strong>3/16</strong> пути. Сколько в 3-й день?</p>
+            <div class="grid-space"></div>
+            <div class="check-row">
+                <label>Ответ:</label><input type="number" id="a18" placeholder="?"> км
+                <button class="check-btn" onclick="chkNum(18,2225)">Проверить</button>
+            </div>
+            <div class="feedback" id="f18"></div>
+        </div>
+
+        <div class="task">
+            <span class="task-label star">Задача 13</span>
+            <p>У Васи <strong>72 марки</strong> = <strong>3/5</strong> марок Лёвы. У Ильи — <strong>5/6</strong> марок Васи. Сколько марок у всех вместе?</p>
+            <div class="grid-space"></div>
+            <div class="check-row">
+                <label>Ответ:</label><input type="number" id="a19" placeholder="?"> марок
+                <button class="check-btn" onclick="chkNum(19,252)">Проверить</button>
+            </div>
+            <div class="feedback" id="f19"></div>
+        </div>
+
+        <div class="task">
+            <span class="task-label star">Задача 14</span>
+            <p>В классе присутствовало <strong>30 учеников</strong>. Отсутствующие = <strong>1/16</strong> от <em>всех</em>. Сколько всего?</p>
+            <div class="grid-space"></div>
+            <div class="check-row">
+                <label>Ответ:</label><input type="number" id="a20" placeholder="?"> учеников
+                <button class="check-btn" onclick="chkNum(20,32)">Проверить</button>
+            </div>
+            <div class="feedback" id="f20"></div>
+        </div>
+
+        <div class="task">
+            <span class="task-label star">Задача 15</span>
+            <p>Купили <strong>5 кг 600 г</strong> сахара. На варенье ушло <strong>7/8</strong>. Сколько граммов пошло на варенье?</p>
+            <div class="grid-space"></div>
+            <div class="check-row">
+                <label>Ответ:</label><input type="number" id="a21" placeholder="?"> г
+                <button class="check-btn" onclick="chkNum(21,4900)">Проверить</button>
+            </div>
+            <div class="feedback" id="f21"></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// Check: fraction numerator/denominator
+function chkFrac2(id, correctN, correctD) {
+    const n = parseInt(document.getElementById('a'+id+'n').value);
+    const d = parseInt(document.getElementById('a'+id+'d').value);
+    const fb = document.getElementById('f'+id);
+    if (isNaN(n) || isNaN(d)) return;
+    // check equivalent fractions
+    if (n * correctD === correctN * d && d > 0) {
+        fb.className = 'feedback show ok';
+        fb.textContent = '✅ Верно!';
+    } else {
+        fb.className = 'feedback show no';
+        fb.textContent = '🤔 Попробуй ещё раз!';
+    }
+}
+
+// Check: numeric answer
+function chkNum(id, correct) {
+    const v = parseFloat(document.getElementById('a'+id).value);
+    const fb = document.getElementById('f'+id);
+    if (isNaN(v)) return;
+    if (v === correct) {
+        fb.className = 'feedback show ok';
+        fb.textContent = '✅ Верно!';
+    } else {
+        fb.className = 'feedback show no';
+        fb.textContent = '🤔 Не совсем. Попробуй ещё!';
+    }
+}
+
+// Enter key support
+document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+        const btn = e.target.closest('.task')?.querySelector('.check-btn');
+        if (btn) btn.click();
+    }
+});
+</script>
+</body>
+</html>
