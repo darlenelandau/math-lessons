@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Невезучий Вася — задачи на худший случай</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background: linear-gradient(135deg, #fff4e0 0%, #ffd89b 50%, #ffb86b 100%);
+        background-attachment: fixed;
+        color: #2d3748;
+        min-height: 100vh;
+        padding: 20px;
+        line-height: 1.55;
+    }
+    .app { max-width: 920px; margin: 0 auto; }
+
+    .top-bar {
+        background: rgba(255, 255, 255, 0.97);
+        border: 3px solid #ed8936;
+        border-radius: 14px;
+        padding: 14px 24px;
+        margin-bottom: 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+    }
+    .title {
+        font-size: 1.7em;
+        color: #c05621;
+        font-weight: bold;
+    }
+    .stats {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .badge {
+        background: #fff7ed;
+        padding: 7px 14px;
+        border-radius: 8px;
+        border: 2px solid #ed8936;
+        font-size: 1em;
+        color: #2d3748;
+        font-weight: bold;
+    }
+    .progress {
+        width: 100%;
+        height: 10px;
+        background: rgba(255, 255, 255, 0.6);
+        border-radius: 5px;
+        overflow: hidden;
+        margin-bottom: 16px;
+        border: 1.5px solid #ed8936;
+    }
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #ed8936, #f6ad55);
+        transition: width 0.4s ease;
+    }
+
+    .intro-card {
+        background: rgba(255, 255, 255, 0.97);
+        border: 2px solid #ed8936;
+        border-radius: 12px;
+        padding: 16px 22px;
+        margin-bottom: 16px;
+        color: #2d3748;
+        font-size: 1em;
+        line-height: 1.65;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .intro-card p { margin-bottom: 8px; }
+    .intro-card p:last-child { margin-bottom: 0; }
+    .intro-card strong { color: #c05621; }
+
+    .card {
+        background: #fff;
+        border: 3px solid #ed8936;
+        border-radius: 14px;
+        padding: 22px 24px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    }
+
+    h2 {
+        color: #c05621;
+        margin-bottom: 6px;
+        font-size: 1.45em;
+        text-align: center;
+    }
+    h2 .subtitle {
+        display: block;
+        font-size: 0.72em;
+        color: #7c2d12;
+        font-style: italic;
+        margin-top: 2px;
+    }
+
+    .story {
+        background: #fff7ed;
+        border-left: 4px solid #ed8936;
+        padding: 12px 16px;
+        border-radius: 6px;
+        margin: 16px 0;
+        font-size: 1.05em;
+    }
+    .story .visual {
+        display: block;
+        font-size: 1.6em;
+        margin: 8px 0 4px;
+        text-align: center;
+        letter-spacing: 4px;
+    }
+
+    .question {
+        font-size: 1.12em;
+        font-weight: bold;
+        text-align: center;
+        margin: 16px 0;
+        color: #2d3748;
+    }
+
+    .answer-row {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        margin: 18px 0;
+    }
+    .answer-input {
+        width: 120px;
+        padding: 12px 16px;
+        font-size: 1.6em;
+        font-weight: bold;
+        text-align: center;
+        background: #fff7ed;
+        color: #2d3748;
+        border: 2.5px solid #ed8936;
+        border-radius: 10px;
+        font-family: inherit;
+        transition: border-color 0.2s, background 0.2s;
+    }
+    .answer-input:focus {
+        outline: none;
+        border-color: #c05621;
+        background: #fff;
+    }
+    .answer-input.correct { background: #c6f6d5; border-color: #38a169; color: #1f5e1f; }
+    .answer-input.wrong { background: #fed7d7; border-color: #c53030; color: #5e1f1f; }
+    .answer-input:disabled { cursor: default; }
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-8px); }
+        75% { transform: translateX(8px); }
+    }
+    .answer-input.shake { animation: shake 0.35s ease; }
+    .submit-btn {
+        padding: 12px 24px;
+        font-size: 1.1em;
+        font-weight: bold;
+        background: linear-gradient(135deg, #ed8936 0%, #f6ad55 100%);
+        color: #fff;
+        border: 2px solid #c05621;
+        border-radius: 8px;
+        cursor: pointer;
+        font-family: inherit;
+        transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .submit-btn:hover:not(:disabled) {
+        transform: scale(1.04);
+        box-shadow: 0 4px 12px rgba(237, 137, 54, 0.5);
+    }
+    .submit-btn:disabled { opacity: 0.5; cursor: default; }
+
+    .feedback {
+        margin-top: 16px;
+        padding: 12px 16px;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 1.12em;
+        font-weight: bold;
+    }
+    .feedback.win { background: #c6f6d5; border: 2px solid #38a169; color: #1f5e1f; }
+    .feedback.lose { background: #fed7d7; border: 2px solid #c53030; color: #5e1f1f; }
+
+    .explanation {
+        margin-top: 12px;
+        background: #fff;
+        border-left: 4px solid #c05621;
+        padding: 12px 16px;
+        border-radius: 6px;
+        color: #2d3748;
+        line-height: 1.7;
+        font-size: 1em;
+    }
+    .explanation strong { color: #c05621; }
+
+    .btn {
+        display: block;
+        margin: 18px auto 0;
+        padding: 12px 32px;
+        font-size: 1.1em;
+        font-weight: bold;
+        background: linear-gradient(135deg, #ed8936 0%, #f6ad55 100%);
+        color: #fff;
+        border: 2px solid #c05621;
+        border-radius: 8px;
+        cursor: pointer;
+        font-family: inherit;
+        transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn:hover {
+        transform: scale(1.04);
+        box-shadow: 0 4px 12px rgba(237, 137, 54, 0.5);
+    }
+
+    .final {
+        text-align: center;
+        padding: 30px 20px;
+    }
+    .final .emo { font-size: 4.5em; margin-bottom: 12px; }
+    .final h2 { font-size: 1.9em; margin-bottom: 16px; }
+    .final p { font-size: 1.2em; color: #7c2d12; margin-bottom: 14px; }
+
+    @media (max-width: 640px) {
+        body { padding: 10px; }
+        .title { font-size: 1.3em; }
+        .top-bar { padding: 12px 16px; }
+        .option { font-size: 1.2em; padding: 14px 20px; min-width: 80px; }
+    }
+</style>
+</head>
+<body>
+<div class="app">
+    <div class="top-bar">
+        <div class="title">🧒 Невезучий Вася</div>
+        <div class="stats">
+            <div class="badge">Задача: <span id="puz-num">1</span> / 12</div>
+            <div class="badge">⭐ верно: <span id="score">0</span></div>
+        </div>
+    </div>
+    <div class="progress"><div class="progress-bar" id="progress-bar"></div></div>
+    <div class="intro-card">
+        <p>🤷‍♂️ <strong>Кто такой Вася?</strong> Это мальчик, которому всё время не везёт. То свет погасили, то ему срочно надо что-то достать с закрытыми глазами, то всё в карманах перемешалось. И каждый раз Вася боится — а вдруг попадётся не то?</p>
+        <p>🎯 <strong>Цель.</strong> Помоги Васе понять: сколько вещей нужно достать наугад, чтобы <em>точно</em> (даже в самом невезучем случае!) получить то, что он хочет.</p>
+        <p>💡 <strong>Главный приём.</strong> Представь самый «невезучий» вариант — когда сначала достаётся всё ненужное. И тогда после него — обязательно нужное. Это называется <strong>«худший случай»</strong>.</p>
+    </div>
+    <div id="puzzle-area"></div>
+</div>
+
+<script>
+const tasks = [
+    {
+        title: "Мешок Деда Мороза",
+        story: "Дед Мороз подарил Васе мешок. Внутри лежат 7 разных подарков: лопатка, телефон, мыльные пузыри, кубик, конфета, брелок и мячик. Вася ужасно хочет именно телефон!",
+        visual: "🛠️ 📱 🫧 🟥 🍭 🔑 🏀",
+        question: "Сколько подарков придётся достать наугад, чтобы ТОЧНО был телефон?",
+        options: [3, 5, 7],
+        correct: 7,
+        explanation: "В худшем случае Вася сначала достанет все 6 ненужных подарков. Только тогда 7-й (последний) — обязательно телефон. <strong>Ответ: 7</strong>."
+    },
+    {
+        title: "Красное яблоко для Кати",
+        story: "У Васи в корзинке 4 красных и 5 зелёных яблок. Он хочет подарить Кате одно красное яблоко.",
+        visual: "🍎🍎🍎🍎 🍏🍏🍏🍏🍏",
+        question: "Сколько яблок нужно достать с закрытыми глазами?",
+        options: [1, 5, 6],
+        correct: 6,
+        explanation: "Невезучий случай: Вася сначала вытащит все 5 зелёных подряд. Значит 6-е яблоко обязательно будет красным. <strong>Ответ: 6</strong>."
+    },
+    {
+        title: "Конфеты в портфеле",
+        story: "У Васи в портфеле два вида конфет — карамельки и шоколадные. Он хочет достать две конфеты одного вида (всё равно какого).",
+        visual: "🍬🍬🍬🍬🍬 🍫🍫🍫🍫🍫",
+        question: "Сколько конфет нужно достать?",
+        options: [2, 3, 4],
+        correct: 3,
+        explanation: "Достали 2 конфеты — может, по одной каждого вида. А вот 3-я обязательно совпадёт с одной из первых (видов всего два!). <strong>Ответ: 3</strong>.",
+    },
+    {
+        title: "Носки в темноте",
+        story: "У Васи погасили свет. В ящике лежат только чёрные и белые носки. Он хочет получить пару одного цвета.",
+        visual: "⚫⚫⚫ ⚪⚪⚪",
+        question: "Сколько носков нужно достать?",
+        options: [2, 3, 5],
+        correct: 3,
+        explanation: "Цветов всего два — чёрный и белый. Если достать 3 носка, два из них точно одного цвета (это и будет пара!). <strong>Ответ: 3</strong>."
+    },
+    {
+        title: "Носки 4 видов",
+        story: "Мама добавила Васе на полку ещё носки в полоску и в клетку. Теперь там 4 вида: чёрные, белые, полосатые, клетчатые. Вася снова хочет одну пару одного вида.",
+        visual: "⚫ ⚪ 🟧 🟦",
+        question: "Сколько носков надо достать?",
+        options: [4, 5, 8],
+        correct: 5,
+        explanation: "Достали 4 — могло попасться по одному каждого вида. А 5-й обязательно совпадёт с одним из них — это и будет пара! <strong>Ответ: 5</strong>."
+    },
+    {
+        title: "Лего: 2 кубика одного цвета",
+        story: "В коробке у Васи 5 красных, 4 зелёных и 3 синих кубика Лего. Он хочет получить 2 кубика одного цвета.",
+        visual: "🟥🟥🟥🟥🟥 🟩🟩🟩🟩 🟦🟦🟦",
+        question: "Сколько кубиков нужно достать?",
+        options: [2, 4, 6],
+        correct: 4,
+        explanation: "Цветов всего три. Достали 3 — могло попасться по одному каждого цвета. А 4-й обязательно совпадёт с одним из них. <strong>Ответ: 4</strong>."
+    },
+    {
+        title: "Лего: 3 кубика одного цвета",
+        story: "Те же 5 красных, 4 зелёных и 3 синих кубика. Теперь Вася хочет 3 кубика одного цвета — для башни.",
+        visual: "🟥🟥🟥🟥🟥 🟩🟩🟩🟩 🟦🟦🟦",
+        question: "Сколько кубиков нужно достать?",
+        options: [5, 7, 9],
+        correct: 7,
+        explanation: "В худшем случае Вася достанет по 2 кубика каждого цвета — это 6 штук, но 3-х одного цвета ещё нет. А 7-й кубик уже добавит «тройку» в какой-то из цветов. <strong>Ответ: 7</strong>."
+    },
+    {
+        title: "Лего: 3 кубика разных цветов",
+        story: "Те же кубики: 5 красных, 4 зелёных, 3 синих. Теперь Вася хочет три кубика РАЗНЫХ цветов.",
+        visual: "🟥🟥🟥🟥🟥 🟩🟩🟩🟩 🟦🟦🟦",
+        question: "Сколько кубиков нужно достать?",
+        options: [3, 9, 10],
+        correct: 10,
+        explanation: "Худший случай: Вася сначала вытащит ВСЕ красные (5) и ВСЕ зелёные (4) — итого 9 кубиков двух цветов. А 10-й обязательно будет синим — третьего цвета. <strong>Ответ: 10</strong>."
+    },
+    {
+        title: "Варежки",
+        story: "У Васи 5 пар варежек разных цветов: чёрные, коричневые, синие, зелёные и красные. Он хочет пару варежек одного цвета.",
+        visual: "🧤⚫ 🧤🟫 🧤🟦 🧤🟩 🧤🟥",
+        question: "Сколько варежек нужно достать наугад?",
+        options: [2, 6, 10],
+        correct: 6,
+        explanation: "Цветов 5. Достали 5 варежек — может попасться по одной каждого цвета. А 6-я обязательно совпадёт с одной из первых — это и есть пара. <strong>Ответ: 6</strong>."
+    },
+    {
+        title: "Светофор из карандашей",
+        story: "У Васи в мешке 3 красных, 4 зелёных и 5 жёлтых карандашей. Он хочет нарисовать светофор — нужны все три цвета.",
+        visual: "🔴🔴🔴 🟢🟢🟢🟢 🟡🟡🟡🟡🟡",
+        question: "Сколько карандашей нужно достать?",
+        options: [3, 9, 10],
+        correct: 10,
+        explanation: "Худший случай: Вася сначала вытащит ВСЕ жёлтые (5) и ВСЕ зелёные (4) — итого 9 карандашей. А 10-й обязательно будет красным. <strong>Ответ: 10</strong>."
+    },
+    {
+        title: "Лего-фигурки",
+        story: "У Васи 4 бионикла, 3 ниндзяго и 5 имперских солдат из «Звёздных войн». Он хочет получить пару фигурок РАЗНЫХ видов для игрового сражения.",
+        visual: "🤖🤖🤖🤖 🥷🥷🥷 👨‍✈️👨‍✈️👨‍✈️👨‍✈️👨‍✈️",
+        question: "Сколько фигурок нужно достать?",
+        options: [2, 6, 8],
+        correct: 6,
+        explanation: "Худший случай: Вася достанет всех 5 имперских солдат подряд — одного вида. А 6-я фигурка точно будет другого вида. <strong>Ответ: 6</strong>."
+    },
+    {
+        title: "Холодильник",
+        story: "В холодильнике погасла лампочка! Там лежат 8 бананов, 3 яблока и 2 груши. Вася хочет приготовить салат: ему нужны 1 банан и 2 яблока.",
+        visual: "🍌🍌🍌🍌🍌🍌🍌🍌 🍎🍎🍎 🍐🍐",
+        question: "Сколько фруктов придётся достать?",
+        options: [5, 11, 12],
+        correct: 12,
+        explanation: "Самый невезучий случай: Вася сначала вытащит все 8 бананов, обе груши, а потом ещё 1 яблоко — это 11 фруктов, но 2-го яблока всё ещё нет! А 12-й фрукт точно будет яблоком (других уже не осталось). <strong>Ответ: 12</strong>."
+    }
+];
+
+let currentIndex = 0;
+let score = 0;
+let answered = false;
+let attempts = 0;
+
+function render() {
+    const area = document.getElementById('puzzle-area');
+
+    if (currentIndex >= tasks.length) {
+        const msg = score === tasks.length ? '🌟 Безупречно! Вася в восторге!' :
+                    score >= 9 ? '✨ Отличный результат — Вася почти всегда получает то, что хочет!' :
+                    score >= 6 ? '👏 Хорошо! Вася выкрутится!' :
+                    '🐾 Пройди ещё раз — теперь точно поймёшь!';
+        area.innerHTML = `
+            <div class="card final">
+                <div class="emo">🎉</div>
+                <h2>Все 12 задач пройдены!</h2>
+                <p>Верных ответов: <strong>${score} из ${tasks.length}</strong></p>
+                <p>${msg}</p>
+                <button class="btn" onclick="restart()">Пройти заново</button>
+            </div>
+        `;
+        document.getElementById('puz-num').textContent = tasks.length;
+        document.getElementById('progress-bar').style.width = '100%';
+        return;
+    }
+
+    const task = tasks[currentIndex];
+
+    area.innerHTML = `
+        <div class="card">
+            <h2>Задача ${currentIndex + 1}<span class="subtitle">${task.title}</span></h2>
+            <div class="story">
+                ${task.story}
+                <span class="visual">${task.visual}</span>
+            </div>
+            <div class="question">${task.question}</div>
+            <div class="answer-row">
+                <input type="number" inputmode="numeric" class="answer-input" id="answer-input" placeholder="?" onkeydown="if(event.key==='Enter') checkAnswer()">
+                <button class="submit-btn" id="submit-btn" onclick="checkAnswer()">Проверить</button>
+            </div>
+            <div id="result"></div>
+        </div>
+    `;
+
+    answered = false;
+    attempts = 0;
+    document.getElementById('puz-num').textContent = currentIndex + 1;
+    document.getElementById('progress-bar').style.width = `${(currentIndex / tasks.length) * 100}%`;
+    document.getElementById('score').textContent = score;
+    setTimeout(() => document.getElementById('answer-input').focus(), 50);
+}
+
+function checkAnswer() {
+    if (answered) return;
+    const task = tasks[currentIndex];
+    const input = document.getElementById('answer-input');
+    const raw = input.value.trim();
+    if (raw === '') return;
+    const chosen = parseInt(raw, 10);
+    if (isNaN(chosen)) return;
+
+    attempts++;
+    const isCorrect = chosen === task.correct;
+    const result = document.getElementById('result');
+
+    if (isCorrect) {
+        answered = true;
+        input.disabled = true;
+        input.classList.remove('shake');
+        input.classList.add('correct');
+        document.getElementById('submit-btn').disabled = true;
+
+        if (attempts === 1) {
+            score++;
+            document.getElementById('score').textContent = score;
+        }
+
+        result.innerHTML = `
+            <div class="feedback win">
+                🎉 Правильно! ${attempts === 1 ? 'С первой попытки!' : `Получилось с ${attempts}-й попытки.`}
+            </div>
+            <div class="explanation">${task.explanation}</div>
+            <button class="btn" onclick="next()">
+                ${currentIndex < tasks.length - 1 ? 'Следующая задача →' : 'Завершить →'}
+            </button>
+        `;
+    } else {
+        input.classList.remove('shake');
+        void input.offsetWidth;
+        input.classList.add('shake');
+        result.innerHTML = `
+            <div class="feedback lose">
+                😅 Не то. Попробуй ещё раз!
+            </div>
+        `;
+        setTimeout(() => input.select(), 50);
+    }
+}
+
+function next() {
+    currentIndex++;
+    render();
+}
+
+function restart() {
+    currentIndex = 0;
+    score = 0;
+    render();
+}
+
+render();
+</script>
+</body>
+</html>
