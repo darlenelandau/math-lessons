@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Книжка юного фокусника (1 класс)</title>
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:'Segoe UI',Arial,sans-serif;background:url('magicback.jpg') center/cover no-repeat fixed,#2d1b4e;color:#2d2438;padding:24px;line-height:1.6;min-height:100vh}
+        .container{max-width:840px;margin:0 auto}
+
+        .header{border:3px solid #fbbf24;border-radius:14px;padding:18px 26px;margin-bottom:24px;text-align:center;background:rgba(255,255,255,0.96);box-shadow:0 8px 24px rgba(0,0,0,0.4)}
+        .header .emo{font-size:2.2em;margin-bottom:6px}
+        .header h1{font-size:1.65em;margin-bottom:4px;color:#4c1d95}
+        .header .sub{color:#6b21a8;font-size:1em;font-style:italic}
+
+        .intro{background:rgba(255,255,255,0.96);border:2px solid #fbbf24;border-radius:12px;padding:14px 22px;margin-bottom:20px;color:#1e1b4b;box-shadow:0 4px 14px rgba(0,0,0,0.3)}
+        .intro p{margin-bottom:6px}
+        .intro p:last-child{margin-bottom:0}
+        .intro strong{color:#6b46c1}
+
+        .card{background:rgba(255,255,255,0.97);border:3px solid #fbbf24;border-radius:12px;margin-bottom:14px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,0.35);transition:transform 0.2s,border-color 0.2s}
+        .card:hover{transform:translateY(-2px);border-color:#fcd34d}
+
+        .card-head{padding:16px 20px;cursor:pointer;background:linear-gradient(135deg,#6b46c1,#9333ea);color:#fff;display:flex;align-items:center;gap:12px;font-weight:bold;font-size:1.15em;user-select:none;transition:background 0.2s}
+        .card-head:hover{background:linear-gradient(135deg,#9333ea,#a855f7)}
+        .card-head .num{background:#fff;color:#6b46c1;border-radius:50%;width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;font-size:.95em;font-weight:800;flex-shrink:0}
+        .card-head .arrow{margin-left:auto;font-size:.85em;background:rgba(255,255,255,0.25);padding:5px 12px;border-radius:14px;transition:transform 0.2s}
+        .card.open .card-head .arrow{transform:rotate(180deg)}
+
+        .card-body{max-height:0;overflow:hidden;transition:max-height 0.4s ease,padding 0.4s ease;padding:0 22px;background:#faf5ff}
+        .card.open .card-body{max-height:800px;padding:18px 22px}
+
+        .label{font-weight:800;color:#6b46c1;margin-bottom:8px;font-size:1.02em;display:flex;align-items:center;gap:6px}
+
+        .steps{padding-left:0;list-style:none;counter-reset:step}
+        .steps li{position:relative;padding:8px 12px 8px 42px;margin:6px 0;background:#fff;border-left:4px solid #9333ea;border-radius:0 6px 6px 0;font-size:1.06em}
+        .steps li::before{counter-increment:step;content:counter(step);position:absolute;left:8px;top:50%;transform:translateY(-50%);width:26px;height:26px;background:#6b46c1;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85em}
+
+        .magic-line{background:linear-gradient(135deg,#fef3c7,#fde68a);border:2px solid #d97706;border-radius:8px;padding:12px 16px;margin-top:12px;font-weight:600;color:#78350f;font-size:1.06em;text-align:center}
+
+        @media print{.card-body{max-height:none !important;padding:18px 22px !important}.card{page-break-inside:avoid}body{padding:10px;background:#fff}.arrow{display:none}}
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="header">
+        <div class="emo">🎩 ✨ 🪄</div>
+        <h1>Книжка юного фокусника</h1>
+    </div>
+
+    <div class="intro">
+        <p>👋 <strong>Привет, юный фокусник!</strong> Здесь шесть фокусов. Нажми на любой, чтобы открыть и прочитать инструкцию.</p>
+        <p>🎩 В каждом фокусе три части: <strong>что сказать зрителю</strong>, <strong>что попросить сделать</strong> и <strong>волшебная фраза</strong> в конце.</p>
+    </div>
+
+    <div class="card" onclick="toggle(this)">
+        <div class="card-head">
+            <span class="num">1</span>
+            Три подряд идущих числа
+            <span class="arrow">▼ открыть</span>
+        </div>
+        <div class="card-body">
+            <div class="label">💬 Скажи зрителю:</div>
+            <ol class="steps">
+                <li>Задумай три числа, которые идут <strong>друг за другом</strong> (например, 5, 6, 7).</li>
+                <li>Сложи их.</li>
+                <li>Скажи мне только <strong>сумму</strong>.</li>
+            </ol>
+            <div class="magic-line">🪄 «Сейчас я угадаю, какие три числа ты задумал!»</div>
+        </div>
+    </div>
+
+    <div class="card" onclick="toggle(this)">
+        <div class="card-head">
+            <span class="num">2</span>
+            Я всегда угадаю — будет 4
+            <span class="arrow">▼ открыть</span>
+        </div>
+        <div class="card-body">
+            <div class="label">💬 Скажи зрителю:</div>
+            <ol class="steps">
+                <li>Задумай число от 1 до 10.</li>
+                <li>Умножь его на 2.</li>
+                <li>Прибавь 8.</li>
+                <li>Раздели на 2.</li>
+                <li>Отними своё <strong>задуманное</strong> число.</li>
+            </ol>
+            <div class="magic-line">🪄 «У тебя получилось 4!»</div>
+        </div>
+    </div>
+
+    <div class="card" onclick="toggle(this)">
+        <div class="card-head">
+            <span class="num">3</span>
+            Угадаю задуманное двузначное число
+            <span class="arrow">▼ открыть</span>
+        </div>
+        <div class="card-body">
+            <div class="label">💬 Скажи зрителю:</div>
+            <ol class="steps">
+                <li>Задумай <strong>двузначное</strong> число.</li>
+                <li>Возьми цифру <strong>десятков</strong> и умножь на 2.</li>
+                <li>Прибавь 5.</li>
+                <li>Умножь то, что получилось, на 5.</li>
+                <li>Прибавь 10.</li>
+                <li>Прибавь цифру <strong>единиц</strong> задуманного числа.</li>
+                <li>Скажи мне, что получилось.</li>
+            </ol>
+            <div class="magic-line">🪄 «А я знаю, какое число ты задумал!»</div>
+        </div>
+    </div>
+
+    <div class="card" onclick="toggle(this)">
+        <div class="card-head">
+            <span class="num">4</span>
+            Угадаю день рождения
+            <span class="arrow">▼ открыть</span>
+        </div>
+        <div class="card-body">
+            <div class="label">💬 Скажи зрителю:</div>
+            <ol class="steps">
+                <li>Возьми <strong>день</strong> своего рождения и умножь на 2.</li>
+                <li>Прибавь 5.</li>
+                <li>Умножь на 50.</li>
+                <li>Прибавь <strong>номер месяца</strong> (январь — 1, февраль — 2, …, декабрь — 12).</li>
+                <li>Скажи мне, что получилось.</li>
+            </ol>
+            <div class="magic-line">🪄 «А я скажу, какого числа и месяца ты родился!»</div>
+        </div>
+    </div>
+
+    <div class="card" onclick="toggle(this)">
+        <div class="card-head">
+            <span class="num">5</span>
+            Возраст по размеру обуви
+            <span class="arrow">▼ открыть</span>
+        </div>
+        <div class="card-body">
+            <div class="label">💬 Скажи зрителю:</div>
+            <ol class="steps">
+                <li>Возьми <strong>размер</strong> своей обуви.</li>
+                <li>Припиши к нему <strong>два нуля</strong>.</li>
+                <li>Отними <strong>год, в котором ты родился</strong>.</li>
+                <li>Прибавь <strong>текущий год</strong>.</li>
+                <li>Скажи мне, что получилось.</li>
+            </ol>
+            <div class="magic-line">🪄 «А я знаю, сколько тебе лет!»</div>
+        </div>
+    </div>
+
+    <div class="card" onclick="toggle(this)">
+        <div class="card-head">
+            <span class="num">6</span>
+            Игра «Кто возьмёт последнюю спичку»
+            <span class="arrow">▼ открыть</span>
+        </div>
+        <div class="card-body">
+            <div class="label">🎲 Правила игры:</div>
+            <ol class="steps">
+                <li>На столе <strong>21 спичка</strong>.</li>
+                <li>По очереди берём <strong>1, 2 или 3</strong> спички.</li>
+                <li>Кто заберёт <strong>последнюю</strong> спичку — тот выиграл!</li>
+            </ol>
+            <div class="magic-line">🪄 «Я знаю секрет — я всегда выигрываю!»</div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+function toggle(card) {
+    card.classList.toggle('open');
+}
+</script>
+</body>
+</html>
