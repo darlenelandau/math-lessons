@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Квест: Взломай сейф профессора</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI','Roboto',sans-serif;background:linear-gradient(135deg,#1e1b4b 0%,#4c1d95 40%,#1e1b4b 100%);background-attachment:fixed;color:#fff;padding:20px;min-height:100vh;line-height:1.6}
+.quest{max-width:900px;margin:0 auto}
+
+.header{background:rgba(255,255,255,0.05);border:2px solid #fbbf24;border-radius:16px;padding:24px 30px;text-align:center;margin-bottom:24px}
+.header .emo{font-size:1.8em;margin-bottom:6px;letter-spacing:8px}
+.header h1{font-family:Georgia,serif;font-size:2em;color:#fbbf24;margin:6px 0;letter-spacing:2px}
+.header .story{color:#e9d5ff;font-style:italic;font-size:1.05em;margin-top:12px;line-height:1.7}
+
+.progress{display:flex;justify-content:center;gap:10px;margin-bottom:24px;padding:16px;background:rgba(0,0,0,0.3);border:2px solid #fbbf24;border-radius:12px;flex-wrap:wrap}
+.progress .slot{width:50px;height:60px;background:#1e1b4b;border:2px solid #6b21a8;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.8em;font-weight:bold;color:#6b21a8;font-family:'Courier New',monospace;transition:all 0.4s}
+.progress .slot.filled{background:#fbbf24;color:#1e1b4b;border-color:#fef3c7;box-shadow:0 0 12px #fbbf24}
+
+.stage{background:rgba(255,255,255,0.05);border:2px solid #6b21a8;border-radius:14px;padding:22px 26px;margin-bottom:16px;opacity:0.5;pointer-events:none;transition:all 0.4s}
+.stage.unlocked{opacity:1;pointer-events:auto;border-color:#fbbf24;box-shadow:0 4px 20px rgba(251,191,36,0.3)}
+.stage.done{opacity:0.9;border-color:#10b981;box-shadow:0 4px 12px rgba(16,185,129,0.2)}
+.stage.done .stage-body{display:none}
+
+.stage-header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.stage-num{width:36px;height:36px;background:#fbbf24;color:#1e1b4b;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1em;flex-shrink:0}
+.stage.done .stage-num{background:#10b981;color:#fff}
+.stage-title{flex:1;font-size:1.2em;font-weight:bold;color:#fbbf24}
+.stage.done .stage-title{color:#10b981}
+.stage-lock{font-size:1.3em}
+.stage.unlocked .stage-lock::after{content:'🔓'}
+.stage:not(.unlocked):not(.done) .stage-lock::after{content:'🔒'}
+.stage.done .stage-lock::after{content:'✓';color:#10b981;font-weight:bold;font-size:1.5em}
+
+.stage-body p{color:#f3f4f6;margin-bottom:10px}
+.stage-body ul{margin:8px 0 8px 24px;color:#f3f4f6}
+.stage-body strong{color:#fef3c7}
+
+.puzzle{background:#fff;color:#1e1b4b;border-radius:10px;padding:20px;margin:14px 0;text-align:center}
+.puzzle p{color:#1e1b4b}
+.task{font-size:1.05em;margin:14px 0 10px;color:#fef3c7 !important;font-weight:600}
+.task strong{color:#fbbf24}
+
+.answer-row{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}
+.answer-row label{font-weight:bold;color:#fef3c7}
+.answer-row input{background:#fff;color:#1e1b4b;border:2px solid #6b21a8;border-radius:6px;padding:8px 12px;font-size:1.05em;min-width:160px;font-family:inherit}
+.answer-row button{background:#fbbf24;color:#1e1b4b;border:none;border-radius:6px;padding:8px 18px;font-size:1em;font-weight:bold;cursor:pointer;transition:all 0.2s}
+.answer-row button:hover{background:#f59e0b;transform:translateY(-1px)}
+.feedback{min-height:1.5em;margin-top:10px;font-weight:bold;font-size:1.05em}
+.feedback.ok{color:#10b981}
+.feedback.err{color:#ef4444}
+
+.hint-btn{background:transparent;border:1px dashed #a78bfa;color:#a78bfa;border-radius:6px;padding:6px 12px;font-size:0.9em;cursor:pointer;margin-top:10px}
+.hint-btn:hover{background:rgba(167,139,250,0.1)}
+.hint-box{background:rgba(251,191,36,0.1);border-left:3px solid #fbbf24;padding:10px 14px;margin-top:10px;border-radius:0 8px 8px 0;color:#fef3c7;font-style:italic;display:none}
+.hint-box.shown{display:block}
+
+.break-marker{text-align:center;padding:20px;color:#fbbf24;font-style:italic;font-size:1.1em;background:rgba(251,191,36,0.05);border-radius:12px;margin:20px 0}
+
+.workspaces{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin:14px 0}
+.workspace{background:#fff;color:#1e1b4b;border:2.5px solid #6b21a8;border-radius:10px;padding:10px 12px;text-align:center;width:210px;transition:all 0.3s}
+.workspace.done{border-color:#10b981;background:#f0fdf4;box-shadow:0 4px 12px rgba(16,185,129,0.25)}
+.ws-name{font-weight:bold;color:#4c1d95;font-size:1.1em;margin-bottom:2px}
+.ws-puzzle-num{font-size:0.8em;color:#6b7280;margin-bottom:6px}
+.inky-grid{display:grid;grid-template-columns:repeat(4,44px);grid-template-rows:repeat(4,44px);margin:6px auto;background:#fff;user-select:none;width:fit-content}
+.inky-cell{position:relative;border:0.5px solid #d1d5db;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.35em;font-weight:bold;color:#1e1b4b;background:#fff;transition:background 0.1s}
+.inky-cell:hover{background:#fef3c7}
+.inky-cell.thick-top{border-top:2.5px solid #000}
+.inky-cell.thick-bottom{border-bottom:2.5px solid #000}
+.inky-cell.thick-left{border-left:2.5px solid #000}
+.inky-cell.thick-right{border-right:2.5px solid #000}
+.inky-cell .clue{position:absolute;top:2px;left:3px;font-size:0.68em;font-weight:700;color:#000;font-family:Arial,sans-serif;line-height:1}
+.inky-cell .cell-digit{font-family:Georgia,serif}
+.ws-buttons{display:flex;gap:6px;justify-content:center;margin-top:8px;flex-wrap:wrap}
+.ws-btn{background:#fbbf24;color:#1e1b4b;border:none;border-radius:6px;padding:5px 12px;font-size:0.88em;font-weight:bold;cursor:pointer;font-family:inherit}
+.ws-btn.next{background:#a78bfa;color:#fff}
+.ws-btn:hover{opacity:0.85}
+.ws-feedback{min-height:1.2em;margin-top:6px;font-weight:bold;font-size:0.88em}
+.ws-feedback.ok{color:#10b981}
+.ws-feedback.err{color:#dc2626}
+
+.advance-btn{background:#fbbf24;color:#1e1b4b;border:none;border-radius:8px;padding:12px 28px;font-size:1.05em;font-weight:bold;cursor:pointer;margin:16px auto 0;display:block;opacity:0.35;transition:all 0.3s;font-family:inherit}
+.advance-btn.active{opacity:1;box-shadow:0 4px 14px rgba(251,191,36,0.4)}
+.advance-btn:not(:disabled):hover{background:#f59e0b}
+
+.dict-poem{display:grid;grid-template-columns:1fr 1fr;gap:20px;background:#faf5ff;color:#1e1b4b;padding:14px 18px;border-radius:8px;font-family:Georgia,serif;line-height:1.9;margin:10px 0}
+.dict-poem .ay{border-left:2px solid #a78bfa;padding-left:18px;font-style:italic}
+.dict-fields{margin:12px 0}
+.dict-row{display:flex;align-items:center;gap:10px;margin:8px 0;flex-wrap:wrap}
+.dict-word{min-width:110px;font-weight:600;color:#fef3c7;font-family:Georgia,serif;font-style:italic;text-align:right}
+.dict-row input{background:#fff;color:#1e1b4b;border:2px solid #6b21a8;border-radius:6px;padding:6px 10px;font-size:1em;min-width:110px;font-family:inherit}
+.dict-check{background:#fbbf24;color:#1e1b4b;border:none;border-radius:6px;padding:5px 12px;font-size:0.9em;font-weight:bold;cursor:pointer;font-family:inherit}
+.dict-check:hover{background:#f59e0b}
+.dict-fb{font-weight:bold;font-size:1.1em}
+.dict-fb.ok{color:#10b981}
+.dict-fb.err{color:#dc2626}
+
+.mini-q{background:rgba(255,255,255,0.05);border-left:3px solid #a78bfa;padding:12px 16px;margin:10px 0;border-radius:0 8px 8px 0;transition:all 0.3s}
+.mini-q.hidden{display:none}
+.mini-q.done{border-left-color:#10b981;opacity:0.8}
+.mini-q .qnum{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;background:#a78bfa;color:#fff;border-radius:50%;font-size:0.85em;font-weight:800;margin-right:10px;vertical-align:middle;flex-shrink:0}
+.mini-q.done .qnum{background:#10b981}
+.mini-q .mini-task{color:#fef3c7 !important;font-weight:500;margin-bottom:8px;display:flex;align-items:flex-start;gap:4px}
+.mini-q .mini-task-text{flex:1;padding-top:2px}
+
+.preview-bar{max-width:900px;margin:0 auto 14px;text-align:right}
+.preview-btn{background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:0.9em;font-weight:bold;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.25);font-family:inherit}
+.preview-btn:hover{background:#6d28d9}
+.preview-btn.on{background:#059669}
+
+.safe{background:linear-gradient(135deg,#1a1a1a,#2d2d2d);border:3px solid #fbbf24;padding:30px;text-align:center;box-shadow:inset 0 0 30px rgba(0,0,0,0.6)}
+.safe .stage-title{color:#fbbf24 !important;font-size:1.5em}
+.combo-lock{display:flex;justify-content:center;gap:8px;margin:20px 0}
+.combo-lock input{width:50px;height:60px;font-size:1.8em;text-align:center;background:#1e1b4b;color:#fbbf24;border:2px solid #fbbf24;border-radius:6px;font-family:'Courier New',monospace;font-weight:bold}
+.safe-btn{background:#fbbf24;color:#1e1b4b;border:none;border-radius:8px;padding:12px 28px;font-size:1.1em;font-weight:bold;cursor:pointer;margin-top:12px}
+.safe-btn:hover{background:#f59e0b}
+
+.finale{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#1e1b4b;padding:30px;border-radius:16px;text-align:center;margin-top:20px;display:none;animation:shine 1s ease-out}
+.finale.shown{display:block}
+@keyframes shine{0%{transform:scale(0.85);opacity:0}100%{transform:scale(1);opacity:1}}
+.finale h1{font-family:Georgia,serif;font-size:2em;margin-bottom:16px;color:#1e1b4b}
+.finale .letter{background:rgba(255,255,255,0.6);padding:20px;border-radius:12px;text-align:left;font-family:Georgia,serif;line-height:1.8;font-size:1.05em}
+.finale .letter p{margin-bottom:12px;color:#1e1b4b}
+.finale .letter p:last-child{margin-bottom:0}
+
+.confetti-piece{position:fixed;top:-15px;opacity:0;pointer-events:none;z-index:2000;animation:confetti-fall linear forwards}
+@keyframes confetti-fall{
+  0%{transform:translateY(0) rotate(0deg);opacity:1}
+  100%{transform:translateY(110vh) rotate(720deg);opacity:0.3}
+}
+</style>
+</head>
+<body>
+
+<div class="preview-bar">
+  <button class="preview-btn" id="previewBtn" onclick="togglePreview()">👁 Показать все задачи</button>
+</div>
+
+<div class="quest">
+
+  <div class="header">
+    <div class="emo">🔒  ⚙️  🗝️</div>
+    <h1>Взломай сейф профессора</h1>
+    <div class="story">
+      Профессор Логик заперся в лаборатории и оставил вам последнее задание перед летом.<br>
+      В его сейфе - секретное послание, но открыть можно только восьмизначным кодом.<br>
+      У вас 8 задач: каждая раскроет одну цифру. Готовы? Тогда за дело!
+    </div>
+  </div>
+
+  <div class="progress">
+    <div class="slot" id="slot1">?</div>
+    <div class="slot" id="slot2">?</div>
+    <div class="slot" id="slot3">?</div>
+    <div class="slot" id="slot4">?</div>
+    <div class="slot" id="slot5">?</div>
+    <div class="slot" id="slot6">?</div>
+    <div class="slot" id="slot7">?</div>
+    <div class="slot" id="slot8">?</div>
+  </div>
+
+  <!-- STAGE 1: INKY -->
+  <div class="stage unlocked" id="s1">
+    <div class="stage-header">
+      <span class="stage-num">1</span>
+      <span class="stage-title">Разминка: Головоломка Инки</span>
+      <span class="stage-lock"></span>
+    </div>
+    <div class="stage-body">
+      <p><strong>Правила:</strong> заполни пустые клетки цифрами <strong>1, 2, 3, 4</strong> так, чтобы в каждой строке и каждом столбце цифры не повторялись. Жирными линиями обведены <strong>области</strong> (клетки): в них цифры дают указанную <strong>сумму</strong> (если знак +) или их <strong>разность</strong> равна числу (если знак -). Если в области цифра одна - это её значение.</p>
+      <p style="color:#fef3c7;font-size:0.95em">💡 <strong>Как работать:</strong> нажми на клетку - цифра меняется по кругу: пусто → 1 → 2 → 3 → 4 → пусто. У каждого своя головоломка. Кто закончил - жми «Проверить» или «Ещё →» чтобы взять следующую.</p>
+
+      <div class="workspaces">
+        <div class="workspace" id="ws0">
+          <div class="ws-name">Соня</div>
+          <div class="ws-puzzle-num"></div>
+          <div class="inky-grid"></div>
+          <div class="ws-feedback"></div>
+          <div class="ws-buttons">
+            <button class="ws-btn" onclick="checkInkyWorkspace(0)">Проверить</button>
+            <button class="ws-btn next" onclick="nextPuzzle(0)">Ещё →</button>
+          </div>
+        </div>
+        <div class="workspace" id="ws1">
+          <div class="ws-name">Лев</div>
+          <div class="ws-puzzle-num"></div>
+          <div class="inky-grid"></div>
+          <div class="ws-feedback"></div>
+          <div class="ws-buttons">
+            <button class="ws-btn" onclick="checkInkyWorkspace(1)">Проверить</button>
+            <button class="ws-btn next" onclick="nextPuzzle(1)">Ещё →</button>
+          </div>
+        </div>
+        <div class="workspace" id="ws2">
+          <div class="ws-name">Егор</div>
+          <div class="ws-puzzle-num"></div>
+          <div class="inky-grid"></div>
+          <div class="ws-feedback"></div>
+          <div class="ws-buttons">
+            <button class="ws-btn" onclick="checkInkyWorkspace(2)">Проверить</button>
+            <button class="ws-btn next" onclick="nextPuzzle(2)">Ещё →</button>
+          </div>
+        </div>
+        <div class="workspace" id="ws3">
+          <div class="ws-name">Даня</div>
+          <div class="ws-puzzle-num"></div>
+          <div class="inky-grid"></div>
+          <div class="ws-feedback"></div>
+          <div class="ws-buttons">
+            <button class="ws-btn" onclick="checkInkyWorkspace(3)">Проверить</button>
+            <button class="ws-btn next" onclick="nextPuzzle(3)">Ещё →</button>
+          </div>
+        </div>
+        <div class="workspace" id="ws4">
+          <div class="ws-name">Андрей</div>
+          <div class="ws-puzzle-num"></div>
+          <div class="inky-grid"></div>
+          <div class="ws-feedback"></div>
+          <div class="ws-buttons">
+            <button class="ws-btn" onclick="checkInkyWorkspace(4)">Проверить</button>
+            <button class="ws-btn next" onclick="nextPuzzle(4)">Ещё →</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="advance-btn active" id="advance1" onclick="advanceStage1()">Все справились - идём дальше →</button>
+
+      <button class="hint-btn" onclick="showHint(1)">💡 Общая подсказка</button>
+      <div class="hint-box" id="hint1">В каждой строке и каждом столбце должны стоять все цифры 1, 2, 3, 4 - по одной! Начни с самых маленьких областей ("N+" из 2 клеток или одиночные "N"): там меньше вариантов. Дальше подставляй известные цифры и смотри, что вынуждено получается.</div>
+    </div>
+  </div>
+
+  <!-- STAGE 2: BUGS ON 5x5 -->
+  <div class="stage" id="s2">
+    <div class="stage-header">
+      <span class="stage-num">2</span>
+      <span class="stage-title">Задача 1: Жуки на доске 5×5</span>
+      <span class="stage-lock"></span>
+    </div>
+    <div class="stage-body">
+      <p>На доске <strong>5×5</strong> в каждой клетке сидит по одному <strong>жуку</strong> (всего 25 жуков). По команде каждый жук <strong>ОБЯЗАТЕЛЬНО</strong> перепрыгивает на соседнюю по стороне клетку (вверх, вниз, влево или вправо на 1 клетку).</p>
+      <p><strong>Главный вопрос:</strong> Может ли получиться, что после прыжка снова в каждой клетке сидит ровно 1 жук? Разберёмся по шагам.</p>
+      <div class="puzzle">
+        <div id="board2"></div>
+      </div>
+
+      <div class="mini-q" id="q2-1">
+        <div class="mini-task"><span class="qnum">1</span><span class="mini-task-text">Сколько всего клеток на доске 5×5?</span></div>
+        <div class="answer-row">
+          <input type="text" id="q2-1-ans" placeholder="число">
+          <button onclick="checkMiniQ('2-1')">Проверить</button>
+        </div>
+        <div class="feedback" id="q2-1-fb"></div>
+      </div>
+
+      <div class="mini-q hidden" id="q2-2">
+        <div class="mini-task"><span class="qnum">2</span><span class="mini-task-text">Раскрасим доску шахматно (левый верхний угол - <strong>тёмный</strong>). Сколько получится <strong>тёмных</strong> клеток?</span></div>
+        <div class="answer-row">
+          <input type="text" id="q2-2-ans" placeholder="число">
+          <button onclick="checkMiniQ('2-2')">Проверить</button>
+        </div>
+        <div class="feedback" id="q2-2-fb"></div>
+      </div>
+
+      <div class="mini-q hidden" id="q2-3">
+        <div class="mini-task"><span class="qnum">3</span><span class="mini-task-text">Соседняя клетка (по стороне) на шахматной раскраске всегда <strong>другого</strong> цвета. Значит когда жук прыгает - меняется ли цвет клетки, где он теперь сидит? (да / нет)</span></div>
+        <div class="answer-row">
+          <input type="text" id="q2-3-ans" placeholder="да / нет">
+          <button onclick="checkMiniQ('2-3')">Проверить</button>
+        </div>
+        <div class="feedback" id="q2-3-fb"></div>
+      </div>
+
+      <div class="mini-q hidden" id="q2-4">
+        <div class="mini-task"><span class="qnum">4</span><span class="mini-task-text">13 жуков сидели на тёмных клетках. После прыжка все они попадут на <strong>СВЕТЛЫЕ</strong> клетки. А светлых клеток всего 12. Могут ли 13 жуков разместиться в 12 клетках по одному? (можно / нельзя)</span></div>
+        <div class="answer-row">
+          <input type="text" id="q2-4-ans" placeholder="можно / нельзя">
+          <button onclick="checkMiniQ('2-4')">Проверить</button>
+        </div>
+        <div class="feedback" id="q2-4-fb"></div>
+      </div>
+
+      <div class="mini-q hidden" id="q2-5">
+        <div class="mini-task"><span class="qnum">5</span><span class="mini-task-text">Скольким жукам не хватит места (разница между тёмными и светлыми)? Это цифра для кода.</span></div>
+        <div class="answer-row">
+          <input type="text" id="q2-5-ans" placeholder="число">
+          <button onclick="checkMiniQ('2-5')">Проверить</button>
+        </div>
+        <div class="feedback" id="q2-5-fb"></div>
+      </div>
+
+      <button class="hint-btn" onclick="showHint(2)">💡 Общая подсказка</button>
+      <div class="hint-box" id="hint2">Ключ - в шахматной раскраске. Каждый прыжок меняет цвет клетки: жук с тёмной попадает на светлую, а со светлой - на тёмную. Значит все 13 жуков с тёмных клеток должны занять 12 светлых. По принципу Дирихле - кому-то из 13 не хватит места.</div>
+      <button class="advance-btn active" style="margin-top:12px" onclick="forceAdvance(2)">Все справились - идём дальше →</button>
+    </div>
+  </div>
+
+  <!-- STAGE 3: CAESAR CIPHER -->
+  <div class="stage" id="s3">
+    <div class="stage-header">
+      <span class="stage-num">3</span>
+      <span class="stage-title">Задача 2: Шифр Цезаря</span>
+      <span class="stage-lock"></span>
+    </div>
+    <div class="stage-body">
+      <p>Профессор оставил зашифрованную <strong>фразу</strong>. В его шифре каждая буква сдвинута <strong>ВПЕРЁД на 5 позиций</strong> в русском алфавите (33 буквы, с Ё).</p>
+      <p><strong>Алфавит:</strong> А Б В Г Д Е Ё Ж З И Й К Л М Н О П Р С Т У Ф Х Ц Ч Ш Щ Ъ Ы Ь Э Ю Я</p>
+      <p>Пример: <strong>А → Е</strong> (сдвиг на 5), <strong>М → С</strong>.</p>
+      <div class="puzzle" style="font-size:1.4em;letter-spacing:4px;font-weight:bold;color:#4c1d95;font-family:Georgia,serif;line-height:1.7">
+        Ц Ф Е Ц Н Ё У &nbsp; &nbsp; М Е &nbsp; &nbsp; З У И &nbsp; &nbsp; Л И К С<br>
+        У Ч Р Н Ь Т У З У &nbsp; &nbsp; Р Й Ч Е
+      </div>
+      <p class="task">Расшифруй длинную фразу: сдвинь каждую букву <strong>назад на 5</strong>. Разделите буквы между собой - каждый расшифровывает часть! Введите всю фразу через пробелы.</p>
+      <div class="answer-row">
+        <label>Фраза:</label>
+        <input type="text" id="ans3" placeholder="вся фраза через пробелы" style="min-width:280px">
+        <button onclick="check(3)">Проверить</button>
+      </div>
+      <div class="feedback" id="fb3"></div>
+      <button class="hint-btn" onclick="showHint(3)">💡 Нужна подсказка?</button>
+      <div class="hint-box" id="hint3">Первая буква Ц - 5 назад = С. Ф → П. Е → А. Первое слово: <strong>СПАСИБО</strong>. Дальше сами! Всего в фразе 6 слов - тёплое пожелание в конце учебного года.</div>
+      <button class="advance-btn active" style="margin-top:12px" onclick="forceAdvance(3)">Все справились - идём дальше →</button>
+    </div>
+  </div>
+
+  <!-- STAGE 4: VERBLYUD -->
+  <div class="stage" id="s4">
+    <div class="stage-header">
+      <span class="stage-num">4</span>
+      <span class="stage-title">Задача 3: Верблюд</span>
+      <span class="stage-lock"></span>
+    </div>
+    <div class="stage-body">
+      <p><strong>Верблюд</strong> - шахматная фигура, которая ходит буквой «Г» с большим шагом: <strong>1 клетка в одну сторону + 3 клетки в перпендикулярную</strong>.</p>
+      <p>Сравни с конём:</p>
+      <ul>
+        <li><strong>Конь</strong>: шагает 1 + 2</li>
+        <li><strong>Верблюд</strong>: шагает 1 + 3</li>
+      </ul>
+      <p>Куда может пойти верблюд «В» за один ход (8 возможных клеток отмечены кружками):</p>
+      <div class="puzzle">
+        <div id="board4"></div>
+      </div>
+      <p class="task">Верблюд стоит на <strong>ТЁМНОЙ</strong> клетке. Может ли он какими-то ходами (одним или несколькими) попасть на <strong>СВЕТЛУЮ</strong> клетку?<br>Ответ: <strong>1</strong> - да, <strong>0</strong> - нет.</p>
+      <div class="answer-row">
+        <label>Ответ:</label>
+        <input type="text" id="ans4" placeholder="0 или 1">
+        <button onclick="check(4)">Проверить</button>
+      </div>
+      <div class="feedback" id="fb4"></div>
+      <button class="hint-btn" onclick="showHint(4)">💡 Нужна подсказка?</button>
+      <div class="hint-box" id="hint4">Посчитай сумму шагов: 1 + 3 = 4. Один шаг меняет цвет клетки. Значит 4 шага меняют цвет 4 раза. А если менять цвет ЧЁТНОЕ число раз - что получится с цветом?</div>
+      <button class="advance-btn active" style="margin-top:12px" onclick="forceAdvance(4)">Все справились - идём дальше →</button>
+    </div>
+  </div>
+
+  <!-- STAGE 5: LINGUISTICS (3 languages) -->
+  <div class="stage" id="s5">
+    <div class="stage-header">
+      <span class="stage-num">5</span>
+      <span class="stage-title">Задача 4: Языки мира</span>
+      <span class="stage-lock"></span>
+    </div>
+    <div class="stage-body">
+      <p>Профессор оставил три языковые загадки. Разгадай их по очереди - последняя даст цифру для кода.</p>
+
+      <div class="mini-q" id="q5-1">
+        <div class="mini-task"><span class="qnum">1</span><span class="mini-task-text">
+          <strong>Польский язык.</strong> Даны пары слов:<br>
+          <span style="font-family:'Courier New',monospace;background:#faf5ff;color:#1e1b4b;padding:2px 6px;border-radius:4px;display:inline-block;margin:4px 0">chleb = хлеб, ucho = ухо, ryba = рыба, dym = дым</span><br>
+          Как переводится польское слово <strong>mucha</strong>?
+        </span></div>
+        <div class="answer-row"><input type="text" id="q5-1-ans" placeholder="слово по-русски"><button onclick="checkMiniQ('5-1')">Проверить</button></div>
+        <div class="feedback" id="q5-1-fb"></div>
+      </div>
+
+      <div class="mini-q hidden" id="q5-2">
+        <div class="mini-task"><span class="qnum">2</span><span class="mini-task-text">
+          <strong>Язык хинди.</strong> Даны два арифметических примера (все слова обозначают числа не больше 5):<br>
+          <span style="font-family:'Courier New',monospace;background:#faf5ff;color:#1e1b4b;padding:2px 6px;border-radius:4px;display:inline-block;margin:4px 0">do × do = cār, &nbsp; pãc − do = tīn</span><br>
+          Какое число обозначает слово <strong>do</strong>?
+        </span></div>
+        <div class="answer-row"><input type="text" id="q5-2-ans" placeholder="цифра"><button onclick="checkMiniQ('5-2')">Проверить</button></div>
+        <div class="feedback" id="q5-2-fb"></div>
+      </div>
+
+      <div class="mini-q hidden" id="q5-3">
+        <div class="mini-task"><span class="qnum">3</span><span class="mini-task-text">
+          <strong>Язык южный киваи</strong> (Папуа-Новая Гвинея):<br>
+          <span style="font-family:'Courier New',monospace;background:#faf5ff;color:#1e1b4b;padding:2px 6px;border-radius:4px;display:inline-block;margin:4px 0">2 = netewa, &nbsp; 4 = netewa netewa, &nbsp; 5 = netewa netewa nao</span><br>
+          Как будет число <strong>3</strong> на этом языке? (введи через пробел)
+        </span></div>
+        <div class="answer-row"><input type="text" id="q5-3-ans" placeholder="через пробел"><button onclick="checkMiniQ('5-3')">Проверить</button></div>
+        <div class="feedback" id="q5-3-fb"></div>
+      </div>
+
+      <button class="hint-btn" onclick="showHint(5)">💡 Общие подсказки</button>
+      <div class="hint-box" id="hint5">
+        1) Польский очень близок к русскому: ch=х, l=л, e=е, b=б → chleb=хлеб. По той же логике m-u-ch-a = ?<br>
+        2) do × do = cār значит какое-то число, умноженное само на себя, даёт cār. Возьми ЧИСЛА не больше 5 и попробуй: 2×2=4 (совпадает!). Значит do=2, cār=4.<br>
+        3) netewa = 2, netewa netewa = 2+2 = 4. netewa netewa nao = 5, значит nao = 1. Тогда 3 = 2 + 1 = netewa + nao.
+      </div>
+      <button class="advance-btn active" style="margin-top:12px" onclick="forceAdvance(5)">Все справились - идём дальше →</button>
+    </div>
+  </div>
+
+  <!-- STAGE 6: MOUSE IN 3x3x3 CHEESE CUBE -->
+  <div class="stage" id="s6">
+    <div class="stage-header">
+      <span class="stage-num">6</span>
+      <span class="stage-title">Задача 5: Мышь в кубе сыра</span>
+      <span class="stage-lock"></span>
+    </div>
+    <div class="stage-body">
+      <p>Кубик сыра <strong>3×3×3</strong> состоит из маленьких кубиков. Мышь <strong>М</strong> начинает в угловом маленьком кубике. Она хочет съесть все кубики по одному, каждый раз переползая в СОСЕДНИЙ по грани кубик.</p>
+      <p><strong>Главный вопрос:</strong> Может ли мышь закончить в самом <strong>центральном</strong> кубике (обведён красным)? Разберёмся по шагам.</p>
+      <div class="puzzle">
+        <div id="board6"></div>
+        <p style="font-size:0.85em;color:#666;margin-top:8px">Куб показан 3 слоями по 3×3.</p>
+      </div>
+
+      <div class="mini-q" id="q6-1">
+        <div class="mini-task"><span class="qnum">1</span><span class="mini-task-text">Сколько всего маленьких кубиков в кубе 3×3×3?</span></div>
+        <div class="answer-row"><input type="text" id="q6-1-ans" placeholder="число"><button onclick="checkMiniQ('6-1')">Проверить</button></div>
+        <div class="feedback" id="q6-1-fb"></div>
+      </div>
+
+      <div class="mini-q hidden" id="q6-2">
+        <div class="mini-task"><span class="qnum">2</span><span class="mini-task-text">Раскрасим кубики шахматно в 3D (соседние кубики - всегда разного цвета). Раскраска появилась на схеме сверху. Сколько получилось <strong>ТЁМНЫХ</strong> кубиков? (можно посчитать по слоям)</span></div>
+        <div class="answer-row"><input type="text" id="q6-2-ans" placeholder="число"><button onclick="checkMiniQ('6-2')">Проверить</button></div>
+        <div class="feedback" id="q6-2-fb"></div>
+      </div>
+
+      <div class="mini-q hidden" id="q6-3">
+        <div class="mini-task"><span class="qnum">3</span><span class="mini-task-text">А сколько <strong>СВЕТЛЫХ</strong> кубиков?</span></div>
+        <div class="answer-row"><input type="text" id="q6-3-ans" placeholder="число"><button onclick="checkMiniQ('6-3')">Проверить</button></div>
+        <div class="feedback" id="q6-3-fb"></div>
+      </div>
+
+      <div class="mini-q hidden" id="q6-4">
+        <div class="mini-task"><span class="qnum">4</span><span class="mini-task-text">Помнишь <strong>задачу про жуков</strong>? Там каждый прыжок жука на соседнюю клетку менял цвет клетки. Здесь ТО ЖЕ САМОЕ: каждое переползание мыши в соседний кубик меняет цвет. Мышь съест все 27 кубиков за 26 переползаний. 26 - число чётное. После чётного числа смен цвета мышь окажется на кубике <strong>того же</strong> цвета что стартовый или <strong>другого</strong>? (того же / другого)</span></div>
+        <div class="answer-row"><input type="text" id="q6-4-ans" placeholder="того же / другого"><button onclick="checkMiniQ('6-4')">Проверить</button></div>
+        <div class="feedback" id="q6-4-fb"></div>
+      </div>
+
+      <div class="mini-q hidden" id="q6-5">
+        <div class="mini-task"><span class="qnum">5</span><span class="mini-task-text">Мышь стартует в <strong>тёмном</strong> угловом кубике. Значит закончит тоже на <strong>тёмном</strong>. А центр (красный кружок) - <strong>светлый</strong>. Значит закончить в центре... Введи <strong>0</strong> - нельзя, <strong>1</strong> - можно. Это цифра для кода.</span></div>
+        <div class="answer-row"><input type="text" id="q6-5-ans" placeholder="0 / 1"><button onclick="checkMiniQ('6-5')">Проверить</button></div>
+        <div class="feedback" id="q6-5-fb"></div>
+      </div>
+
+      <button class="hint-btn" onclick="showHint(6)">💡 Общая подсказка</button>
+      <div class="hint-box" id="hint6">Тот же приём, что и в задаче про жуков: каждый шаг меняет цвет. Тёмных 14, светлых 13. Мышь стартует на тёмном, за 26 шагов (чётное число) - вернётся на тёмный. Центр - светлый. Значит закончить в центре нельзя.</div>
+      <button class="advance-btn active" style="margin-top:12px" onclick="forceAdvance(6)">Все справились - идём дальше →</button>
+    </div>
+  </div>
+
+  <!-- STAGE 7: VEPSIAN LANGUAGE -->
+  <div class="stage" id="s7">
+    <div class="stage-header">
+      <span class="stage-num">7</span>
+      <span class="stage-title">Задача 6: Вепсский язык</span>
+      <span class="stage-lock"></span>
+    </div>
+    <div class="stage-body">
+      <p><strong>Вепсский язык</strong> - близкий родственник финского. На нём говорят несколько тысяч человек на северо-западе России.</p>
+      <p>Даны пары слов в именительном и родительном падеже:</p>
+      <p><span style="font-family:'Courier New',monospace;background:#faf5ff;color:#1e1b4b;padding:6px 10px;border-radius:4px;display:inline-block;line-height:1.8">
+        ilo → ilon &nbsp; (веселье → веселья)<br>
+        nena → nenan &nbsp; (нос → носа)<br>
+        puzu → puzun &nbsp; (корзина → корзины)
+      </span></p>
+
+      <div class="mini-q" id="q7-1">
+        <div class="mini-task"><span class="qnum">1</span><span class="mini-task-text">Присмотрись к парам слов. Какая <strong>одна буква</strong> добавляется в родительном падеже?</span></div>
+        <div class="answer-row"><input type="text" id="q7-1-ans" placeholder="буква"><button onclick="checkMiniQ('7-1')">Проверить</button></div>
+        <div class="feedback" id="q7-1-fb"></div>
+      </div>
+
+      <div class="mini-q hidden" id="q7-2">
+        <div class="mini-task"><span class="qnum">2</span><span class="mini-task-text">Отлично! Правило простое: добавляем букву <strong>n</strong>. Как будет <strong>«лошади»</strong> (родительный падеж) от слова <strong>hebo</strong> (лошадь)?</span></div>
+        <div class="answer-row"><input type="text" id="q7-2-ans" placeholder="слово"><button onclick="checkMiniQ('7-2')">Проверить</button></div>
+        <div class="feedback" id="q7-2-fb"></div>
+      </div>
+
+      <div class="mini-q hidden" id="q7-3">
+        <div class="mini-task"><span class="qnum">3</span><span class="mini-task-text">А теперь наоборот! Дано слово в родительном падеже - <strong>madon</strong> («змеи»). Как будет <strong>«змея»</strong> (именительный падеж)?</span></div>
+        <div class="answer-row"><input type="text" id="q7-3-ans" placeholder="слово"><button onclick="checkMiniQ('7-3')">Проверить</button></div>
+        <div class="feedback" id="q7-3-fb"></div>
+      </div>
+
+      <button class="hint-btn" onclick="showHint(7)">💡 Подсказка</button>
+      <div class="hint-box" id="hint7">Пары: ilo/ilon, nena/nenan, puzu/puzun. Заметил? Различие - только последняя буква. Значит для родительного - добавить эту букву; для именительного - убрать.</div>
+      <button class="advance-btn active" style="margin-top:12px" onclick="forceAdvance(7)">Все справились - идём дальше →</button>
+    </div>
+  </div>
+
+  <!-- STAGE 8: AM-YAM LANGUAGE (DICTIONARY) -->
+  <div class="stage" id="s8">
+    <div class="stage-header">
+      <span class="stage-num">8</span>
+      <span class="stage-title">Задача 7: Ам-Ямский словарь</span>
+      <span class="stage-lock"></span>
+    </div>
+    <div class="stage-body">
+      <p>Перед вами стишок о мышке и кошке (слева) и его перевод (построчный) на язык племени <strong>Ам-Ям</strong> (справа):</p>
+      <div class="dict-poem">
+        <div>
+          Мышка ночью пошла гулять.<br>
+          Кошка ночью видит - мышка!<br>
+          Мышку кошка пошла поймать.
+        </div>
+        <div class="ay">
+          Ам ту му ям,<br>
+          Ту ля бу ам,<br>
+          Гу ля ту ям.
+        </div>
+      </div>
+      <p>Составь <strong>русско-ам-ямский словарь</strong> - переведи каждое слово из стишка:</p>
+      <div class="dict-fields">
+        <div class="dict-row">
+          <span class="dict-word">кошка =</span>
+          <input type="text" id="d8-1" placeholder="?">
+          <button class="dict-check" onclick="checkDictWord('8-1')">Проверить</button>
+          <span class="dict-fb" id="d8-1-fb"></span>
+        </div>
+        <div class="dict-row">
+          <span class="dict-word">мышка =</span>
+          <input type="text" id="d8-2" placeholder="?">
+          <button class="dict-check" onclick="checkDictWord('8-2')">Проверить</button>
+          <span class="dict-fb" id="d8-2-fb"></span>
+        </div>
+        <div class="dict-row">
+          <span class="dict-word">мышку =</span>
+          <input type="text" id="d8-3" placeholder="?">
+          <button class="dict-check" onclick="checkDictWord('8-3')">Проверить</button>
+          <span class="dict-fb" id="d8-3-fb"></span>
+        </div>
+        <div class="dict-row">
+          <span class="dict-word">ночью =</span>
+          <input type="text" id="d8-4" placeholder="?">
+          <button class="dict-check" onclick="checkDictWord('8-4')">Проверить</button>
+          <span class="dict-fb" id="d8-4-fb"></span>
+        </div>
+        <div class="dict-row">
+          <span class="dict-word">видит =</span>
+          <input type="text" id="d8-5" placeholder="?">
+          <button class="dict-check" onclick="checkDictWord('8-5')">Проверить</button>
+          <span class="dict-fb" id="d8-5-fb"></span>
+        </div>
+        <div class="dict-row">
+          <span class="dict-word">пошла =</span>
+          <input type="text" id="d8-6" placeholder="?">
+          <button class="dict-check" onclick="checkDictWord('8-6')">Проверить</button>
+          <span class="dict-fb" id="d8-6-fb"></span>
+        </div>
+        <div class="dict-row">
+          <span class="dict-word">гулять =</span>
+          <input type="text" id="d8-7" placeholder="?">
+          <button class="dict-check" onclick="checkDictWord('8-7')">Проверить</button>
+          <span class="dict-fb" id="d8-7-fb"></span>
+        </div>
+        <div class="dict-row">
+          <span class="dict-word">поймать =</span>
+          <input type="text" id="d8-8" placeholder="?">
+          <button class="dict-check" onclick="checkDictWord('8-8')">Проверить</button>
+          <span class="dict-fb" id="d8-8-fb"></span>
+        </div>
+      </div>
+      <div class="feedback" id="fb8"></div>
+      <button class="hint-btn" onclick="showHint(8)">💡 Подсказка</button>
+      <div class="hint-box" id="hint8">Ключевое наблюдение: <strong>слово «ту» встречается во всех 3 строчках</strong>, и <strong>слово «мышка/мышку» - тоже во всех 3</strong>! Значит ту = мышка. При этом в языке Ам-Ям нет падежей - и «мышка» (кто?), и «мышку» (кого?) переводятся одинаково. Дальше: «кошка» повторяется 2 раза (2 и 3 строки) - какое ам-ямское слово тоже 2 раза? А остальные - уникальные, ищи в парных строчках.</div>
+      <button class="advance-btn active" style="margin-top:12px" onclick="forceAdvance(8)">Все справились - идём дальше →</button>
+    </div>
+  </div>
+
+  <!-- SAFE -->
+  <div class="stage safe" id="safe">
+    <div class="stage-header">
+      <span class="stage-num" style="background:#dc2626;color:#fff">🔒</span>
+      <span class="stage-title">СЕЙФ ПРОФЕССОРА</span>
+    </div>
+    <div class="stage-body">
+      <p style="text-align:center;color:#fef3c7">Введите шестизначный код, который вы собрали в задачах (см. прогресс сверху):</p>
+      <div class="combo-lock">
+        <input type="text" maxlength="1" id="cd1" oninput="autoAdvance(this,'cd2')">
+        <input type="text" maxlength="1" id="cd2" oninput="autoAdvance(this,'cd3')">
+        <input type="text" maxlength="1" id="cd3" oninput="autoAdvance(this,'cd4')">
+        <input type="text" maxlength="1" id="cd4" oninput="autoAdvance(this,'cd5')">
+        <input type="text" maxlength="1" id="cd5" oninput="autoAdvance(this,'cd6')">
+        <input type="text" maxlength="1" id="cd6" oninput="autoAdvance(this,'cd7')">
+        <input type="text" maxlength="1" id="cd7" oninput="autoAdvance(this,'cd8')">
+        <input type="text" maxlength="1" id="cd8">
+      </div>
+      <button class="safe-btn" onclick="unlockSafe()">🔓 Открыть сейф</button>
+      <div class="feedback" id="fbSafe"></div>
+    </div>
+  </div>
+
+  <!-- FINALE -->
+  <div class="finale" id="finale">
+    <h1>🎉 Сейф открыт! 🎉</h1>
+    <div class="letter">
+      <p><strong>Дорогие мои взломщики шифров, Соня, Лев, Егор, Даня и Андрей!</strong></p>
+      <p>Вы прошли путь через все ловушки: решили головоломки Инки, обманули жуков и верблюда, расшифровали длинное послание, освоили <strong>пять языков мира</strong> (польский, хинди, южный киваи, вепсский и ам-ямский), обошли сырный куб и собрали код. Вы настоящие математики-разведчики!</p>
+      <p>А теперь - главная тайна каникул: <strong>они у вас впереди!</strong> Целый месяц свободы, купания, книжек, велосипедов, приключений и радости.</p>
+      <p><em>До встречи в сентябре с новым 5 классом!<br>Ваш Профессор Логик (и Олеся Андреевна)</em></p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const answers = {1:'2', 2:'2', 3:'спасибо за год ждем отличного лета', 4:'0', 5:'netewa nao', 6:'0', 7:'mado', 8:'ту'};
+const digits  = {1:'2', 2:'1', 3:'4', 4:'0', 5:'3', 6:'0', 7:'5', 8:'8'};
+
+// === INKY PUZZLES DATA (15 puzzles, verified unique-solvable) ===
+const INKY_PUZZLES = [{"cages":[{"cells":[[0,0],[1,0]],"clue":"4+"},{"cells":[[0,1],[0,2]],"clue":"1-"},{"cells":[[0,3],[1,3]],"clue":"6+"},{"cells":[[1,1],[1,2]],"clue":"3-"},{"cells":[[2,0],[2,1]],"clue":"1-"},{"cells":[[2,2],[2,3]],"clue":"7+"},{"cells":[[3,0],[3,1]],"clue":"1-"},{"cells":[[3,2],[3,3]],"clue":"3+"}],"solution":[[1,2,3,4],[3,4,1,2],[2,1,4,3],[4,3,2,1]]},{"cages":[{"cells":[[0,0],[0,1],[1,1]],"clue":"8+"},{"cells":[[0,2],[0,3]],"clue":"2-"},{"cells":[[1,0],[2,0]],"clue":"3+"},{"cells":[[1,2],[1,3]],"clue":"4+"},{"cells":[[2,1],[2,2]],"clue":"1-"},{"cells":[[2,3],[3,3]],"clue":"5+"},{"cells":[[3,0],[3,1]],"clue":"2-"},{"cells":[[3,2]],"clue":"3"}],"solution":[[3,1,4,2],[2,4,1,3],[1,3,2,4],[4,2,3,1]]},{"cages":[{"cells":[[0,0],[1,0],[2,0],[3,0]],"clue":"10+"},{"cells":[[0,1],[1,1]],"clue":"6+"},{"cells":[[0,2],[0,3]],"clue":"7+"},{"cells":[[1,2],[1,3]],"clue":"3+"},{"cells":[[2,1],[2,2]],"clue":"3-"},{"cells":[[2,3],[3,3]],"clue":"4+"},{"cells":[[3,1],[3,2]],"clue":"5+"}],"solution":[[1,2,3,4],[3,4,1,2],[2,1,4,3],[4,3,2,1]]},{"cages":[{"cells":[[0,0],[1,0],[1,1]],"clue":"7+"},{"cells":[[0,1],[0,2]],"clue":"7+"},{"cells":[[0,3],[1,3]],"clue":"1-"},{"cells":[[1,2],[2,2]],"clue":"1-"},{"cells":[[2,0],[3,0]],"clue":"4+"},{"cells":[[2,1],[3,1]],"clue":"6+"},{"cells":[[2,3],[3,3]],"clue":"7+"},{"cells":[[3,2]],"clue":"1"}],"solution":[[2,3,4,1],[4,1,3,2],[1,4,2,3],[3,2,1,4]]},{"cages":[{"cells":[[0,0]],"clue":"1"},{"cells":[[0,1],[0,2]],"clue":"5+"},{"cells":[[0,3],[1,3]],"clue":"6+"},{"cells":[[1,0],[1,1]],"clue":"7+"},{"cells":[[1,2],[2,2]],"clue":"5+"},{"cells":[[2,0],[2,1]],"clue":"5+"},{"cells":[[2,3],[3,3]],"clue":"4+"},{"cells":[[3,0],[3,1],[3,2]],"clue":"7+"}],"solution":[[1,2,3,4],[3,4,1,2],[2,3,4,1],[4,1,2,3]]},{"cages":[{"cells":[[0,1]],"clue":"1"},{"cells":[[1,1],[1,2],[2,2]],"clue":"5+"},{"cells":[[0,0],[1,0]],"clue":"1-"},{"cells":[[0,2],[0,3]],"clue":"2-"},{"cells":[[1,3],[2,3]],"clue":"1-"},{"cells":[[2,0],[2,1]],"clue":"4+"},{"cells":[[3,0],[3,1]],"clue":"2-"},{"cells":[[3,2],[3,3]],"clue":"4+"}],"solution":[[3,1,4,2],[4,2,1,3],[1,3,2,4],[2,4,3,1]]},{"cages":[{"cells":[[0,0],[0,1]],"clue":"5+"},{"cells":[[0,2],[1,1],[1,2]],"clue":"8+"},{"cells":[[0,3],[1,3]],"clue":"4+"},{"cells":[[1,0],[2,0]],"clue":"1-"},{"cells":[[2,1],[3,1]],"clue":"2-"},{"cells":[[2,2],[2,3]],"clue":"7+"},{"cells":[[3,0]],"clue":"4"},{"cells":[[3,2],[3,3]],"clue":"1-"}],"solution":[[1,4,2,3],[3,2,4,1],[2,1,3,4],[4,3,1,2]]},{"cages":[{"cells":[[0,1]],"clue":"2"},{"cells":[[0,0],[1,0]],"clue":"4+"},{"cells":[[0,2],[0,3],[1,3]],"clue":"9+"},{"cells":[[1,1],[1,2],[2,1],[2,2]],"clue":"10+"},{"cells":[[2,0],[3,0],[3,1]],"clue":"7+"},{"cells":[[2,3],[3,3]],"clue":"4+"},{"cells":[[3,2]],"clue":"4"}],"solution":[[1,2,3,4],[3,4,1,2],[4,3,2,1],[2,1,4,3]]},{"cages":[{"cells":[[0,0],[0,1]],"clue":"3+"},{"cells":[[0,2],[0,3]],"clue":"1-"},{"cells":[[1,0],[1,1]],"clue":"1-"},{"cells":[[1,2],[2,2]],"clue":"3-"},{"cells":[[1,3],[2,3]],"clue":"5+"},{"cells":[[2,0],[3,0]],"clue":"2-"},{"cells":[[2,1],[3,1]],"clue":"4+"},{"cells":[[3,2],[3,3]],"clue":"3+"}],"solution":[[1,2,3,4],[3,4,1,2],[2,1,4,3],[4,3,2,1]]},{"cages":[{"cells":[[0,0],[0,1],[1,1]],"clue":"7+"},{"cells":[[0,2],[0,3]],"clue":"7+"},{"cells":[[1,2],[1,3]],"clue":"1-"},{"cells":[[1,0],[2,0]],"clue":"5+"},{"cells":[[2,1],[2,2]],"clue":"5+"},{"cells":[[2,3],[3,3]],"clue":"4+"},{"cells":[[3,0],[3,1]],"clue":"7+"},{"cells":[[3,2]],"clue":"2"}],"solution":[[1,2,3,4],[3,4,1,2],[2,1,4,3],[4,3,2,1]]},{"cages":[{"cells":[[0,0]],"clue":"1"},{"cells":[[3,3]],"clue":"1"},{"cells":[[0,1],[0,2]],"clue":"1-"},{"cells":[[0,3],[1,3]],"clue":"2-"},{"cells":[[1,0],[2,0]],"clue":"5+"},{"cells":[[1,1],[1,2]],"clue":"3-"},{"cells":[[2,1],[3,1],[3,0]],"clue":"8+"},{"cells":[[2,2],[2,3],[3,2]],"clue":"9+"}],"solution":[[1,2,3,4],[3,4,1,2],[2,1,4,3],[4,3,2,1]]},{"cages":[{"cells":[[0,0],[1,0]],"clue":"1-"},{"cells":[[0,1],[1,1]],"clue":"3-"},{"cells":[[0,2],[0,3]],"clue":"4+"},{"cells":[[1,2],[1,3]],"clue":"2-"},{"cells":[[2,0],[2,1]],"clue":"4+"},{"cells":[[2,2],[3,2]],"clue":"1-"},{"cells":[[2,3],[3,3]],"clue":"3-"},{"cells":[[3,0],[3,1]],"clue":"2-"}],"solution":[[2,4,1,3],[3,1,4,2],[1,3,2,4],[4,2,3,1]]},{"cages":[{"cells":[[0,0],[0,1],[1,0]],"clue":"7+"},{"cells":[[2,3],[3,2],[3,3]],"clue":"9+"},{"cells":[[0,2],[0,3]],"clue":"1-"},{"cells":[[1,1],[1,2]],"clue":"7+"},{"cells":[[1,3]],"clue":"1"},{"cells":[[2,0],[3,0]],"clue":"4+"},{"cells":[[2,1],[2,2]],"clue":"3-"},{"cells":[[3,1]],"clue":"2"}],"solution":[[4,1,2,3],[2,3,4,1],[3,4,1,2],[1,2,3,4]]},{"cages":[{"cells":[[0,0]],"clue":"2"},{"cells":[[0,1],[1,1]],"clue":"7+"},{"cells":[[0,2],[0,3]],"clue":"3-"},{"cells":[[1,0],[2,0],[2,1]],"clue":"6+"},{"cells":[[1,2],[1,3],[2,3]],"clue":"7+"},{"cells":[[2,2],[3,2]],"clue":"1-"},{"cells":[[3,0],[3,1]],"clue":"1-"},{"cells":[[3,3]],"clue":"1"}],"solution":[[2,3,1,4],[1,4,2,3],[4,1,3,2],[3,2,4,1]]},{"cages":[{"cells":[[1,0],[1,1],[1,2],[1,3]],"clue":"10+"},{"cells":[[0,0],[0,1]],"clue":"6+"},{"cells":[[0,2]],"clue":"1"},{"cells":[[0,3]],"clue":"3"},{"cells":[[2,0],[3,0]],"clue":"7+"},{"cells":[[2,1],[3,1],[3,2]],"clue":"5+"},{"cells":[[2,2],[2,3]],"clue":"4+"},{"cells":[[3,3]],"clue":"4"}],"solution":[[2,4,1,3],[1,3,4,2],[4,2,3,1],[3,1,2,4]]}];
+
+// === INKY WORKSPACE STATE ===
+const NAMES = ["Соня", "Лев", "Егор", "Даня", "Андрей"];
+const workspaceState = [0, 1, 2, 3, 4]; // puzzle index per workspace
+const workspaceGrids = [
+  [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]],
+  [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]],
+  [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]],
+  [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]],
+  [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
+];
+let usedPuzzles = new Set([0,1,2,3,4]);
+let anySolved = false;
+
+function renderInkyWorkspace(wsIdx){
+  const puzzleIdx = workspaceState[wsIdx];
+  if(puzzleIdx == null || !INKY_PUZZLES[puzzleIdx]) return;
+  const puzzle = INKY_PUZZLES[puzzleIdx];
+  const ws = document.getElementById('ws'+wsIdx);
+  if(!ws) return;
+  const grid = ws.querySelector('.inky-grid');
+  grid.innerHTML = '';
+
+  // Map each cell to a cage index
+  const cellToCage = [[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1]];
+  puzzle.cages.forEach((cage, ci) => {
+    cage.cells.forEach(([r,c]) => { cellToCage[r][c] = ci; });
+  });
+
+  // Anchor cell for each cage (top-most, then left-most)
+  const cageAnchors = {};
+  for(let r=0; r<4; r++){
+    for(let c=0; c<4; c++){
+      const ci = cellToCage[r][c];
+      if(ci >= 0 && !(ci in cageAnchors)) cageAnchors[ci] = [r,c];
+    }
+  }
+
+  for(let r=0; r<4; r++){
+    for(let c=0; c<4; c++){
+      const cell = document.createElement('div');
+      cell.className = 'inky-cell';
+      cell.dataset.r = r; cell.dataset.c = c; cell.dataset.ws = wsIdx;
+      const myCage = cellToCage[r][c];
+      if(r===0 || cellToCage[r-1][c] !== myCage) cell.classList.add('thick-top');
+      if(r===3 || cellToCage[r+1][c] !== myCage) cell.classList.add('thick-bottom');
+      if(c===0 || cellToCage[r][c-1] !== myCage) cell.classList.add('thick-left');
+      if(c===3 || cellToCage[r][c+1] !== myCage) cell.classList.add('thick-right');
+      const anchor = cageAnchors[myCage];
+      if(anchor && anchor[0]===r && anchor[1]===c){
+        const clue = document.createElement('span');
+        clue.className = 'clue';
+        clue.textContent = puzzle.cages[myCage].clue;
+        cell.appendChild(clue);
+      }
+      const dspan = document.createElement('span');
+      dspan.className = 'cell-digit';
+      const cur = workspaceGrids[wsIdx][r][c];
+      dspan.textContent = cur ? String(cur) : '';
+      cell.appendChild(dspan);
+      cell.onclick = () => cycleCell(cell, wsIdx);
+      grid.appendChild(cell);
+    }
+  }
+
+  ws.querySelector('.ws-puzzle-num').textContent = 'Головоломка №' + (puzzleIdx+1);
+  const fb = ws.querySelector('.ws-feedback');
+  fb.textContent = '';
+  fb.className = 'ws-feedback';
+  ws.classList.remove('done');
+}
+
+function cycleCell(cellEl, wsIdx){
+  const r = parseInt(cellEl.dataset.r), c = parseInt(cellEl.dataset.c);
+  let cur = workspaceGrids[wsIdx][r][c] || 0;
+  cur = (cur + 1) % 5;
+  workspaceGrids[wsIdx][r][c] = cur;
+  cellEl.querySelector('.cell-digit').textContent = cur ? String(cur) : '';
+}
+
+function checkInkyWorkspace(wsIdx){
+  const puzzleIdx = workspaceState[wsIdx];
+  if(!INKY_PUZZLES[puzzleIdx]) return;
+  const sol = INKY_PUZZLES[puzzleIdx].solution;
+  const grid = workspaceGrids[wsIdx];
+  let ok = true;
+  for(let r=0; r<4 && ok; r++){
+    for(let c=0; c<4 && ok; c++){
+      if(grid[r][c] !== sol[r][c]) ok = false;
+    }
+  }
+  const ws = document.getElementById('ws'+wsIdx);
+  const fb = ws.querySelector('.ws-feedback');
+  if(ok){
+    fb.textContent = '✓ Отлично! Всё правильно!';
+    fb.className = 'ws-feedback ok';
+    ws.classList.add('done');
+    anySolved = true;
+    const adv = document.getElementById('advance1');
+    adv.disabled = false;
+    adv.classList.add('active');
+  } else {
+    fb.textContent = 'Ещё не всё сходится';
+    fb.className = 'ws-feedback err';
+  }
+}
+
+function nextPuzzle(wsIdx){
+  for(let i=0; i<INKY_PUZZLES.length; i++){
+    if(!usedPuzzles.has(i)){
+      usedPuzzles.add(i);
+      workspaceState[wsIdx] = i;
+      workspaceGrids[wsIdx] = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
+      renderInkyWorkspace(wsIdx);
+      return;
+    }
+  }
+  const ws = document.getElementById('ws'+wsIdx);
+  ws.querySelector('.ws-feedback').textContent = 'Все головоломки уже разобраны!';
+  ws.querySelector('.ws-feedback').className = 'ws-feedback';
+}
+
+function advanceStage1(){
+  forceAdvance(1);
+}
+
+function forceAdvance(n){
+  const stageEl = document.getElementById('s'+n);
+  if(!stageEl) return;
+  stageEl.classList.add('done');
+  const slot = document.getElementById('slot'+n);
+  if(slot){
+    slot.textContent = digits[n];
+    slot.classList.add('filled');
+  }
+  unlockNext(n);
+}
+
+let previewOn = false;
+function togglePreview(){
+  previewOn = !previewOn;
+  const btn = document.getElementById('previewBtn');
+  if(previewOn){
+    document.querySelectorAll('.stage').forEach(s => s.classList.add('unlocked'));
+    document.querySelectorAll('.mini-q.hidden').forEach(q => q.classList.remove('hidden'));
+    const adv = document.getElementById('advance1');
+    if(adv){ adv.disabled = false; adv.classList.add('active'); }
+    if(document.getElementById('board6')) make3DSlices('board6', {colored: true});
+    btn.textContent = '🔒 Скрыть (вернуться к квесту)';
+    btn.classList.add('on');
+  } else {
+    // Return to locked state — but keep already-done stages
+    document.querySelectorAll('.stage').forEach(s => {
+      if(!s.classList.contains('done') && s.id !== 's1'){
+        s.classList.remove('unlocked');
+      }
+    });
+    btn.textContent = '👁 Показать все задачи';
+    btn.classList.remove('on');
+  }
+}
+
+// === Puzzle validation (safety net) ===
+function isCageConnected(cells){
+  if(cells.length <= 1) return true;
+  const key = (r,c) => r*4+c;
+  const cellSet = new Set(cells.map(([r,c]) => key(r,c)));
+  const visited = new Set([key(cells[0][0], cells[0][1])]);
+  const queue = [cells[0]];
+  while(queue.length){
+    const [r,c] = queue.shift();
+    for(const [dr,dc] of [[-1,0],[1,0],[0,-1],[0,1]]){
+      const nr = r+dr, nc = c+dc;
+      const k = key(nr,nc);
+      if(cellSet.has(k) && !visited.has(k)){
+        visited.add(k);
+        queue.push([nr,nc]);
+      }
+    }
+  }
+  return visited.size === cells.length;
+}
+
+function validatePuzzle(p, idx){
+  const errs = [];
+  const covered = new Set();
+  (p.cages||[]).forEach(cage => {
+    (cage.cells||[]).forEach(([r,c]) => {
+      if(r<0||r>3||c<0||c>3){errs.push('bad coord ['+r+','+c+']');return}
+      const k = r*4+c;
+      if(covered.has(k)) errs.push('cell ['+r+','+c+'] in multiple cages');
+      covered.add(k);
+    });
+    if(!isCageConnected(cage.cells)) errs.push('cage "'+cage.clue+'" not edge-connected');
+  });
+  if(covered.size !== 16) errs.push('only '+covered.size+'/16 cells covered');
+  // Latin square check
+  for(let r=0; r<4; r++){
+    const s = new Set(p.solution[r]);
+    if(s.size !== 4) errs.push('row '+r+' has duplicates');
+    if([...s].some(v => v<1||v>4)) errs.push('row '+r+' has bad digits');
+  }
+  for(let c=0; c<4; c++){
+    const s = new Set();
+    for(let r=0; r<4; r++) s.add(p.solution[r][c]);
+    if(s.size !== 4) errs.push('col '+c+' has duplicates');
+  }
+  // Cage clue consistency
+  (p.cages||[]).forEach(cage => {
+    const vals = cage.cells.map(([r,c]) => p.solution[r][c]);
+    const clue = cage.clue.trim();
+    if(clue.endsWith('+')){
+      const t = parseInt(clue);
+      const sum = vals.reduce((a,b)=>a+b,0);
+      if(sum !== t) errs.push('cage "'+clue+'" sum='+sum+' expected '+t);
+    } else if(clue.endsWith('-')){
+      const t = parseInt(clue);
+      if(vals.length !== 2) errs.push('cage "'+clue+'" needs 2 cells, has '+vals.length);
+      else if(Math.abs(vals[0]-vals[1]) !== t) errs.push('cage "'+clue+'" |diff|='+Math.abs(vals[0]-vals[1])+' expected '+t);
+    } else {
+      const t = parseInt(clue);
+      if(!isNaN(t)){
+        if(vals.length !== 1) errs.push('single-cell cage "'+clue+'" has '+vals.length+' cells');
+        else if(vals[0] !== t) errs.push('single-cell cage "'+clue+'" val='+vals[0]+' expected '+t);
+      }
+    }
+  });
+  return errs;
+}
+
+function filterValidPuzzles(){
+  const validated = [];
+  INKY_PUZZLES.forEach((p, i) => {
+    const errs = validatePuzzle(p, i);
+    if(errs.length === 0) validated.push(p);
+    else console.warn('Puzzle '+i+' rejected:', errs);
+  });
+  INKY_PUZZLES.length = 0;
+  validated.forEach(p => INKY_PUZZLES.push(p));
+  console.log('Loaded '+INKY_PUZZLES.length+' valid puzzles');
+}
+
+function normalize(s){
+  return s.toString().trim().toLowerCase()
+    .replace(/ё/g,'е')
+    .replace(/\s+/g,' ');
+}
+
+function check(n){
+  const input = document.getElementById('ans'+n).value;
+  const fb = document.getElementById('fb'+n);
+  if(normalize(input) === normalize(answers[n])){
+    fb.innerHTML = '✓ Верно! Твоя цифра в код: <strong style="color:#fbbf24;font-size:1.3em">'+digits[n]+'</strong>';
+    fb.className = 'feedback ok';
+    markDone(n);
+    unlockNext(n);
+  } else {
+    fb.innerHTML = '✗ Не совсем. Проверь ещё раз.';
+    fb.className = 'feedback err';
+  }
+}
+
+// === Multi-step (mini-question) support ===
+const MINI_Q_ANSWERS = {
+  '2-1': ['25', 'двадцать пять'],
+  '2-2': ['13', 'тринадцать'],
+  '2-3': ['да', 'меняется', 'yes', 'изменяется', 'меняет', '1'],
+  '2-4': ['нельзя', 'нет', 'no', '0', 'не можно', 'не получится', 'невозможно', 'не смогут'],
+  '2-5': ['1', 'один', 'одна', 'одному'],
+  '5-1': ['муха'],
+  '5-2': ['2', 'два', 'do'],
+  '5-3': ['netewa nao', 'нетева нао', 'нетэва нао'],
+  '6-1': ['27', 'двадцать семь'],
+  '6-2': ['14', 'четырнадцать'],
+  '6-3': ['13', 'тринадцать'],
+  '6-4': ['того же', 'тот же', 'такой же', 'такого же', 'таком же', 'одинаковый', 'одинакового', 'того же цвета', 'такой же цвет', 'тот же цвет', 'того же цвета что стартовый'],
+  '6-5': ['0', 'нельзя', 'нет', 'no', 'не можно', 'не получится', 'невозможно'],
+  '7-1': ['n', 'н', 'буква n', 'буква н'],
+  '7-2': ['hebon', 'хебон'],
+  '7-3': ['mado', 'мадо']
+};
+
+const MINI_Q_SEQUENCE = {
+  '2': ['2-1', '2-2', '2-3', '2-4', '2-5'],
+  '5': ['5-1', '5-2', '5-3'],
+  '6': ['6-1', '6-2', '6-3', '6-4', '6-5'],
+  '7': ['7-1', '7-2', '7-3']
+};
+
+function checkMiniQ(id){
+  const inp = document.getElementById('q'+id+'-ans').value;
+  const fb = document.getElementById('q'+id+'-fb');
+  const norm = normalize(inp);
+  const valid = (MINI_Q_ANSWERS[id]||[]).some(a => normalize(a) === norm);
+  if(valid){
+    fb.innerHTML = '✓ Верно!';
+    fb.className = 'feedback ok';
+    document.getElementById('q'+id).classList.add('done');
+    // Hook: reveal chess coloring on cube after first cube question
+    if(id === '6-1' && document.getElementById('board6')){
+      setTimeout(()=>make3DSlices('board6', {colored: true}), 300);
+    }
+    const stage = id.split('-')[0];
+    const seq = MINI_Q_SEQUENCE[stage] || [];
+    const idx = seq.indexOf(id);
+    if(idx >= 0 && idx < seq.length - 1){
+      const nextId = seq[idx+1];
+      const nextEl = document.getElementById('q'+nextId);
+      if(nextEl){
+        nextEl.classList.remove('hidden');
+        setTimeout(()=>nextEl.scrollIntoView({behavior:'smooth',block:'center'}), 250);
+      }
+    } else if(idx === seq.length - 1){
+      // Last question — reveal digit and advance stage
+      const stageN = parseInt(stage);
+      fb.innerHTML = '✓ Верно! Твоя цифра в код: <strong style="color:#fbbf24;font-size:1.3em">'+digits[stageN]+'</strong>';
+      setTimeout(()=>{
+        markDone(stageN);
+        unlockNext(stageN);
+      }, 800);
+    }
+  } else {
+    fb.innerHTML = '✗ Не совсем. Попробуй ещё раз.';
+    fb.className = 'feedback err';
+  }
+}
+
+function markDone(n){
+  document.getElementById('s'+n).classList.add('done');
+  const slot = document.getElementById('slot'+n);
+  slot.textContent = digits[n];
+  slot.classList.add('filled');
+}
+
+function unlockNext(n){
+  if(n < 8){
+    const next = document.getElementById('s'+(n+1));
+    if(next){
+      next.classList.add('unlocked');
+      setTimeout(()=>next.scrollIntoView({behavior:'smooth',block:'start'}), 400);
+    }
+  } else {
+    const safe = document.getElementById('safe');
+    safe.classList.add('unlocked');
+    setTimeout(()=>safe.scrollIntoView({behavior:'smooth',block:'start'}), 400);
+  }
+}
+
+// === Dictionary-style checker (multi-input, no sequential unlock) ===
+const DICT_ANSWERS = {
+  '8-1': ['ля'],        // кошка
+  '8-2': ['ту'],        // мышка
+  '8-3': ['ту'],        // мышку (тот же ту, падежа нет)
+  '8-4': ['ам'],        // ночью
+  '8-5': ['бу'],        // видит
+  '8-6': ['ям'],        // пошла
+  '8-7': ['му'],        // гулять
+  '8-8': ['гу']         // поймать
+};
+
+function checkDictWord(id){
+  const inp = document.getElementById('d'+id).value;
+  const fb = document.getElementById('d'+id+'-fb');
+  const norm = normalize(inp);
+  const valid = (DICT_ANSWERS[id]||[]).some(a => normalize(a) === norm);
+  if(valid){
+    fb.textContent = '✓';
+    fb.className = 'dict-fb ok';
+    const allKeys = Object.keys(DICT_ANSWERS);
+    const stagePrefix = id.split('-')[0];
+    const stageKeys = allKeys.filter(k => k.startsWith(stagePrefix+'-'));
+    const allOk = stageKeys.every(k => {
+      const el = document.getElementById('d'+k+'-fb');
+      return el && el.classList.contains('ok');
+    });
+    if(allOk){
+      const stageN = parseInt(stagePrefix);
+      const stageFb = document.getElementById('fb'+stageN);
+      if(stageFb){
+        stageFb.innerHTML = '✓ Отлично! Словарь готов! Твоя цифра в код: <strong style="color:#fbbf24;font-size:1.3em">'+digits[stageN]+'</strong>';
+        stageFb.className = 'feedback ok';
+      }
+      setTimeout(()=>{
+        markDone(stageN);
+        unlockNext(stageN);
+      }, 800);
+    }
+  } else {
+    fb.textContent = '✗';
+    fb.className = 'dict-fb err';
+  }
+}
+
+function showHint(n){
+  document.getElementById('hint'+n).classList.add('shown');
+}
+
+function autoAdvance(el, nextId){
+  if(el.value.length >= 1){
+    const next = document.getElementById(nextId);
+    if(next) next.focus();
+  }
+}
+
+function unlockSafe(){
+  let code = '';
+  for(let i=1; i<=8; i++) code += document.getElementById('cd'+i).value;
+  const expected = digits[1]+digits[2]+digits[3]+digits[4]+digits[5]+digits[6]+digits[7]+digits[8];
+  const fb = document.getElementById('fbSafe');
+  if(code === expected){
+    fb.innerHTML = '';
+    document.getElementById('finale').classList.add('shown');
+    setTimeout(()=>document.getElementById('finale').scrollIntoView({behavior:'smooth',block:'start'}), 400);
+    launchConfetti();
+    setTimeout(launchConfetti, 1200);
+    setTimeout(launchConfetti, 2400);
+  } else {
+    fb.innerHTML = '✗ Код не подходит. Проверь свои цифры в прогрессе выше!';
+    fb.className = 'feedback err';
+  }
+}
+
+function launchConfetti(){
+  const colors = ['#fbbf24','#7c3aed','#ef4444','#10b981','#3b82f6','#ec4899','#f59e0b','#a78bfa'];
+  const count = 90;
+  for(let i=0; i<count; i++){
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random()*100 + 'vw';
+    piece.style.background = colors[Math.floor(Math.random()*colors.length)];
+    const size = 6 + Math.random()*10;
+    piece.style.width = size + 'px';
+    piece.style.height = size + 'px';
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    piece.style.animationDuration = (2.5 + Math.random()*2.5) + 's';
+    piece.style.animationDelay = (Math.random()*0.6) + 's';
+    document.body.appendChild(piece);
+    setTimeout(()=>piece.remove(), 6500);
+  }
+}
+
+function makeBoard(id, size, opts){
+  opts = opts || {};
+  const removed = opts.removed || [];
+  const start = opts.start;
+  const marks = opts.marks || [];
+  const cell = opts.cellSize || 32;
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg');
+  const total = size * cell;
+  svg.setAttribute('viewBox', '0 0 '+total+' '+total);
+  svg.setAttribute('width', total);
+  svg.setAttribute('height', total);
+  svg.style.display = 'block';
+  svg.style.margin = '0 auto';
+
+  for(let r=0; r<size; r++){
+    for(let c=0; c<size; c++){
+      const isDark = (r+c) % 2 === 0;
+      const isRemoved = removed.some(p => p[0]===r && p[1]===c);
+      const rect = document.createElementNS(svgNS, 'rect');
+      rect.setAttribute('x', c*cell);
+      rect.setAttribute('y', r*cell);
+      rect.setAttribute('width', cell);
+      rect.setAttribute('height', cell);
+      if(isRemoved) rect.setAttribute('fill', '#d1d5db');
+      else rect.setAttribute('fill', isDark ? '#8b6f47' : '#f0d9b5');
+      rect.setAttribute('stroke', 'rgba(0,0,0,0.3)');
+      rect.setAttribute('stroke-width', '0.5');
+      svg.appendChild(rect);
+      if(isRemoved){
+        const t = document.createElementNS(svgNS, 'text');
+        t.setAttribute('x', c*cell + cell/2);
+        t.setAttribute('y', r*cell + cell/2 + 7);
+        t.setAttribute('text-anchor', 'middle');
+        t.setAttribute('fill', '#dc2626');
+        t.setAttribute('font-weight', 'bold');
+        t.setAttribute('font-size', '22');
+        t.textContent = '×';
+        svg.appendChild(t);
+      }
+    }
+  }
+  if(start){
+    const [sr, sc] = start;
+    const circle = document.createElementNS(svgNS, 'circle');
+    circle.setAttribute('cx', sc*cell + cell/2);
+    circle.setAttribute('cy', sr*cell + cell/2);
+    circle.setAttribute('r', cell*0.35);
+    circle.setAttribute('fill', '#1e3a8a');
+    circle.setAttribute('stroke', '#fff');
+    circle.setAttribute('stroke-width', '2');
+    svg.appendChild(circle);
+    const t = document.createElementNS(svgNS, 'text');
+    t.setAttribute('x', sc*cell + cell/2);
+    t.setAttribute('y', sr*cell + cell/2 + 5);
+    t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('fill', '#fff');
+    t.setAttribute('font-weight', 'bold');
+    t.setAttribute('font-size', '14');
+    t.textContent = 'В';
+    svg.appendChild(t);
+  }
+  for(const [mr, mc] of marks){
+    const circle = document.createElementNS(svgNS, 'circle');
+    circle.setAttribute('cx', mc*cell + cell/2);
+    circle.setAttribute('cy', mr*cell + cell/2);
+    circle.setAttribute('r', cell*0.28);
+    circle.setAttribute('fill', 'none');
+    circle.setAttribute('stroke', '#dc2626');
+    circle.setAttribute('stroke-width', '2.5');
+    svg.appendChild(circle);
+  }
+  const outer = document.createElementNS(svgNS, 'rect');
+  outer.setAttribute('x', 0);
+  outer.setAttribute('y', 0);
+  outer.setAttribute('width', total);
+  outer.setAttribute('height', total);
+  outer.setAttribute('fill', 'none');
+  outer.setAttribute('stroke', '#333');
+  outer.setAttribute('stroke-width', '2');
+  svg.appendChild(outer);
+  document.getElementById(id).appendChild(svg);
+}
+
+function make3DSlices(id, opts){
+  opts = opts || {};
+  const colored = opts.colored !== false;
+  const container = document.getElementById(id);
+  if(!container) return;
+  container.innerHTML = '';
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const cell = 34;
+  const gridSize = 3 * cell;
+  const gap = 22;
+  const totalWidth = 3 * gridSize + 2 * gap;
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('viewBox', '0 0 ' + totalWidth + ' ' + (gridSize + 28));
+  svg.setAttribute('width', Math.min(totalWidth, 400));
+  svg.setAttribute('height', 'auto');
+  svg.style.display = 'block';
+  svg.style.margin = '0 auto';
+  svg.style.maxWidth = '100%';
+  for(let k=0; k<3; k++){
+    const xOff = k * (gridSize + gap);
+    for(let i=0; i<3; i++){
+      for(let j=0; j<3; j++){
+        const isDark = (i + j + k) % 2 === 0;
+        const rect = document.createElementNS(svgNS, 'rect');
+        rect.setAttribute('x', xOff + j*cell);
+        rect.setAttribute('y', 24 + i*cell);
+        rect.setAttribute('width', cell);
+        rect.setAttribute('height', cell);
+        rect.setAttribute('fill', colored ? (isDark ? '#8b6f47' : '#f0d9b5') : '#faf5ff');
+        rect.setAttribute('stroke', 'rgba(0,0,0,0.35)');
+        rect.setAttribute('stroke-width', '0.5');
+        svg.appendChild(rect);
+      }
+    }
+    const label = document.createElementNS(svgNS, 'text');
+    label.setAttribute('x', xOff + gridSize/2);
+    label.setAttribute('y', 16);
+    label.setAttribute('text-anchor', 'middle');
+    label.setAttribute('font-size', '12');
+    label.setAttribute('font-weight', 'bold');
+    label.setAttribute('fill', '#4c1d95');
+    label.textContent = 'Слой ' + (k+1) + (k===0 ? ' (низ)' : k===2 ? ' (верх)' : ' (середина)');
+    svg.appendChild(label);
+    const outer = document.createElementNS(svgNS, 'rect');
+    outer.setAttribute('x', xOff);
+    outer.setAttribute('y', 24);
+    outer.setAttribute('width', gridSize);
+    outer.setAttribute('height', gridSize);
+    outer.setAttribute('fill', 'none');
+    outer.setAttribute('stroke', '#333');
+    outer.setAttribute('stroke-width', '2');
+    svg.appendChild(outer);
+  }
+  // Center cube — slice 2 (middle), position (1,1). k=1, i=1, j=1
+  const centerX = (gridSize + gap) + cell + cell/2;
+  const centerY = 24 + cell + cell/2;
+  const cc = document.createElementNS(svgNS, 'circle');
+  cc.setAttribute('cx', centerX);
+  cc.setAttribute('cy', centerY);
+  cc.setAttribute('r', cell*0.32);
+  cc.setAttribute('fill', 'none');
+  cc.setAttribute('stroke', '#dc2626');
+  cc.setAttribute('stroke-width', '2.5');
+  svg.appendChild(cc);
+  // Mouse start — slice 1 (bottom), corner (0,0). k=0, i=0, j=0
+  const mx = cell/2;
+  const my = 24 + cell/2;
+  const mc = document.createElementNS(svgNS, 'circle');
+  mc.setAttribute('cx', mx);
+  mc.setAttribute('cy', my);
+  mc.setAttribute('r', cell*0.32);
+  mc.setAttribute('fill', '#1e3a8a');
+  mc.setAttribute('stroke', '#fff');
+  mc.setAttribute('stroke-width', '2');
+  svg.appendChild(mc);
+  const mt = document.createElementNS(svgNS, 'text');
+  mt.setAttribute('x', mx);
+  mt.setAttribute('y', my + 4);
+  mt.setAttribute('text-anchor', 'middle');
+  mt.setAttribute('font-size', '13');
+  mt.setAttribute('font-weight', 'bold');
+  mt.setAttribute('fill', '#fff');
+  mt.textContent = 'М';
+  svg.appendChild(mt);
+  document.getElementById(id).appendChild(svg);
+}
+
+window.addEventListener('DOMContentLoaded', function(){
+  if(document.getElementById('board2')) makeBoard('board2', 5, {cellSize: 44});
+  if(document.getElementById('board4')) makeBoard('board4', 7, {start:[3,3], marks:[[0,2],[0,4],[2,0],[2,6],[4,0],[4,6],[6,2],[6,4]]});
+  if(document.getElementById('board6')) make3DSlices('board6', {colored: false});
+  // Validate and render 5 Inky workspaces
+  filterValidPuzzles();
+  for(let i=0; i<5; i++) renderInkyWorkspace(i);
+});
+</script>
+
+</body>
+</html>
