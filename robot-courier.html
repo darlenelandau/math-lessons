@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Робот-курьер, координаты на плоскости</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background: linear-gradient(135deg, #e8f4ff 0%, #b9dcff 50%, #8ec8f5 100%);
+        background-attachment: fixed;
+        color: #1a2c42;
+        min-height: 100vh;
+        padding: 20px;
+        line-height: 1.55;
+    }
+    .app { max-width: 920px; margin: 0 auto; }
+
+    .top-bar {
+        background: rgba(255,255,255,0.97);
+        border: 3px solid #2b6cb0;
+        border-radius: 14px;
+        padding: 14px 24px;
+        margin-bottom: 14px;
+        display: flex; justify-content: space-between; align-items: center;
+        flex-wrap: wrap; gap: 10px;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+    }
+    .title { font-size: 1.7em; color: #1a4971; font-weight: bold; }
+    .stats { display: flex; gap: 10px; flex-wrap: wrap; }
+    .badge {
+        background: #eef6ff; padding: 7px 14px; border-radius: 8px;
+        border: 2px solid #2b6cb0; font-size: 1em; font-weight: bold;
+    }
+    .progress {
+        width: 100%; height: 10px; background: rgba(255,255,255,0.6);
+        border-radius: 5px; overflow: hidden; margin-bottom: 16px;
+        border: 1.5px solid #2b6cb0;
+    }
+    .progress-bar { height: 100%; background: #2b6cb0; width: 0; transition: width .35s; }
+
+    .intro-card {
+        background: rgba(255,255,255,0.97);
+        border: 3px solid #2b6cb0; border-radius: 14px;
+        padding: 18px 24px; margin-bottom: 16px;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+    }
+    .intro-card p { margin-bottom: 10px; }
+    .intro-card p:last-child { margin-bottom: 0; }
+
+    .card {
+        background: rgba(255,255,255,0.97);
+        border: 3px solid #2b6cb0; border-radius: 14px;
+        padding: 20px 24px; box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+    }
+    .card h2 { font-size: 1.3em; color: #1a4971; margin-bottom: 4px; }
+    .card h2 .subtitle { display: block; font-size: .72em; color: #4a6b8a; font-weight: normal; margin-top: 2px; }
+
+    .story {
+        background: #eef6ff; border-left: 5px solid #2b6cb0;
+        padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 14px 0;
+        font-size: 1.05em;
+    }
+    .question { font-weight: bold; font-size: 1.12em; margin: 14px 0 10px; color: #1a4971; }
+
+    .grid-wrap { display: flex; justify-content: center; margin: 12px 0; }
+    svg.grid { width: 100%; max-width: 520px; height: auto; touch-action: manipulation; }
+    svg.grid .cell-line { stroke: #b6cfe6; stroke-width: 1; }
+    svg.grid .axis { stroke: #1a4971; stroke-width: 2.5; }
+    svg.grid .tick { font-size: 13px; fill: #33536f; font-family: 'Segoe UI', Arial, sans-serif; }
+    svg.grid .hit { fill: transparent; cursor: pointer; }
+    svg.grid .hit:hover { fill: rgba(43,108,176,.18); }
+    svg.grid .dot { fill: #2b6cb0; }
+    svg.grid .dot-label { font-size: 13px; font-weight: bold; fill: #1a4971; font-family: 'Segoe UI', Arial, sans-serif; }
+    svg.grid .picked { fill: #2f855a; }
+    svg.grid .wrongpick { fill: #c53030; }
+    svg.grid .target { fill: none; stroke: #dd6b20; stroke-width: 3; }
+    svg.grid .blocked { fill: #c53030; }
+    svg.grid .route { fill: none; stroke: #2f855a; stroke-width: 3.5; stroke-linejoin: round; stroke-linecap: round; }
+    svg.grid .count { font-size: 14px; font-weight: bold; fill: #2f855a; font-family: 'Segoe UI', Arial, sans-serif;
+        stroke: #fff; stroke-width: 3.5; paint-order: stroke fill; }
+
+    .answer-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
+    .answer-input {
+        font-size: 1.25em; padding: 9px 14px; width: 130px;
+        border: 2.5px solid #2b6cb0; border-radius: 8px; text-align: center;
+        font-family: inherit;
+    }
+    .answer-input.correct { border-color: #38a169; background: #f0fff4; }
+    .pair-sep { font-size: 1.3em; font-weight: bold; color: #1a4971; }
+    .submit-btn, .btn, .ghost-btn {
+        font-size: 1.05em; padding: 10px 20px; border-radius: 8px;
+        border: none; cursor: pointer; font-weight: bold; font-family: inherit;
+    }
+    .submit-btn { background: #2b6cb0; color: #fff; }
+    .submit-btn:disabled { background: #a0b8cc; cursor: default; }
+    .ghost-btn { background: #eef6ff; color: #1a4971; border: 2px solid #2b6cb0; }
+    .btn { display: block; width: 100%; margin-top: 14px; background: #2f855a; color: #fff; font-size: 1.1em; }
+
+    .shake { animation: sh .35s; }
+    @keyframes sh { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-7px)} 75%{transform:translateX(7px)} }
+
+    .feedback {
+        margin-top: 16px; padding: 12px 16px; border-radius: 8px;
+        text-align: center; font-size: 1.12em; font-weight: bold;
+    }
+    .feedback.win { background: #c6f6d5; border: 2px solid #38a169; color: #1f5e1f; }
+    .feedback.lose { background: #fed7d7; border: 2px solid #c53030; color: #5e1f1f; }
+
+    .explanation {
+        margin-top: 12px; background: #fff; border-left: 4px solid #1a4971;
+        padding: 12px 16px; border-radius: 6px; line-height: 1.7;
+    }
+    .explanation strong { color: #1a4971; }
+
+    .hintbox {
+        margin-top: 12px; background: #f7fbff; border: 2px dashed #2b6cb0;
+        border-left: 6px solid #2b6cb0; padding: 12px 16px; border-radius: 6px;
+        line-height: 1.65; text-align: left;
+    }
+    .hintbox b { color: #1a4971; }
+
+    .note {
+        margin-top: 12px; background: #fffaf0; border: 2px solid #dd6b20;
+        padding: 12px 16px; border-radius: 6px; color: #6b3a10;
+        line-height: 1.65; text-align: left;
+    }
+
+    .final { text-align: center; }
+    .final .emo { font-size: 3em; margin-bottom: 8px; }
+    .final h2 { font-size: 1.6em; }
+    .final p { margin: 8px 0; font-size: 1.1em; }
+</style>
+</head>
+<body>
+<div class="app">
+    <div class="top-bar">
+        <div class="title">🤖 Робот-курьер</div>
+        <div class="stats">
+            <div class="badge">Задание: <span id="puz-num">1</span> / <span id="puz-total">1</span></div>
+            <div class="badge">⭐ верно: <span id="score">0</span></div>
+        </div>
+    </div>
+    <div class="progress"><div class="progress-bar" id="progress-bar"></div></div>
+    <div class="intro-card">
+        <p>🤖 <strong>Кто такой Робот-курьер?</strong> Он развозит посылки по городу, где все улицы идут ровными рядами. Чтобы отправить его по нужному адресу, надо назвать <strong>два числа</strong>.</p>
+        <p>📍 <strong>Как читается адрес.</strong> Первое число это сколько шагов вправо. Второе это сколько шагов вверх. Записывают так: <strong>(3; 5)</strong>. Сначала вправо, потом вверх, и никогда наоборот.</p>
+        <p>⚠️ <strong>Робот очень послушный и очень глупый.</strong> Он поедет ровно туда, куда ты скажешь. Перепутаешь числа местами, и посылка уедет не в тот дом.</p>
+    </div>
+    <div id="puzzle-area"></div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+// Задания
+// типы: read (прочитать координаты), place (кликнуть по узлу),
+//       draw (кликать по узлам по порядку), number (числовой ответ)
+// ─────────────────────────────────────────────────────────────
+const TASKS = [
+    {
+        type: "read", title: "Первый адрес",
+        story: "Робот стоит на перекрёстке. Посмотри, где он, и назови его адрес.",
+        question: "Запиши координаты робота.",
+        size: 6, dots: [{x:3, y:2, label:"🤖"}], answer: {x:3, y:2},
+        hint: "Считай от угла: сначала вправо по нижней линии, потом вверх.",
+        explanation: "Три шага вправо и два вверх. Адрес <strong>(3; 2)</strong>."
+    },
+    {
+        type: "read", title: "Ещё три адреса",
+        story: "Теперь робот заехал повыше. Не спеши: сначала вправо, потом вверх.",
+        question: "Запиши координаты робота.",
+        size: 6, dots: [{x:1, y:5, label:"🤖"}], answer: {x:1, y:5},
+        hint: "Первое число маленькое, второе большое. Робот почти у левого края, но высоко.",
+        explanation: "Один шаг вправо, пять вверх. Адрес <strong>(1; 5)</strong>."
+    },
+    {
+        type: "place", title: "Доставка посылки",
+        story: "Диспетчер передал адрес: (4; 1). Отправь робота туда.",
+        question: "Нажми на нужный перекрёсток.",
+        size: 6, answer: {x:4, y:1},
+        hint: "Четыре шага вправо, один вверх. Не наоборот!",
+        explanation: "Четыре вправо, один вверх. <strong>(4; 1)</strong>."
+    },
+    {
+        type: "place", title: "Осторожно, ловушка",
+        story: "Новый адрес: (2; 5).",
+        question: "Нажми на нужный перекрёсток.",
+        size: 6, answer: {x:2, y:5},
+        swapTrap: true,
+        hint: "Первое число, вправо, второе, вверх. Значит два вправо и пять вверх.",
+        explanation: "Два вправо, пять вверх. <strong>(2; 5)</strong>.",
+        note: "Точка (2; 5) и точка (5; 2) это два разных дома! Порядок чисел в адресе менять нельзя."
+    },
+    {
+        type: "place", title: "А теперь наоборот",
+        story: "Тот же робот, но адрес переставили: (5; 2).",
+        question: "Нажми на нужный перекрёсток.",
+        size: 6, answer: {x:5, y:2},
+        swapTrap: true,
+        hint: "Пять вправо, два вверх.",
+        explanation: "Пять вправо, два вверх. <strong>(5; 2)</strong>. Совсем другой дом, чем в прошлом задании."
+    },
+    {
+        type: "draw", title: "Маршрут робота",
+        story: "Робот объезжает четыре дома по кругу и возвращается назад.",
+        question: "Нажимай на перекрёстки по порядку: (1; 1), (5; 1), (5; 4), (1; 4), снова (1; 1).",
+        size: 6, path: [{x:1,y:1},{x:5,y:1},{x:5,y:4},{x:1,y:4},{x:1,y:1}],
+        hint: "Иди по списку сверху вниз, не перескакивай.",
+        explanation: "Получился прямоугольник шириной 4 и высотой 3. Его периметр 14, а площадь 12 клеток."
+    },
+    {
+        type: "number", title: "Сколько шагов",
+        story: "Робот стоит в точке (1; 1), а посылку ждут в точке (4; 3). Робот ездит только вправо и вверх, за один шаг на одну клетку.",
+        question: "Сколько шагов ему нужно самое меньшее?",
+        size: 6, dots: [{x:1,y:1,label:"🤖"},{x:4,y:3,label:"📦"}], answer: 5,
+        traps: { 2: "Это разница только по одному направлению.", 3: "Столько шагов вправо, но вверх ещё не поднялись.", 7: "Это если возвращаться назад, а робот так не умеет.", 12: "Это площадь, а не путь." },
+        hint: "Посчитай отдельно, сколько вправо, и отдельно, сколько вверх. Потом сложи.",
+        explanation: "Три шага вправо и два вверх. Всего <strong>5</strong>. И неважно, в каком порядке он их сделает."
+    },
+    {
+        type: "paths", title: "Сколько разных дорог",
+        story: "Робот едет из (1; 1) в (3; 3), только вправо и вверх.",
+        question: "Сколько у него разных маршрутов?",
+        size: 5, from: {x:1,y:1}, to: {x:3,y:3}, answer: 6,
+        traps: { 2: "Дорог больше: можно поворачивать по-разному.", 4: "Почти! Посчитай ещё раз по табличке.", 9: "Столько получается, если разрешить ходить и назад." },
+        hint: "Подпиши над каждым перекрёстком, сколькими дорогами до него можно доехать. В перекрёсток попадают слева или снизу, значит числа складываются.",
+        explanation: "Считаем табличкой: в каждый перекрёсток попадаем слева или снизу, значит числа складываются. До цели получается <strong>6</strong> дорог.",
+        showTable: true
+    },
+    {
+        type: "paths", title: "Дорог стало больше",
+        story: "Теперь робот едет из (1; 1) в (4; 3), правила те же.",
+        question: "Сколько у него разных маршрутов?",
+        size: 5, from: {x:1,y:1}, to: {x:4,y:3}, answer: 10,
+        traps: { 5: "Это количество шагов, а не количество дорог.", 6: "Это ответ прошлой задачи, а цель теперь дальше.", 12: "Многовато, пересчитай по табличке." },
+        hint: "Та же табличка. Заполняй снизу слева направо и вверх.",
+        explanation: "Табличка даёт <strong>10</strong> дорог.",
+        showTable: true
+    },
+    {
+        type: "paths", title: "Дорогу перекопали",
+        story: "На перекрёстке (2; 2) идёт ремонт, проехать через него нельзя. Робот по-прежнему едет из (1; 1) в (4; 3).",
+        question: "Сколько маршрутов осталось?",
+        size: 5, from: {x:1,y:1}, to: {x:4,y:3}, blocked: {x:2,y:2}, answer: 4,
+        traps: { 10: "Это когда ремонта не было. Теперь часть дорог закрыта.", 6: "Столько дорог как раз ПРОХОДИЛО через ремонт. Их надо убрать из десяти.", 9: "Пересчитай: в перекрёстке с ремонтом пиши ноль." },
+        hint: "В табличке над перекопанным перекрёстком напиши 0. Дальше складывай как обычно.",
+        explanation: "Ставим в ремонтном перекрёстке ноль и складываем дальше. Остаётся <strong>4</strong> дороги. Проверка: всего было 10, через ремонт шло 6, значит осталось 4.",
+        showTable: true
+    },
+    {
+        type: "number", title: "Робот-пылесос",
+        story: "На поле 8 на 8 клеток в углу стоит робот-пылесос. Он ездит только по прямой: вдоль своей строки и вдоль своего столбца, до самого края.",
+        question: "Сколько клеток он проедет, кроме своей собственной?",
+        size: 8, dots: [{x:1,y:1,label:"🤖"}], answer: 14,
+        traps: { 7: "Это только в одну сторону. А он ездит и вдоль строки, и вдоль столбца.", 8: "Не забудь, что своя клетка не считается.", 16: "Своя клетка посчитана дважды.", 15: "Свою клетку считать не надо." },
+        hint: "Отдельно посчитай клетки в строке, отдельно в столбце. Свою клетку не считай.",
+        explanation: "Семь клеток вдоль строки и семь вдоль столбца. Всего <strong>14</strong>."
+    },
+    {
+        type: "number", title: "Кузнечик и лишний прыжок",
+        story: "Кузнечик сидит в точке (0; 0). За один прыжок он передвигается на одну клетку вправо или на одну вверх. Он хочет попасть в точку (2; 2) ровно за 5 прыжков.",
+        question: "Сколько прыжков ему нужно на самом деле? (Напиши число.)",
+        size: 5, dots: [{x:0,y:0,label:"🦗"},{x:2,y:2,label:"🎯"}], answer: 4,
+        traps: { 5: "Столько он хотел, но столько не получится. Посчитай, сколько нужно.", 2: "Это только вправо. А вверх?", 3: "Пересчитай: два вправо и два вверх." },
+        hint: "Каждый прыжок добавляет ровно единицу к сумме двух чисел адреса. В точке (2; 2) сумма равна 4.",
+        explanation: "Нужно 2 прыжка вправо и 2 вверх, всего <strong>4</strong>. Пятый прыжок девать некуда: любой прыжок уводит кузнечика дальше от цели. Значит ровно за 5 прыжков попасть нельзя.",
+        note: "Хитрость: каждый прыжок увеличивает сумму двух чисел адреса ровно на 1. У точки (2; 2) сумма равна 4, значит и прыжков ровно 4. Ни больше, ни меньше."
+    }
+];
+
+// ─────────────────────────────────────────────────────────────
+// Чистая логика: проверка ответа. Тестируется отдельно от DOM.
+// ─────────────────────────────────────────────────────────────
+function countPaths(from, to, blocked) {
+    if (to.x < from.x || to.y < from.y) return 0;
+    const memo = {};
+    function f(x, y) {
+        if (blocked && x === blocked.x && y === blocked.y) return 0;
+        if (x === from.x && y === from.y) return 1;
+        if (x < from.x || y < from.y) return 0;
+        const k = x + "," + y;
+        if (memo[k] !== undefined) return memo[k];
+        return memo[k] = f(x - 1, y) + f(x, y - 1);
+    }
+    return f(to.x, to.y);
+}
+
+function expected(task) {
+    if (task.type === "read") return task.answer;
+    if (task.type === "place") return task.answer;
+    if (task.type === "draw") return task.path;
+    if (task.type === "paths") return countPaths(task.from, task.to, task.blocked);
+    return task.answer;
+}
+
+function verify(task, given) {
+    const exp = expected(task);
+    if (task.type === "read" || task.type === "place") {
+        return given && given.x === exp.x && given.y === exp.y;
+    }
+    if (task.type === "draw") {
+        return Array.isArray(given) && given.length === exp.length &&
+               given.every((p, i) => p.x === exp[i].x && p.y === exp[i].y);
+    }
+    return Number(given) === exp;
+}
+
+// подсказка на перепутанный порядок координат
+function isSwapped(task, given) {
+    const exp = expected(task);
+    return (task.type === "read" || task.type === "place") && given &&
+           exp.x !== exp.y && given.x === exp.y && given.y === exp.x;
+}
+
+// ─────────────────────────────────────────────────────────────
+// Отрисовка сетки
+// ─────────────────────────────────────────────────────────────
+const CELL = 54, PAD = 38;
+
+function gridSvg(task, state) {
+    const n = task.size;
+    const W = n * CELL + PAD * 2, H = n * CELL + PAD * 2;
+    const X = x => PAD + x * CELL;
+    const Y = y => H - PAD - y * CELL;
+    let s = `<svg class="grid" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img">`;
+
+    for (let i = 0; i <= n; i++) {
+        s += `<line class="cell-line" x1="${X(0)}" y1="${Y(i)}" x2="${X(n)}" y2="${Y(i)}"/>`;
+        s += `<line class="cell-line" x1="${X(i)}" y1="${Y(0)}" x2="${X(i)}" y2="${Y(n)}"/>`;
+    }
+    s += `<line class="axis" x1="${X(0)}" y1="${Y(0)}" x2="${X(n)}" y2="${Y(0)}"/>`;
+    s += `<line class="axis" x1="${X(0)}" y1="${Y(0)}" x2="${X(0)}" y2="${Y(n)}"/>`;
+    for (let i = 0; i <= n; i++) {
+        s += `<text class="tick" x="${X(i)}" y="${Y(0) + 20}" text-anchor="middle">${i}</text>`;
+        s += `<text class="tick" x="${X(0) - 12}" y="${Y(i) + 5}" text-anchor="end">${i}</text>`;
+    }
+
+    if (task.type === "paths") {
+        s += `<circle class="dot" cx="${X(task.from.x)}" cy="${Y(task.from.y)}" r="7"/>`;
+        s += `<text class="dot-label" x="${X(task.from.x)}" y="${Y(task.from.y) + 24}" text-anchor="middle">старт</text>`;
+        s += `<circle class="target" cx="${X(task.to.x)}" cy="${Y(task.to.y)}" r="10"/>`;
+        s += `<text class="dot-label" x="${X(task.to.x)}" y="${Y(task.to.y) + 26}" text-anchor="middle">цель</text>`;
+        if (task.blocked) {
+            const bx = X(task.blocked.x), by = Y(task.blocked.y);
+            s += `<line class="blocked" stroke="#c53030" stroke-width="4" x1="${bx-9}" y1="${by-9}" x2="${bx+9}" y2="${by+9}"/>`;
+            s += `<line class="blocked" stroke="#c53030" stroke-width="4" x1="${bx+9}" y1="${by-9}" x2="${bx-9}" y2="${by+9}"/>`;
+        }
+        if (state && state.table) {
+            for (let x = task.from.x; x <= task.to.x; x++)
+                for (let y = task.from.y; y <= task.to.y; y++) {
+                    const v = countPaths(task.from, {x, y}, task.blocked);
+                    s += `<text class="count" x="${X(x) + 11}" y="${Y(y) - 9}">${v}</text>`;
+                }
+        }
+    }
+
+    (task.dots || []).forEach(d => {
+        s += `<circle class="dot" cx="${X(d.x)}" cy="${Y(d.y)}" r="6"/>`;
+        if (d.label) s += `<text class="dot-label" x="${X(d.x)}" y="${Y(d.y) - 17}" text-anchor="middle">${d.label}</text>`;
+    });
+
+    if (task.type === "draw" && state && state.picked && state.picked.length) {
+        const pts = state.picked.map(p => `${X(p.x)},${Y(p.y)}`).join(" ");
+        s += `<polyline class="route" points="${pts}"/>`;
+        state.picked.forEach(p => { s += `<circle class="picked" cx="${X(p.x)}" cy="${Y(p.y)}" r="6"/>`; });
+    }
+    if (task.type === "place" && state && state.picked && state.picked.length) {
+        const p = state.picked[state.picked.length - 1];
+        const cls = verify(task, p) ? "picked" : "wrongpick";
+        s += `<circle class="${cls}" cx="${X(p.x)}" cy="${Y(p.y)}" r="8"/>`;
+    }
+
+    if (task.type === "place" || task.type === "draw") {
+        for (let x = 0; x <= n; x++)
+            for (let y = 0; y <= n; y++)
+                s += `<circle class="hit" cx="${X(x)}" cy="${Y(y)}" r="19" data-x="${x}" data-y="${y}"/>`;
+    }
+
+    return s + `</svg>`;
+}
+
+// ─────────────────────────────────────────────────────────────
+// Состояние и рендер
+// ─────────────────────────────────────────────────────────────
+let idx = 0, score = 0, answered = false, attempts = 0, st = {};
+
+function task() { return TASKS[idx]; }
+
+function render() {
+    const area = document.getElementById("puzzle-area");
+    document.getElementById("puz-total").textContent = TASKS.length;
+
+    if (idx >= TASKS.length) {
+        const msg = score === TASKS.length ? "🌟 Безупречно! Все посылки доставлены точно по адресу." :
+                    score >= TASKS.length * 0.75 ? "✨ Отлично! Робот почти нигде не заблудился." :
+                    score >= TASKS.length * 0.5 ? "👏 Хорошо! Основное ты понял." :
+                    "🤖 Робот пока путается. Пройди ещё раз, теперь будет легче.";
+        area.innerHTML = `<div class="card final">
+            <div class="emo">📦</div>
+            <h2>Все ${TASKS.length} заданий пройдены!</h2>
+            <p>Верных с первой попытки: <strong>${score} из ${TASKS.length}</strong></p>
+            <p>${msg}</p>
+            <button class="btn" onclick="restart()">Пройти заново</button>
+        </div>`;
+        document.getElementById("puz-num").textContent = TASKS.length;
+        document.getElementById("progress-bar").style.width = "100%";
+        return;
+    }
+
+    const t = task();
+    st = { picked: [], table: false };
+    answered = false; attempts = 0;
+
+    let input = "";
+    if (t.type === "read") {
+        input = `<div class="answer-row">
+            <span class="pair-sep">(</span>
+            <input type="number" inputmode="numeric" class="answer-input" id="in-x" placeholder="?" style="width:90px">
+            <span class="pair-sep">;</span>
+            <input type="number" inputmode="numeric" class="answer-input" id="in-y" placeholder="?" style="width:90px">
+            <span class="pair-sep">)</span>
+            <button class="submit-btn" id="submit-btn" onclick="check()">Проверить</button>
+        </div>`;
+    } else if (t.type === "place") {
+        input = `<div class="answer-row"><em>Нажимай прямо по сетке.</em></div>`;
+    } else if (t.type === "draw") {
+        input = `<div class="answer-row"><em>Нажато точек: <span id="picked-n">0</span> из ${t.path.length}</em>
+            <button class="ghost-btn" onclick="resetPicks()">Начать заново</button></div>`;
+    } else {
+        input = `<div class="answer-row">
+            <input type="number" inputmode="numeric" class="answer-input" id="in-n" placeholder="?">
+            <button class="submit-btn" id="submit-btn" onclick="check()">Проверить</button>
+            ${t.showTable ? `<button class="ghost-btn" onclick="showTable()">Показать табличку</button>` : ""}
+        </div>`;
+    }
+
+    area.innerHTML = `<div class="card">
+        <h2>Задание ${idx + 1}<span class="subtitle">${t.title}</span></h2>
+        <div class="story">${t.story}</div>
+        <div class="grid-wrap" id="grid-wrap">${gridSvg(t, st)}</div>
+        <div class="question">${t.question}</div>
+        ${input}
+        <div id="result"></div>
+    </div>`;
+
+    bindGrid();
+    document.getElementById("puz-num").textContent = idx + 1;
+    document.getElementById("progress-bar").style.width = `${(idx / TASKS.length) * 100}%`;
+    document.getElementById("score").textContent = score;
+    const first = document.getElementById("in-x") || document.getElementById("in-n");
+    if (first) { first.onkeydown = e => { if (e.key === "Enter") check(); }; first.focus(); }
+    const iy = document.getElementById("in-y");
+    if (iy) iy.onkeydown = e => { if (e.key === "Enter") check(); };
+}
+
+function redrawGrid() {
+    const w = document.getElementById("grid-wrap");
+    if (w) { w.innerHTML = gridSvg(task(), st); bindGrid(); }
+}
+
+function bindGrid() {
+    document.querySelectorAll("svg.grid .hit").forEach(c => {
+        c.onclick = () => onCell(Number(c.getAttribute("data-x")), Number(c.getAttribute("data-y")));
+    });
+}
+
+function onCell(x, y) {
+    if (answered) return;
+    const t = task();
+    if (t.type === "place") {
+        st.picked = [{x, y}];
+        redrawGrid();
+        check({x, y});
+    } else if (t.type === "draw") {
+        const step = st.picked.length;
+        const want = t.path[step];
+        if (x === want.x && y === want.y) {
+            st.picked.push({x, y});
+            redrawGrid();
+            const pn = document.getElementById("picked-n");
+            if (pn) pn.textContent = st.picked.length;
+            if (st.picked.length === t.path.length) check(st.picked);
+        } else {
+            attempts++;
+            const w = document.getElementById("grid-wrap");
+            if (w) { w.classList.remove("shake"); void w.offsetWidth; w.classList.add("shake"); }
+            document.getElementById("result").innerHTML =
+                `<div class="feedback lose">😅 Не та точка. Следующая по списку, (${want.x}; ${want.y}).</div>`;
+        }
+    }
+}
+
+function resetPicks() {
+    if (answered) return;
+    st.picked = [];
+    redrawGrid();
+    const pn = document.getElementById("picked-n");
+    if (pn) pn.textContent = 0;
+    document.getElementById("result").innerHTML = "";
+}
+
+function showTable() {
+    st.table = true;
+    redrawGrid();
+}
+
+function readInput() {
+    const t = task();
+    if (t.type === "read") {
+        const xs = document.getElementById("in-x").value.trim();
+        const ys = document.getElementById("in-y").value.trim();
+        if (xs === "" || ys === "") return null;
+        return {x: Number(xs), y: Number(ys)};
+    }
+    if (t.type === "number" || t.type === "paths") {
+        const v = document.getElementById("in-n").value.trim();
+        if (v === "") return null;
+        return Number(v);
+    }
+    return null;
+}
+
+function check(givenArg) {
+    if (answered) return;
+    const t = task();
+    const given = givenArg !== undefined ? givenArg : readInput();
+    if (given === null) return;
+    attempts++;
+    const result = document.getElementById("result");
+
+    if (verify(t, given)) {
+        answered = true;
+        if (attempts === 1) { score++; document.getElementById("score").textContent = score; }
+        const sb = document.getElementById("submit-btn");
+        if (sb) sb.disabled = true;
+        ["in-x", "in-y", "in-n"].forEach(id => {
+            const e = document.getElementById(id);
+            if (e) { e.disabled = true; e.classList.add("correct"); }
+        });
+        result.innerHTML = `
+            <div class="feedback win">🎉 Верно! ${attempts === 1 ? "С первой попытки!" : `Получилось с ${attempts}-й попытки.`}</div>
+            <div class="explanation">${t.explanation}</div>
+            ${t.note ? `<div class="note">🔎 ${t.note}</div>` : ""}
+            <button class="btn" onclick="next()">${idx < TASKS.length - 1 ? "Следующее задание →" : "Завершить →"}</button>`;
+        return;
+    }
+
+    let extra = "";
+    if (isSwapped(t, given)) {
+        extra = `<div class="hintbox">🔁 <b>Числа перепутаны местами.</b> Первое число, вправо, второе, вверх. Ты попал в дом, где живёт другой адрес.</div>`;
+    } else if (t.traps && t.traps[given] !== undefined) {
+        extra = `<div class="hintbox">🤖 <b>Робот не согласен:</b> ${t.traps[given]}</div>`;
+    }
+    if (!extra && attempts >= 2 && t.hint) {
+        extra = `<div class="hintbox">💡 <b>Подсказка:</b> ${t.hint}</div>`;
+    } else if (extra && attempts >= 3 && t.hint) {
+        extra += `<div class="hintbox">💡 <b>Подсказка:</b> ${t.hint}</div>`;
+    }
+
+    ["in-x", "in-y", "in-n"].forEach(id => {
+        const e = document.getElementById(id);
+        if (e) { e.classList.remove("shake"); void e.offsetWidth; e.classList.add("shake"); }
+    });
+    result.innerHTML = `<div class="feedback lose">😅 Не то. Попробуй ещё раз!</div>${extra}`;
+}
+
+function next() { idx++; render(); }
+function restart() { idx = 0; score = 0; render(); }
+
+render();
+</script>
+</body>
+</html>
