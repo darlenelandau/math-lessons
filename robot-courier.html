@@ -249,24 +249,36 @@ const TASKS = [
         showTable: true
     },
     {
-        type: "number", title: "Робот-пылесос",
-        story: "На поле 8 на 8 клеток в углу стоит робот-пылесос. Он ездит только по прямой: вдоль своей строки и вдоль своего столбца, до самого края.",
-        question: "Сколько клеток он проедет, кроме своей собственной?",
-        size: 8, dots: [{x:1,y:1,label:"🤖"}], answer: 14,
-        traps: { 7: "Это только в одну сторону. А он ездит и вдоль строки, и вдоль столбца.", 8: "Не забудь, что своя клетка не считается.", 16: "Своя клетка посчитана дважды.", 15: "Свою клетку считать не надо." },
-        hint: "Отдельно посчитай клетки в строке, отдельно в столбце. Свою клетку не считай.",
-        explanation: "Семь клеток вдоль строки и семь вдоль столбца. Всего <strong>14</strong>."
+        type: "number", title: "Робот-охранник",
+        story: "Робот-охранник стоит на перекрёстке (3; 3). Смотреть он умеет только вдоль улиц: прямо вправо, прямо влево, прямо вверх и прямо вниз, до самого края.",
+        question: "Сколько перекрёстков он видит, кроме своего собственного?",
+        size: 6, dots: [{x:3,y:3,label:"🤖"}], answer: 12,
+        traps: { 4: "Это если смотреть только на четырёх соседей. А он видит до самого края.", 6: "Это только вдоль одной улицы. А вторая?", 7: "Это все перекрёстки одной улицы вместе с его собственным.", 13: "Свой перекрёсток считать не надо.", 24: "Многовато. На каждой улице всего по 6 других перекрёстков." },
+        hint: "Посчитай отдельно перекрёстки на его горизонтальной улице и отдельно на вертикальной. Свой не считай ни разу.",
+        explanation: "На горизонтальной улице 6 других перекрёстков, на вертикальной тоже 6. Всего <strong>12</strong>.",
+        note: "Посмотри на адреса всех перекрёстков, которые он видит. У каждого либо первое число равно 3, либо второе. Ровно одно число совпадает с его собственным адресом."
     },
     {
-        type: "number", title: "Кузнечик и лишний прыжок",
-        story: "Кузнечик сидит в точке (0; 0). За один прыжок он передвигается на одну клетку вправо или на одну вверх. Он хочет попасть в точку (2; 2) ровно за 5 прыжков.",
-        question: "Сколько прыжков ему нужно на самом деле? (Напиши число.)",
-        size: 5, dots: [{x:0,y:0,label:"🦗"},{x:2,y:2,label:"🎯"}], answer: 4,
-        traps: { 5: "Столько он хотел, но столько не получится. Посчитай, сколько нужно.", 2: "Это только вправо. А вверх?", 3: "Пересчитай: два вправо и два вверх." },
-        hint: "Каждый прыжок добавляет ровно единицу к сумме двух чисел адреса. В точке (2; 2) сумма равна 4.",
-        explanation: "Нужно 2 прыжка вправо и 2 вверх, всего <strong>4</strong>. Пятый прыжок девать некуда: любой прыжок уводит кузнечика дальше от цели. Значит ровно за 5 прыжков попасть нельзя.",
-        note: "Хитрость: каждый прыжок увеличивает сумму двух чисел адреса ровно на 1. У точки (2; 2) сумма равна 4, значит и прыжков ровно 4. Ни больше, ни меньше."
+        type: "yesno", title: "Ровно пять шагов",
+        story: "Робот стоит в точке (0; 0). Ему приказали сделать ровно 5 шагов, и каждый шаг это один шаг вправо или один шаг вверх по улице. Диспетчер ждёт его в точке (2; 2).",
+        question: "Сможет ли робот оказаться в точке (2; 2) ровно после пятого шага?",
+        size: 5, dots: [{x:0,y:0,label:"🤖"},{x:2,y:2,label:"🎯"}], answer: false,
+        wrongMsg: "А ты сложи два числа адреса цели: 2 плюс 2 будет 4. И посчитай, чему равна эта сумма после каждого шага робота.",
+        hint: "Каждый шаг добавляет единицу либо к первому числу адреса, либо ко второму. Значит после каждого шага сумма двух чисел увеличивается ровно на 1: после первого шага 1, после второго 2, после пятого 5.",
+        explanation: "<strong>Нет, не сможет.</strong> После пятого шага сумма двух чисел его адреса равна 5, а у точки (2; 2) она равна 4. Роботу нужно ровно 4 шага, и лишний шаг девать некуда: любой шаг уводит его дальше.",
+        note: "Заметь, что мы ни разу не перебирали маршруты. Мы нашли то, что меняется одинаково при любом шаге, и этого хватило, чтобы доказать: нельзя."
+    },
+    {
+        type: "yesno", title: "Робот научился пятиться",
+        story: "Теперь робот умеет ходить в любую из четырёх сторон: вправо, влево, вверх и вниз, на один перекрёсток за шаг. Он выехал из (0; 0), погулял по городу и хочет вернуться домой.",
+        question: "Может ли робот вернуться в точку (0; 0) ровно после седьмого шага?",
+        size: 5, dots: [{x:0,y:0,label:"🏠"}], answer: false,
+        wrongMsg: "Проверь на маленьких числах: за 1 шаг вернуться нельзя, за 2 можно, за 3 нельзя, за 4 можно. Заметил закономерность?",
+        hint: "Сумма двух чисел адреса теперь меняется на 1 то вверх, то вниз. Но чётность этой суммы меняется на каждом шаге: была чётная, стала нечётная, и наоборот.",
+        explanation: "<strong>Нет, не сможет.</strong> Дома сумма чисел адреса равна 0, это чётное число. Каждый шаг меняет чётность суммы. После семи шагов сумма обязана быть нечётной, значит домой робот не попадёт. Вернуться он может только за чётное число шагов.",
+        note: "Это та же мысль, что и в прошлом задании, только теперь мы следим не за самой суммой, а за тем, чётная она или нечётная."
     }
+
 ];
 
 // ─────────────────────────────────────────────────────────────
@@ -291,6 +303,7 @@ function expected(task) {
     if (task.type === "place") return task.answer;
     if (task.type === "draw") return task.path;
     if (task.type === "paths") return countPaths(task.from, task.to, task.blocked);
+    if (task.type === "yesno") return task.answer;
     return task.answer;
 }
 
@@ -303,6 +316,7 @@ function verify(task, given) {
         return Array.isArray(given) && given.length === exp.length &&
                given.every((p, i) => p.x === exp[i].x && p.y === exp[i].y);
     }
+    if (task.type === "yesno") return given === exp;
     return Number(given) === exp;
 }
 
@@ -424,6 +438,11 @@ function render() {
         </div>`;
     } else if (t.type === "place") {
         input = `<div class="answer-row"><em>Нажимай прямо по сетке.</em></div>`;
+    } else if (t.type === "yesno") {
+        input = `<div class="answer-row">
+            <button class="submit-btn" id="btn-yes" onclick="check(true)">Да, сможет</button>
+            <button class="submit-btn" id="btn-no" onclick="check(false)">Нет, не сможет</button>
+        </div>`;
     } else if (t.type === "draw") {
         input = `<div class="answer-row"><em>Нажато точек: <span id="picked-n">0</span> из ${t.path.length}</em>
             <button class="ghost-btn" onclick="resetPicks()">Начать заново</button></div>`;
@@ -472,6 +491,11 @@ function onCell(x, y) {
         st.picked = [{x, y}];
         redrawGrid();
         check({x, y});
+    } else if (t.type === "yesno") {
+        input = `<div class="answer-row">
+            <button class="submit-btn" id="btn-yes" onclick="check(true)">Да, сможет</button>
+            <button class="submit-btn" id="btn-no" onclick="check(false)">Нет, не сможет</button>
+        </div>`;
     } else if (t.type === "draw") {
         const step = st.picked.length;
         const want = t.path[step];
@@ -532,8 +556,10 @@ function check(givenArg) {
     if (verify(t, given)) {
         answered = true;
         if (attempts === 1) { score++; document.getElementById("score").textContent = score; }
-        const sb = document.getElementById("submit-btn");
-        if (sb) sb.disabled = true;
+        ["submit-btn", "btn-yes", "btn-no"].forEach(id => {
+            const b = document.getElementById(id);
+            if (b) b.disabled = true;
+        });
         ["in-x", "in-y", "in-n"].forEach(id => {
             const e = document.getElementById(id);
             if (e) { e.disabled = true; e.classList.add("correct"); }
@@ -549,6 +575,8 @@ function check(givenArg) {
     let extra = "";
     if (isSwapped(t, given)) {
         extra = `<div class="hintbox">🔁 <b>Числа перепутаны местами.</b> Первое число, вправо, второе, вверх. Ты попал в дом, где живёт другой адрес.</div>`;
+    } else if (t.type === "yesno" && t.wrongMsg) {
+        extra = `<div class="hintbox">🤖 <b>Робот не согласен:</b> ${t.wrongMsg}</div>`;
     } else if (t.traps && t.traps[given] !== undefined) {
         extra = `<div class="hintbox">🤖 <b>Робот не согласен:</b> ${t.traps[given]}</div>`;
     }
@@ -562,7 +590,8 @@ function check(givenArg) {
         const e = document.getElementById(id);
         if (e) { e.classList.remove("shake"); void e.offsetWidth; e.classList.add("shake"); }
     });
-    result.innerHTML = `<div class="feedback lose">😅 Не то. Попробуй ещё раз!</div>${extra}`;
+    const lose = t.type === "yesno" ? "🤔 Не сходится. Подумай ещё и ответь заново." : "😅 Не то. Попробуй ещё раз!";
+    result.innerHTML = `<div class="feedback lose">${lose}</div>${extra}`;
 }
 
 function next() { idx++; render(); }
