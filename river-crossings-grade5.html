@@ -30,6 +30,7 @@
     .sec-amber {--c:#a16207;--bg:#fffbeb;--grid:#ecd9a8}
     .sec-wine  {--c:#9f1239;--bg:#fff1f2;--grid:#f2c9d2}
     .sec-slate {--c:#475569;--bg:#f8fafc;--grid:#d5dde6}
+    .sec-emer  {--c:#047857;--bg:#ecfdf5;--grid:#b4e0cd}
 
     h2{font-size:1.26em;margin:26px 0 12px;padding:9px 16px;border-radius:9px;
        background:var(--c);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.14)}
@@ -115,6 +116,13 @@
     .warn{border:3px solid var(--c);border-radius:10px;padding:14px 18px;margin:14px 0;background:var(--bg)}
     .warn p{font-size:1.06em}
     .warn p:first-child{font-size:1.12em;font-weight:700;color:var(--c);margin-bottom:7px}
+    .lc{border:2px solid var(--c);border-radius:9px;padding:12px 16px;margin:10px 0;background:#fff;
+        box-shadow:0 1px 4px rgba(0,0,0,.06)}
+    .lc .n{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:26px;
+           border-radius:50%;background:var(--c);color:#fff;font-weight:800;font-size:.85em;margin-right:9px}
+    .lc .e{font-size:1.2em;font-weight:700;letter-spacing:.3px}
+    .lc .q{font-size:1.06em}
+    .lc .blank{display:block;border-bottom:2px solid var(--grid);height:1.7em;margin-top:11px}
 </style>
 </head>
 <body>
@@ -167,6 +175,24 @@
             <div class="calc hard"><span class="st">⭐</span><span class="eq xlong">(37 × 41 − 41 × 37) × (1 + 2 + … + 1000)</span><span class="blank"></span></div>
         </div>
         <p class="hint">В трёх последних сначала скажи ответ, и только потом бери ручку. Если взял ручку сразу, значит не посмотрел на пример целиком.</p>
+    </section>
+
+
+    <div class="break"></div>
+    <section class="sec sec-emer">
+        <h2>⭐ Вынести, потом вынести ещё раз</h2>
+        <div class="memo">
+            <p>🎯 Здесь одного вынесения мало. Вынес общий множитель, посмотрел на то, что осталось, и вынес снова. Иногда трижды.</p>
+            <p>Считать в лоб бесполезно: числа большие нарочно. Сначала ищем, что повторяется.</p>
+        </div>
+        <div class="lc"><span class="n">1</span><span class="e">239 × 181 + 124 × 302 − 398 × 115 + 217 × 239</span><span class="blank"></span></div>
+        <div class="lc"><span class="n">2</span><span class="e">143 × 239 − 239 − 39 × 350 + 239 × 207</span><span class="blank"></span></div>
+        <div class="lc"><span class="n">3</span><span class="e">624 × 17 + 625 × 19 + 626 × 14</span><span class="blank"></span></div>
+        <div class="lc"><span class="n">4</span><span class="e">1002 + 499 × 243 − 998 + 501 × 239</span><span class="blank"></span></div>
+        <div class="lc"><span class="n">5</span><span class="e">279 × 3 × 137 − 93 × 3 × 410 + 632 × 373 − 631 × 372</span><span class="blank"></span></div>
+        <div class="lc"><span class="n">6</span><span class="q">Костя вычислил <strong>239 × 2478</strong>, а Женя вычислила <strong>478 × 1241</strong>. У кого результат больше и на сколько?</span><span class="blank"></span></div>
+        <div class="lc"><span class="n">7</span><span class="q">На сколько отличаются числа <strong>239 × 243</strong> и <strong>240 × 242</strong>?</span><span class="blank"></span></div>
+        <p class="hint">В задачах 6 и 7 умножать не нужно вовсе. В шестой посмотри на 478 и 239, в седьмой запиши оба произведения через одно и то же число.</p>
     </section>
 
     <div class="break"></div>
