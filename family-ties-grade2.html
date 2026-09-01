@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Родственные связи и отчества (2 класс)</title>
+<style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+        font-family:'Segoe UI',Arial,sans-serif;
+        background:linear-gradient(160deg,#fdf6ec 0%,#eef4fb 45%,#f3ecfb 100%);
+        background-attachment:fixed;
+        color:#1e2430;padding:22px;line-height:1.55;
+    }
+    .container{max-width:860px;margin:0 auto}
+
+    .header{
+        border:3px solid #c2410c;border-radius:14px;padding:18px 24px;margin-bottom:8px;text-align:center;
+        background:linear-gradient(135deg,#fff7ed 0%,#ffedd5 100%);
+        box-shadow:0 3px 10px rgba(0,0,0,.10);
+    }
+    .header .emo{font-size:2em;margin-bottom:6px;letter-spacing:4px}
+    .header h1{font-size:1.7em;color:#9a3412}
+
+    /* у каждой секции свой цвет */
+    .sec{--c:#334155;--bg:#f8fafc;--grid:#dbe3ec}
+    .sec-amber {--c:#b45309;--bg:#fffbeb;--grid:#f0dcae}
+    .sec-teal  {--c:#0e7490;--bg:#ecfeff;--grid:#b8e2ea}
+    .sec-blue  {--c:#1d4ed8;--bg:#eff6ff;--grid:#c5d8f5}
+    .sec-green {--c:#15803d;--bg:#f0fdf4;--grid:#bfe3c9}
+    .sec-violet{--c:#6d28d9;--bg:#f5f3ff;--grid:#d7cdf3}
+    .sec-orange{--c:#c2410c;--bg:#fff7ed;--grid:#f5d3b4}
+    .sec-pink  {--c:#be185d;--bg:#fdf2f8;--grid:#f2cadd}
+
+    h2{font-size:1.26em;margin:26px 0 12px;padding:9px 16px;border-radius:9px;
+       background:var(--c);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.14)}
+
+    .memo{border:2px solid var(--c);border-left:8px solid var(--c);border-radius:9px;
+          padding:13px 18px;margin:12px 0;background:var(--bg)}
+    .memo p{font-size:1.02em;margin-bottom:7px}
+    .memo p:last-child{margin-bottom:0}
+
+    .task{border:2px solid var(--c);border-radius:10px;padding:15px 19px;margin:15px 0;
+          background:#fff;box-shadow:0 2px 7px rgba(0,0,0,.08)}
+    .task-num{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;
+              border-radius:50%;font-weight:800;font-size:.95em;color:#fff;background:var(--c);
+              margin-bottom:7px;padding:0 9px}
+    .task p{font-size:1.06em;margin-bottom:7px}
+    .task strong{color:var(--c)}
+    .task .star{float:right;font-size:1.1em;letter-spacing:2px}
+
+    /* поля для рисования светлые: поверх них видно аннотации Zoom */
+    .grid-space{margin-top:9px;border:2px solid var(--c);border-radius:6px;min-height:130px;background:#fff;
+        background-image:repeating-linear-gradient(0deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px),
+                         repeating-linear-gradient(90deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px);
+        background-size:24px 24px}
+    .grid-tall{min-height:170px}
+
+    .write-line{display:inline-block;border-bottom:2px solid var(--c);min-width:130px;height:1.25em;margin:0 4px}
+    .write-long{min-width:230px}
+    .write-short{min-width:70px}
+
+    .pairs{display:grid;grid-template-columns:1fr 1fr;gap:4px 28px;font-size:1.03em;line-height:2.15}
+    .pairs .row{white-space:nowrap;overflow:hidden}
+
+    .legend{border:2px solid var(--c);border-radius:10px;padding:14px 18px;margin:12px 0;background:#fff}
+    .legend-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px 26px;align-items:center}
+    .legend-item{display:flex;align-items:center;gap:13px;font-size:1.02em}
+    .legend-item svg{flex:none}
+
+    .tree-space{margin-top:11px;border:2px solid var(--c);border-radius:6px;min-height:280px;position:relative;background:#fff;
+        background-image:repeating-linear-gradient(0deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px),
+                         repeating-linear-gradient(90deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px);
+        background-size:24px 24px}
+    .tier{position:absolute;left:0;right:0;border-top:2px dashed var(--c);opacity:.6;
+          color:var(--c);font-size:.85em;font-weight:700;padding-left:8px}
+    .tier span{background:#fff;padding:0 7px;position:relative;top:-.75em}
+    .tier-1{top:60px} .tier-2{top:150px} .tier-3{top:240px}
+
+    .hint{font-size:.95em;color:var(--c);font-style:italic;margin-top:7px;opacity:.95}
+    .lines{margin-top:9px}
+    .lines .line{border-bottom:2px solid var(--grid);height:32px}
+
+    @page{size:A4;margin:12mm}
+    @media print{
+        body{background:#fff;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+        .task,.memo,.header,.legend,.pairs{page-break-inside:avoid}
+        .break{page-break-before:always}
+    }
+</style>
+</head>
+<body>
+<div class="container">
+
+    <div class="header">
+        <div class="emo">👴 👵 👨 👩 🧒</div>
+        <h1>Родственные связи и отчества</h1>
+    </div>
+
+    <section class="sec sec-amber">
+    <h2>🌳 Как рисовать схему семьи</h2>
+
+    <div class="legend">
+        <div class="legend-grid">
+            <div class="legend-item">
+                <svg width="46" height="30"><rect x="8" y="6" width="30" height="18" fill="none" stroke="#b45309" stroke-width="2.5"/></svg>
+                <span>квадрат — мальчик или мужчина</span>
+            </div>
+            <div class="legend-item">
+                <svg width="46" height="30"><circle cx="23" cy="15" r="11" fill="none" stroke="#b45309" stroke-width="2.5"/></svg>
+                <span>кружок — девочка или женщина</span>
+            </div>
+            <div class="legend-item">
+                <svg width="86" height="30">
+                    <rect x="4" y="6" width="26" height="18" fill="none" stroke="#b45309" stroke-width="2.5"/>
+                    <line x1="30" y1="15" x2="52" y2="15" stroke="#b45309" stroke-width="2.5"/>
+                    <circle cx="63" cy="15" r="11" fill="none" stroke="#b45309" stroke-width="2.5"/>
+                </svg>
+                <span>черта между ними — муж и жена</span>
+            </div>
+            <div class="legend-item">
+                <svg width="86" height="46">
+                    <line x1="43" y1="2" x2="43" y2="14" stroke="#b45309" stroke-width="2.5"/>
+                    <line x1="18" y1="14" x2="68" y2="14" stroke="#b45309" stroke-width="2.5"/>
+                    <line x1="18" y1="14" x2="18" y2="24" stroke="#b45309" stroke-width="2.5"/>
+                    <line x1="68" y1="14" x2="68" y2="24" stroke="#b45309" stroke-width="2.5"/>
+                    <rect x="6" y="24" width="24" height="16" fill="none" stroke="#b45309" stroke-width="2.5"/>
+                    <circle cx="68" cy="32" r="9" fill="none" stroke="#b45309" stroke-width="2.5"/>
+                </svg>
+                <span>линия вниз — их дети</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="memo">
+        <p>📐 <strong>Правило одно:</strong> кто старше, тот выше. Дедушки и бабушки в верхнем ряду, их дети в среднем, внуки в нижнем.</p>
+        <p>✏️ <strong>Совет:</strong> сначала нарисуй все кружки и квадратики, а имена подписывай потом, когда станет понятно, кто где.</p>
+    </div>
+
+    </section>
+
+    <section class="sec sec-teal">
+    <h2>🔤 Разминка. Кто мне кто?</h2>
+
+    <div class="memo">
+        <div class="pairs">
+            <div class="row">Дочь моей мамы мне <span class="write-line"></span></div>
+            <div class="row">Брат моей мамы мне <span class="write-line"></span></div>
+            <div class="row">Отец моей дочери мне <span class="write-line"></span></div>
+            <div class="row">Сын моего сына мне <span class="write-line"></span></div>
+            <div class="row">Мать моей двоюродной сестры мне <span class="write-line"></span></div>
+            <div class="row">Бабушка моего брата мне <span class="write-line"></span></div>
+            <div class="row">Внук моей бабушки мне <span class="write-line"></span></div>
+            <div class="row">Отец моей сестры мне <span class="write-line"></span></div>
+            <div class="row">Дочь моей сестры мне <span class="write-line"></span></div>
+            <div class="row">Отец моего двоюродного брата мне <span class="write-line"></span></div>
+            <div class="row">Сын моей бабушки мне <span class="write-line"></span></div>
+            <div class="row">Мать моей внучки мне <span class="write-line"></span></div>
+        </div>
+        <p class="hint">Осторожно: в некоторых строчках подходит не один ответ, а два. Найди такие строчки и подпиши рядом оба.</p>
+    </div>
+
+    </section>
+
+    <section class="sec sec-blue">
+    <h2>📛 Отчества</h2>
+
+    <div class="task">
+        <span class="task-num">1</span>
+        <p>Колиного отца зовут <strong>Пётр Васильевич</strong>. Какое имя и отчество у Колиного младшего брата Юры?</p>
+        <p>Ответ: <span class="write-line write-long"></span></p>
+    </div>
+
+    <div class="task">
+        <span class="task-num">2</span>
+        <p><strong>Лев Александрович</strong> назвал дочь в честь своего отца. Напиши её полное имя и отчество.</p>
+        <p>Ответ: <span class="write-line write-long"></span></p>
+    </div>
+
+    <div class="task">
+        <span class="task-num">3</span>
+        <p>Иван — сын Алексея, Алексей — сын Михаила. Кем приходится Иван Михаилу? А Михаил Ивану?</p>
+        <p>Иван Михаилу <span class="write-line"></span> Михаил Ивану <span class="write-line"></span></p>
+        <div class="grid-space" style="min-height:100px"></div>
+        <p class="hint">Нарисуй всех троих в столбик: кто старше, тот выше.</p>
+    </div>
+
+    <div class="task">
+        <span class="task-num">4</span>
+        <p>Отца зовут <strong>Антон Павлович</strong>, а отчество деда — <strong>Филиппович</strong>. Как звали деда полностью? Как назвали сына Антона, если в семье принято называть сына в честь деда?</p>
+        <p>Дед <span class="write-line write-long"></span></p>
+        <p>Сын Антона <span class="write-line write-long"></span></p>
+    </div>
+
+    <div class="task">
+        <span class="task-num">5</span>
+        <p>В семье традиция: сына называют в честь деда, то есть в честь отца отца. Деда зовут <strong>Павел Аркадьевич</strong>. Как зовут его сына и его внука?</p>
+        <p>Сын <span class="write-line write-long"></span></p>
+        <p>Внук <span class="write-line write-long"></span></p>
+        <div class="grid-space" style="min-height:110px"></div>
+        <p class="hint">Нарисуй три поколения и подпиши имена. Что ты заметил?</p>
+    </div>
+
+    <div class="break"></div>
+    </section>
+
+    <section class="sec sec-green">
+    <h2>🌳 Схема семьи</h2>
+
+    <div class="task">
+        <span class="task-num">6</span>
+        <p>У одного дедушки было <strong>два сына</strong> и <strong>четыре внука</strong>. Одного из внуков зовут <strong>Дмитрий Олегович</strong>, а у другого внука есть <strong>двое родных братьев</strong>.</p>
+        <p>Нарисуй схему этой семьи и придумай имена всем, кого не назвали.</p>
+        <div class="tree-space">
+            <div class="tier tier-1"><span>дедушка</span></div>
+            <div class="tier tier-2"><span>его сыновья</span></div>
+            <div class="tier tier-3"><span>внуки</span></div>
+        </div>
+        <p class="hint">Подсказка: раз у одного внука двое родных братьев, значит в одной семье трое сыновей. А сколько тогда в другой?</p>
+    </div>
+
+    <div class="task">
+        <span class="task-num">7</span>
+        <p>В семье у каждого брата <strong>две сестры</strong>, а у каждой сестры <strong>семь братьев</strong>. Сколько всего детей в семье?</p>
+        <div class="grid-space grid-tall"></div>
+        <p>Ответ: <span class="write-line write-short"></span> детей</p>
+        <p class="hint">Нарисуй сначала сестёр, потом братьев. Проверь каждую фразу отдельно.</p>
+    </div>
+
+    </section>
+
+    <section class="sec sec-violet">
+    <h2>🕵️ Задачи с подвохом</h2>
+
+    <div class="memo">
+        <p>🕵️ В этих задачах ответ кажется невозможным. Он возможен. Просто где-то спрятался второй смысл: то ли людей меньше, чем кажется, то ли кто-то не тот, за кого его приняли.</p>
+    </div>
+
+    <div class="task">
+        <span class="task-num">8</span>
+        <p>Сын отца электрика разговаривает с отцом сына электрика. А сам электрик в разговоре не участвует. Как такое может быть?</p>
+        <div class="lines"><div class="line"></div><div class="line"></div></div>
+    </div>
+
+    <div class="task">
+        <span class="task-num">9</span>
+        <p>Возможно ли так сказать: «Ты мне сын, но я тебе не отец»?</p>
+        <div class="lines"><div class="line"></div></div>
+    </div>
+
+    <div class="task">
+        <span class="task-num">10</span>
+        <p>У входа в музей стоят два человека. Один из них — отец сына другого. Как такое возможно?</p>
+        <div class="lines"><div class="line"></div><div class="line"></div></div>
+    </div>
+
+    <div class="task">
+        <span class="task-num">11</span>
+        <p>У трёх маляров был брат Иван. А у Ивана братьев нет. Как это?</p>
+        <div class="lines"><div class="line"></div></div>
+    </div>
+
+    <div class="task">
+        <span class="task-num">12</span>
+        <p>Сын моего отца, а мне не брат. Кто это?</p>
+        <div class="lines"><div class="line"></div></div>
+    </div>
+
+    <div class="task">
+        <span class="task-num">13</span>
+        <p>У отца Мэри пять дочерей: Чача, Чичи, Чече и Чочо. Как зовут пятую?</p>
+        <div class="lines"><div class="line"></div></div>
+    </div>
+
+    <div class="task">
+        <span class="task-num">14</span>
+        <p>Шли два отца и два сына, нашли три апельсина. Поделили — и всем досталось по одному. Как так вышло?</p>
+        <div class="grid-space" style="min-height:110px"></div>
+        <p class="hint">Нарисуй схему. Сколько человек шло на самом деле?</p>
+    </div>
+
+    <div class="break"></div>
+    </section>
+
+    <section class="sec sec-orange">
+    <h2>⭐ Задачи со звёздочкой</h2>
+
+    <div class="task">
+        <span class="star">⭐⭐⭐</span>
+        <span class="task-num">15</span>
+        <p>«Я Фёдор, а отец мой Иван. У нас в семье мальчиков называют Ванями или Федями. Отец того, кто нарисован на портрете, — единственный сын того, кто это говорит.»</p>
+        <p>Назови имя и отчество того, кто на портрете. Кем он приходится рассказчику?</p>
+        <div class="tree-space" style="min-height:270px">
+            <div class="tier tier-1"><span>рассказчик</span></div>
+            <div class="tier tier-2"><span>его сын</span></div>
+            <div class="tier tier-3"><span>тот, кто на портрете</span></div>
+        </div>
+        <p>На портрете <span class="write-line write-long"></span></p>
+        <p>Рассказчику он <span class="write-line"></span></p>
+    </div>
+
+    <div class="task">
+        <span class="star">⭐⭐⭐</span>
+        <span class="task-num">16</span>
+        <p>В семье несколько детей. У Пети сестёр столько же, сколько братьев. У его сестры Маши братьев вдвое больше, чем сестёр. Сколько всего детей в семье?</p>
+        <div class="grid-space grid-tall"></div>
+        <p>Ответ: <span class="write-line write-short"></span> детей</p>
+        <p class="hint">Пробуй по очереди: 2 брата и 1 сестра, потом 3 и 2, потом 4 и 3. Каждый раз проверяй обе фразы.</p>
+    </div>
+
+    <div class="task">
+        <span class="star">⭐⭐⭐</span>
+        <span class="task-num">17</span>
+        <p>Отец старше сына на 24 года. Сейчас отцу втрое больше лет, чем сыну. Сколько лет каждому?</p>
+        <div class="grid-space grid-tall"></div>
+        <p>Сыну <span class="write-line write-short"></span> лет, отцу <span class="write-line write-short"></span> лет</p>
+        <p class="hint">Нарисуй отрезками: возраст сына — один отрезок, возраст отца — три таких же. На сколько отрезков отец старше?</p>
+    </div>
+
+    <div class="task">
+        <span class="star">⭐⭐⭐</span>
+        <span class="task-num">18</span>
+        <p>У бабушки трое внуков. Старший старше среднего на 2 года, средний старше младшего тоже на 2 года. Вместе им 27 лет. Сколько лет каждому?</p>
+        <div class="grid-space grid-tall"></div>
+        <p>Младшему <span class="write-line write-short"></span> среднему <span class="write-line write-short"></span> старшему <span class="write-line write-short"></span></p>
+        <p class="hint">Нарисуй три отрезка. Если бы все трое были как младший, сколько получилось бы вместе?</p>
+    </div>
+
+    </section>
+
+    <section class="sec sec-pink">
+    <h2>🏡 Домой</h2>
+
+    <div class="task">
+        <span class="task-num">19</span>
+        <p>Нарисуй схему <strong>своей</strong> семьи на три поколения: ты, твои родители, твои бабушки и дедушки. Подпиши имена и отчества всех, кого знаешь.</p>
+        <div class="tree-space" style="min-height:300px">
+            <div class="tier tier-1"><span>бабушки и дедушки</span></div>
+            <div class="tier tier-2"><span>родители</span></div>
+            <div class="tier tier-3"><span>я</span></div>
+        </div>
+        <p class="hint">Если чьё-то отчество не помнишь — спроси дома. Это и есть часть задания.</p>
+    </div>
+
+    </section>
+
+</div>
+</body>
+</html>
