@@ -101,6 +101,23 @@
     .eqlist{font-size:1.14em;line-height:1.95;font-weight:600}
     .eqlist .tot{margin-top:9px;padding-top:9px;border-top:2px solid var(--c);color:var(--c);font-size:1.18em}
     @media(max-width:700px){.two{grid-template-columns:1fr}}
+
+    .box{display:inline-block;min-width:44px;height:1.5em;border:2px solid var(--c);border-radius:5px;
+         background:var(--bg);vertical-align:-.35em;margin:0 4px}
+    .fill{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:10px;margin-top:12px}
+    .fill div{border:2px solid var(--c);border-radius:9px;padding:12px 14px;background:#fff;
+              font-size:1.1em;font-weight:600;text-align:center;white-space:nowrap}
+    .check{margin-top:12px}
+    .check .row{display:flex;align-items:center;gap:12px;border:2px solid var(--c);border-radius:9px;
+                padding:10px 14px;margin:8px 0;background:#fff;flex-wrap:wrap}
+    .check .eq{font-size:1.14em;font-weight:700;margin-right:auto}
+    .check .vt{border:2px solid var(--grid);border-radius:7px;padding:5px 13px;font-weight:700;color:#64748b}
+    .check .fx{flex-basis:100%;border-bottom:2px solid var(--grid);height:1.5em;margin-top:2px}
+    .cmp{margin-top:12px}
+    .cmp .row{display:grid;grid-template-columns:1fr 54px 1fr;gap:10px;align-items:center;
+              border:2px solid var(--c);border-radius:9px;padding:10px 14px;margin:8px 0;background:#fff}
+    .cmp .e{font-size:1.14em;font-weight:700;text-align:center}
+    .cmp .mid{height:1.9em;border:2px solid var(--c);border-radius:6px;background:var(--bg)}
 </style>
 </head>
 <body>
@@ -316,6 +333,21 @@
             <div class="calc"><span class="eq">8, 11, 14, …, 74</span><span class="blank"></span></div>
         </div>
         <p class="hint">Это те же распилы и промежутки, что были в первом классе. Между семью столбами шесть промежутков, а не семь.</p>
+    </section>
+
+<div class="break"></div>
+    <section class="sec sec-violet">
+        <h2>🧩 Три задания без вычислений</h2>
+
+        <p><strong>1. Заполни пропуски.</strong> Это та самая запись, о которой договорились: сколько чисел, сколько пар, чему равна пара, что осталось.</p>
+        <div class="fill"><div>1 + 2 + … + 20: чисел <span class="box"></span>, пар <span class="box"></span></div><div>каждая пара даёт <span class="box"></span>, сумма <span class="box"></span></div><div>1 + 2 + … + 15: чисел <span class="box"></span>, пар <span class="box"></span></div><div>пара даёт <span class="box"></span>, без пары <span class="box"></span>, сумма <span class="box"></span></div><div>2 + 4 + … + 40: чисел <span class="box"></span>, пара даёт <span class="box"></span></div><div>сумма <span class="box"></span></div></div>
+
+        <p style="margin-top:18px"><strong>2. Найди ошибку.</strong> Отметь, верно рассуждение или нет. Неверные исправь.</p>
+        <div class="check"><div class="row"><span class="eq">в сумме 1 + 2 + … + 11 получается 5 пар по 12 и одинокая 6</span><span class="vt">верно</span><span class="vt">неверно</span><span class="fx"></span></div><div class="row"><span class="eq">в ряду 7, 8, 9, …, 43 всего 43 − 7 = 36 чисел</span><span class="vt">верно</span><span class="vt">неверно</span><span class="fx"></span></div><div class="row"><span class="eq">1 + 3 + 5 + … + 19 = 10 × 20 : 2 = 100</span><span class="vt">верно</span><span class="vt">неверно</span><span class="fx"></span></div><div class="row"><span class="eq">в ряду 10, 12, 14, …, 60 всего (60 − 10) : 2 = 25 чисел</span><span class="vt">верно</span><span class="vt">неверно</span><span class="fx"></span></div><div class="row"><span class="eq">1 + 2 + … + 100 это 50 пар по 101, то есть 5050</span><span class="vt">верно</span><span class="vt">неверно</span><span class="fx"></span></div></div>
+
+        <p style="margin-top:18px"><strong>3. Сравни, не вычисляя.</strong> Если суммы не равны, напиши на строке, на сколько одна больше другой.</p>
+        <div class="cmp"><div class="row"><span class="e">1 + 2 + … + 40</span><span class="mid"></span><span class="e">2 + 3 + … + 41</span></div><div class="row"><span class="e">5 + 6 + … + 25</span><span class="mid"></span><span class="e">6 + 7 + … + 26</span></div><div class="row"><span class="e">2 + 4 + … + 40</span><span class="mid"></span><span class="e">1 + 3 + … + 39</span></div></div>
+        <p class="hint">Обе суммы состоят из одинакового количества слагаемых. Сравни их по одному, не складывая.</p>
     </section>
 
     <div class="break"></div>

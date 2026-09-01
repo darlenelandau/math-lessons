@@ -92,6 +92,23 @@
         .task,.memo,.rule,.header,.card4{page-break-inside:avoid}
         .break{page-break-before:always}
     }
+
+    .box{display:inline-block;min-width:44px;height:1.5em;border:2px solid var(--c);border-radius:5px;
+         background:var(--bg);vertical-align:-.35em;margin:0 4px}
+    .fill{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:10px;margin-top:12px}
+    .fill div{border:2px solid var(--c);border-radius:9px;padding:12px 14px;background:#fff;
+              font-size:1.1em;font-weight:600;text-align:center;white-space:nowrap}
+    .check{margin-top:12px}
+    .check .row{display:flex;align-items:center;gap:12px;border:2px solid var(--c);border-radius:9px;
+                padding:10px 14px;margin:8px 0;background:#fff;flex-wrap:wrap}
+    .check .eq{font-size:1.14em;font-weight:700;margin-right:auto}
+    .check .vt{border:2px solid var(--grid);border-radius:7px;padding:5px 13px;font-weight:700;color:#64748b}
+    .check .fx{flex-basis:100%;border-bottom:2px solid var(--grid);height:1.5em;margin-top:2px}
+    .cmp{margin-top:12px}
+    .cmp .row{display:grid;grid-template-columns:1fr 54px 1fr;gap:10px;align-items:center;
+              border:2px solid var(--c);border-radius:9px;padding:10px 14px;margin:8px 0;background:#fff}
+    .cmp .e{font-size:1.14em;font-weight:700;text-align:center}
+    .cmp .mid{height:1.9em;border:2px solid var(--c);border-radius:6px;background:var(--bg)}
 </style>
 </head>
 <body>
@@ -182,6 +199,21 @@
             <div class="calc hard"><span class="st">⭐</span><span class="eq">84 × 12 − 84 × 2</span><span class="blank"></span></div>
         </div>
         <p class="hint">Подумай отдельно про 99 × 47 + 47. Куда делся множитель у второго слагаемого? Он там есть, просто спрятался.</p>
+    </section>
+
+<div class="break"></div>
+    <section class="sec sec-teal">
+        <h2>🧩 Три задания без вычислений</h2>
+
+        <p><strong>1. Заполни пропуски.</strong> Считать до конца не надо, надо восстановить приём.</p>
+        <div class="fill"><div>297 + 456 = 300 + 456 − <span class="box"></span></div><div>596 + 248 = 600 + 248 − <span class="box"></span></div><div>654 − 198 = 654 − 200 + <span class="box"></span></div><div>823 − 297 = 823 − 300 + <span class="box"></span></div><div>25 × 16 = 25 × 4 × <span class="box"></span></div><div>8 × 125 = 8 × 5 × <span class="box"></span></div><div>37 × 8 + 63 × 8 = (37 + <span class="box"></span>) × 8</div><div>99 × 47 + 47 = (99 + <span class="box"></span>) × 47</div></div>
+
+        <p style="margin-top:18px"><strong>2. Найди ошибку.</strong> Отметь, верно равенство или нет. Неверные исправь на строке снизу.</p>
+        <div class="check"><div class="row"><span class="eq">48 × 99 = 48 × 100 − 1</span><span class="vt">верно</span><span class="vt">неверно</span><span class="fx"></span></div><div class="row"><span class="eq">763 − 199 = 763 − 200 + 1</span><span class="vt">верно</span><span class="vt">неверно</span><span class="fx"></span></div><div class="row"><span class="eq">305 + 198 = 305 + 200 + 2</span><span class="vt">верно</span><span class="vt">неверно</span><span class="fx"></span></div><div class="row"><span class="eq">25 × 12 = 25 × 4 × 3</span><span class="vt">верно</span><span class="vt">неверно</span><span class="fx"></span></div><div class="row"><span class="eq">56 × 7 + 44 × 7 = (56 + 44) × 7</span><span class="vt">верно</span><span class="vt">неверно</span><span class="fx"></span></div><div class="row"><span class="eq">72 × 9 − 72 × 4 = 72 × 13</span><span class="vt">верно</span><span class="vt">неверно</span><span class="fx"></span></div></div>
+
+        <p style="margin-top:18px"><strong>3. Сравни, не вычисляя.</strong> Поставь в рамку между ними знак больше, меньше или равно.</p>
+        <div class="cmp"><div class="row"><span class="e">24 × 99</span><span class="mid"></span><span class="e">24 × 100</span></div><div class="row"><span class="e">17 × 6 + 3 × 6</span><span class="mid"></span><span class="e">21 × 6</span></div><div class="row"><span class="e">35 × 8</span><span class="mid"></span><span class="e">34 × 8 + 8</span></div><div class="row"><span class="e">48 × 25 + 52 × 25</span><span class="mid"></span><span class="e">100 × 25</span></div><div class="row"><span class="e">15 × 9 + 15</span><span class="mid"></span><span class="e">15 × 10</span></div><div class="row"><span class="e">199 × 7</span><span class="mid"></span><span class="e">200 × 7 − 7</span></div></div>
+        <p class="hint">Если для сравнения пришлось перемножать, значит приём не увидел. Вернись и посмотри на выражения ещё раз.</p>
     </section>
 
     <section class="sec sec-amber">
