@@ -30,6 +30,7 @@
     .sec-meadow{--c:#4d7c0f;--bg:#f7fee7;--grid:#d5e8a9}
     .sec-earth {--c:#92400e;--bg:#fffbeb;--grid:#eed7b4}
     .sec-stone {--c:#44403c;--bg:#f6f5f4;--grid:#dcd8d4}
+    .sec-indigo{--c:#4338ca;--bg:#eef2ff;--grid:#c9d0f7}
 
     h2{font-size:1.26em;margin:26px 0 12px;padding:9px 16px;border-radius:9px;
        background:var(--c);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.14)}
@@ -104,6 +105,14 @@
     .tbl th{background:var(--c);color:#fff;padding:9px 10px;font-size:1em}
     .tbl td{border:1.6px solid var(--grid);padding:11px 10px;text-align:center;font-size:1.08em;font-weight:600;height:42px}
     .tbl td.filled{background:var(--bg);color:var(--c)}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+    @media(max-width:760px){.two{grid-template-columns:1fr}}
+    .way{border:2px solid var(--c);border-radius:10px;padding:13px 16px;background:#fff}
+    .way .cap{font-weight:800;font-size:.88em;text-transform:uppercase;letter-spacing:.6px;
+              color:var(--c);margin-bottom:7px}
+    .way ol{margin-left:18px}
+    .way li{margin:5px 0;font-size:1.03em}
+    .way .eqline{font-size:1.14em;font-weight:700;margin:5px 0;color:#1e2430}
 </style>
 </head>
 <body>
@@ -352,6 +361,86 @@
             <p>Может ли в сарае, где живут только куры и кролики, оказаться <strong>10 голов и 27 ног</strong>? Объясни свой ответ.</p>
             <div class="grid-space"></div>
             <p class="hint">Здесь ответом служит не число, а рассуждение.</p>
+        </div>
+    </section>
+
+<div class="break"></div>
+    <section class="sec sec-indigo">
+        <h2>🔢 Числа побольше</h2>
+        <div class="memo">
+            <p>✏️ Здесь кружочки с палочками рисовать бессмысленно: попробуй изобразить сто пятьдесят голов. Значит приём надо <strong>записывать</strong>, а не рисовать.</p>
+            <p>Ниже одна и та же задача решена двумя записями. Обе правильные, выбирай ту, которая понятнее.</p>
+        </div>
+
+        <p style="margin-top:14px"><strong>Образец.</strong> На ферме гуси и кролики, всего 150 голов и 442 ноги. Сколько тех и других?</p>
+        <div class="two">
+            <div class="way">
+                <div class="cap">В четыре шага</div>
+                <ol>
+                    <li>Пусть все гуси: 150 × 2 = <strong>300</strong> ног.</li>
+                    <li>Не хватает: 442 − 300 = <strong>142</strong> ноги.</li>
+                    <li>Замена гуся на кролика даёт: 4 − 2 = <strong>2</strong> ноги.</li>
+                    <li>Замен: 142 : 2 = <strong>71</strong>. Кроликов 71, гусей 150 − 71 = 79.</li>
+                </ol>
+            </div>
+            <div class="way">
+                <div class="cap">Уравнением</div>
+                <div class="eqline">Пусть кроликов <strong>к</strong>, тогда гусей 150 − к.</div>
+                <div class="eqline">4 × к + 2 × (150 − к) = 442</div>
+                <div class="eqline">2 × к + 300 = 442</div>
+                <div class="eqline">2 × к = 142</div>
+                <div class="eqline">к = 71</div>
+            </div>
+        </div>
+        <p class="hint">Проверка обязательна в обеих записях: 79 × 2 + 71 × 4 = 158 + 284 = 442. ✓</p>
+
+        <div class="task">
+            <span class="task-num">1</span>
+            <p>Дядя Вася разводит только кроликов и гусей. Он посчитал, что у всех его животных <strong>442 ноги</strong>. Тогда он решил обменять несколько гусей на кроликов так, чтобы ног стало ровно <strong>450</strong>. Скольких гусей нужно поменять?</p>
+            <div class="grid-space"></div>
+            <p class="hint">Голов при обмене не становится больше. На сколько меняется число ног от одного обмена?</p>
+        </div>
+        <div class="task">
+            <span class="task-num">2</span>
+            <p>Сколько гусей и сколько кроликов было на ферме дяди Васи год назад, если у них было <strong>150 голов и 302 ноги</strong>?</p>
+            <div class="grid-space"></div>
+        </div>
+        <div class="task">
+            <span class="task-num">3</span>
+            <p>Сколько гусей и сколько кроликов на ферме дяди Васи сейчас, если у них <strong>150 голов и 442 ноги</strong>?</p>
+            <div class="grid-space"></div>
+        </div>
+        <div class="task">
+            <span class="star">⭐</span>
+            <span class="task-num">4</span>
+            <p>Из <strong>40 яиц</strong> вылупились чайки и черепахи. Всего у них <strong>100 ног</strong>. Сколько вылупилось чаек?</p>
+            <div class="grid-space"></div>
+        </div>
+        <div class="task">
+            <span class="star">⭐⭐</span>
+            <span class="task-num">5</span>
+            <p>В пруду плавают лягушки и утки, никто не ныряет. Над водой видны <strong>50 глаз</strong>, под водой прячется <strong>66 лап</strong>. Сколько лягушек, а сколько уток?</p>
+            <div class="grid-space grid-tall"></div>
+            <p class="hint">Голов тебе не сказали. Зато сказали про глаза. Сколько глаз у одного животного?</p>
+        </div>
+        <div class="task">
+            <span class="star">⭐</span>
+            <span class="task-num">6</span>
+            <p>Панда купила <strong>13 веток</strong> бамбука: маленькие по 5 монет и большие по 8. Всего она потратила <strong>77 монет</strong>. Сколько больших веток купила Панда?</p>
+            <div class="grid-space"></div>
+        </div>
+        <div class="task">
+            <span class="star">⭐⭐</span>
+            <span class="task-num">7</span>
+            <p>На столе <strong>50 кошельков</strong>, синие и красные. В каждом синем по 5 монет, в каждом красном по 12. Всего в кошельках <strong>341 монета</strong>. Сколько на столе красных кошельков?</p>
+            <div class="grid-space grid-tall"></div>
+        </div>
+        <div class="task">
+            <span class="star">⭐⭐⭐</span>
+            <span class="task-num">8</span>
+            <p>Разрежьте какой-нибудь квадрат на квадратики <strong>двух разных размеров</strong> так, чтобы маленьких было столько же, сколько больших.</p>
+            <div class="grid-space grid-tall"></div>
+            <p class="hint">Задача не про ноги, а про площадь. Начни с вопроса: если маленьких и больших поровну, чему равна площадь всего квадрата?</p>
         </div>
     </section>
 
