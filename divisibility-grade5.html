@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Простые числа и делимость (5 класс)</title>
+<style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+        font-family:'Segoe UI',Arial,sans-serif;
+        background:linear-gradient(180deg,#eef3fb 0%,#f3f7f4 52%,#faf2f2 100%);
+        background-attachment:fixed;
+        color:#1e2430;padding:22px;line-height:1.55;
+    }
+    .container{max-width:900px;margin:0 auto}
+
+    .header{
+        border:3px solid #6b21a8;border-radius:14px;padding:18px 24px;margin-bottom:8px;text-align:center;
+        background:linear-gradient(160deg,#ede9fe 0%,#dbeafe 60%,#ecfdf5 100%);
+        box-shadow:0 3px 10px rgba(0,0,0,.10);
+    }
+    .header .emo{font-size:2em;margin-bottom:6px;letter-spacing:6px}
+    .header h1{font-size:1.7em;color:#581c87}
+    .header .lead{margin-top:8px;font-size:1.02em;color:#334155}
+
+    .sec{--c:#334155;--bg:#f8fafc;--grid:#dbe3ec}
+    .sec-blue   {--c:#1d4ed8;--bg:#eff6ff;--grid:#c5d8f5}
+    .sec-emerald{--c:#047857;--bg:#ecfdf5;--grid:#b4e0cd}
+    .sec-purple {--c:#6b21a8;--bg:#faf5ff;--grid:#dcc7ee}
+    .sec-crimson{--c:#b91c1c;--bg:#fef2f2;--grid:#f3c9c9}
+    .sec-cyan   {--c:#0e7490;--bg:#ecfeff;--grid:#b6e0eb}
+    .sec-slate  {--c:#334155;--bg:#f1f5f9;--grid:#cbd5e1}
+
+    h2{font-size:1.26em;margin:26px 0 12px;padding:9px 16px;border-radius:9px;
+       background:var(--c);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.14)}
+
+    .memo{border:2px solid var(--c);border-left:8px solid var(--c);border-radius:9px;
+          padding:13px 18px;margin:12px 0;background:var(--bg)}
+    .memo p{font-size:1.02em;margin-bottom:7px}
+    .memo p:last-child{margin-bottom:0}
+
+    .rule{border:2px dashed var(--c);border-radius:10px;padding:14px 18px;margin:12px 0;background:var(--bg)}
+    .rule .lbl{font-weight:700;color:var(--c);font-size:1.02em}
+    .rule .ex{font-size:1.3em;font-weight:700;color:var(--c);margin-top:8px;text-align:center;letter-spacing:.5px}
+
+    .calc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(238px,1fr));gap:11px;margin-top:12px}
+    .calc{
+        position:relative;border:2px solid var(--c);border-radius:9px;padding:12px 10px 10px;
+        background:#fff;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.07);
+    }
+    .calc .eq{font-size:1.3em;font-weight:600;letter-spacing:.5px;white-space:nowrap}
+    .calc .eq.long{font-size:1.05em;letter-spacing:0}
+    .calc .blank{display:block;border-bottom:2px solid var(--grid);height:1.5em;margin:8px 12px 0}
+    .calc.hard{border-style:dashed;background:var(--bg)}
+    .calc .st{position:absolute;top:3px;right:7px;font-size:.72em}
+
+    .oral{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:9px;margin-top:10px}
+    .oral div{border:2px solid var(--c);border-radius:8px;padding:9px 6px;background:#fff;
+              text-align:center;font-size:1.3em;font-weight:600}
+
+    .task{border:2px solid var(--c);border-radius:10px;padding:15px 19px;margin:15px 0;
+          background:#fff;box-shadow:0 2px 7px rgba(0,0,0,.08)}
+    .task-num{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;
+              border-radius:50%;font-weight:800;font-size:.95em;color:#fff;background:var(--c);
+              margin-bottom:7px;padding:0 9px}
+    .task p{font-size:1.06em;margin-bottom:7px}
+    .task strong{color:var(--c)}
+    .task .star{float:right;font-size:1.05em;letter-spacing:2px}
+
+    .grid-space{margin-top:9px;border:2px solid var(--c);border-radius:6px;min-height:120px;background:#fff;
+        background-image:repeating-linear-gradient(0deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px),
+                         repeating-linear-gradient(90deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px);
+        background-size:24px 24px}
+    .grid-tall{min-height:165px}
+
+    .card4{border:3px solid var(--c);border-radius:12px;padding:16px 20px;background:var(--bg);margin:12px 0}
+    .card4 .row{display:flex;gap:14px;align-items:baseline;padding:9px 0;border-bottom:1px dashed var(--c)}
+    .card4 .row:last-child{border-bottom:none}
+    .card4 .n{flex:none;width:26px;height:26px;border-radius:50%;background:var(--c);color:#fff;
+              font-weight:800;font-size:.85em;display:flex;align-items:center;justify-content:center}
+    .card4 .t{flex:1}
+    .card4 .t b{color:var(--c)}
+    .card4 .t .e{display:block;font-size:1.12em;font-weight:700;margin-top:3px}
+
+    .hint{font-size:.95em;color:var(--c);font-style:italic;margin-top:7px;opacity:.95}
+
+    @page{size:A4;margin:12mm}
+    @media print{
+        body{background:#fff;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+        .task,.memo,.rule,.header,.card4{page-break-inside:avoid}
+        .break{page-break-before:always}
+    }
+
+    .calc .eq.xlong{font-size:.92em;letter-spacing:0}
+    .figure{border:2px solid var(--c);border-radius:10px;padding:14px;margin:12px 0;background:#fff;text-align:center;overflow-x:auto}
+    .figure .cap{margin-top:10px;font-size:1.12em;font-weight:700;color:var(--c)}
+    .figure .sub{margin-top:4px;font-size:.97em;color:#475569}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+    .eqlist{font-size:1.14em;line-height:1.95;font-weight:600}
+    .eqlist .tot{margin-top:9px;padding-top:9px;border-top:2px solid var(--c);color:var(--c);font-size:1.18em}
+    @media(max-width:700px){.two{grid-template-columns:1fr}}
+
+    .tbl{width:100%;border-collapse:collapse;margin-top:12px;background:#fff}
+    .tbl th{background:var(--c);color:#fff;padding:9px 10px;font-size:1em}
+    .tbl td{border:1.6px solid var(--grid);padding:11px 10px;text-align:center;font-size:1.08em;font-weight:600;height:42px}
+    .tbl td.filled{background:var(--bg);color:var(--c)}
+
+    .tbl th:first-child{width:64px}
+    .tbl th.river{background:#0e7490}
+    .tbl td.river{background:#e0f2fe;color:#0c4a6e;font-weight:700}
+    .tbl td.river.empty{background:#f0f9ff}
+    .tbl td:first-child{font-weight:800;color:var(--c)}
+    .tbl td.l{text-align:left;padding-left:14px}
+    .tbl caption{caption-side:top;text-align:left;font-weight:700;color:var(--c);padding:0 0 7px;font-size:1.04em}
+    .warn{border:3px solid var(--c);border-radius:10px;padding:14px 18px;margin:14px 0;background:var(--bg)}
+    .warn p{font-size:1.06em}
+    .warn p:first-child{font-size:1.12em;font-weight:700;color:var(--c);margin-bottom:7px}
+
+    .col{font-family:"SF Mono",Consolas,"Courier New",monospace;font-size:1.5em;font-weight:700;
+         line-height:1.5;color:var(--c);white-space:pre;display:inline-block;text-align:right}
+    .colwrap{text-align:center;margin:12px 0}
+    .steps{counter-reset:st;list-style:none;margin:10px 0}
+    .steps li{position:relative;padding:9px 12px 9px 46px;margin:7px 0;background:#fff;
+              border-left:4px solid var(--c);border-radius:0 7px 7px 0;font-size:1.04em}
+    .steps li::before{counter-increment:st;content:counter(st);position:absolute;left:10px;top:50%;
+        transform:translateY(-50%);width:26px;height:26px;background:var(--c);color:#fff;border-radius:50%;
+        display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85em}
+    .mine{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:12px}
+    .mine .card{border:2px solid var(--c);border-radius:10px;background:#fff;padding:12px 14px;
+                box-shadow:0 2px 6px rgba(0,0,0,.07)}
+    .mine .who{font-size:.86em;font-weight:800;color:var(--c);text-transform:uppercase;letter-spacing:.5px}
+    .mine .eqn{font-size:1.24em;font-weight:700;margin-top:6px;white-space:nowrap}
+    .mine .blank{display:block;border-bottom:2px solid var(--grid);height:1.5em;margin-top:9px}
+
+    .ways{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:stretch;margin:14px 0}
+    .way{border:2px solid;border-radius:10px;padding:13px 16px;background:#fff}
+    .way .cap{font-weight:800;font-size:.88em;text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px}
+    .way.a{border-color:#0f766e} .way.a .cap{color:#0f766e}
+    .way.b{border-color:#c2410c} .way.b .cap{color:#c2410c}
+    .eqsign{display:flex;align-items:center;font-size:2.1em;font-weight:800;color:#475569}
+    @media(max-width:700px){.ways{grid-template-columns:1fr}.eqsign{justify-content:center}}
+
+    .boards{display:flex;flex-wrap:wrap;gap:22px;justify-content:center;align-items:flex-end;margin-top:14px}
+    .boards figure{text-align:center}
+    .boards figcaption{margin-top:8px;font-weight:800;color:var(--c);font-size:1.02em}
+    .sieve{border-collapse:collapse;margin:12px auto;background:#fff}
+    .sieve td{border:1.4px solid var(--grid);width:38px;height:34px;text-align:center;
+              font-size:.98em;font-weight:600;color:#1e2430}
+    .rules-list{list-style:none;counter-reset:rl;margin:10px 0}
+    .rules-list li{position:relative;padding:10px 14px 10px 48px;margin:8px 0;background:#fff;
+                   border-left:4px solid var(--c);border-radius:0 7px 7px 0;font-size:1.05em}
+    .rules-list li::before{counter-increment:rl;content:counter(rl);position:absolute;left:11px;top:50%;
+        transform:translateY(-50%);width:26px;height:26px;background:var(--c);color:#fff;border-radius:50%;
+        display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85em}
+    .sign{border:2px solid var(--c);border-radius:9px;padding:12px 16px;margin:10px 0;background:#fff}
+    .sign b{color:var(--c)}
+    .sign .ex{margin-top:5px;font-size:1.02em;color:#475569}
+</style>
+</head>
+<body>
+<div class="container">
+
+    <div class="header">
+        <div class="emo">➗ 🔟 ➗</div>
+        <h1>Простые числа и делимость</h1>
+    </div>
+
+    <section class="sec sec-blue">
+        <h2>🔥 Разминка. Устно, по цепочке</h2>
+        <div class="memo">
+            <p>Делится ли <strong>4569</strong> на 3? А на 9?</p>
+            <p>Делится ли <strong>1236</strong> на 4?</p>
+            <p>Делится ли <strong>71256</strong> на 8?</p>
+            <p>Делится ли <strong>2478</strong> на 6?</p>
+            <p>Делится ли <strong>918082</strong> на 11?</p>
+        </div>
+    </section>
+
+    <section class="sec sec-emerald">
+        <h2>🧱 Свойства делимости</h2>
+        <ol class="rules-list">
+            <li>Если <b>каждое</b> из двух чисел делится на c, то и сумма, и разность делятся на c.</li>
+            <li>Если одно из двух чисел делится на c, а другое <b>нет</b>, то сумма на c не делится.</li>
+            <li>Если хотя бы один множитель делится на c, то и всё произведение делится на c.</li>
+            <li>Если a делится на b, а b делится на c, то a делится на c.</li>
+        </ol>
+        <div class="task">
+            <span class="task-num">1</span>
+            <p>Число <strong>a</strong> делится на 5 и число <strong>b</strong> делится на 5. Делится ли на 5 число a + b? a − b? a × b? a + b + 3?</p>
+            <div class="grid-space"></div>
+        </div>
+        <div class="task">
+            <span class="star">⭐</span>
+            <span class="task-num">2</span>
+            <p>Верно ли, что если число делится на 2 и на 3, то оно делится на 6?</p>
+            <div class="grid-space"></div>
+        </div>
+        <div class="task">
+            <span class="star">⭐</span>
+            <span class="task-num">3</span>
+            <p>Верно ли, что если число делится на 4 и на 6, то оно делится на 24?</p>
+            <div class="grid-space"></div>
+            <p class="hint">Если считаешь, что неверно, приведи контрпример. Один пример убивает утверждение целиком.</p>
+        </div>
+        <div class="task">
+            <span class="star">⭐</span>
+            <span class="task-num">4</span>
+            <p>Докажи, что сумма <strong>трёх</strong> подряд идущих натуральных чисел делится на 3.</p>
+            <div class="grid-space grid-tall"></div>
+        </div>
+        <div class="task">
+            <span class="star">⭐⭐</span>
+            <span class="task-num">5</span>
+            <p>Докажи, что сумма <strong>четырёх</strong> подряд идущих натуральных чисел на 4 <strong>не</strong> делится.</p>
+            <div class="grid-space grid-tall"></div>
+        </div>
+        <div class="task">
+            <span class="star">⭐⭐</span>
+            <span class="task-num">6</span>
+            <p>Докажи, что произведение двух подряд идущих натуральных чисел чётно. А произведение <strong>трёх</strong> подряд идущих делится на 6.</p>
+            <div class="grid-space grid-tall"></div>
+        </div>
+    </section>
+
+    <div class="break"></div>
+    <section class="sec sec-purple">
+        <h2>🔍 Признаки делимости</h2>
+        <p>Признаки не разрозненный список, их всего три семьи, и у каждой своя причина работать.</p>
+        <div class="sign"><b>Через последние цифры: на 2, 5 и 10 — одна, на 4 — две, на 8 — три.</b>
+            <div class="ex">Работает потому, что 100 делится на 4, а 1000 делится на 8. Всё, что левее, уже кратно, и смотреть на него незачем.</div></div>
+        <div class="sign"><b>Через сумму цифр: на 3 и на 9.</b>
+            <div class="ex">Работает потому, что 10, 100 и 1000 при делении на 9 дают в остатке единицу.</div></div>
+        <div class="sign"><b>Через знакопеременную сумму: на 11.</b>
+            <div class="ex">Складываем цифры на нечётных местах, вычитаем цифры на чётных, смотрим на результат.</div></div>
+        <div class="sign"><b>Отдельно на 7.</b>
+            <div class="ex">Отбрасываем последнюю цифру, удваиваем её и вычитаем из оставшегося числа. Повторяем, пока не станет видно. Пример: 1729 → 172 − 18 = 154 → 15 − 8 = 7. Делится.</div></div>
+        <div class="task">
+            <span class="star">⭐</span>
+            <span class="task-num">7</span>
+            <p>Вставь цифру вместо звёздочки так, чтобы число <strong>3 * 5</strong> делилось на 9. Найди все варианты.</p>
+            <div class="grid-space"></div>
+        </div>
+        <div class="task">
+            <span class="star">⭐</span>
+            <span class="task-num">8</span>
+            <p>При каких цифрах вместо звёздочки число <strong>12 * 4</strong> делится на 4? А на 8?</p>
+            <div class="grid-space grid-tall"></div>
+        </div>
+        <div class="task">
+            <span class="star">⭐⭐⭐</span>
+            <span class="task-num">9</span>
+            <p>Число <strong>34 * 5 *</strong> делится на 36. Найди все варианты.</p>
+            <div class="grid-space grid-tall"></div>
+            <p class="hint">36 это 4 × 9. Вспомни задачи 2 и 3: когда двух признаков сразу достаточно, а когда нет?</p>
+        </div>
+        <div class="task">
+            <span class="star">⭐</span>
+            <span class="task-num">10</span>
+            <p>Сколько делителей у числа <strong>36</strong>? у числа <strong>100</strong>? у числа <strong>60</strong>?</p>
+            <div class="grid-space"></div>
+        </div>
+        <div class="task">
+            <span class="star">⭐⭐</span>
+            <span class="task-num">11</span>
+            <p>Найди наименьшее натуральное число, которое делится на <strong>все числа от 1 до 10</strong>.</p>
+            <div class="grid-space grid-tall"></div>
+        </div>
+    </section>
+
+    <div class="break"></div>
+    <section class="sec sec-crimson">
+        <h2>🧮 Простые и составные</h2>
+        <div class="task">
+            <span class="task-num">12</span>
+            <p>Вычеркни решетом Эратосфена всё лишнее и выпиши <strong>все простые числа до 100</strong>. Сколько их получилось?</p>
+<table class="sieve">
+  <tr><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td></tr>
+  <tr><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td><td>19</td><td>20</td></tr>
+  <tr><td>21</td><td>22</td><td>23</td><td>24</td><td>25</td><td>26</td><td>27</td><td>28</td><td>29</td><td>30</td></tr>
+  <tr><td>31</td><td>32</td><td>33</td><td>34</td><td>35</td><td>36</td><td>37</td><td>38</td><td>39</td><td>40</td></tr>
+  <tr><td>41</td><td>42</td><td>43</td><td>44</td><td>45</td><td>46</td><td>47</td><td>48</td><td>49</td><td>50</td></tr>
+  <tr><td>51</td><td>52</td><td>53</td><td>54</td><td>55</td><td>56</td><td>57</td><td>58</td><td>59</td><td>60</td></tr>
+  <tr><td>61</td><td>62</td><td>63</td><td>64</td><td>65</td><td>66</td><td>67</td><td>68</td><td>69</td><td>70</td></tr>
+  <tr><td>71</td><td>72</td><td>73</td><td>74</td><td>75</td><td>76</td><td>77</td><td>78</td><td>79</td><td>80</td></tr>
+  <tr><td>81</td><td>82</td><td>83</td><td>84</td><td>85</td><td>86</td><td>87</td><td>88</td><td>89</td><td>90</td></tr>
+  <tr><td>91</td><td>92</td><td>93</td><td>94</td><td>95</td><td>96</td><td>97</td><td>98</td><td>99</td><td>100</td></tr>
+</table>
+            <p class="hint">Единицу вычеркни сразу, она не простая и не составная. Дальше обводи очередное невычеркнутое число и вычёркивай всех его кратных. Дойдя до какого числа, можно остановиться?</p>
+        </div>
+        <div class="task">
+            <span class="star">⭐</span>
+            <span class="task-num">13</span>
+            <p>Почему единица <strong>не</strong> считается простым числом?</p>
+            <div class="grid-space"></div>
+        </div>
+        <div class="task">
+            <span class="star">⭐</span>
+            <span class="task-num">14</span>
+            <p>Найди все пары простых чисел-<strong>близнецов</strong> до 100, то есть таких, которые отличаются на 2.</p>
+            <div class="grid-space grid-tall"></div>
+        </div>
+        <div class="task">
+            <span class="star">⭐⭐</span>
+            <span class="task-num">15</span>
+            <p>Может ли сумма двух простых чисел быть простым числом?</p>
+            <div class="grid-space grid-tall"></div>
+        </div>
+        <div class="task">
+            <span class="star">⭐⭐⭐</span>
+            <span class="task-num">16</span>
+            <p>Найди три простых числа, идущих через 2, то есть вида p, p + 2, p + 4. Сколько таких троек существует?</p>
+            <div class="grid-space grid-tall"></div>
+            <p class="hint">Посмотри на остатки этих трёх чисел при делении на 3.</p>
+        </div>
+        <div class="task">
+            <span class="star">⭐⭐⭐</span>
+            <span class="task-num">17</span>
+            <p>Докажи, что простых чисел <strong>бесконечно много</strong>.</p>
+            <div class="grid-space grid-tall"></div>
+            <p class="hint">Предположи, что их конечное число, и перемножь их все. А теперь прибавь единицу.</p>
+        </div>
+    </section>
+
+    <div class="break"></div>
+    <section class="sec sec-cyan">
+        <h2>🎯 Головоломка</h2>
+        <div class="memo">
+            <p>Отметьте центры клеток так, чтобы <strong>никакие три отмеченные точки не лежали на одной прямой</strong>.</p>
+            <p>Прямая любая: не только вдоль клеток и по диагонали, но и наклонная. Три точки на одной прямой запрещены всегда.</p>
+        </div>
+        <div class="boards">
+            <figure><svg viewBox="0 0 206 206" width="206" height="206" style="max-width:100%;height:auto">
+<rect x="8" y="8" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="27.0" cy="27.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="46" y="8" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="65.0" cy="27.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="84" y="8" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="103.0" cy="27.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="122" y="8" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="141.0" cy="27.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="160" y="8" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="179.0" cy="27.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="8" y="46" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="27.0" cy="65.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="46" y="46" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="65.0" cy="65.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="84" y="46" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="103.0" cy="65.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="122" y="46" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="141.0" cy="65.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="160" y="46" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="179.0" cy="65.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="8" y="84" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="27.0" cy="103.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="46" y="84" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="65.0" cy="103.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="84" y="84" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="103.0" cy="103.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="122" y="84" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="141.0" cy="103.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="160" y="84" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="179.0" cy="103.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="8" y="122" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="27.0" cy="141.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="46" y="122" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="65.0" cy="141.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="84" y="122" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="103.0" cy="141.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="122" y="122" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="141.0" cy="141.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="160" y="122" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="179.0" cy="141.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="8" y="160" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="27.0" cy="179.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="46" y="160" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="65.0" cy="179.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="84" y="160" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="103.0" cy="179.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="122" y="160" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="141.0" cy="179.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="160" y="160" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="179.0" cy="179.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="8" y="8" width="190" height="190" fill="none" stroke="#0e7490" stroke-width="2.6"/>
+</svg><figcaption>а) 10 клеток на доске 5 × 5</figcaption></figure>
+            <figure><svg viewBox="0 0 244 244" width="244" height="244" style="max-width:100%;height:auto">
+<rect x="8" y="8" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="27.0" cy="27.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="46" y="8" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="65.0" cy="27.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="84" y="8" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="103.0" cy="27.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="122" y="8" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="141.0" cy="27.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="160" y="8" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="179.0" cy="27.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="198" y="8" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="217.0" cy="27.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="8" y="46" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="27.0" cy="65.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="46" y="46" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="65.0" cy="65.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="84" y="46" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="103.0" cy="65.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="122" y="46" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="141.0" cy="65.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="160" y="46" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="179.0" cy="65.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="198" y="46" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="217.0" cy="65.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="8" y="84" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="27.0" cy="103.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="46" y="84" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="65.0" cy="103.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="84" y="84" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="103.0" cy="103.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="122" y="84" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="141.0" cy="103.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="160" y="84" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="179.0" cy="103.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="198" y="84" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="217.0" cy="103.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="8" y="122" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="27.0" cy="141.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="46" y="122" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="65.0" cy="141.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="84" y="122" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="103.0" cy="141.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="122" y="122" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="141.0" cy="141.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="160" y="122" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="179.0" cy="141.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="198" y="122" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="217.0" cy="141.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="8" y="160" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="27.0" cy="179.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="46" y="160" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="65.0" cy="179.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="84" y="160" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="103.0" cy="179.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="122" y="160" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="141.0" cy="179.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="160" y="160" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="179.0" cy="179.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="198" y="160" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="217.0" cy="179.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="8" y="198" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="27.0" cy="217.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="46" y="198" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="65.0" cy="217.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="84" y="198" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="103.0" cy="217.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="122" y="198" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="141.0" cy="217.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="160" y="198" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="179.0" cy="217.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="198" y="198" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="217.0" cy="217.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="8" y="8" width="228" height="228" fill="none" stroke="#0e7490" stroke-width="2.6"/>
+</svg><figcaption>б) 12 клеток на доске 6 × 6</figcaption></figure>
+            <figure><svg viewBox="0 0 282 282" width="282" height="282" style="max-width:100%;height:auto">
+<rect x="8" y="8" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="27.0" cy="27.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="46" y="8" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="65.0" cy="27.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="84" y="8" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="103.0" cy="27.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="122" y="8" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="141.0" cy="27.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="160" y="8" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="179.0" cy="27.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="198" y="8" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="217.0" cy="27.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="236" y="8" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="255.0" cy="27.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="8" y="46" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="27.0" cy="65.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="46" y="46" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="65.0" cy="65.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="84" y="46" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="103.0" cy="65.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="122" y="46" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="141.0" cy="65.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="160" y="46" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="179.0" cy="65.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="198" y="46" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="217.0" cy="65.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="236" y="46" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="255.0" cy="65.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="8" y="84" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="27.0" cy="103.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="46" y="84" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="65.0" cy="103.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="84" y="84" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="103.0" cy="103.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="122" y="84" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="141.0" cy="103.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="160" y="84" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="179.0" cy="103.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="198" y="84" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="217.0" cy="103.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="236" y="84" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="255.0" cy="103.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="8" y="122" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="27.0" cy="141.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="46" y="122" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="65.0" cy="141.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="84" y="122" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="103.0" cy="141.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="122" y="122" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="141.0" cy="141.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="160" y="122" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="179.0" cy="141.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="198" y="122" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="217.0" cy="141.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="236" y="122" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="255.0" cy="141.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="8" y="160" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="27.0" cy="179.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="46" y="160" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="65.0" cy="179.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="84" y="160" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="103.0" cy="179.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="122" y="160" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="141.0" cy="179.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="160" y="160" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="179.0" cy="179.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="198" y="160" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="217.0" cy="179.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="236" y="160" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="255.0" cy="179.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="8" y="198" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="27.0" cy="217.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="46" y="198" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="65.0" cy="217.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="84" y="198" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="103.0" cy="217.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="122" y="198" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="141.0" cy="217.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="160" y="198" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="179.0" cy="217.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="198" y="198" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="217.0" cy="217.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="236" y="198" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="255.0" cy="217.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="8" y="236" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="27.0" cy="255.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="46" y="236" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="65.0" cy="255.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="84" y="236" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="103.0" cy="255.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="122" y="236" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="141.0" cy="255.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="160" y="236" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="179.0" cy="255.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="198" y="236" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="217.0" cy="255.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="236" y="236" width="38" height="38" fill="#fff" stroke="#0e7490" stroke-width="1.3" opacity=".55"/>
+<circle cx="255.0" cy="255.0" r="2" fill="#0e7490" opacity=".28"/>
+<rect x="8" y="8" width="266" height="266" fill="none" stroke="#0e7490" stroke-width="2.6"/>
+</svg><figcaption>в) 14 клеток на доске 7 × 7</figcaption></figure>
+        </div>
+        <p class="hint">Подсказка про количество: в каждой строке может стоять не больше двух точек, иначе три из них окажутся на одной горизонтали. То же и со столбцами. Значит на доске 5 × 5 больше десяти точек не поставить в принципе, и задача просит ровно максимум.</p>
+    </section>
+
+    <section class="sec sec-slate">
+        <h2>🏡 Домой</h2>
+        <div class="memo">
+            <p><strong>1.</strong> Число a делится на 7, а число b на 7 не делится. Что можно сказать про a + b? Про a × b?</p>
+            <p><strong>2.</strong> Вставь цифру: 5 * 7 делится на 9. Найди все варианты.</p>
+            <p><strong>3.</strong> При каких цифрах вместо звёздочки число 4 * 32 делится на 8?</p>
+            <p><strong>4.</strong> Сколько делителей у числа 48? у числа 81?</p>
+            <p><strong>5.</strong> Докажи, что сумма пяти подряд идущих натуральных чисел делится на 5.</p>
+            <p><strong>6.</strong> Выпиши все простые числа от 100 до 150.</p>
+            <p><strong>7.</strong> ⭐ Найди наименьшее число, которое делится на все числа от 1 до 12.</p>
+            <p><strong>8.</strong> ⭐ Проверь признаками, делится ли 1001 на 7, на 11 и на 13. Что заметил?</p>
+        </div>
+    </section>
+
+</div>
+</body>
+</html>
