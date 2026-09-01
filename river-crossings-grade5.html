@@ -106,6 +106,9 @@
     .tbl td.filled{background:var(--bg);color:var(--c)}
 
     .tbl th:first-child{width:64px}
+    .tbl th.river{background:#0e7490}
+    .tbl td.river{background:#e0f2fe;color:#0c4a6e;font-weight:700}
+    .tbl td.river.empty{background:#f0f9ff}
     .tbl td:first-child{font-weight:800;color:var(--c)}
     .tbl td.l{text-align:left;padding-left:14px}
     .tbl caption{caption-side:top;text-align:left;font-weight:700;color:var(--c);padding:0 0 7px;font-size:1.04em}
@@ -175,17 +178,18 @@
             <p>Договариваемся на весь год: <strong>решение без таблицы не принимается</strong>, даже если ответ верный.</p>
         </div>
         <table class="tbl">
-            <caption>Образец. Волк, коза и капуста: лодка берёт крестьянина и один груз</caption>
-            <tr><th>№</th><th>Кто едет и куда</th><th>Левый берег</th><th>Правый берег</th></tr>
-            <tr><td>1</td><td class="l filled">Коза →</td><td class="l">волк, капуста</td><td class="l">коза</td></tr>
-            <tr><td>2</td><td class="l filled">← пустой</td><td class="l">волк, капуста</td><td class="l">коза</td></tr>
-            <tr><td>3</td><td class="l filled">Волк →</td><td class="l">капуста</td><td class="l">волк, коза</td></tr>
-            <tr><td>4</td><td class="l filled">← Коза</td><td class="l">капуста, коза</td><td class="l">волк</td></tr>
-            <tr><td>5</td><td class="l filled">Капуста →</td><td class="l">коза</td><td class="l">волк, капуста</td></tr>
-            <tr><td>6</td><td class="l filled">← пустой</td><td class="l">коза</td><td class="l">волк, капуста</td></tr>
-            <tr><td>7</td><td class="l filled">Коза →</td><td class="l">пусто</td><td class="l">волк, коза, капуста</td></tr>
+            <caption>Образец. Волк, коза и капуста: лодка берёт крестьянина (К) и один груз</caption>
+            <tr><th>№</th><th>Левый берег</th><th class="river">На реке</th><th>Правый берег</th></tr>
+            <tr><td>старт</td><td class="l">К, волк, коза, капуста</td><td class="l river">—</td><td class="l">пусто</td></tr>
+            <tr><td>1</td><td class="l">волк, капуста</td><td class="l river">К + коза →</td><td class="l">К, коза</td></tr>
+            <tr><td>2</td><td class="l">К, волк, капуста</td><td class="l river">← К</td><td class="l">коза</td></tr>
+            <tr><td>3</td><td class="l">капуста</td><td class="l river">К + волк →</td><td class="l">К, волк, коза</td></tr>
+            <tr><td>4</td><td class="l">К, коза, капуста</td><td class="l river">← К + коза</td><td class="l">волк</td></tr>
+            <tr><td>5</td><td class="l">коза</td><td class="l river">К + капуста →</td><td class="l">К, волк, капуста</td></tr>
+            <tr><td>6</td><td class="l">К, коза</td><td class="l river">← К</td><td class="l">волк, капуста</td></tr>
+            <tr><td>7</td><td class="l">пусто</td><td class="l river">К + коза →</td><td class="l">К, волк, коза, капуста</td></tr>
         </table>
-        <p class="hint">Стрелка вправо это рейс на тот берег, стрелка влево обратно. Крестьянина в таблице не пишем: он едет всегда, и где он сейчас, видно по стрелке последнего рейса. Поэтому строки 1 и 2 отличаются только ею. Обратите внимание на рейс 4: пришлось везти козу <strong>назад</strong>. Без этого задача не решается, и почти никто до этого не додумывается сразу.</p>
+        <p class="hint">Столбцы стоят как на карте: левый берег слева, река посередине, правый справа. <strong>К</strong> это крестьянин, он в лодке всегда, поэтому и на реке он в каждой строке. Стрелка показывает, в какую сторону плывут. Обратите внимание на рейс 4: пришлось везти козу <strong>назад</strong>. Без этого задача не решается, и почти никто до этого не додумывается сразу.</p>
     </section>
 
     <div class="break"></div>
@@ -196,13 +200,13 @@
             <p>Отряд солдат подошёл к реке. У берега лодка, в которой катаются <strong>два мальчика</strong>. Лодка выдерживает либо двух мальчиков, либо одного солдата. Как переправить весь отряд?</p>
         <table class="tbl">
             <caption>Заполни один полный цикл: как переправляется ОДИН солдат</caption>
-            <tr><th>№</th><th>Кто едет и куда</th><th>Левый берег</th><th>Правый берег</th></tr>
-            <tr><td>1</td><td></td><td></td><td></td></tr>
-            <tr><td>2</td><td></td><td></td><td></td></tr>
-            <tr><td>3</td><td></td><td></td><td></td></tr>
-            <tr><td>4</td><td></td><td></td><td></td></tr>
-            <tr><td>5</td><td></td><td></td><td></td></tr>
-            <tr><td>6</td><td></td><td></td><td></td></tr>
+            <tr><th>№</th><th>Левый берег</th><th class="river">На реке</th><th>Правый берег</th></tr>
+            <tr><td>1</td><td></td><td class="river empty"></td><td></td></tr>
+            <tr><td>2</td><td></td><td class="river empty"></td><td></td></tr>
+            <tr><td>3</td><td></td><td class="river empty"></td><td></td></tr>
+            <tr><td>4</td><td></td><td class="river empty"></td><td></td></tr>
+            <tr><td>5</td><td></td><td class="river empty"></td><td></td></tr>
+            <tr><td>6</td><td></td><td class="river empty"></td><td></td></tr>
         </table>
             <p class="hint">Сколько рейсов уходит на одного солдата? А на отряд из десяти?</p>
         </div>
@@ -212,18 +216,18 @@
             <p>Три рыцаря и три оруженосца подошли к реке. Лодка вмещает двоих. Оруженосец не должен оставаться в обществе чужого рыцаря без своего господина. Как всем переправиться?</p>
         <table class="tbl">
             <caption>Одиннадцать рейсов. Столбцы берегов заполняй обязательно: без них не поймёшь, где нарушено условие</caption>
-            <tr><th>№</th><th>Кто едет и куда</th><th>Левый берег</th><th>Правый берег</th></tr>
-            <tr><td>1</td><td></td><td></td><td></td></tr>
-            <tr><td>2</td><td></td><td></td><td></td></tr>
-            <tr><td>3</td><td></td><td></td><td></td></tr>
-            <tr><td>4</td><td></td><td></td><td></td></tr>
-            <tr><td>5</td><td></td><td></td><td></td></tr>
-            <tr><td>6</td><td></td><td></td><td></td></tr>
-            <tr><td>7</td><td></td><td></td><td></td></tr>
-            <tr><td>8</td><td></td><td></td><td></td></tr>
-            <tr><td>9</td><td></td><td></td><td></td></tr>
-            <tr><td>10</td><td></td><td></td><td></td></tr>
-            <tr><td>11</td><td></td><td></td><td></td></tr>
+            <tr><th>№</th><th>Левый берег</th><th class="river">На реке</th><th>Правый берег</th></tr>
+            <tr><td>1</td><td></td><td class="river empty"></td><td></td></tr>
+            <tr><td>2</td><td></td><td class="river empty"></td><td></td></tr>
+            <tr><td>3</td><td></td><td class="river empty"></td><td></td></tr>
+            <tr><td>4</td><td></td><td class="river empty"></td><td></td></tr>
+            <tr><td>5</td><td></td><td class="river empty"></td><td></td></tr>
+            <tr><td>6</td><td></td><td class="river empty"></td><td></td></tr>
+            <tr><td>7</td><td></td><td class="river empty"></td><td></td></tr>
+            <tr><td>8</td><td></td><td class="river empty"></td><td></td></tr>
+            <tr><td>9</td><td></td><td class="river empty"></td><td></td></tr>
+            <tr><td>10</td><td></td><td class="river empty"></td><td></td></tr>
+            <tr><td>11</td><td></td><td class="river empty"></td><td></td></tr>
         </table>
             <p class="hint">Следи, чтобы ни на одном берегу оруженосцев не оказалось больше, чем рыцарей, если рыцари там вообще есть.</p>
         </div>
@@ -233,16 +237,16 @@
             <p>Семья переходит по верёвочному мосту, который выдерживает не более <strong>100 кг</strong>. Отец весит 90 кг, мать 80 кг, сын 40 кг, дочь 30 кг. Идти вдвоём можно, если вместе не больше 100 кг. Как переправиться всем?</p>
         <table class="tbl">
             <caption>Девять рейсов</caption>
-            <tr><th>№</th><th>Кто едет и куда</th><th>Левый берег</th><th>Правый берег</th></tr>
-            <tr><td>1</td><td></td><td></td><td></td></tr>
-            <tr><td>2</td><td></td><td></td><td></td></tr>
-            <tr><td>3</td><td></td><td></td><td></td></tr>
-            <tr><td>4</td><td></td><td></td><td></td></tr>
-            <tr><td>5</td><td></td><td></td><td></td></tr>
-            <tr><td>6</td><td></td><td></td><td></td></tr>
-            <tr><td>7</td><td></td><td></td><td></td></tr>
-            <tr><td>8</td><td></td><td></td><td></td></tr>
-            <tr><td>9</td><td></td><td></td><td></td></tr>
+            <tr><th>№</th><th>Левый берег</th><th class="river">На реке</th><th>Правый берег</th></tr>
+            <tr><td>1</td><td></td><td class="river empty"></td><td></td></tr>
+            <tr><td>2</td><td></td><td class="river empty"></td><td></td></tr>
+            <tr><td>3</td><td></td><td class="river empty"></td><td></td></tr>
+            <tr><td>4</td><td></td><td class="river empty"></td><td></td></tr>
+            <tr><td>5</td><td></td><td class="river empty"></td><td></td></tr>
+            <tr><td>6</td><td></td><td class="river empty"></td><td></td></tr>
+            <tr><td>7</td><td></td><td class="river empty"></td><td></td></tr>
+            <tr><td>8</td><td></td><td class="river empty"></td><td></td></tr>
+            <tr><td>9</td><td></td><td class="river empty"></td><td></td></tr>
         </table>
             <p class="hint">Кто здесь работает перевозчиком? Сравни с первой задачей.</p>
         </div>
@@ -267,12 +271,12 @@
             <p>Четверо путников. Первый переходит мост за <strong>1 минуту</strong>, второй за <strong>2</strong>, третий за <strong>5</strong>, четвёртый за <strong>10</strong>. За какое наименьшее время переберутся все?</p>
         <table class="tbl">
             <caption>Пять переходов</caption>
-            <tr><th>№</th><th>Кто идёт и куда</th><th>Минут</th><th>Всего прошло</th></tr>
-            <tr><td>1</td><td></td><td></td><td></td></tr>
-            <tr><td>2</td><td></td><td></td><td></td></tr>
-            <tr><td>3</td><td></td><td></td><td></td></tr>
-            <tr><td>4</td><td></td><td></td><td></td></tr>
-            <tr><td>5</td><td></td><td></td><td></td></tr>
+            <tr><th>№</th><th>Ещё не перешли</th><th class="river">На мосту</th><th>Уже перешли</th><th>Минут</th><th>Всего</th></tr>
+            <tr><td>1</td><td></td><td class="river empty"></td><td></td><td></td><td></td></tr>
+            <tr><td>2</td><td></td><td class="river empty"></td><td></td><td></td><td></td></tr>
+            <tr><td>3</td><td></td><td class="river empty"></td><td></td><td></td><td></td></tr>
+            <tr><td>4</td><td></td><td class="river empty"></td><td></td><td></td><td></td></tr>
+            <tr><td>5</td><td></td><td class="river empty"></td><td></td><td></td><td></td></tr>
         </table>
             <p class="hint">Почти все сначала получают 19 минут, отправляя самого быстрого проводником каждый раз. Попробуй отправить двух самых медленных ВМЕСТЕ.</p>
         </div>
@@ -282,14 +286,14 @@
             <p>Тот же мост, но путников пятеро: <strong>1, 3, 6, 8 и 12 минут</strong>. За какое наименьшее время переберутся все?</p>
         <table class="tbl">
             <caption>Семь переходов</caption>
-            <tr><th>№</th><th>Кто идёт и куда</th><th>Минут</th><th>Всего прошло</th></tr>
-            <tr><td>1</td><td></td><td></td><td></td></tr>
-            <tr><td>2</td><td></td><td></td><td></td></tr>
-            <tr><td>3</td><td></td><td></td><td></td></tr>
-            <tr><td>4</td><td></td><td></td><td></td></tr>
-            <tr><td>5</td><td></td><td></td><td></td></tr>
-            <tr><td>6</td><td></td><td></td><td></td></tr>
-            <tr><td>7</td><td></td><td></td><td></td></tr>
+            <tr><th>№</th><th>Ещё не перешли</th><th class="river">На мосту</th><th>Уже перешли</th><th>Минут</th><th>Всего</th></tr>
+            <tr><td>1</td><td></td><td class="river empty"></td><td></td><td></td><td></td></tr>
+            <tr><td>2</td><td></td><td class="river empty"></td><td></td><td></td><td></td></tr>
+            <tr><td>3</td><td></td><td class="river empty"></td><td></td><td></td><td></td></tr>
+            <tr><td>4</td><td></td><td class="river empty"></td><td></td><td></td><td></td></tr>
+            <tr><td>5</td><td></td><td class="river empty"></td><td></td><td></td><td></td></tr>
+            <tr><td>6</td><td></td><td class="river empty"></td><td></td><td></td><td></td></tr>
+            <tr><td>7</td><td></td><td class="river empty"></td><td></td><td></td><td></td></tr>
         </table>
         </div>
     </section>
