@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Подсчёт двумя способами (5 класс)</title>
+<style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+        font-family:'Segoe UI',Arial,sans-serif;
+        background:linear-gradient(180deg,#eaf4f3 0%,#f5f1ec 52%,#eef1f8 100%);
+        background-attachment:fixed;
+        color:#1e2430;padding:22px;line-height:1.55;
+    }
+    .container{max-width:900px;margin:0 auto}
+
+    .header{
+        border:3px solid #0f766e;border-radius:14px;padding:18px 24px;margin-bottom:8px;text-align:center;
+        background:linear-gradient(160deg,#ccfbf1 0%,#fef3c7 62%,#fed7aa 100%);
+        box-shadow:0 3px 10px rgba(0,0,0,.10);
+    }
+    .header .emo{font-size:2em;margin-bottom:6px;letter-spacing:6px}
+    .header h1{font-size:1.7em;color:#115e59}
+    .header .lead{margin-top:8px;font-size:1.02em;color:#334155}
+
+    .sec{--c:#334155;--bg:#f8fafc;--grid:#dbe3ec}
+    .sec-navy  {--c:#1e3a8a;--bg:#eef2ff;--grid:#c7d2f0}
+    .sec-teal  {--c:#0f766e;--bg:#f0fdfa;--grid:#b5dcd6}
+    .sec-orange{--c:#c2410c;--bg:#fff7ed;--grid:#f2d1b6}
+    .sec-violet{--c:#6d28d9;--bg:#f5f3ff;--grid:#d7cdf3}
+    .sec-rose  {--c:#be123c;--bg:#fff1f2;--grid:#f5cad3}
+    .sec-slate {--c:#334155;--bg:#f1f5f9;--grid:#cbd5e1}
+
+    h2{font-size:1.26em;margin:26px 0 12px;padding:9px 16px;border-radius:9px;
+       background:var(--c);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.14)}
+
+    .memo{border:2px solid var(--c);border-left:8px solid var(--c);border-radius:9px;
+          padding:13px 18px;margin:12px 0;background:var(--bg)}
+    .memo p{font-size:1.02em;margin-bottom:7px}
+    .memo p:last-child{margin-bottom:0}
+
+    .rule{border:2px dashed var(--c);border-radius:10px;padding:14px 18px;margin:12px 0;background:var(--bg)}
+    .rule .lbl{font-weight:700;color:var(--c);font-size:1.02em}
+    .rule .ex{font-size:1.3em;font-weight:700;color:var(--c);margin-top:8px;text-align:center;letter-spacing:.5px}
+
+    .calc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(238px,1fr));gap:11px;margin-top:12px}
+    .calc{
+        position:relative;border:2px solid var(--c);border-radius:9px;padding:12px 10px 10px;
+        background:#fff;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.07);
+    }
+    .calc .eq{font-size:1.3em;font-weight:600;letter-spacing:.5px;white-space:nowrap}
+    .calc .eq.long{font-size:1.05em;letter-spacing:0}
+    .calc .blank{display:block;border-bottom:2px solid var(--grid);height:1.5em;margin:8px 12px 0}
+    .calc.hard{border-style:dashed;background:var(--bg)}
+    .calc .st{position:absolute;top:3px;right:7px;font-size:.72em}
+
+    .oral{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:9px;margin-top:10px}
+    .oral div{border:2px solid var(--c);border-radius:8px;padding:9px 6px;background:#fff;
+              text-align:center;font-size:1.3em;font-weight:600}
+
+    .task{border:2px solid var(--c);border-radius:10px;padding:15px 19px;margin:15px 0;
+          background:#fff;box-shadow:0 2px 7px rgba(0,0,0,.08)}
+    .task-num{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;
+              border-radius:50%;font-weight:800;font-size:.95em;color:#fff;background:var(--c);
+              margin-bottom:7px;padding:0 9px}
+    .task p{font-size:1.06em;margin-bottom:7px}
+    .task strong{color:var(--c)}
+    .task .star{float:right;font-size:1.05em;letter-spacing:2px}
+
+    .grid-space{margin-top:9px;border:2px solid var(--c);border-radius:6px;min-height:120px;background:#fff;
+        background-image:repeating-linear-gradient(0deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px),
+                         repeating-linear-gradient(90deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px);
+        background-size:24px 24px}
+    .grid-tall{min-height:165px}
+
+    .card4{border:3px solid var(--c);border-radius:12px;padding:16px 20px;background:var(--bg);margin:12px 0}
+    .card4 .row{display:flex;gap:14px;align-items:baseline;padding:9px 0;border-bottom:1px dashed var(--c)}
+    .card4 .row:last-child{border-bottom:none}
+    .card4 .n{flex:none;width:26px;height:26px;border-radius:50%;background:var(--c);color:#fff;
+              font-weight:800;font-size:.85em;display:flex;align-items:center;justify-content:center}
+    .card4 .t{flex:1}
+    .card4 .t b{color:var(--c)}
+    .card4 .t .e{display:block;font-size:1.12em;font-weight:700;margin-top:3px}
+
+    .hint{font-size:.95em;color:var(--c);font-style:italic;margin-top:7px;opacity:.95}
+
+    @page{size:A4;margin:12mm}
+    @media print{
+        body{background:#fff;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+        .task,.memo,.rule,.header,.card4{page-break-inside:avoid}
+        .break{page-break-before:always}
+    }
+
+    .calc .eq.xlong{font-size:.92em;letter-spacing:0}
+    .figure{border:2px solid var(--c);border-radius:10px;padding:14px;margin:12px 0;background:#fff;text-align:center;overflow-x:auto}
+    .figure .cap{margin-top:10px;font-size:1.12em;font-weight:700;color:var(--c)}
+    .figure .sub{margin-top:4px;font-size:.97em;color:#475569}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+    .eqlist{font-size:1.14em;line-height:1.95;font-weight:600}
+    .eqlist .tot{margin-top:9px;padding-top:9px;border-top:2px solid var(--c);color:var(--c);font-size:1.18em}
+    @media(max-width:700px){.two{grid-template-columns:1fr}}
+
+    .tbl{width:100%;border-collapse:collapse;margin-top:12px;background:#fff}
+    .tbl th{background:var(--c);color:#fff;padding:9px 10px;font-size:1em}
+    .tbl td{border:1.6px solid var(--grid);padding:11px 10px;text-align:center;font-size:1.08em;font-weight:600;height:42px}
+    .tbl td.filled{background:var(--bg);color:var(--c)}
+
+    .tbl th:first-child{width:64px}
+    .tbl th.river{background:#0e7490}
+    .tbl td.river{background:#e0f2fe;color:#0c4a6e;font-weight:700}
+    .tbl td.river.empty{background:#f0f9ff}
+    .tbl td:first-child{font-weight:800;color:var(--c)}
+    .tbl td.l{text-align:left;padding-left:14px}
+    .tbl caption{caption-side:top;text-align:left;font-weight:700;color:var(--c);padding:0 0 7px;font-size:1.04em}
+    .warn{border:3px solid var(--c);border-radius:10px;padding:14px 18px;margin:14px 0;background:var(--bg)}
+    .warn p{font-size:1.06em}
+    .warn p:first-child{font-size:1.12em;font-weight:700;color:var(--c);margin-bottom:7px}
+
+    .col{font-family:"SF Mono",Consolas,"Courier New",monospace;font-size:1.5em;font-weight:700;
+         line-height:1.5;color:var(--c);white-space:pre;display:inline-block;text-align:right}
+    .colwrap{text-align:center;margin:12px 0}
+    .steps{counter-reset:st;list-style:none;margin:10px 0}
+    .steps li{position:relative;padding:9px 12px 9px 46px;margin:7px 0;background:#fff;
+              border-left:4px solid var(--c);border-radius:0 7px 7px 0;font-size:1.04em}
+    .steps li::before{counter-increment:st;content:counter(st);position:absolute;left:10px;top:50%;
+        transform:translateY(-50%);width:26px;height:26px;background:var(--c);color:#fff;border-radius:50%;
+        display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85em}
+    .mine{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:12px}
+    .mine .card{border:2px solid var(--c);border-radius:10px;background:#fff;padding:12px 14px;
+                box-shadow:0 2px 6px rgba(0,0,0,.07)}
+    .mine .who{font-size:.86em;font-weight:800;color:var(--c);text-transform:uppercase;letter-spacing:.5px}
+    .mine .eqn{font-size:1.24em;font-weight:700;margin-top:6px;white-space:nowrap}
+    .mine .blank{display:block;border-bottom:2px solid var(--grid);height:1.5em;margin-top:9px}
+
+    .ways{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:stretch;margin:14px 0}
+    .way{border:2px solid;border-radius:10px;padding:13px 16px;background:#fff}
+    .way .cap{font-weight:800;font-size:.88em;text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px}
+    .way.a{border-color:#0f766e} .way.a .cap{color:#0f766e}
+    .way.b{border-color:#c2410c} .way.b .cap{color:#c2410c}
+    .eqsign{display:flex;align-items:center;font-size:2.1em;font-weight:800;color:#475569}
+    @media(max-width:700px){.ways{grid-template-columns:1fr}.eqsign{justify-content:center}}
+</style>
+</head>
+<body>
+<div class="container">
+
+    <div class="header">
+        <div class="emo">🔢 ⇄ 🔢</div>
+        <h1>Подсчёт двумя способами</h1>
+    </div>
+
+    <section class="sec sec-navy">
+        <h2>🧮 Разминка</h2>
+        <div class="calc-grid">
+            <div class="calc"><span class="eq">88 × 125</span><span class="blank"></span></div>
+            <div class="calc"><span class="eq">48 × 99 + 48</span><span class="blank"></span></div>
+            <div class="calc"><span class="eq">1 + 2 + … + 1000</span><span class="blank"></span></div>
+            <div class="calc"><span class="eq long">(1 + 2 + … + 99) : 99</span><span class="blank"></span></div>
+            <div class="calc"><span class="eq">35 × 28 + 65 × 28</span><span class="blank"></span></div>
+            <div class="calc hard"><span class="st">⭐</span><span class="eq xlong">2025 × 2023 − 2024 × 2024</span><span class="blank"></span></div>
+        </div>
+        <p class="hint">В последнем примере ответ можно назвать, не считая. Посмотри, что будет с 5 × 3 − 4 × 4, потом с 6 × 4 − 5 × 5.</p>
+    </section>
+
+    <section class="sec sec-teal">
+        <h2>⇄ Приём</h2>
+        <div class="ways">
+            <div class="way a"><div class="cap">Способ 1</div>Считаем величину одним способом и получаем какое-то число.</div>
+            <div class="eqsign">=</div>
+            <div class="way b"><div class="cap">Способ 2</div>Считаем <strong>ту же самую</strong> величину другим способом и получаем другое выражение.</div>
+        </div>
+        <div class="rule">
+            <span class="lbl">Оба ответа верны, значит их можно приравнять.</span> Из этого равенства и вытаскивается неизвестное. Весь фокус в том, чтобы выбрать, <strong>что именно</strong> считать дважды.
+        </div>
+        <div class="figure">
+<svg viewBox="0 0 478 320" width="478" height="320" style="max-width:100%;height:auto">
+<rect x="76" y="40" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="110" y="40" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="144" y="40" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="178" y="40" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="212" y="40" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="246" y="40" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="280" y="40" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="314" y="40" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="348" y="40" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="76" y="74" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="110" y="74" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="144" y="74" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="178" y="74" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="212" y="74" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="246" y="74" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="280" y="74" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="314" y="74" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="348" y="74" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="76" y="108" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="110" y="108" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="144" y="108" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="178" y="108" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="212" y="108" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="246" y="108" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="280" y="108" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="314" y="108" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="348" y="108" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="76" y="142" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="110" y="142" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="144" y="142" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="178" y="142" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="212" y="142" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="246" y="142" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="280" y="142" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="314" y="142" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="348" y="142" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="76" y="176" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="110" y="176" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="144" y="176" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="178" y="176" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="212" y="176" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="246" y="176" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="280" y="176" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="314" y="176" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="348" y="176" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="76" y="210" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="110" y="210" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="144" y="210" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="178" y="210" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="212" y="210" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="246" y="210" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="280" y="210" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="314" y="210" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="348" y="210" width="34" height="34" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+<rect x="76" y="40" width="306" height="204" fill="none" stroke="#475569" stroke-width="2.4"/>
+<rect x="76" y="40" width="306" height="34" fill="#0f766e" opacity=".08"/>
+<text x="412" y="63.0" text-anchor="middle" font-size="17" font-weight="800" fill="#0f766e" font-family="Segoe UI,Arial">12</text>
+<rect x="76" y="74" width="306" height="34" fill="#0f766e" opacity=".08"/>
+<text x="412" y="97.0" text-anchor="middle" font-size="17" font-weight="800" fill="#0f766e" font-family="Segoe UI,Arial">12</text>
+<rect x="76" y="108" width="306" height="34" fill="#0f766e" opacity=".08"/>
+<text x="412" y="131.0" text-anchor="middle" font-size="17" font-weight="800" fill="#0f766e" font-family="Segoe UI,Arial">12</text>
+<rect x="76" y="142" width="306" height="34" fill="#0f766e" opacity=".08"/>
+<text x="412" y="165.0" text-anchor="middle" font-size="17" font-weight="800" fill="#0f766e" font-family="Segoe UI,Arial">12</text>
+<rect x="76" y="176" width="306" height="34" fill="#0f766e" opacity=".08"/>
+<text x="412" y="199.0" text-anchor="middle" font-size="17" font-weight="800" fill="#0f766e" font-family="Segoe UI,Arial">12</text>
+<rect x="76" y="210" width="306" height="34" fill="#0f766e" opacity=".08"/>
+<text x="412" y="233.0" text-anchor="middle" font-size="17" font-weight="800" fill="#0f766e" font-family="Segoe UI,Arial">12</text>
+<text x="412" y="28" text-anchor="middle" font-size="13" font-weight="700" fill="#0f766e" font-family="Segoe UI,Arial">сумма</text>
+<text x="93.0" y="274" text-anchor="middle" font-size="17" font-weight="800" fill="#c2410c" font-family="Segoe UI,Arial">?</text>
+<text x="127.0" y="274" text-anchor="middle" font-size="17" font-weight="800" fill="#c2410c" font-family="Segoe UI,Arial">?</text>
+<text x="161.0" y="274" text-anchor="middle" font-size="17" font-weight="800" fill="#c2410c" font-family="Segoe UI,Arial">?</text>
+<text x="195.0" y="274" text-anchor="middle" font-size="17" font-weight="800" fill="#c2410c" font-family="Segoe UI,Arial">?</text>
+<text x="229.0" y="274" text-anchor="middle" font-size="17" font-weight="800" fill="#c2410c" font-family="Segoe UI,Arial">?</text>
+<text x="263.0" y="274" text-anchor="middle" font-size="17" font-weight="800" fill="#c2410c" font-family="Segoe UI,Arial">?</text>
+<text x="297.0" y="274" text-anchor="middle" font-size="17" font-weight="800" fill="#c2410c" font-family="Segoe UI,Arial">?</text>
+<text x="331.0" y="274" text-anchor="middle" font-size="17" font-weight="800" fill="#c2410c" font-family="Segoe UI,Arial">?</text>
+<text x="365.0" y="274" text-anchor="middle" font-size="17" font-weight="800" fill="#c2410c" font-family="Segoe UI,Arial">?</text>
+<text x="68" y="274" text-anchor="end" font-size="13" font-weight="700" fill="#c2410c" font-family="Segoe UI,Arial">сумма</text>
+<circle cx="412" cy="268" r="19" fill="#f8fafc" stroke="#475569" stroke-width="2"/>
+<text x="412" y="274" text-anchor="middle" font-size="16" font-weight="800" fill="#334155" font-family="Segoe UI,Arial">72</text>
+<text x="239.0" y="298" text-anchor="middle" font-size="14.5" font-weight="700" fill="#0f766e" font-family="Segoe UI,Arial">по строкам: 6 × 12 = 72</text>
+<text x="239.0" y="317" text-anchor="middle" font-size="14.5" font-weight="700" fill="#c2410c" font-family="Segoe UI,Arial">по столбцам: 9 × ? = 72, значит ? = 8</text>
+</svg>
+        </div>
+        <p class="hint">Считали одно и то же: сумму всех чисел таблицы. Сначала по строкам, потом по столбцам. Приравняли и нашли сумму столбца, хотя ни одного числа в таблице так и не узнали.</p>
+    </section>
+
+    <div class="break"></div>
+    <section class="sec sec-teal">
+        <h2>📊 Таблицы</h2>
+        <div class="task">
+            <span class="task-num">1</span>
+            <p>В прямоугольной таблице <strong>6 строк и 9 столбцов</strong>, в каждой клетке стоит число. Сумма чисел в каждой строке равна 12. Чему равна сумма всех чисел таблицы? А чему равна сумма чисел в каждом столбце, если во всех столбцах она одинакова?</p>
+            <div class="grid-space"></div>
+        </div>
+        <div class="task">
+            <span class="star">⭐</span>
+            <span class="task-num">2</span>
+            <p>В таблице <strong>5 × 5</strong> в каждой клетке написано число. Сумма чисел в каждой строке равна 20, и сумма в каждом столбце тоже равна 20. Может ли такое быть? А если бы сумма в строке была 20, а в столбце 25?</p>
+            <div class="grid-space grid-tall"></div>
+        </div>
+        <div class="task">
+            <span class="star">⭐</span>
+            <span class="task-num">3</span>
+            <p>Составлена таблица умножения от 1 × 1 до <strong>9 × 9</strong>. Чему равна сумма всех 81 произведения?</p>
+            <div class="grid-space grid-tall"></div>
+            <p class="hint">Посчитай сначала сумму одной строки. Что в ней общего у всех слагаемых?</p>
+        </div>
+        <div class="task">
+            <span class="star">⭐⭐</span>
+            <span class="task-num">4</span>
+            <p>В таблице <strong>10 × 10</strong> в клетке на пересечении строки i и столбца j написано число <strong>i + j</strong> (строки и столбцы пронумерованы от 1 до 10). Найди сумму всех чисел таблицы.</p>
+            <div class="grid-space grid-tall"></div>
+            <p class="hint">Сколько раз в таблице встретится номер строки 7? А номер столбца 7?</p>
+        </div>
+    </section>
+
+    <div class="break"></div>
+    <section class="sec sec-orange">
+        <h2>🔲 Клетки и фигуры</h2>
+        <div class="task">
+            <span class="star">⭐</span>
+            <span class="task-num">5</span>
+            <p>Сколько всего <strong>квадратов</strong> любого размера со сторонами по линиям сетки можно найти на доске 8 × 8?</p>
+            <div class="grid-space grid-tall"></div>
+        </div>
+        <div class="task">
+            <span class="star">⭐⭐</span>
+            <span class="task-num">6</span>
+            <p>Сколько всего <strong>прямоугольников</strong> со сторонами по линиям сетки на доске 8 × 8?</p>
+            <div class="grid-space grid-tall"></div>
+            <p class="hint">Чем задаётся прямоугольник? Двумя горизонтальными линиями и двумя вертикальными. А сколько линий на доске?</p>
+        </div>
+        <p class="hint">Эти две задачи стоят подряд не случайно. Во второй, где фигур намного больше, решение оказывается <strong>проще</strong>. Подумай, почему так вышло.</p>
+    </section>
+
+    <div class="break"></div>
+    <section class="sec sec-violet">
+        <h2>👥 Множества и принадлежность</h2>
+        <div class="task">
+            <span class="task-num">7</span>
+            <p>В школе работает <strong>8 кружков</strong>. Каждый ученик ходит ровно в 3 кружка, в каждом кружке ровно 6 человек. Сколько всего учеников занимается в кружках?</p>
+            <div class="grid-space"></div>
+            <p class="hint">Что здесь считать дважды? Попробуй пары «ученик и его кружок».</p>
+        </div>
+        <div class="task">
+            <span class="task-num">8</span>
+            <p>Тридцать школьников написали по <strong>4 контрольные</strong>, причём каждую контрольную писали ровно 20 человек. Сколько было контрольных?</p>
+            <div class="grid-space"></div>
+        </div>
+        <div class="task">
+            <span class="star">⭐⭐</span>
+            <span class="task-num">9</span>
+            <p>В компании <strong>10 человек</strong>, каждый знаком ровно с четырьмя другими. Сколько пар знакомых в компании?</p>
+            <div class="grid-space"></div>
+        </div>
+        <div class="task">
+            <span class="star">⭐⭐</span>
+            <span class="task-num">10</span>
+            <p>Может ли в компании из <strong>7 человек</strong> каждый быть знаком ровно с тремя другими? Объясни ответ.</p>
+            <div class="grid-space"></div>
+            <p class="hint">Здесь ответом служит рассуждение, а не число.</p>
+        </div>
+    </section>
+
+    <div class="break"></div>
+    <section class="sec sec-rose">
+        <h2>⭐ Задачи со звёздочкой</h2>
+        <div class="task">
+            <span class="star">⭐⭐⭐</span>
+            <span class="task-num">11</span>
+            <p>Сколько диагоналей у выпуклого <strong>двенадцатиугольника</strong>?</p>
+            <div class="grid-space grid-tall"></div>
+        </div>
+        <div class="task">
+            <span class="star">⭐⭐⭐</span>
+            <span class="task-num">12</span>
+            <p>В клетках доски <strong>8 × 8</strong> расставлены числа так, что сумма в каждом квадрате 2 × 2 равна 10. Чему равна сумма всех чисел доски?</p>
+            <div class="grid-space grid-tall"></div>
+            <p class="hint">Разрежь доску на квадраты 2 × 2 так, чтобы они не перекрывались. Сколько их получится?</p>
+        </div>
+        <div class="task">
+            <span class="star">⭐⭐⭐</span>
+            <span class="task-num">13</span>
+            <p>Найди сумму всех цифр, использованных при записи чисел от <strong>1 до 100</strong>.</p>
+            <div class="grid-space grid-tall"></div>
+            <p class="hint">Разбей числа от 0 до 99 на пары, дающие в сумме 99. Чему равна сумма цифр в каждой такой паре?</p>
+        </div>
+        <div class="task">
+            <span class="star">⭐⭐⭐</span>
+            <span class="task-num">14</span>
+            <p>В турнире каждый сыграл с каждым по одной партии, всего сыграно <strong>66 партий</strong>. Сколько было участников?</p>
+            <div class="grid-space"></div>
+        </div>
+    </section>
+
+    <section class="sec sec-slate">
+        <h2>🏡 Домой</h2>
+        <div class="memo">
+            <p><strong>1.</strong> В таблице 7 строк и 12 столбцов, сумма чисел в каждой строке равна 24. Чему равна общая сумма? Чему равна сумма в каждом столбце, если они одинаковы?</p>
+            <p><strong>2.</strong> Составлена таблица умножения от 1 × 1 до 12 × 12. Чему равна сумма всех произведений?</p>
+            <p><strong>3.</strong> Сколько квадратов на доске 5 × 5?</p>
+            <p><strong>4.</strong> В клубе 12 секций, каждый участник ходит ровно в 2 секции, в каждой секции ровно 5 человек. Сколько участников в клубе?</p>
+            <p><strong>5.</strong> Может ли в группе из 9 человек каждый быть знаком ровно с пятью другими? Объясни.</p>
+            <p><strong>6.</strong> ⭐ Сколько прямоугольников на доске 5 × 5?</p>
+            <p><strong>7.</strong> ⭐ Сколько диагоналей у выпуклого двадцатиугольника?</p>
+        </div>
+    </section>
+
+</div>
+</body>
+</html>
