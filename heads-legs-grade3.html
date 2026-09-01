@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Головы и ноги (3 класс)</title>
+<style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+        font-family:'Segoe UI',Arial,sans-serif;
+        background:linear-gradient(180deg,#dff1fd 0%,#eaf7ee 55%,#f2f9e6 100%);
+        background-attachment:fixed;
+        color:#1e2430;padding:22px;line-height:1.55;
+    }
+    .container{max-width:900px;margin:0 auto}
+
+    .header{
+        border:3px solid #15803d;border-radius:14px;padding:18px 24px;margin-bottom:8px;text-align:center;
+        background:linear-gradient(160deg,#e0f2fe 0%,#d1fae5 62%,#dcfce7 100%);
+        box-shadow:0 3px 10px rgba(0,0,0,.10);
+    }
+    .header .emo{font-size:2em;margin-bottom:6px;letter-spacing:6px}
+    .header h1{font-size:1.7em;color:#14532d}
+    .header .lead{margin-top:8px;font-size:1.02em;color:#334155}
+
+    .sec{--c:#44403c;--bg:#fafaf9;--grid:#e2dfdb}
+    .sec-sky   {--c:#0369a1;--bg:#f0f9ff;--grid:#c4e2f5}
+    .sec-grass {--c:#15803d;--bg:#f0fdf4;--grid:#bfe6cb}
+    .sec-pond  {--c:#0e7490;--bg:#ecfeff;--grid:#bae3ec}
+    .sec-meadow{--c:#4d7c0f;--bg:#f7fee7;--grid:#d5e8a9}
+    .sec-earth {--c:#92400e;--bg:#fffbeb;--grid:#eed7b4}
+    .sec-stone {--c:#44403c;--bg:#f6f5f4;--grid:#dcd8d4}
+
+    h2{font-size:1.26em;margin:26px 0 12px;padding:9px 16px;border-radius:9px;
+       background:var(--c);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.14)}
+
+    .memo{border:2px solid var(--c);border-left:8px solid var(--c);border-radius:9px;
+          padding:13px 18px;margin:12px 0;background:var(--bg)}
+    .memo p{font-size:1.02em;margin-bottom:7px}
+    .memo p:last-child{margin-bottom:0}
+
+    .rule{border:2px dashed var(--c);border-radius:10px;padding:14px 18px;margin:12px 0;background:var(--bg)}
+    .rule .lbl{font-weight:700;color:var(--c);font-size:1.02em}
+    .rule .ex{font-size:1.3em;font-weight:700;color:var(--c);margin-top:8px;text-align:center;letter-spacing:.5px}
+
+    .calc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(238px,1fr));gap:11px;margin-top:12px}
+    .calc{
+        position:relative;border:2px solid var(--c);border-radius:9px;padding:12px 10px 10px;
+        background:#fff;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.07);
+    }
+    .calc .eq{font-size:1.3em;font-weight:600;letter-spacing:.5px;white-space:nowrap}
+    .calc .eq.long{font-size:1.05em;letter-spacing:0}
+    .calc .blank{display:block;border-bottom:2px solid var(--grid);height:1.5em;margin:8px 12px 0}
+    .calc.hard{border-style:dashed;background:var(--bg)}
+    .calc .st{position:absolute;top:3px;right:7px;font-size:.72em}
+
+    .oral{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:9px;margin-top:10px}
+    .oral div{border:2px solid var(--c);border-radius:8px;padding:9px 6px;background:#fff;
+              text-align:center;font-size:1.3em;font-weight:600}
+
+    .task{border:2px solid var(--c);border-radius:10px;padding:15px 19px;margin:15px 0;
+          background:#fff;box-shadow:0 2px 7px rgba(0,0,0,.08)}
+    .task-num{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;
+              border-radius:50%;font-weight:800;font-size:.95em;color:#fff;background:var(--c);
+              margin-bottom:7px;padding:0 9px}
+    .task p{font-size:1.06em;margin-bottom:7px}
+    .task strong{color:var(--c)}
+    .task .star{float:right;font-size:1.05em;letter-spacing:2px}
+
+    .grid-space{margin-top:9px;border:2px solid var(--c);border-radius:6px;min-height:120px;background:#fff;
+        background-image:repeating-linear-gradient(0deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px),
+                         repeating-linear-gradient(90deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px);
+        background-size:24px 24px}
+    .grid-tall{min-height:165px}
+
+    .card4{border:3px solid var(--c);border-radius:12px;padding:16px 20px;background:var(--bg);margin:12px 0}
+    .card4 .row{display:flex;gap:14px;align-items:baseline;padding:9px 0;border-bottom:1px dashed var(--c)}
+    .card4 .row:last-child{border-bottom:none}
+    .card4 .n{flex:none;width:26px;height:26px;border-radius:50%;background:var(--c);color:#fff;
+              font-weight:800;font-size:.85em;display:flex;align-items:center;justify-content:center}
+    .card4 .t{flex:1}
+    .card4 .t b{color:var(--c)}
+    .card4 .t .e{display:block;font-size:1.12em;font-weight:700;margin-top:3px}
+
+    .hint{font-size:.95em;color:var(--c);font-style:italic;margin-top:7px;opacity:.95}
+
+    @page{size:A4;margin:12mm}
+    @media print{
+        body{background:#fff;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+        .task,.memo,.rule,.header,.card4{page-break-inside:avoid}
+        .break{page-break-before:always}
+    }
+
+    .calc .eq.xlong{font-size:.92em;letter-spacing:0}
+    .figure{border:2px solid var(--c);border-radius:10px;padding:14px;margin:12px 0;background:#fff;text-align:center;overflow-x:auto}
+    .figure .cap{margin-top:10px;font-size:1.12em;font-weight:700;color:var(--c)}
+    .figure .sub{margin-top:4px;font-size:.97em;color:#475569}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+    .eqlist{font-size:1.14em;line-height:1.95;font-weight:600}
+    .eqlist .tot{margin-top:9px;padding-top:9px;border-top:2px solid var(--c);color:var(--c);font-size:1.18em}
+    @media(max-width:700px){.two{grid-template-columns:1fr}}
+
+    .tbl{width:100%;border-collapse:collapse;margin-top:12px;background:#fff}
+    .tbl th{background:var(--c);color:#fff;padding:9px 10px;font-size:1em}
+    .tbl td{border:1.6px solid var(--grid);padding:11px 10px;text-align:center;font-size:1.08em;font-weight:600;height:42px}
+    .tbl td.filled{background:var(--bg);color:var(--c)}
+</style>
+</head>
+<body>
+<div class="container">
+
+    <div class="header">
+        <div class="emo">🐔 🐇 🐄</div>
+        <h1>Головы и ноги</h1>
+    </div>
+
+    <section class="sec sec-sky">
+        <h2>🔥 Разминка. Устно</h2>
+        <div class="memo">
+            <p>Сколько ног у <strong>6 куриц</strong>? У <strong>4 коров</strong>? У <strong>5 пауков</strong>?</p>
+            <p>Во дворе <strong>3 курицы и 2 коровы</strong>. Сколько всего голов? Сколько всего ног?</p>
+            <p>У <strong>4 животных 12 ног</strong>. Кто это может быть?</p>
+        </div>
+    </section>
+
+    <section class="sec sec-grass">
+        <h2>🐔 Приём предположения</h2>
+        <div class="memo">
+            <p>🚜 <strong>Задача.</strong> В сарае куры и кролики, всего <strong>10 голов</strong> и <strong>28 ног</strong>. Сколько кого?</p>
+        </div>
+        <div class="figure">
+<svg viewBox="0 0 742 250" width="742" height="250" style="max-width:100%;height:auto">
+<text x="158" y="52" text-anchor="end" font-size="14.5" font-weight="700" fill="#15803d" font-family="Segoe UI,Arial">Пусть все</text>
+<text x="158" y="70" text-anchor="end" font-size="14.5" font-weight="700" fill="#15803d" font-family="Segoe UI,Arial">куры</text>
+<circle cx="186" cy="52" r="13" fill="#dcfce7" stroke="#15803d" stroke-width="2.4"/>
+<line x1="186" y1="63" x2="177" y2="83" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="186" y1="63" x2="195" y2="83" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<circle cx="236" cy="52" r="13" fill="#dcfce7" stroke="#15803d" stroke-width="2.4"/>
+<line x1="236" y1="63" x2="227" y2="83" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="236" y1="63" x2="245" y2="83" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<circle cx="286" cy="52" r="13" fill="#dcfce7" stroke="#15803d" stroke-width="2.4"/>
+<line x1="286" y1="63" x2="277" y2="83" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="286" y1="63" x2="295" y2="83" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<circle cx="336" cy="52" r="13" fill="#dcfce7" stroke="#15803d" stroke-width="2.4"/>
+<line x1="336" y1="63" x2="327" y2="83" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="336" y1="63" x2="345" y2="83" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<circle cx="386" cy="52" r="13" fill="#dcfce7" stroke="#15803d" stroke-width="2.4"/>
+<line x1="386" y1="63" x2="377" y2="83" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="386" y1="63" x2="395" y2="83" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<circle cx="436" cy="52" r="13" fill="#dcfce7" stroke="#15803d" stroke-width="2.4"/>
+<line x1="436" y1="63" x2="427" y2="83" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="436" y1="63" x2="445" y2="83" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<circle cx="486" cy="52" r="13" fill="#dcfce7" stroke="#15803d" stroke-width="2.4"/>
+<line x1="486" y1="63" x2="477" y2="83" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="486" y1="63" x2="495" y2="83" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<circle cx="536" cy="52" r="13" fill="#dcfce7" stroke="#15803d" stroke-width="2.4"/>
+<line x1="536" y1="63" x2="527" y2="83" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="536" y1="63" x2="545" y2="83" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<circle cx="586" cy="52" r="13" fill="#dcfce7" stroke="#15803d" stroke-width="2.4"/>
+<line x1="586" y1="63" x2="577" y2="83" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="586" y1="63" x2="595" y2="83" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<circle cx="636" cy="52" r="13" fill="#dcfce7" stroke="#15803d" stroke-width="2.4"/>
+<line x1="636" y1="63" x2="627" y2="83" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="636" y1="63" x2="645" y2="83" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<text x="728" y="62" text-anchor="end" font-size="16" font-weight="700" fill="#15803d" font-family="Segoe UI,Arial">20 ног</text>
+<text x="371.0" y="122" text-anchor="middle" font-size="15.5" font-weight="700" fill="#a16207" font-family="Segoe UI,Arial">а нужно 28 → не хватает 8 ног</text>
+<text x="158" y="178" text-anchor="end" font-size="14.5" font-weight="700" fill="#a16207" font-family="Segoe UI,Arial">Меняем</text>
+<text x="158" y="196" text-anchor="end" font-size="14.5" font-weight="700" fill="#a16207" font-family="Segoe UI,Arial">по одной</text>
+<circle cx="186" cy="178" r="13" fill="#fef3c7" stroke="#a16207" stroke-width="2.4"/>
+<line x1="186" y1="189" x2="171" y2="209" stroke="#a16207" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="186" y1="189" x2="181" y2="209" stroke="#a16207" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="186" y1="189" x2="191" y2="209" stroke="#a16207" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="186" y1="189" x2="201" y2="209" stroke="#a16207" stroke-width="2.4" stroke-linecap="round"/>
+<circle cx="236" cy="178" r="13" fill="#fef3c7" stroke="#a16207" stroke-width="2.4"/>
+<line x1="236" y1="189" x2="221" y2="209" stroke="#a16207" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="236" y1="189" x2="231" y2="209" stroke="#a16207" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="236" y1="189" x2="241" y2="209" stroke="#a16207" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="236" y1="189" x2="251" y2="209" stroke="#a16207" stroke-width="2.4" stroke-linecap="round"/>
+<circle cx="286" cy="178" r="13" fill="#fef3c7" stroke="#a16207" stroke-width="2.4"/>
+<line x1="286" y1="189" x2="271" y2="209" stroke="#a16207" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="286" y1="189" x2="281" y2="209" stroke="#a16207" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="286" y1="189" x2="291" y2="209" stroke="#a16207" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="286" y1="189" x2="301" y2="209" stroke="#a16207" stroke-width="2.4" stroke-linecap="round"/>
+<circle cx="336" cy="178" r="13" fill="#fef3c7" stroke="#a16207" stroke-width="2.4"/>
+<line x1="336" y1="189" x2="321" y2="209" stroke="#a16207" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="336" y1="189" x2="331" y2="209" stroke="#a16207" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="336" y1="189" x2="341" y2="209" stroke="#a16207" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="336" y1="189" x2="351" y2="209" stroke="#a16207" stroke-width="2.4" stroke-linecap="round"/>
+<circle cx="386" cy="178" r="13" fill="#dcfce7" stroke="#15803d" stroke-width="2.4"/>
+<line x1="386" y1="189" x2="377" y2="209" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="386" y1="189" x2="395" y2="209" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<circle cx="436" cy="178" r="13" fill="#dcfce7" stroke="#15803d" stroke-width="2.4"/>
+<line x1="436" y1="189" x2="427" y2="209" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="436" y1="189" x2="445" y2="209" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<circle cx="486" cy="178" r="13" fill="#dcfce7" stroke="#15803d" stroke-width="2.4"/>
+<line x1="486" y1="189" x2="477" y2="209" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="486" y1="189" x2="495" y2="209" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<circle cx="536" cy="178" r="13" fill="#dcfce7" stroke="#15803d" stroke-width="2.4"/>
+<line x1="536" y1="189" x2="527" y2="209" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="536" y1="189" x2="545" y2="209" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<circle cx="586" cy="178" r="13" fill="#dcfce7" stroke="#15803d" stroke-width="2.4"/>
+<line x1="586" y1="189" x2="577" y2="209" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="586" y1="189" x2="595" y2="209" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<circle cx="636" cy="178" r="13" fill="#dcfce7" stroke="#15803d" stroke-width="2.4"/>
+<line x1="636" y1="189" x2="627" y2="209" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="636" y1="189" x2="645" y2="209" stroke="#15803d" stroke-width="2.4" stroke-linecap="round"/>
+<text x="728" y="188" text-anchor="end" font-size="16" font-weight="700" fill="#a16207" font-family="Segoe UI,Arial">28 ног</text>
+<text x="371.0" y="240" text-anchor="middle" font-size="13.5" font-weight="600" fill="#475569" font-family="Segoe UI,Arial">каждая замена добавляет 2 ноги → 8 : 2 = 4 кролика</text>
+</svg>
+        </div>
+        <div class="rule">
+            <span class="lbl">Четыре шага, и так каждый раз.</span>
+            <div class="ex" style="text-align:left;font-size:1.06em;line-height:1.9">
+                1. Представим, что все десять это куры.<br>
+                2. Тогда ног было бы 20, а нужно 28. Не хватает 8.<br>
+                3. Каждая замена курицы на кролика добавляет 2 ноги.<br>
+                4. Значит замен было 8 : 2 = 4. Кроликов 4, кур 6.
+            </div>
+        </div>
+    </section>
+
+    <section class="sec sec-pond">
+        <h2>📋 Если запутался: таблица подбора</h2>
+        <p>Заполняй сверху вниз, пока число ног не совпадёт с нужным. Приём медленный, зато никогда не подводит.</p>
+        <table class="tbl">
+            <tr><th>Кур</th><th>Кроликов</th><th>Ног</th></tr>
+            <tr><td class="filled">10</td><td class="filled">0</td><td class="filled">20</td></tr>
+            <tr><td class="filled">9</td><td class="filled">1</td><td class="filled">22</td></tr>
+            <tr><td class="filled">8</td><td class="filled">2</td><td></td></tr>
+            <tr><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td></tr>
+        </table>
+        <p class="hint">Посмотри на столбик «Ног»: он растёт всё время на одно и то же число. На какое? Вот поэтому приём предположения и работает.</p>
+    </section>
+
+    <div class="break"></div>
+    <section class="sec sec-meadow">
+        <h2>🌾 Задачи</h2>
+        <div class="task">
+            <span class="task-num">1</span>
+            <p>В сарае куры и овцы, всего <strong>12 голов</strong> и <strong>34 ноги</strong>. Сколько кур и сколько овец?</p>
+            <div class="grid-space"></div>
+        </div>
+        <div class="task">
+            <span class="task-num">2</span>
+            <p>В пруду плавают утки (2 ноги) и лягушки (4 ноги), всего <strong>15 голов</strong> и <strong>42 ноги</strong>. Сколько каждых?</p>
+            <div class="grid-space"></div>
+        </div>
+        <div class="task">
+            <span class="task-num">3</span>
+            <p>В коробке пауки (8 ног) и жуки (6 ног), всего <strong>8 существ</strong> и <strong>54 ноги</strong>. Сколько пауков и сколько жуков?</p>
+            <div class="grid-space"></div>
+        </div>
+        <div class="task">
+            <span class="task-num">4</span>
+            <p>В гараже стоят мотоциклы и легковые машины, всего <strong>9 штук</strong> и <strong>30 колёс</strong>. Сколько каждых?</p>
+            <div class="grid-space"></div>
+            <p class="hint">Ног нет, а приём тот же.</p>
+        </div>
+        <div class="task">
+            <span class="task-num">5</span>
+            <p>На столе стоят трёхногие и четырёхногие табуретки, всего <strong>7 табуреток</strong> и <strong>25 ножек</strong>. Сколько каких?</p>
+            <div class="grid-space"></div>
+        </div>
+        <div class="task">
+            <span class="star">⭐</span>
+            <span class="task-num">6</span>
+            <p>В кошельке <strong>20 монет</strong> по 5 и по 10 рублей, всего <strong>145 рублей</strong>. Сколько монет каждого достоинства?</p>
+            <div class="grid-space grid-tall"></div>
+            <p class="hint">Вместо ног рубли. Какой шаг у замены на этот раз?</p>
+        </div>
+    </section>
+
+    <div class="break"></div>
+    <section class="sec sec-earth">
+        <h2>🏆 Задачи посложнее</h2>
+        <div class="task">
+            <span class="star">⭐⭐</span>
+            <span class="task-num">№1</span>
+            <p>По тропинке вдоль кустов шло <strong>11 хвостов</strong>. Сосчитать я также смог, что шагало <strong>30 ног</strong>. Это вместе шли куда-то петухи и поросята. Сколько было петухов и сколько поросят?</p>
+            <div class="grid-space"></div>
+        </div>
+        <div class="task">
+            <span class="star">⭐⭐</span>
+            <span class="task-num">№2</span>
+            <p>Десяти собакам и кошкам дали <strong>56 котлет</strong>. Каждой собаке досталось 6 котлет, каждой кошке 5. Сколько было собак и кошек?</p>
+            <div class="grid-space"></div>
+        </div>
+        <div class="task">
+            <span class="star">⭐⭐</span>
+            <span class="task-num">№3</span>
+            <p>На веточке сирени <strong>35 цветков</strong>, у которых по 4 и по 5 лепестков. Всего лепестков <strong>153</strong>. Сколько цветков с пятью лепестками?</p>
+            <div class="grid-space grid-tall"></div>
+        </div>
+        <div class="task">
+            <span class="star">⭐⭐</span>
+            <span class="task-num">№4</span>
+            <p>Магазин получил со склада <strong>100 линеек</strong> по 20 см и по 30 см. Общая длина линеек <strong>22 метра</strong>. Сколько двадцатисантиметровых линеек получил магазин?</p>
+            <div class="grid-space grid-tall"></div>
+            <p class="hint">Метры и сантиметры вперемешку. С чего надо начать?</p>
+        </div>
+        <div class="task">
+            <span class="star">⭐⭐</span>
+            <span class="task-num">№5</span>
+            <p>На каждой из <strong>10 карточек</strong> Коля нарисовал треугольник или квадрат. Всего он провёл <strong>36 отрезков</strong>. Сколько квадратов он начертил?</p>
+            <div class="grid-space"></div>
+        </div>
+        <div class="task">
+            <span class="star">⭐⭐⭐</span>
+            <span class="task-num">№6</span>
+            <p>У котёнка <strong>на лапе</strong> 5 когтей, у цыплёнка <strong>на лапе</strong> 4. Во дворе <strong>10 котят и цыплят</strong>, а когтей у всех у них <strong>104</strong>. Сколько котят во дворе?</p>
+            <div class="grid-space grid-tall"></div>
+            <p class="hint">Перечитай условие два раза. Сказано «на лапе». А сколько лап у котёнка? А у цыплёнка?</p>
+        </div>
+        <div class="task">
+            <span class="star">⭐⭐⭐</span>
+            <span class="task-num">№7</span>
+            <p>В учреждении <strong>14 столов</strong> с одним, двумя и тремя ящиками. Всего <strong>25 ящиков</strong>. Столов с одним ящиком столько же, сколько с двумя и тремя вместе. Сколько столов каждого вида?</p>
+            <div class="grid-space grid-tall"></div>
+            <p class="hint">Начни с последней фразы: она сразу говорит, сколько столов с одним ящиком.</p>
+        </div>
+        <div class="task">
+            <span class="star">⭐⭐</span>
+            <span class="task-num">№8</span>
+            <p>В инкубаторе лежало <strong>20 яиц</strong>. Из некоторых вылупились гусята, из остальных крокодильчики. Всего у детёнышей <strong>54 ноги</strong>. Сколько вылупилось каждых?</p>
+            <div class="grid-space"></div>
+        </div>
+        <div class="task">
+            <span class="star">⭐</span>
+            <span class="task-num">№9</span>
+            <p>В инкубаторе лежало <strong>7 яиц</strong>, всего из них вышли <strong>18 ног</strong>. Сколько гусят и сколько крокодильчиков?</p>
+            <div class="grid-space"></div>
+        </div>
+        <div class="task">
+            <span class="star">⭐⭐⭐</span>
+            <span class="task-num">№10</span>
+            <p>В инкубаторе лежало <strong>21 яйцо</strong>. Из некоторых вылупились утята, из остальных утконосы, причём <strong>ног и у тех, и у других оказалось поровну</strong>. Сколько вылупилось каждых?</p>
+            <div class="grid-space grid-tall"></div>
+            <p class="hint">Общее число ног не сказано! Зато сказано, что ног поровну. У кого ног на одного меньше, тех должно быть больше. Во сколько раз?</p>
+        </div>
+        <div class="task">
+            <span class="star">⭐⭐⭐</span>
+            <span class="task-num">№11</span>
+            <p>В морской пучине водолазы сражаются с осьминогами. Видно <strong>36 конечностей</strong>, из них <strong>26 ноги</strong>. Сколько осьминогов участвует в битве?</p>
+            <div class="grid-space grid-tall"></div>
+            <p class="hint">У водолаза 2 руки и 2 ноги, у осьминога 8 ног. Вычти одно число из другого и подумай, что осталось.</p>
+        </div>
+        <div class="task">
+            <span class="star">⭐⭐⭐</span>
+            <span class="task-num">№12</span>
+            <p>Может ли в сарае, где живут только куры и кролики, оказаться <strong>10 голов и 27 ног</strong>? Объясни свой ответ.</p>
+            <div class="grid-space"></div>
+            <p class="hint">Здесь ответом служит не число, а рассуждение.</p>
+        </div>
+    </section>
+
+    <section class="sec sec-stone">
+        <h2>🏡 Домой</h2>
+        <div class="memo">
+            <p><strong>1.</strong> В сарае куры и коровы, всего 14 голов и 40 ног. Сколько каждых?</p>
+            <p><strong>2.</strong> В гараже велосипеды и трициклы, всего 11 штук и 26 колёс. Сколько каких?</p>
+            <p><strong>3.</strong> В кошельке 15 монет по 2 и по 5 рублей, всего 54 рубля. Сколько монет каждого вида?</p>
+            <p><strong>4.</strong> На столе трёхногие и четырёхногие табуретки, всего 9 штук и 32 ножки. Сколько каких?</p>
+            <p><strong>5.</strong> Может ли в сарае, где живут только куры и кролики, оказаться 12 голов и 35 ног? Объясни.</p>
+            <p><strong>6.</strong> ⭐ За тест из 15 вопросов за верный ответ дают 4 балла, за неверный снимают 1 балл. Ученик набрал 40 баллов. Сколько верных ответов он дал?</p>
+        </div>
+        <p class="hint">К каждой задаче записывай все четыре шага приёма, а не только ответ.</p>
+    </section>
+
+</div>
+</body>
+</html>
