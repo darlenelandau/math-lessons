@@ -105,14 +105,11 @@
     .tbl th{background:var(--c);color:#fff;padding:9px 10px;font-size:1em}
     .tbl td{border:1.6px solid var(--grid);padding:11px 10px;text-align:center;font-size:1.08em;font-weight:600;height:42px}
     .tbl td.filled{background:var(--bg);color:var(--c)}
-    .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
-    @media(max-width:760px){.two{grid-template-columns:1fr}}
-    .way{border:2px solid var(--c);border-radius:10px;padding:13px 16px;background:#fff}
+    .way{border:2px solid var(--c);border-radius:10px;padding:14px 18px;background:#fff;margin-top:12px}
     .way .cap{font-weight:800;font-size:.88em;text-transform:uppercase;letter-spacing:.6px;
               color:var(--c);margin-bottom:7px}
     .way ol{margin-left:18px}
-    .way li{margin:5px 0;font-size:1.03em}
-    .way .eqline{font-size:1.14em;font-weight:700;margin:5px 0;color:#1e2430}
+    .way li{margin:7px 0;font-size:1.06em;line-height:1.6}
 </style>
 </head>
 <body>
@@ -369,30 +366,21 @@
         <h2>🔢 Числа побольше</h2>
         <div class="memo">
             <p>✏️ Здесь кружочки с палочками рисовать бессмысленно: попробуй изобразить сто пятьдесят голов. Значит приём надо <strong>записывать</strong>, а не рисовать.</p>
-            <p>Ниже одна и та же задача решена двумя записями. Обе правильные, выбирай ту, которая понятнее.</p>
+            <p>Записываем по строчке на каждый шаг, словами и числами. Так решение читается и проверяется, а не остаётся в голове.</p>
         </div>
 
-        <p style="margin-top:14px"><strong>Образец.</strong> На ферме гуси и кролики, всего 150 голов и 442 ноги. Сколько тех и других?</p>
-        <div class="two">
-            <div class="way">
-                <div class="cap">В четыре шага</div>
-                <ol>
-                    <li>Пусть все гуси: 150 × 2 = <strong>300</strong> ног.</li>
-                    <li>Не хватает: 442 − 300 = <strong>142</strong> ноги.</li>
-                    <li>Замена гуся на кролика даёт: 4 − 2 = <strong>2</strong> ноги.</li>
-                    <li>Замен: 142 : 2 = <strong>71</strong>. Кроликов 71, гусей 150 − 71 = 79.</li>
-                </ol>
-            </div>
-            <div class="way">
-                <div class="cap">Уравнением</div>
-                <div class="eqline">Пусть кроликов <strong>к</strong>, тогда гусей 150 − к.</div>
-                <div class="eqline">4 × к + 2 × (150 − к) = 442</div>
-                <div class="eqline">2 × к + 300 = 442</div>
-                <div class="eqline">2 × к = 142</div>
-                <div class="eqline">к = 71</div>
-            </div>
+        <p style="margin-top:14px"><strong>Образец.</strong> На ферме куры и кролики, всего 100 голов и 240 ног. Сколько тех и других?</p>
+        <div class="way">
+            <div class="cap">Как записываем</div>
+            <ol>
+                <li>Если бы все были курами, то у 100 кур было бы <strong>200 ног</strong>.</li>
+                <li>А нужно 240 ног, значит не хватает <strong>240 − 200 = 40 ног</strong>.</li>
+                <li>Каждая замена курицы на кролика добавляет 2 ноги, значит замен <strong>40 : 2 = 20</strong>.</li>
+                <li>Значит кроликов <strong>20</strong>, а кур <strong>100 − 20 = 80</strong>.</li>
+                <li>Проверка: 80 × 2 + 20 × 4 = 160 + 80 = <strong>240</strong>. ✓</li>
+            </ol>
         </div>
-        <p class="hint">Проверка обязательна в обеих записях: 79 × 2 + 71 × 4 = 158 + 284 = 442. ✓</p>
+        <p class="hint">Пять строчек, и в каждой видно, откуда взялось число. Решение без такой записи не принимается, даже если ответ верный.</p>
 
         <div class="task">
             <span class="task-num">1</span>
