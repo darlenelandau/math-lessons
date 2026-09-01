@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Никакие три на одной прямой</title>
+<style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+        font-family:'Segoe UI',Arial,sans-serif;
+        background:linear-gradient(180deg,#eef3fb 0%,#ecfeff 60%,#f5f3ff 100%);
+        color:#0f2c3a;display:flex;flex-direction:column;padding:14px 18px;gap:12px;
+    }
+
+    .bar{
+        background:#fff;border:3px solid #0e7490;border-radius:14px;
+        padding:10px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+        box-shadow:0 3px 10px rgba(0,0,0,.12);flex:none;
+    }
+    .bar .title{font-size:1.25em;font-weight:800;color:#0e7490;margin-right:auto}
+    .bar .task{font-size:1.05em;color:#334155}
+    .bar .task b{color:#0e7490}
+
+    .grp{display:flex;gap:7px;align-items:center}
+    button{
+        font-family:inherit;font-size:1.02em;font-weight:700;padding:9px 15px;border-radius:9px;
+        border:2px solid #0e7490;background:#fff;color:#0e7490;cursor:pointer;
+    }
+    button:hover{background:#ecfeff}
+    button.on{background:#0e7490;color:#fff}
+    button.wide{background:#0e7490;color:#fff}
+    button.wide:hover{background:#0b6076}
+
+    .counter{
+        font-size:1.05em;font-weight:800;color:#334155;background:#f1f5f9;
+        border:2px solid #cbd5e1;border-radius:9px;padding:8px 14px;white-space:nowrap;
+    }
+
+    .stage{
+        flex:1;min-height:0;background:#fff;border:3px solid #0e7490;border-radius:14px;
+        display:flex;align-items:center;justify-content:center;padding:14px;
+        box-shadow:0 3px 10px rgba(0,0,0,.12);
+    }
+    svg{max-width:100%;max-height:100%;height:auto;width:auto}
+
+    .hint{flex:none;text-align:center;color:#475569;font-size:.95em}
+    .hint b{color:#0e7490}
+</style>
+</head>
+<body>
+
+<div class="bar">
+    <div class="title">🎯 Никакие три на одной прямой</div>
+    <div class="task">Отметить <b><span id="need">10</span></b> центров клеток на доске <b><span id="size">5 × 5</span></b></div>
+    <div class="grp">
+        <button data-n="5" class="sz on">5 × 5</button>
+        <button data-n="6" class="sz">6 × 6</button>
+        <button data-n="7" class="sz">7 × 7</button>
+    </div>
+    <div class="counter">Поле № <span id="num">1</span></div>
+    <button class="wide" id="next">Чистое поле →</button>
+</div>
+
+<div class="stage" id="stage"></div>
+
+<div class="hint">Пробел или стрелка вправо — <b>чистое поле</b>. Клавиши <b>5</b>, <b>6</b>, <b>7</b> — размер доски.</div>
+
+<script>
+let n = 5, num = 1;
+
+function board() {
+    const cell = 96, pad = 14;
+    const S = n * cell + pad * 2;
+    let s = `<svg viewBox="0 0 ${S} ${S}" role="img">`;
+    for (let r = 0; r < n; r++)
+        for (let c = 0; c < n; c++) {
+            const x = pad + c * cell, y = pad + r * cell;
+            s += `<rect x="${x}" y="${y}" width="${cell}" height="${cell}" fill="#fff" stroke="#0e7490" stroke-width="2" opacity=".5"/>`;
+            s += `<circle cx="${x + cell/2}" cy="${y + cell/2}" r="4" fill="#0e7490" opacity=".3"/>`;
+        }
+    s += `<rect x="${pad}" y="${pad}" width="${n*cell}" height="${n*cell}" fill="none" stroke="#0e7490" stroke-width="4"/>`;
+    return s + `</svg>`;
+}
+
+function render() {
+    document.getElementById('stage').innerHTML = board();
+    document.getElementById('need').textContent = 2 * n;
+    document.getElementById('size').textContent = `${n} × ${n}`;
+    document.getElementById('num').textContent = num;
+    document.querySelectorAll('.sz').forEach(b => b.classList.toggle('on', +b.dataset.n === n));
+}
+
+function fresh() { num++; render(); }
+function setSize(k) { n = k; render(); }
+
+document.getElementById('next').onclick = fresh;
+document.querySelectorAll('.sz').forEach(b => b.onclick = () => setSize(+b.dataset.n));
+
+document.addEventListener('keydown', e => {
+    if (e.key === ' ' || e.key === 'ArrowRight') { e.preventDefault(); fresh(); }
+    else if (e.key === '5' || e.key === '6' || e.key === '7') setSize(+e.key);
+});
+
+render();
+</script>
+</body>
+</html>
