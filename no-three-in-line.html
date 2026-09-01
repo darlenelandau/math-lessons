@@ -10,41 +10,48 @@
     body{
         font-family:'Segoe UI',Arial,sans-serif;
         background:linear-gradient(180deg,#eef3fb 0%,#ecfeff 60%,#f5f3ff 100%);
-        color:#0f2c3a;display:flex;flex-direction:column;padding:14px 18px;gap:12px;
+        color:#0f2c3a;display:flex;flex-direction:column;padding:10px 12px;gap:10px;overflow:hidden;
     }
 
     .bar{
-        background:#fff;border:3px solid #0e7490;border-radius:14px;
-        padding:10px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
-        box-shadow:0 3px 10px rgba(0,0,0,.12);flex:none;
+        background:#fff;border:3px solid #0e7490;border-radius:12px;
+        padding:8px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+        box-shadow:0 2px 8px rgba(0,0,0,.10);flex:none;
     }
-    .bar .title{font-size:1.25em;font-weight:800;color:#0e7490;margin-right:auto}
-    .bar .task{font-size:1.05em;color:#334155}
-    .bar .task b{color:#0e7490}
+    .bar .title{font-size:1.15em;font-weight:800;color:#0e7490;margin-right:auto}
+    .bar .lbl{font-size:.95em;color:#475569;font-weight:700}
 
-    .grp{display:flex;gap:7px;align-items:center}
     button{
-        font-family:inherit;font-size:1.02em;font-weight:700;padding:9px 15px;border-radius:9px;
+        font-family:inherit;font-size:.98em;font-weight:700;padding:7px 13px;border-radius:8px;
         border:2px solid #0e7490;background:#fff;color:#0e7490;cursor:pointer;
     }
     button:hover{background:#ecfeff}
-    button.on{background:#0e7490;color:#fff}
-    button.wide{background:#0e7490;color:#fff}
-    button.wide:hover{background:#0b6076}
+    button.solid{background:#0e7490;color:#fff}
+    button.solid:hover{background:#0b6076}
 
-    .counter{
-        font-size:1.05em;font-weight:800;color:#334155;background:#f1f5f9;
-        border:2px solid #cbd5e1;border-radius:9px;padding:8px 14px;white-space:nowrap;
+    .grid{
+        flex:1;min-height:0;display:grid;gap:10px;
+        grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);
     }
+    @media(max-width:1000px){.grid{grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(3,1fr)}}
 
-    .stage{
-        flex:1;min-height:0;background:#fff;border:3px solid #0e7490;border-radius:14px;
-        display:flex;align-items:center;justify-content:center;padding:14px;
-        box-shadow:0 3px 10px rgba(0,0,0,.12);
+    .card{
+        background:#fff;border:3px solid #0e7490;border-radius:12px;padding:7px 9px 9px;
+        display:flex;flex-direction:column;min-height:0;box-shadow:0 2px 7px rgba(0,0,0,.10);
     }
-    svg{max-width:100%;max-height:100%;height:auto;width:auto}
+    .head{display:flex;align-items:center;gap:8px;flex:none;margin-bottom:5px}
+    .who{
+        font-weight:800;color:#0e7490;font-size:1.02em;min-width:26px;padding:2px 6px;
+        border-bottom:2px dashed #b6e0eb;outline:none;
+    }
+    .who:focus{border-bottom-color:#0e7490;background:#ecfeff}
+    .job{font-size:.94em;font-weight:700;color:#475569;margin-right:auto;white-space:nowrap}
+    .nx{padding:4px 11px;font-size:.94em;border-radius:7px}
 
-    .hint{flex:none;text-align:center;color:#475569;font-size:.95em}
+    .b{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+    .b svg{max-width:100%;max-height:100%;width:auto;height:auto}
+
+    .hint{flex:none;text-align:center;color:#475569;font-size:.9em}
     .hint b{color:#0e7490}
 </style>
 </head>
@@ -52,54 +59,66 @@
 
 <div class="bar">
     <div class="title">🎯 Никакие три на одной прямой</div>
-    <div class="task">Отметить <b><span id="need">10</span></b> центров клеток на доске <b><span id="size">5 × 5</span></b></div>
-    <div class="grp">
-        <button data-n="5" class="sz on">5 × 5</button>
-        <button data-n="6" class="sz">6 × 6</button>
-        <button data-n="7" class="sz">7 × 7</button>
-    </div>
-    <div class="counter">Поле № <span id="num">1</span></div>
-    <button class="wide" id="next">Чистое поле →</button>
+    <div class="lbl">Всем сразу:</div>
+    <button data-all="5">5 × 5</button>
+    <button data-all="6">6 × 6</button>
+    <button data-all="7">7 × 7</button>
+    <button class="solid" id="reset">Все поля заново</button>
 </div>
 
-<div class="stage" id="stage"></div>
+<div class="grid" id="grid"></div>
 
-<div class="hint">Пробел или стрелка вправо — <b>чистое поле</b>. Клавиши <b>5</b>, <b>6</b>, <b>7</b> — размер доски.</div>
+<div class="hint">Клик по <b>→</b> в углу поля даёт этому ребёнку следующую задачу. Клавиши <b>1</b>…<b>6</b> делают то же самое. Имена в углах можно вписать своими.</div>
 
 <script>
-let n = 5, num = 1;
+const SIZES = [5, 6, 7];
+const COUNT = 6;
+const state = Array.from({length: COUNT}, () => 0);   // индекс в SIZES
+const names = Array.from({length: COUNT}, (_, i) => String(i + 1));
 
-function board() {
-    const cell = 96, pad = 14;
-    const S = n * cell + pad * 2;
+function boardSvg(n) {
+    const cell = 96, pad = 12, S = n * cell + pad * 2;
     let s = `<svg viewBox="0 0 ${S} ${S}" role="img">`;
     for (let r = 0; r < n; r++)
         for (let c = 0; c < n; c++) {
             const x = pad + c * cell, y = pad + r * cell;
             s += `<rect x="${x}" y="${y}" width="${cell}" height="${cell}" fill="#fff" stroke="#0e7490" stroke-width="2" opacity=".5"/>`;
-            s += `<circle cx="${x + cell/2}" cy="${y + cell/2}" r="4" fill="#0e7490" opacity=".3"/>`;
+            s += `<circle cx="${x + cell/2}" cy="${y + cell/2}" r="4.5" fill="#0e7490" opacity=".32"/>`;
         }
     s += `<rect x="${pad}" y="${pad}" width="${n*cell}" height="${n*cell}" fill="none" stroke="#0e7490" stroke-width="4"/>`;
     return s + `</svg>`;
 }
 
 function render() {
-    document.getElementById('stage').innerHTML = board();
-    document.getElementById('need').textContent = 2 * n;
-    document.getElementById('size').textContent = `${n} × ${n}`;
-    document.getElementById('num').textContent = num;
-    document.querySelectorAll('.sz').forEach(b => b.classList.toggle('on', +b.dataset.n === n));
+    document.getElementById('grid').innerHTML = state.map((si, i) => {
+        const n = SIZES[si];
+        return `<div class="card">
+            <div class="head">
+                <span class="who" contenteditable="true" data-i="${i}">${names[i]}</span>
+                <span class="job">${n} × ${n}, отметить ${2*n}</span>
+                <button class="nx" data-i="${i}">→</button>
+            </div>
+            <div class="b">${boardSvg(n)}</div>
+        </div>`;
+    }).join('');
+
+    document.querySelectorAll('.nx').forEach(b => b.onclick = () => next(+b.dataset.i));
+    document.querySelectorAll('.who').forEach(w => {
+        w.onblur = () => { names[+w.dataset.i] = w.textContent.trim() || String(+w.dataset.i + 1); };
+        w.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); w.blur(); } };
+    });
 }
 
-function fresh() { num++; render(); }
-function setSize(k) { n = k; render(); }
+function next(i) { state[i] = (state[i] + 1) % SIZES.length; render(); }
+function allTo(n) { const si = SIZES.indexOf(n); state.fill(si); render(); }
 
-document.getElementById('next').onclick = fresh;
-document.querySelectorAll('.sz').forEach(b => b.onclick = () => setSize(+b.dataset.n));
+document.querySelectorAll('[data-all]').forEach(b => b.onclick = () => allTo(+b.dataset.all));
+document.getElementById('reset').onclick = () => { state.fill(0); render(); };
 
 document.addEventListener('keydown', e => {
-    if (e.key === ' ' || e.key === 'ArrowRight') { e.preventDefault(); fresh(); }
-    else if (e.key === '5' || e.key === '6' || e.key === '7') setSize(+e.key);
+    if (document.activeElement && document.activeElement.isContentEditable) return;
+    const k = +e.key;
+    if (k >= 1 && k <= COUNT) { e.preventDefault(); next(k - 1); }
 });
 
 render();
