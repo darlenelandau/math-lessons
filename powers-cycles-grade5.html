@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Степень числа. Последняя цифра и циклы (5 класс)</title>
+<style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+        font-family:'Segoe UI',Arial,sans-serif;
+        background:linear-gradient(180deg,#eef3fb 0%,#f3f7f4 52%,#faf2f2 100%);
+        background-attachment:fixed;
+        color:#1e2430;padding:22px;line-height:1.55;
+    }
+    .container{max-width:900px;margin:0 auto}
+
+    .header{
+        border:3px solid #6b21a8;border-radius:14px;padding:18px 24px;margin-bottom:8px;text-align:center;
+        background:linear-gradient(160deg,#ede9fe 0%,#dbeafe 60%,#ecfdf5 100%);
+        box-shadow:0 3px 10px rgba(0,0,0,.10);
+    }
+    .header .emo{font-size:2em;margin-bottom:6px;letter-spacing:6px}
+    .header h1{font-size:1.7em;color:#581c87}
+    .header .lead{margin-top:8px;font-size:1.02em;color:#334155}
+
+    .sec{--c:#334155;--bg:#f8fafc;--grid:#dbe3ec}
+    .sec-blue   {--c:#1d4ed8;--bg:#eff6ff;--grid:#c5d8f5}
+    .sec-emerald{--c:#047857;--bg:#ecfdf5;--grid:#b4e0cd}
+    .sec-purple {--c:#6b21a8;--bg:#faf5ff;--grid:#dcc7ee}
+    .sec-crimson{--c:#b91c1c;--bg:#fef2f2;--grid:#f3c9c9}
+    .sec-cyan   {--c:#0e7490;--bg:#ecfeff;--grid:#b6e0eb}
+    .sec-slate  {--c:#334155;--bg:#f1f5f9;--grid:#cbd5e1}
+
+    h2{font-size:1.26em;margin:26px 0 12px;padding:9px 16px;border-radius:9px;
+       background:var(--c);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.14)}
+
+    .memo{border:2px solid var(--c);border-left:8px solid var(--c);border-radius:9px;
+          padding:13px 18px;margin:12px 0;background:var(--bg)}
+    .memo p{font-size:1.02em;margin-bottom:7px}
+    .memo p:last-child{margin-bottom:0}
+
+    .rule{border:2px dashed var(--c);border-radius:10px;padding:14px 18px;margin:12px 0;background:var(--bg)}
+    .rule .lbl{font-weight:700;color:var(--c);font-size:1.02em}
+    .rule .ex{font-size:1.3em;font-weight:700;color:var(--c);margin-top:8px;text-align:center;letter-spacing:.5px}
+
+    .calc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(238px,1fr));gap:11px;margin-top:12px}
+    .calc{
+        position:relative;border:2px solid var(--c);border-radius:9px;padding:12px 10px 10px;
+        background:#fff;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.07);
+    }
+    .calc .eq{font-size:1.3em;font-weight:600;letter-spacing:.5px;white-space:nowrap}
+    .calc .eq.long{font-size:1.05em;letter-spacing:0}
+    .calc .blank{display:block;border-bottom:2px solid var(--grid);height:1.5em;margin:8px 12px 0}
+    .calc.hard{border-style:dashed;background:var(--bg)}
+    .calc .st{position:absolute;top:3px;right:7px;font-size:.72em}
+
+    .oral{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:9px;margin-top:10px}
+    .oral div{border:2px solid var(--c);border-radius:8px;padding:9px 6px;background:#fff;
+              text-align:center;font-size:1.3em;font-weight:600}
+
+    .task{border:2px solid var(--c);border-radius:10px;padding:15px 19px;margin:15px 0;
+          background:#fff;box-shadow:0 2px 7px rgba(0,0,0,.08)}
+    .task-num{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;
+              border-radius:50%;font-weight:800;font-size:.95em;color:#fff;background:var(--c);
+              margin-bottom:7px;padding:0 9px}
+    .task p{font-size:1.06em;margin-bottom:7px}
+    .task strong{color:var(--c)}
+    .task .star{float:right;font-size:1.05em;letter-spacing:2px}
+
+    .grid-space{margin-top:9px;border:2px solid var(--c);border-radius:6px;min-height:120px;background:#fff;
+        background-image:repeating-linear-gradient(0deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px),
+                         repeating-linear-gradient(90deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px);
+        background-size:24px 24px}
+    .grid-tall{min-height:165px}
+
+    .card4{border:3px solid var(--c);border-radius:12px;padding:16px 20px;background:var(--bg);margin:12px 0}
+    .card4 .row{display:flex;gap:14px;align-items:baseline;padding:9px 0;border-bottom:1px dashed var(--c)}
+    .card4 .row:last-child{border-bottom:none}
+    .card4 .n{flex:none;width:26px;height:26px;border-radius:50%;background:var(--c);color:#fff;
+              font-weight:800;font-size:.85em;display:flex;align-items:center;justify-content:center}
+    .card4 .t{flex:1}
+    .card4 .t b{color:var(--c)}
+    .card4 .t .e{display:block;font-size:1.12em;font-weight:700;margin-top:3px}
+
+    .hint{font-size:.95em;color:var(--c);font-style:italic;margin-top:7px;opacity:.95}
+
+
+    .panel{border:2px solid var(--c);border-radius:11px;background:#fff;padding:14px 16px;margin:12px 0;
+           box-shadow:0 2px 7px rgba(0,0,0,.07)}
+    .ctrls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin-bottom:10px;font-size:1.03em}
+    .ctrls label{font-weight:700;color:var(--c)}
+    .ctrls input[type=number]{width:74px;font:inherit;font-weight:700;padding:5px 7px;border:2px solid var(--c);
+           border-radius:7px;text-align:center;background:var(--bg);color:#1e2430}
+    button{font-family:inherit;font-size:1em;font-weight:700;padding:7px 14px;border-radius:8px;cursor:pointer;
+           border:2px solid var(--c);background:#fff;color:var(--c)}
+    button:hover{background:var(--bg)}
+    button.solid{background:var(--c);color:#fff}
+    .strip{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+    .strip span{width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:7px;
+           border:2px solid #dbe3ec;background:#fff;font-weight:700;font-size:.95em;color:#64748b}
+    .strip span.a{border-color:#1d4ed8;background:#dbeafe;color:#1e3a8a}
+    .strip span.b{border-color:#c2410c;background:#ffedd5;color:#9a3412}
+    .strip span.ab{border-color:#047857;background:#bbf7d0;color:#065f46}
+    .strip span.best{outline:3px solid #047857;outline-offset:2px;transform:scale(1.08)}
+    .legend2{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:10px;font-size:.95em}
+    .legend2 i{display:inline-block;width:16px;height:16px;border-radius:5px;margin-right:6px;vertical-align:-3px;border:2px solid}
+    .out{margin-top:10px;font-size:1.15em;font-weight:800;color:var(--c)}
+    .out small{font-weight:600;color:#475569;font-size:.8em}
+    .mrow{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0}
+    .mrow span{padding:5px 9px;border-radius:7px;border:2px solid #dbe3ec;background:#fff;font-weight:700;color:#64748b}
+    .mrow.a span.on{border-color:#1d4ed8;background:#dbeafe;color:#1e3a8a}
+    .mrow.b span.on{border-color:#c2410c;background:#ffedd5;color:#9a3412}
+    .mrow span.common{border-color:#047857;background:#bbf7d0;color:#065f46}
+    .mrow span.first{outline:3px solid #047857;outline-offset:2px}
+    .steps{margin-top:10px;font-size:1.02em}
+    .steps div{padding:4px 0;border-bottom:1px dashed var(--grid)}
+    .steps div:last-child{border-bottom:none}
+    .steps b{color:var(--c)}
+    .flexwrap{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
+    .quiz .q{font-size:1.12em;font-weight:700;margin-bottom:8px}
+    .quiz input[type=text]{width:120px;font:inherit;font-weight:700;padding:6px 8px;border:2px solid var(--c);
+           border-radius:7px;text-align:center}
+    .verdict{margin-left:10px;font-weight:800}
+    .verdict.ok{color:#047857}
+    .verdict.no{color:#b91c1c}
+    .score{font-weight:800;color:var(--c);margin-top:10px}
+    .hintbox{margin-top:8px;font-size:.97em;color:#475569;font-style:italic}
+    @media print{.panel button{display:none}}
+
+
+    .cyc{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+    .cyc span{min-width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:9px;
+        border:2px solid var(--grid);background:#fff;font-weight:800;font-size:1.1em;color:#334155;position:relative}
+    .cyc span i{position:absolute;top:-9px;left:50%;transform:translateX(-50%);font-style:normal;font-size:.62em;
+        color:#64748b;background:#fff;padding:0 3px}
+    .cyc span.on{border-color:var(--c);background:var(--bg);color:var(--c)}
+    .cyc span.hit{outline:3px solid var(--c);outline-offset:2px;transform:scale(1.07)}
+    .big{font-size:1.35em;font-weight:800;color:var(--c)}
+    .fingers{display:flex;gap:8px;align-items:flex-end;margin-top:8px}
+    .fingers div{width:84px;border:2px solid var(--grid);border-radius:12px 12px 6px 6px;background:#fff;
+        text-align:center;font-weight:700;font-size:.8em;line-height:1.15;color:#475569;padding:6px 3px;
+        display:flex;flex-direction:column;justify-content:flex-end}
+    .fingers div.on{border-color:var(--c);background:var(--bg);color:var(--c)}
+    .fingers div.f1{height:96px}.fingers div.f2{height:134px}.fingers div.f3{height:152px}
+    .fingers div.f4{height:130px}.fingers div.f5{height:100px}
+    .fingers div span{display:block;margin-top:4px;font-size:1.3em;font-weight:800;min-height:1.1em}
+    .twocol{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    @media(max-width:700px){.twocol{grid-template-columns:1fr}}
+    select{font:inherit;font-weight:700;padding:6px 8px;border:2px solid var(--c);border-radius:7px;background:#fff;color:var(--c)}
+
+    @page{size:A4;margin:12mm}
+    @media print{
+        body{background:#fff;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+        .task,.memo,.rule,.header,.card4{page-break-inside:avoid}
+        .break{page-break-before:always}
+    }
+
+    .calc .eq.xlong{font-size:.92em;letter-spacing:0}
+    .figure{border:2px solid var(--c);border-radius:10px;padding:14px;margin:12px 0;background:#fff;text-align:center;overflow-x:auto}
+    .figure .cap{margin-top:10px;font-size:1.12em;font-weight:700;color:var(--c)}
+    .figure .sub{margin-top:4px;font-size:.97em;color:#475569}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+    .eqlist{font-size:1.14em;line-height:1.95;font-weight:600}
+    .eqlist .tot{margin-top:9px;padding-top:9px;border-top:2px solid var(--c);color:var(--c);font-size:1.18em}
+    @media(max-width:700px){.two{grid-template-columns:1fr}}
+
+    .tbl{width:100%;border-collapse:collapse;margin-top:12px;background:#fff}
+    .tbl th{background:var(--c);color:#fff;padding:9px 10px;font-size:1em}
+    .tbl td{border:1.6px solid var(--grid);padding:11px 10px;text-align:center;font-size:1.08em;font-weight:600;height:42px}
+    .tbl td.filled{background:var(--bg);color:var(--c)}
+
+    .tbl th:first-child{width:64px}
+    .tbl th.river{background:#0e7490}
+    .tbl td.river{background:#e0f2fe;color:#0c4a6e;font-weight:700}
+    .tbl td.river.empty{background:#f0f9ff}
+    .tbl td:first-child{font-weight:800;color:var(--c)}
+    .tbl td.l{text-align:left;padding-left:14px}
+    .tbl caption{caption-side:top;text-align:left;font-weight:700;color:var(--c);padding:0 0 7px;font-size:1.04em}
+    .warn{border:3px solid var(--c);border-radius:10px;padding:14px 18px;margin:14px 0;background:var(--bg)}
+    .warn p{font-size:1.06em}
+    .warn p:first-child{font-size:1.12em;font-weight:700;color:var(--c);margin-bottom:7px}
+
+    .col{font-family:"SF Mono",Consolas,"Courier New",monospace;font-size:1.5em;font-weight:700;
+         line-height:1.5;color:var(--c);white-space:pre;display:inline-block;text-align:right}
+    .colwrap{text-align:center;margin:12px 0}
+    .steps{counter-reset:st;list-style:none;margin:10px 0}
+    .steps li{position:relative;padding:9px 12px 9px 46px;margin:7px 0;background:#fff;
+              border-left:4px solid var(--c);border-radius:0 7px 7px 0;font-size:1.04em}
+    .steps li::before{counter-increment:st;content:counter(st);position:absolute;left:10px;top:50%;
+        transform:translateY(-50%);width:26px;height:26px;background:var(--c);color:#fff;border-radius:50%;
+        display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85em}
+    .mine{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:12px}
+    .mine .card{border:2px solid var(--c);border-radius:10px;background:#fff;padding:12px 14px;
+                box-shadow:0 2px 6px rgba(0,0,0,.07)}
+    .mine .who{font-size:.86em;font-weight:800;color:var(--c);text-transform:uppercase;letter-spacing:.5px}
+    .mine .eqn{font-size:1.24em;font-weight:700;margin-top:6px;white-space:nowrap}
+    .mine .blank{display:block;border-bottom:2px solid var(--grid);height:1.5em;margin-top:9px}
+
+    .ways{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:stretch;margin:14px 0}
+    .way{border:2px solid;border-radius:10px;padding:13px 16px;background:#fff}
+    .way .cap{font-weight:800;font-size:.88em;text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px}
+    .way.a{border-color:#0f766e} .way.a .cap{color:#0f766e}
+    .way.b{border-color:#c2410c} .way.b .cap{color:#c2410c}
+    .eqsign{display:flex;align-items:center;font-size:2.1em;font-weight:800;color:#475569}
+    @media(max-width:700px){.ways{grid-template-columns:1fr}.eqsign{justify-content:center}}
+
+    .boards{display:flex;flex-wrap:wrap;gap:22px;justify-content:center;align-items:flex-end;margin-top:14px}
+    .boards figure{text-align:center}
+    .boards figcaption{margin-top:8px;font-weight:800;color:var(--c);font-size:1.02em}
+    .sieve{border-collapse:collapse;margin:12px auto;background:#fff}
+    .sieve td{border:1.4px solid var(--grid);width:38px;height:34px;text-align:center;
+              font-size:.98em;font-weight:600;color:#1e2430}
+    .rules-list{list-style:none;counter-reset:rl;margin:10px 0}
+    .rules-list li{position:relative;padding:10px 14px 10px 48px;margin:8px 0;background:#fff;
+                   border-left:4px solid var(--c);border-radius:0 7px 7px 0;font-size:1.05em}
+    .rules-list li::before{counter-increment:rl;content:counter(rl);position:absolute;left:11px;top:50%;
+        transform:translateY(-50%);width:26px;height:26px;background:var(--c);color:#fff;border-radius:50%;
+        display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85em}
+    .sign{border:2px solid var(--c);border-radius:9px;padding:12px 16px;margin:10px 0;background:#fff}
+    .sign b{color:var(--c)}
+    .sign .ex{margin-top:5px;font-size:1.02em;color:#475569}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+    <div class="emo">🔁 🔟 ⏰</div>
+    <h1>Степень числа: последняя цифра и циклы</h1>
+    <div class="lead">Найди длину цикла, подели с остатком, посмотри нужное место</div>
+</div>
+
+<section class="sec sec-blue">
+<h2>1️⃣ Карусель последней цифры</h2>
+<div class="memo"><p>Последние цифры степеней повторяются. Достаточно найти <strong>длину цикла</strong> и разделить показатель на неё <strong>с остатком</strong>.</p></div>
+<div class="panel">
+    <div class="ctrls">
+        <label>Основание <input type="number" id="p-a" value="2" min="2" max="9999"></label>
+        <label>Показатель <input type="number" id="p-n" value="100" min="1" max="100000"></label>
+        <button class="solid" id="p-go">Показать цикл</button>
+        <button class="p-ex" data-a="3" data-n="100">3¹⁰⁰</button>
+        <button class="p-ex" data-a="549" data-n="49">549⁴⁹</button>
+        <button class="p-ex" data-a="2021" data-n="2021">2021²⁰²¹</button>
+        <button class="p-ex" data-a="7" data-n="823543">7⁷⁷ (сверху вниз)</button>
+    </div>
+    <div class="cyc" id="p-cyc"></div>
+    <div class="out" id="p-out"></div>
+    <div class="hintbox">Остаток 0 означает <strong>последнее</strong> место цикла, а не первое. Это самая частая ошибка.</div>
+</div>
+</section>
+
+<section class="sec sec-emerald">
+<h2>2️⃣ Часы и календарь</h2>
+<div class="memo"><p>У часов цикл 24, у минут 60, у недели 7. Дальше работает только остаток.</p></div>
+<div class="panel">
+    <div class="twocol">
+        <div>
+            <div class="ctrls">
+                <label>Сейчас <input type="number" id="t-h" value="17" min="0" max="23"> :
+                    <input type="number" id="t-m" value="15" min="0" max="59"></label>
+            </div>
+            <div class="ctrls">
+                <label>Прибавить <input type="number" id="t-add" value="100" min="0" max="1000000"></label>
+                <select id="t-unit"><option value="60">часов</option><option value="1">минут</option></select>
+                <button class="solid" id="t-go">Посчитать</button>
+            </div>
+            <div class="out" id="t-out"></div>
+        </div>
+        <div>
+            <div class="ctrls">
+                <label>Сегодня <select id="w-day">
+                    <option>понедельник</option><option>вторник</option><option>среда</option>
+                    <option>четверг</option><option>пятница</option><option>суббота</option>
+                    <option selected>воскресенье</option></select></label>
+            </div>
+            <div class="ctrls">
+                <label>Через <input type="number" id="w-n" value="100" min="0" max="1000000"> дней</label>
+                <button class="solid" id="w-go">Какой день?</button>
+            </div>
+            <div class="out" id="w-out"></div>
+        </div>
+    </div>
+</div>
+</section>
+
+<section class="sec sec-purple">
+<h2>3️⃣ Мяч по кругу</h2>
+<div class="memo"><p>Игроки передают мяч по кругу. После каждого полного круга всё повторяется: цикл равен числу игроков.</p></div>
+<div class="panel">
+    <div class="ctrls">
+        <label>Игроков <input type="number" id="b-n" value="3" min="2" max="10"></label>
+        <label>Пасов <input type="number" id="b-k" value="111" min="0" max="100000"></label>
+        <button class="solid" id="b-go">У кого мяч?</button>
+        <button class="b-ex" data-n="3" data-k="111">3 игрока, 111 пасов</button>
+        <button class="b-ex" data-n="4" data-k="199">4 игрока, 199 пасов</button>
+    </div>
+    <div class="flexwrap">
+        <div id="b-pic"></div>
+        <div style="flex:1;min-width:230px"><div class="out" id="b-out"></div></div>
+    </div>
+</div>
+</section>
+
+<section class="sec sec-cyan">
+<h2>4️⃣ Считалка на пальцах</h2>
+<div class="memo"><p>Считаем: 1 большой, 2 указательный, 3 средний, 4 безымянный, 5 мизинец, 6 снова безымянный, 7 средний, 8 указательный, 9 большой и дальше так же. Цикл длины 8.</p></div>
+<div class="panel">
+    <div class="ctrls">
+        <label>Номер <input type="number" id="f-n" value="2023" min="1" max="1000000"></label>
+        <button class="solid" id="f-go">Какой палец?</button>
+        <button class="f-ex" data-n="8">8</button>
+        <button class="f-ex" data-n="100">100</button>
+        <button class="f-ex" data-n="2023">2023</button>
+    </div>
+    <div class="fingers" id="f-pic"></div>
+    <div class="out" id="f-out"></div>
+</div>
+</section>
+
+<section class="sec sec-crimson">
+<h2>5️⃣ Тренажёр</h2>
+<div class="panel quiz">
+    <div class="ctrls"><button class="solid" id="q-new">Новый набор</button><span id="q-score" class="score"></span></div>
+    <div id="q-list"></div>
+</div>
+</section>
+
+<section class="sec sec-slate">
+<h2>6️⃣ Задачи в тетрадь</h2>
+
+<div class="task"><span class="star">⭐⭐</span><span class="task-num">1</span>
+<p>Найди последнюю цифру произведения: <strong>а)</strong> всех простых чисел, не превосходящих 100; <strong>б)</strong> всех нечётных простых, не превосходящих 100; <strong>в)</strong> всех нечётных чисел от 1 до 2021.</p></div>
+
+<div class="task"><span class="star">⭐⭐⭐</span><span class="task-num">2</span>
+<p>Делится ли число <strong>47³⁰ + 39⁵⁰</strong> на 10?</p></div>
+
+<div class="task"><span class="star">⭐⭐⭐</span><span class="task-num">3</span>
+<p>Вовочка перемножил несколько девяток. Может ли произведение оканчиваться <strong>несколькими девятками</strong>?</p></div>
+
+<div class="task"><span class="star">⭐⭐</span><span class="task-num">4</span>
+<p>В книге рекордов написано, что наибольшее известное простое число равно <strong>23021³³⁷ − 1</strong>. Не опечатка ли это?</p></div>
+
+<div class="task"><span class="star">⭐⭐⭐</span><span class="task-num">5</span>
+<p>Робот действует по правилам: кивает → моргает → топает → хлопает → трещит → пищит → снова кивает. Сейчас робот <strong>пищит</strong>. Что он будет делать через <strong>40 минут</strong>?</p></div>
+
+<div class="task"><span class="star">⭐⭐⭐</span><span class="task-num">6</span>
+<p>В полдень начался дождь. После трёх суток дождя колдун сказал: «Ровно через <strong>300 часов</strong> после начала дождя выглянет солнце». Заслуживает ли колдун доверия?</p></div>
+
+<div class="task"><span class="star">⭐⭐⭐</span><span class="task-num">7</span>
+<p>Петя записал 1, потом прибавил 2 и записал сумму, потом прибавил 3, потом 4 и так далее. <strong>а)</strong> Какие последние цифры встречаются в его записях? <strong>б)</strong> На какую цифру оканчивается сотое записанное число?</p></div>
+
+<div class="task"><span class="star">⭐⭐⭐</span><span class="task-num">8</span>
+<p>На доске написано <strong>23</strong>. Каждую минуту число стирают и пишут произведение его цифр, увеличенное на 12. Какое число будет на доске <strong>через час</strong>?</p></div>
+
+<div class="task"><span class="star">⭐⭐⭐</span><span class="task-num">9</span>
+<p>В магазин привезли <strong>206 литров</strong> молока в бидонах по <strong>10</strong> и <strong>17</strong> литров. Сколько было бидонов каждого вида?</p></div>
+
+<div class="task"><span class="star">⭐⭐⭐</span><span class="task-num">10</span>
+<p>Сколькими нулями оканчивается число <strong>2020! = 1 × 2 × 3 × … × 2020</strong>?</p></div>
+</section>
+
+</div>
+
+<script>
+function lastDigitCycle(a){
+    var d=a%10, seen=[], x=d;
+    for(var i=0;i<4;i++){ seen.push(x); x=(x*d)%10; if(x===d) break; }
+    return seen;
+}
+function lastDigitOfPower(a,n){
+    var cyc=lastDigitCycle(a), L=cyc.length, r=n%L;
+    return {cyc:cyc, L:L, pos:(r===0?L:r), digit:cyc[(r===0?L:r)-1]};
+}
+function modAdd(cur,add,mod){ return ((cur+add)%mod+mod)%mod; }
+var DAYS=['понедельник','вторник','среда','четверг','пятница','суббота','воскресенье'];
+var FINGERS=['большой','указательный','средний','безымянный','мизинец','безымянный','средний','указательный'];
+function fingerOf(n){ var r=n%8; return FINGERS[(r===0?8:r)-1]; }
+function ballOwner(players,passes){ return passes%players; }
+function clampInt(el,def,lo,hi){var v=parseInt(el.value,10);if(!isFinite(v))v=def;v=Math.max(lo,Math.min(hi,v));el.value=v;return v;}
+
+/* 1. степени */
+function showPower(){
+    var a=clampInt(document.getElementById('p-a'),2,2,9999);
+    var n=clampInt(document.getElementById('p-n'),100,1,100000);
+    var res=lastDigitOfPower(a,n), html='';
+    for(var i=0;i<res.cyc.length;i++){
+        html+='<span class="on'+((i+1)===res.pos?' hit':'')+'"><i>'+(i+1)+'</i>'+res.cyc[i]+'</span>';
+    }
+    document.getElementById('p-cyc').innerHTML=html;
+    var r=n%res.L;
+    document.getElementById('p-out').innerHTML=
+        'Цикл длины <b>'+res.L+'</b>: '+res.cyc.join(', ')+'<br>'+
+        n+' : '+res.L+' даёт остаток <b>'+r+'</b>'+(r===0?' — значит берём последнее место цикла':' — значит место '+r)+
+        '<br><span class="big">последняя цифра '+a+'<sup>'+n+'</sup> = '+res.digit+'</span>';
+}
+
+/* 2. часы и дни */
+function showTime(){
+    var h=clampInt(document.getElementById('t-h'),17,0,23), m=clampInt(document.getElementById('t-m'),15,0,59);
+    var add=clampInt(document.getElementById('t-add'),100,0,1000000);
+    var unit=parseInt(document.getElementById('t-unit').value,10);
+    var total=add*unit, start=h*60+m, res=modAdd(start,total,1440);
+    var hh=Math.floor(res/60), mm=res%60;
+    var days=Math.floor(total/1440), rest=total%1440;
+    document.getElementById('t-out').innerHTML=
+        'Прибавляем '+total+' минут = '+days+' суток и '+Math.floor(rest/60)+' ч '+(rest%60)+' мин<br>'+
+        '<span class="big">'+(hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm+'</span> <small>полные сутки на время не влияют</small>';
+}
+function showWeek(){
+    var idx=document.getElementById('w-day').selectedIndex;
+    var n=clampInt(document.getElementById('w-n'),100,0,1000000);
+    var r=n%7, res=(idx+r)%7;
+    document.getElementById('w-out').innerHTML=
+        n+' : 7 даёт остаток <b>'+r+'</b><br><span class="big">'+DAYS[res]+'</span>';
+}
+
+/* 3. мяч */
+function showBall(){
+    var n=clampInt(document.getElementById('b-n'),3,2,10);
+    var k=clampInt(document.getElementById('b-k'),111,0,100000);
+    var who=ballOwner(n,k), R=78, W=2*R+70, cy=R+35;
+    var s='<svg viewBox="0 0 '+W+' '+(2*cy)+'" width="'+Math.min(W,300)+'">';
+    s+='<circle cx="'+(W/2)+'" cy="'+cy+'" r="'+R+'" fill="none" stroke="#c4b5fd" stroke-width="2" stroke-dasharray="6 6"/>';
+    for(var i=0;i<n;i++){
+        var ang=-Math.PI/2+2*Math.PI*i/n, x=W/2+R*Math.cos(ang), y=cy+R*Math.sin(ang);
+        var on=(i===who);
+        s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="21" fill="'+(on?'#ddd6fe':'#fff')+'" stroke="'+(on?'#6b21a8':'#94a3b8')+'" stroke-width="'+(on?'4':'2')+'"/>';
+        s+='<text x="'+x.toFixed(1)+'" y="'+(y+6).toFixed(1)+'" font-size="16" font-weight="800" text-anchor="middle" fill="'+(on?'#6b21a8':'#64748b')+'">'+(i+1)+'</text>';
+        if(on) s+='<text x="'+x.toFixed(1)+'" y="'+(y-27).toFixed(1)+'" font-size="18" text-anchor="middle">🏀</text>';
+    }
+    s+='</svg>';
+    document.getElementById('b-pic').innerHTML=s;
+    document.getElementById('b-out').innerHTML=
+        k+' : '+n+' даёт остаток <b>'+(k%n)+'</b><br>'+
+        '<span class="big">мяч у игрока №'+(who+1)+'</span>'+
+        (who===0?'<br><small>это тот, у кого мяч был вначале</small>':'');
+}
+
+/* 4. пальцы */
+function showFinger(){
+    var n=clampInt(document.getElementById('f-n'),2023,1,1000000);
+    var r=n%8, pos=(r===0?8:r), name=FINGERS[pos-1];
+    var names=['большой','указательный','средний','безымянный','мизинец'], html='';
+    for(var i=0;i<5;i++){
+        html+='<div class="f'+(i+1)+(names[i]===name?' on':'')+'">'+names[i]+'<span>'+(names[i]===name?'✓':'')+'</span></div>';
+    }
+    document.getElementById('f-pic').innerHTML=html;
+    document.getElementById('f-out').innerHTML=
+        n+' : 8 даёт остаток <b>'+r+'</b>, это место <b>'+pos+'</b> в считалке<br>'+
+        '<span class="big">'+name+'</span>';
+}
+
+/* 5. тренажёр */
+function randInt(a,b){return a+Math.floor(Math.random()*(b-a+1));}
+function makeQ(){
+    var qs=[];
+    var bases=[2,3,7,8,4,9,6,5];
+    for(var i=0;i<4;i++){
+        var a=bases[randInt(0,bases.length-1)], n=randInt(12,400);
+        qs.push({t:'Последняя цифра числа '+a+'<sup>'+n+'</sup>', ans:lastDigitOfPower(a,n).digit});
+    }
+    var d=randInt(0,6), k=randInt(20,400);
+    qs.push({t:'Сегодня '+DAYS[d]+'. Какой день недели будет через '+k+' дней? <small>(ответ словом)</small>', ans:DAYS[(d+k%7)%7], text:true});
+    var pn=randInt(3,7), pk=randInt(30,500);
+    qs.push({t:'Игроков '+pn+', мяч у первого. У игрока с каким номером мяч после '+pk+'-го паса?', ans:ballOwner(pn,pk)+1});
+    var fn=randInt(50,3000);
+    qs.push({t:'Какой палец будет '+fn+'-м в считалке? <small>(ответ словом)</small>', ans:fingerOf(fn), text:true});
+    return qs;
+}
+function renderQuiz(){
+    var qs=makeQ(), list=document.getElementById('q-list'), h='';
+    qs.forEach(function(q,i){
+        h+='<div class="task" style="margin:10px 0"><div class="q">'+(i+1)+'. '+q.t+'</div>'+
+           '<input type="text" id="q'+i+'" data-ans="'+q.ans+'" data-text="'+(q.text?1:0)+'">'+
+           '<button class="chk" data-i="'+i+'">Проверить</button><span class="verdict" id="v'+i+'"></span></div>';
+    });
+    list.innerHTML=h;
+    document.getElementById('q-score').textContent='';
+    Array.prototype.forEach.call(list.querySelectorAll('.chk'),function(btn){
+        btn.onclick=function(){
+            var i=btn.getAttribute('data-i'), inp=document.getElementById('q'+i), v=document.getElementById('v'+i);
+            var val=(inp.value||'').trim().toLowerCase().replace('ё','е');
+            if(val===''){v.textContent='';v.className='verdict';return;}
+            var ans=String(inp.getAttribute('data-ans')).toLowerCase().replace('ё','е');
+            var ok=(val===ans);
+            v.textContent=ok?'верно':'ещё раз'; v.className='verdict '+(ok?'ok':'no');
+            document.getElementById('q-score').textContent='Решено верно: '+list.querySelectorAll('.verdict.ok').length+' из '+list.querySelectorAll('.chk').length;
+        };
+        btn.parentNode.querySelector('input').onkeydown=function(e){ if(e.key==='Enter') btn.click(); };
+    });
+}
+
+if(typeof document!=='undefined' && document.getElementById('p-go')){
+    document.getElementById('p-go').onclick=showPower;
+    Array.prototype.forEach.call(document.querySelectorAll('.p-ex'),function(b){
+        b.onclick=function(){document.getElementById('p-a').value=b.getAttribute('data-a');
+            document.getElementById('p-n').value=b.getAttribute('data-n');showPower();};
+    });
+    document.getElementById('t-go').onclick=showTime;
+    document.getElementById('w-go').onclick=showWeek;
+    document.getElementById('b-go').onclick=showBall;
+    Array.prototype.forEach.call(document.querySelectorAll('.b-ex'),function(b){
+        b.onclick=function(){document.getElementById('b-n').value=b.getAttribute('data-n');
+            document.getElementById('b-k').value=b.getAttribute('data-k');showBall();};
+    });
+    document.getElementById('f-go').onclick=showFinger;
+    Array.prototype.forEach.call(document.querySelectorAll('.f-ex'),function(b){
+        b.onclick=function(){document.getElementById('f-n').value=b.getAttribute('data-n');showFinger();};
+    });
+    document.getElementById('q-new').onclick=renderQuiz;
+    showPower(); showTime(); showWeek(); showBall(); showFinger(); renderQuiz();
+}
+</script>
+</body>
+</html>
