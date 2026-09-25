@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Переправы (2 класс)</title>
+<style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+        font-family:'Segoe UI',Arial,sans-serif;
+        background:linear-gradient(160deg,#fdf6ec 0%,#eef4fb 45%,#f3ecfb 100%);
+        background-attachment:fixed;
+        color:#1e2430;padding:22px;line-height:1.55;
+    }
+    .container{max-width:860px;margin:0 auto}
+
+    .header{
+        border:3px solid #c2410c;border-radius:14px;padding:18px 24px;margin-bottom:8px;text-align:center;
+        background:linear-gradient(135deg,#fff7ed 0%,#ffedd5 100%);
+        box-shadow:0 3px 10px rgba(0,0,0,.10);
+    }
+    .header .emo{font-size:2em;margin-bottom:6px;letter-spacing:4px}
+    .header h1{font-size:1.7em;color:#9a3412}
+
+    /* у каждой секции свой цвет */
+    .sec{--c:#334155;--bg:#f8fafc;--grid:#dbe3ec}
+    .sec-amber {--c:#b45309;--bg:#fffbeb;--grid:#f0dcae}
+    .sec-teal  {--c:#0e7490;--bg:#ecfeff;--grid:#b8e2ea}
+    .sec-blue  {--c:#1d4ed8;--bg:#eff6ff;--grid:#c5d8f5}
+    .sec-green {--c:#15803d;--bg:#f0fdf4;--grid:#bfe3c9}
+    .sec-violet{--c:#6d28d9;--bg:#f5f3ff;--grid:#d7cdf3}
+    .sec-orange{--c:#c2410c;--bg:#fff7ed;--grid:#f5d3b4}
+    .sec-pink  {--c:#be185d;--bg:#fdf2f8;--grid:#f2cadd}
+
+    h2{font-size:1.26em;margin:26px 0 12px;padding:9px 16px;border-radius:9px;
+       background:var(--c);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.14)}
+
+    .memo{border:2px solid var(--c);border-left:8px solid var(--c);border-radius:9px;
+          padding:13px 18px;margin:12px 0;background:var(--bg)}
+    .memo p{font-size:1.02em;margin-bottom:7px}
+    .memo p:last-child{margin-bottom:0}
+
+    .task{border:2px solid var(--c);border-radius:10px;padding:15px 19px;margin:15px 0;
+          background:#fff;box-shadow:0 2px 7px rgba(0,0,0,.08)}
+    .task-num{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;
+              border-radius:50%;font-weight:800;font-size:.95em;color:#fff;background:var(--c);
+              margin-bottom:7px;padding:0 9px}
+    .task p{font-size:1.06em;margin-bottom:7px}
+    .task strong{color:var(--c)}
+    .task .star{float:right;font-size:1.1em;letter-spacing:2px}
+
+    /* поля для рисования светлые: поверх них видно аннотации Zoom */
+    .grid-space{margin-top:9px;border:2px solid var(--c);border-radius:6px;min-height:130px;background:#fff;
+        background-image:repeating-linear-gradient(0deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px),
+                         repeating-linear-gradient(90deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px);
+        background-size:24px 24px}
+    .grid-tall{min-height:170px}
+
+    .write-line{display:inline-block;border-bottom:2px solid var(--c);min-width:130px;height:1.25em;margin:0 4px}
+    .write-long{min-width:230px}
+    .write-short{min-width:70px}
+
+    .pairs{display:grid;grid-template-columns:1fr 1fr;gap:4px 28px;font-size:1.03em;line-height:2.15}
+    .pairs .row{white-space:nowrap;overflow:hidden}
+
+    .legend{border:2px solid var(--c);border-radius:10px;padding:14px 18px;margin:12px 0;background:#fff}
+    .legend-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px 26px;align-items:center}
+    .legend-item{display:flex;align-items:center;gap:13px;font-size:1.02em}
+    .legend-item svg{flex:none}
+
+    .tree-space{margin-top:11px;border:2px solid var(--c);border-radius:6px;min-height:280px;position:relative;background:#fff;
+        background-image:repeating-linear-gradient(0deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px),
+                         repeating-linear-gradient(90deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px);
+        background-size:24px 24px}
+    .tier{position:absolute;left:0;right:0;border-top:2px dashed var(--c);opacity:.6;
+          color:var(--c);font-size:.85em;font-weight:700;padding-left:8px}
+    .tier span{background:#fff;padding:0 7px;position:relative;top:-.75em}
+    .tier-1{top:60px} .tier-2{top:150px} .tier-3{top:240px}
+
+    .hint{font-size:.95em;color:var(--c);font-style:italic;margin-top:7px;opacity:.95}
+    .lines{margin-top:9px}
+    .lines .line{border-bottom:2px solid var(--grid);height:32px}
+
+
+    .header{border:3px solid #0e7490;border-radius:14px;padding:18px 24px;margin-bottom:8px;text-align:center;
+        background:linear-gradient(135deg,#ecfeff 0%,#e0f2fe 100%);box-shadow:0 3px 10px rgba(0,0,0,.10)}
+    .header h1{color:#0e5a70}
+    .fig{text-align:center;margin:10px 0 4px}
+    .fig svg{max-width:100%;height:auto}
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px 22px;align-items:start}
+    .row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 16px;align-items:start}
+    @media(max-width:640px){.row2,.row3{grid-template-columns:1fr}}
+    .cap{font-size:.97em;font-weight:700;color:var(--c);text-align:center;margin-top:2px}
+    .items{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 8px;margin:10px 0 2px}
+    .item{display:flex;flex-direction:column;align-items:center;min-width:46px;border:2px solid var(--grid);
+          border-radius:10px;padding:6px 8px;background:#fff}
+    .item .e{font-size:1.6em;line-height:1.1}
+    .item .n{font-weight:800;color:var(--c);font-size:.95em}
+    .words{display:flex;flex-wrap:wrap;gap:8px 10px;justify-content:center;margin:8px 0 4px}
+    .words span{border:2px solid var(--grid);border-radius:8px;padding:4px 10px;background:#fff;font-weight:600}
+    .words b{color:var(--c);margin-right:4px}
+    .opt{font-weight:800;color:var(--c)}
+    .theory{border:3px solid var(--c);border-radius:12px;padding:15px 20px;margin:12px 0;background:var(--bg)}
+    .theory p{font-size:1.06em;margin-bottom:8px}
+    .theory p:last-child{margin-bottom:0}
+    .theory .big{font-size:1.2em;font-weight:800;color:var(--c);text-align:center;margin:10px 0 4px}
+    .lst{margin:4px 0 4px 22px}
+    .lst li{font-size:1.05em;margin-bottom:3px}
+
+    @media print{
+        body{background:#fff !important;zoom:.86}
+        .keep,.task,.theory,.memo{break-inside:avoid;page-break-inside:avoid}
+        .fig svg{max-height:270px;width:auto}
+        .row2 .fig svg{max-height:190px}
+        .row3 .fig svg{max-height:128px}
+        .task{margin:10px 0;padding:11px 16px}
+        .grid-space{min-height:96px}
+        h2{margin:16px 0 9px}
+        .task,.memo,.theory,h2,.header,.item{box-shadow:none !important}
+        .theory + .fig svg{max-height:190px}
+        .sec-orange .fig svg{max-height:210px}
+        .row2 .fig svg{max-height:165px}
+        .sec-pink .fig svg{max-height:290px}
+        .container{padding:0 6px}
+        .sec-violet .fig svg{max-height:330px}
+    }
+
+
+    table.cross{width:100%;border-collapse:collapse;margin:10px 0 2px;font-size:1.02em}
+    table.cross th{background:var(--bg);color:var(--c);border:2px solid var(--c);padding:7px 6px;font-size:.95em}
+    table.cross td{border:2px solid var(--grid);padding:0 8px;height:34px;background:#fff}
+    table.cross td.n{width:48px;text-align:center;font-weight:800;color:var(--c);background:var(--bg)}
+    table.cross td.who{width:30%}
+    table.cross.sample td{font-weight:600}
+    table.cross.sample td.dash{color:#94a3b8}
+    .river{display:block;margin:0 auto 4px}
+    .legend{font-size:.95em;color:#475569;margin-top:4px}
+    .legend b{color:var(--c)}
+
+    @page{size:A4;margin:12mm}
+    @media print{
+        body{background:#fff;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+        .task,.memo,.header,.legend,.pairs{page-break-inside:avoid}
+        .break{page-break-before:always}
+    }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+    <div class="emo">🚣 🐺 🐐</div>
+    <h1>Переправы</h1>
+</div>
+<section class="sec sec-orange"><div class="keep"><h2>🛶 Как записывать решение</h2><svg class="river" viewBox="0 0 640 120" width="600" role="img"><rect x="0" y="0" width="640" height="120" rx="14" fill="#e0f2fe"/><path d="M0 92 h190 v28 H0 z" fill="#86efac"/><path d="M460 92 h180 v28 H460 z" fill="#86efac"/><rect x="0" y="92" width="640" height="4" fill="#4ade80" opacity=".6"/><path d="M10 36 q 22 -10 44 0 t 44 0 t 44 0 t 44 0 t 44 0 t 44 0 t 44 0" fill="none" stroke="#38bdf8" stroke-width="3" opacity=".7"/><path d="M28 56 q 22 -10 44 0 t 44 0 t 44 0 t 44 0 t 44 0 t 44 0 t 44 0" fill="none" stroke="#38bdf8" stroke-width="3" opacity=".7"/><path d="M46 76 q 22 -10 44 0 t 44 0 t 44 0 t 44 0 t 44 0 t 44 0 t 44 0" fill="none" stroke="#38bdf8" stroke-width="3" opacity=".7"/><path d="M262 74 h116 l-18 22 h-80 z" fill="#f59e0b" stroke="#b45309" stroke-width="3"/><line x1="320" y1="74" x2="320" y2="34" stroke="#b45309" stroke-width="4"/><path d="M324 36 l40 16 -40 14 z" fill="#fca5a5" stroke="#b91c1c" stroke-width="2.5"/><text x="40" y="86" font-size="28" text-anchor="middle">🐺</text><text x="92" y="86" font-size="28" text-anchor="middle">🐐</text><text x="144" y="86" font-size="28" text-anchor="middle">🥬</text><text x="300" y="72" font-size="26" text-anchor="middle">🧑‍🌾</text></svg><div class="memo"><p>Ответом в переправах служит не число, а <strong>порядок рейсов</strong>. Записываем его таблицей.</p><p>Лодка сама не возвращается: <strong>обратный путь это тоже рейс</strong>.</p><p>После каждого рейса проверяем <strong>оба берега</strong>, а не только тот, куда приплыли.</p></div><p>Крестьянин, волк, коза и капуста. В лодке помещается крестьянин и кто-то один. Без крестьянина волк съест козу, а коза съест капусту. В таблице <b>К</b> это крестьянин, стрелка показывает, куда плывёт лодка.</p><table class="cross sample"><tr><th>Рейс</th><th>Кто плывёт и куда</th><th>Кто на левом берегу</th><th>Кто на правом берегу</th></tr><tr><td class="n">1</td><td class="who">К, коза →</td><td>волк, капуста</td><td>К, коза</td></tr><tr><td class="n">2</td><td class="who">К ←</td><td>К, волк, капуста</td><td>коза</td></tr><tr><td class="n">3</td><td class="who">К, волк →</td><td>капуста</td><td>К, волк, коза</td></tr><tr><td class="n">4</td><td class="who">К, коза ←</td><td>К, коза, капуста</td><td>волк</td></tr><tr><td class="n">5</td><td class="who">К, капуста →</td><td>коза</td><td>К, волк, капуста</td></tr><tr><td class="n">6</td><td class="who">К ←</td><td>К, коза</td><td>волк, капуста</td></tr><tr><td class="n">7</td><td class="who">К, коза →</td><td class="dash">—</td><td>К, волк, коза, капуста</td></tr></table><p class="legend">Семь рейсов. Самый неожиданный <b>четвёртый</b>: козу приходится везти обратно.</p></div></section><section class="sec sec-blue"><h2>🔢 Считаем рейсы</h2><div class="task"><span class="star">⭐</span><span class="task-num">1</span><p>Три поросёнка подошли к реке. Плот выдерживает не больше <strong>20 кг</strong>, управлять им умеет каждый. Поросята весят 9 кг, 10 кг и 16 кг. Как им переправиться? Сколько получилось рейсов?</p><table class="cross"><tr><th>Рейс</th><th>Кто плывёт и куда</th><th>Кто на левом берегу</th><th>Кто на правом берегу</th></tr><tr><td class="n">1</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">2</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">3</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">4</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">5</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">6</td><td class="who"></td><td></td><td></td></tr></table></div><div class="task"><span class="star">⭐</span><span class="task-num">2</span><p>К реке подошёл полк солдат. По реке катались на лодке два мальчика. Лодка выдерживает <strong>одного солдата или двух мальчиков</strong>. Как переправить всех солдат и вернуть лодку мальчикам?</p><p class="hint">Сначала переправь одного солдата и сосчитай рейсы. Сколько рейсов уйдёт на пятерых солдат?</p><table class="cross"><tr><th>Рейс</th><th>Кто плывёт и куда</th><th>Кто на левом берегу</th><th>Кто на правом берегу</th></tr><tr><td class="n">1</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">2</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">3</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">4</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">5</td><td class="who"></td><td></td><td></td></tr></table></div><div class="task"><span class="star">⭐⭐</span><span class="task-num">3</span><p>Крестьянин пришёл к реке с собакой, кошкой, мышкой и мешком семечек. Лодка на двоих, гребёт только он. Без крестьянина нельзя оставлять вместе собаку с кошкой и кошку с мышкой, а мышка сгрызёт семечки, если рядом нет ни собаки, ни крестьянина.</p><table class="cross"><tr><th>Рейс</th><th>Кто плывёт и куда</th><th>Кто на левом берегу</th><th>Кто на правом берегу</th></tr><tr><td class="n">1</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">2</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">3</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">4</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">5</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">6</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">7</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">8</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">9</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">10</td><td class="who"></td><td></td><td></td></tr></table></div></section><section class="sec sec-green"><h2>🌊 Посложнее</h2><div class="task"><span class="star">⭐⭐</span><span class="task-num">4</span><p>К реке с двух сторон подошли три волчонка и четыре зайчонка. Волчата на левом берегу, зайчата на правом, и всем нужно на другой берег. Лодка вмещает двоих, грести умеют все. Зайчата согласны быть на берегу вместе с волчатами, только если зайчат там <strong>не меньше</strong>, чем волчат.</p><table class="cross"><tr><th>Рейс</th><th>Кто плывёт и куда</th><th>Кто на левом берегу</th><th>Кто на правом берегу</th></tr><tr><td class="n">1</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">2</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">3</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">4</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">5</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">6</td><td class="who"></td><td></td><td></td></tr></table></div><div class="task"><span class="star">⭐⭐</span><span class="task-num">5</span><p>Атос, Портос, Арамис и Д’Артаньян сидели за круглым столом и перессорились каждый со своими двумя соседями. Теперь им надо переправиться через реку в лодке на двоих. Никто не поплывёт вдвоём с тем, с кем он в ссоре, и не останется с ним <strong>вдвоём</strong> на берегу. Втроём на берегу быть можно. Смогут ли они переправиться?</p><table class="cross"><tr><th>Рейс</th><th>Кто плывёт и куда</th><th>Кто на левом берегу</th><th>Кто на правом берегу</th></tr><tr><td class="n">1</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">2</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">3</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">4</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">5</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">6</td><td class="who"></td><td></td><td></td></tr></table></div><div class="task"><span class="star">⭐⭐⭐</span><span class="task-num">6</span><p>Три рыцаря, у каждого свой оруженосец, подошли к реке. Лодка на двоих. Оруженосец не останется с чужими рыцарями без своего хозяина, а один или с другими оруженосцами останется спокойно. Как всем переправиться?</p><p class="hint">Рыцарей обозначай Р1, Р2, Р3, а их оруженосцев О1, О2, О3.</p><table class="cross"><tr><th>Рейс</th><th>Кто плывёт и куда</th><th>Кто на левом берегу</th><th>Кто на правом берегу</th></tr><tr><td class="n">1</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">2</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">3</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">4</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">5</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">6</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">7</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">8</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">9</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">10</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">11</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">12</td><td class="who"></td><td></td><td></td></tr></table></div></section><section class="sec sec-pink"><h2>⭐ Для тех, кому мало</h2><div class="task"><span class="star">⭐⭐⭐</span><span class="task-num">7</span><p>Ночью к мосту подошла семья: папа, мама, сын и бабушка. Мост выдерживает двоих, и идти по нему можно только с фонариком, а фонарик один. Папа переходит мост за 1 минуту, мама за 2, сын за 5, бабушка за 10. Когда идут двое, они идут со скоростью того, кто медленнее. Как перейти <strong>за 17 минут</strong>?</p><table class="cross"><tr><th>Переход</th><th>Кто идёт и куда</th><th>Минут</th><th>Всего минут</th></tr><tr><td class="n">1</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">2</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">3</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">4</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">5</td><td class="who"></td><td></td><td></td></tr></table></div><div class="task"><span class="star">⭐⭐⭐</span><span class="task-num">8</span><p>Тот же мост и тот же фонарик, но переходят пятеро: они тратят на мост 1, 3, 4, 7 и 10 минут. За какое наименьшее время они переберутся?</p><table class="cross"><tr><th>Переход</th><th>Кто идёт и куда</th><th>Минут</th><th>Всего минут</th></tr><tr><td class="n">1</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">2</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">3</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">4</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">5</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">6</td><td class="who"></td><td></td><td></td></tr><tr><td class="n">7</td><td class="who"></td><td></td><td></td></tr></table></div></section></div></body></html>
