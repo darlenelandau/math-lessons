@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>На сколько и во сколько раз — тренажёр</title>
+<style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',Arial,sans-serif;background:linear-gradient(135deg,#e6f7f4 0%,#c3e9e2 50%,#9fd9cf 100%);background-attachment:fixed;color:#1f2937;min-height:100vh;padding:18px;line-height:1.5}
+    .app{max-width:920px;margin:0 auto}
+
+    .top-bar{background:rgba(255,255,255,.97);border:3px solid #0f766e;border-radius:14px;padding:12px 20px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+    .title{font-size:1.5em;color:#0f766e;font-weight:bold}
+    .stats{display:flex;gap:8px;flex-wrap:wrap}
+    .badge{background:#ecfdf5;padding:6px 12px;border-radius:8px;border:2px solid #0f766e;font-size:.95em;font-weight:bold}
+
+    .progress{width:100%;height:10px;background:rgba(255,255,255,.6);border-radius:5px;overflow:hidden;margin-bottom:14px;border:1.5px solid #0f766e}
+    .progress-bar{height:100%;background:linear-gradient(90deg,#0f766e,#5eead4);width:0;transition:width .35s ease}
+
+    .rule{background:rgba(255,255,255,.97);border:2px solid #0f766e;border-radius:12px;padding:12px 18px;margin-bottom:14px;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+    .rule h3{font-size:1.05em;color:#0f766e;margin-bottom:6px}
+    .rule table{border-collapse:collapse;width:100%}
+    .rule td{padding:5px 8px;border-bottom:1px solid #d1fae5;font-size:1.02em;vertical-align:top}
+    .rule td:first-child{font-weight:bold;white-space:nowrap;color:#0f766e;width:190px}
+    .rule tr:last-child td{border-bottom:none}
+
+    .card{background:#fff;border:3px solid #0f766e;border-radius:14px;padding:20px 22px;box-shadow:0 6px 20px rgba(0,0,0,.2)}
+    .lvl{font-size:.9em;letter-spacing:1.2px;text-transform:uppercase;color:#0f766e;font-weight:bold;margin-bottom:8px}
+    .q{font-size:1.28em;margin-bottom:6px}
+    .q b{color:#b45309}
+    .hint{font-style:italic;color:#4b5563;font-size:.97em;margin-bottom:10px}
+
+    .pic{margin:10px 0}
+    .pic svg{max-width:620px;width:100%;height:auto}
+
+    .answer{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+    input[type=text]{font-size:1.25em;font-family:inherit;padding:8px 12px;width:130px;border:2.5px solid #0f766e;border-radius:9px;text-align:center}
+    button{font-family:inherit;font-size:1.05em;font-weight:bold;padding:9px 18px;border:none;border-radius:9px;background:#0f766e;color:#fff;cursor:pointer}
+    button:hover{background:#115e59}
+    button.ghost{background:#fff;color:#0f766e;border:2.5px solid #0f766e}
+    button.ghost:hover{background:#ecfdf5}
+    .choices{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+    .choices button{font-size:1.12em;padding:12px 22px;background:#fff;color:#0f766e;border:2.5px solid #0f766e}
+    .choices button:hover{background:#ecfdf5}
+
+    .fb{margin-top:14px;padding:12px 16px;border-radius:10px;font-size:1.05em;display:none}
+    .fb.ok{display:block;background:#ecfdf5;border:2px solid #0f766e}
+    .fb.no{display:block;background:#fef2f2;border:2px solid #dc2626}
+    .fb b{display:block;margin-bottom:4px}
+
+    .done{text-align:center;padding:10px 0}
+    .done .big{font-size:1.5em;font-weight:bold;color:#0f766e;margin-bottom:8px}
+    .levels{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;justify-content:center}
+    .levels button{font-size:.95em;padding:7px 14px}
+    .muted{color:#4b5563;font-size:.95em;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div class="top-bar">
+    <div class="title">На сколько и во сколько раз</div>
+    <div class="stats">
+        <div class="badge" id="b-level">Уровень 1 из 5</div>
+        <div class="badge" id="b-score">Верно: 0</div>
+        <div class="badge" id="b-streak">Подряд: 0</div>
+    </div>
+</div>
+
+<div class="progress"><div class="progress-bar" id="bar"></div></div>
+
+<div class="rule">
+    <h3>Два разных вопроса</h3>
+    <table>
+        <tr><td>На сколько больше</td><td>это разность, из большего вычитаем меньшее</td></tr>
+        <tr><td>Во сколько раз больше</td><td>это частное, большее делим на меньшее</td></tr>
+        <tr><td>На 5 больше</td><td>прибавляем 5</td></tr>
+        <tr><td>В 5 раз больше</td><td>умножаем на 5</td></tr>
+    </table>
+</div>
+
+<div class="card" id="card"></div>
+
+</div>
+
+<script>
+/* ---------- вспомогательное ---------- */
+function ri(a,b){return a+Math.floor(Math.random()*(b-a+1));}
+function pick(arr){return arr[ri(0,arr.length-1)];}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=ri(0,i);[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+/* слова: "во сколько раз" и "на сколько" */
+function plural(n,one,few,many){
+    const n10=n%10,n100=n%100;
+    if(n10===1&&n100!==11)return one;
+    if(n10>=2&&n10<=4&&(n100<10||n100>=20))return few;
+    return many;
+}
+
+/* ---------- картинка: две полоски ---------- */
+function bars(small,times){
+    const total=small*times;
+    const u=Math.min(26,Math.max(6,520/total));
+    const x0=70, W=x0+total*u+24, H=160;
+    let s='<svg viewBox="0 0 '+W+' '+H+'" role="img">';
+    s+='<text x="'+(x0-10)+'" y="34" font-size="15" font-weight="700" fill="#0f766e" text-anchor="end">'+small+'</text>';
+    s+='<rect x="'+x0+'" y="16" width="'+(small*u)+'" height="26" fill="#5eead4" stroke="#0f766e" stroke-width="2"/>';
+    s+='<text x="'+(x0-10)+'" y="80" font-size="15" font-weight="700" fill="#b45309" text-anchor="end">'+total+'</text>';
+    for(let i=0;i<times;i++){
+        s+='<rect x="'+(x0+i*small*u)+'" y="62" width="'+(small*u)+'" height="26" fill="'+(i%2?'#fed7aa':'#fdba74')+'" stroke="#b45309" stroke-width="2"/>';
+        if(small*u>16)s+='<text x="'+(x0+i*small*u+small*u/2)+'" y="81" font-size="14" font-weight="700" fill="#7c2d12" text-anchor="middle">'+small+'</text>';
+    }
+    s+='<line x1="'+(x0+small*u)+'" y1="96" x2="'+(x0+total*u)+'" y2="96" stroke="#7c3aed" stroke-width="3"/>';
+    s+='<line x1="'+(x0+small*u)+'" y1="90" x2="'+(x0+small*u)+'" y2="102" stroke="#7c3aed" stroke-width="3"/>';
+    s+='<line x1="'+(x0+total*u)+'" y1="90" x2="'+(x0+total*u)+'" y2="102" stroke="#7c3aed" stroke-width="3"/>';
+    s+='<text x="'+(x0+(small*u+total*u)/2)+'" y="120" font-size="15" font-weight="700" fill="#7c3aed" text-anchor="middle">на '+(total-small)+' больше</text>';
+    s+='<text x="'+(x0+total*u/2)+'" y="148" font-size="15" font-weight="700" fill="#b45309" text-anchor="middle">это '+times+' '+plural(times,'раз','раза','раз')+' по '+small+', значит в '+times+' '+plural(times,'раз','раза','раз')+' больше</text>';
+    s+='</svg>';
+    return s;
+}
+
+/* ---------- сюжеты ---------- */
+const STORY=[
+    {a:['марка','марки','марок'],b:['открытка','открытки','открыток'],who:'В альбоме'},
+    {a:['карандаш','карандаша','карандашей'],b:['ручка','ручки','ручек'],who:'В коробке'},
+    {a:['яблоко','яблока','яблок'],b:['груша','груши','груш'],who:'В ящике'},
+    {a:['книга','книги','книг'],b:['тетрадь','тетради','тетрадей'],who:'На полке'},
+    {a:['шишка','шишки','шишек'],b:['жёлудь','жёлудя','желудей'],who:'В корзине'},
+    {a:['машинка','машинки','машинок'],b:['кубик','кубика','кубиков'],who:'В комнате'},
+    {a:['ромашка','ромашки','ромашек'],b:['василёк','василька','васильков'],who:'В букете'},
+    {a:['конфета','конфеты','конфет'],b:['печенье','печенья','печений'],who:'В вазе'}
+];
+function nf(n,f){return n+' '+plural(n,f[0],f[1],f[2]);}
+function pairNums(maxProd){
+    let small,times;
+    do{small=ri(2,9);times=ri(2,9);}while(small*times>(maxProd||72)||small===times&&Math.random()<0.5);
+    return {small:small,times:times,total:small*times};
+}
+
+/* ---------- генераторы уровней ---------- */
+function levelPairs(n){          // уровень 1: два вопроса про одни и те же числа
+    const out=[];
+    for(let i=0;i<n/2;i++){
+        const p=pairNums(48), st=pick(STORY);
+        const base=st.who+' '+nf(p.total,st.a)+' и '+nf(p.small,st.b)+'. ';
+        out.push({kind:'input',text:base+'<b>На сколько</b> больше '+st.a[2]+', чем '+st.b[2]+'?',
+            hint:'«На сколько» это вычитание.',answer:p.total-p.small,
+            explain:p.total+' − '+p.small+' = '+(p.total-p.small),pic:p});
+        out.push({kind:'input',text:base+'<b>Во сколько раз</b> больше '+st.a[2]+', чем '+st.b[2]+'?',
+            hint:'«Во сколько раз» это деление.',answer:p.times,
+            explain:p.total+' : '+p.small+' = '+p.times,pic:p});
+    }
+    return out;
+}
+function levelChoice(n){         // уровень 2: выбрать действие, не считая
+    const out=[];
+    for(let i=0;i<n;i++){
+        const p=pairNums(72), st=pick(STORY), razy=Math.random()<0.5;
+        const q=razy?'Во сколько раз':'На сколько';
+        out.push({kind:'choice',
+            text:st.who+' '+nf(p.total,st.a)+' и '+nf(p.small,st.b)+'. <b>'+q+'</b> больше '+st.a[2]+'?',
+            hint:'Считать не надо. Выбери действие.',
+            choices:['Вычитание','Деление'],
+            answer:razy?'Деление':'Вычитание',
+            explain:razy?'«Во сколько раз» это всегда деление: '+p.total+' : '+p.small
+                        :'«На сколько» это всегда вычитание: '+p.total+' − '+p.small});
+    }
+    return out;
+}
+function levelSolve(n){          // уровень 3: посчитать
+    const out=[];
+    for(let i=0;i<n;i++){
+        const p=pairNums(72), st=pick(STORY), razy=Math.random()<0.5;
+        out.push({kind:'input',
+            text:st.who+' '+nf(p.total,st.a)+', а '+st.b[2]+' '+p.small+'. '+(razy?'<b>Во сколько раз</b>':'<b>На сколько</b>')+' больше '+st.a[2]+'?',
+            hint:'',answer:razy?p.times:p.total-p.small,
+            explain:razy?p.total+' : '+p.small+' = '+p.times+', потому что «во сколько раз» это деление'
+                        :p.total+' − '+p.small+' = '+(p.total-p.small)+', потому что «на сколько» это вычитание'});
+    }
+    return out;
+}
+function levelBack(n){           // уровень 4: обратный ход
+    const out=[];
+    for(let i=0;i<n;i++){
+        const small=ri(3,9), k=ri(2,9), st=pick(STORY), razy=Math.random()<0.5;
+        out.push({kind:'input',
+            text:st.who+' '+nf(small,st.a)+', а '+st.b[2]+' '+(razy?'в '+k+' '+plural(k,'раз','раза','раз')+' больше':'на '+k+' больше')+'. Сколько '+st.b[2]+'?',
+            hint:'',answer:razy?small*k:small+k,
+            explain:razy?small+' × '+k+' = '+(small*k)+', «в '+k+' '+plural(k,'раз','раза','раз')+' больше» это умножение'
+                        :small+' + '+k+' = '+(small+k)+', «на '+k+' больше» это сложение'});
+    }
+    return out;
+}
+function levelMix(n){
+    return shuffle(levelSolve(Math.ceil(n/3)).concat(levelBack(Math.ceil(n/3)),levelChoice(Math.floor(n/3)))).slice(0,n);
+}
+
+const LEVELS=[
+    {name:'Уровень 1. Одни числа, два вопроса',make:()=>levelPairs(6),
+     intro:'Числа в задаче одни и те же, а вопросы разные. Нажми «картинку», если хочется увидеть, почему ответы не совпадают.'},
+    {name:'Уровень 2. Выбери действие',make:()=>levelChoice(8),
+     intro:'Ничего не считай. Реши только, что здесь делают: вычитают или делят.'},
+    {name:'Уровень 3. Реши задачу',make:()=>levelSolve(8),intro:''},
+    {name:'Уровень 4. Обратный ход',make:()=>levelBack(6),
+     intro:'Теперь известно меньшее число. Смотри внимательно: «на 5 больше» и «в 5 раз больше» это разные действия.'},
+    {name:'Уровень 5. Всё вперемешку',make:()=>levelMix(10),intro:''}
+];
+
+/* ---------- состояние ---------- */
+let L=0,items=[],idx=0,score=0,streak=0,best=0,answered=false,showPic=false;
+
+function startLevel(i){
+    L=i;items=LEVELS[i].make();idx=0;answered=false;showPic=false;render();
+}
+function updBar(){
+    document.getElementById('b-level').textContent='Уровень '+(L+1)+' из '+LEVELS.length;
+    document.getElementById('b-score').textContent='Верно: '+score;
+    document.getElementById('b-streak').textContent='Подряд: '+streak;
+    document.getElementById('bar').style.width=Math.round(idx/items.length*100)+'%';
+}
+function render(){
+    updBar();
+    const card=document.getElementById('card');
+    if(idx>=items.length){renderDone();return;}
+    const it=items[idx];
+    let h='<div class="lvl">'+LEVELS[L].name+' · задание '+(idx+1)+' из '+items.length+'</div>';
+    if(idx===0&&LEVELS[L].intro)h+='<p class="hint">'+LEVELS[L].intro+'</p>';
+    h+='<p class="q">'+it.text+'</p>';
+    if(it.hint)h+='<p class="hint">'+it.hint+'</p>';
+    if(it.pic){
+        h+='<div class="pic" id="pic">'+(showPic?bars(it.pic.small,it.pic.times):'')+'</div>';
+        h+='<button class="ghost" id="pic-btn">'+(showPic?'Спрятать картинку':'Показать картинку')+'</button>';
+    }
+    if(it.kind==='input'){
+        h+='<div class="answer"><input type="text" id="inp" inputmode="numeric" autocomplete="off"><button id="go">Проверить</button></div>';
+    }else{
+        h+='<div class="choices">'+it.choices.map((c,i)=>'<button data-c="'+i+'">'+c+'</button>').join('')+'</div>';
+    }
+    h+='<div class="fb" id="fb"></div>';
+    card.innerHTML=h;
+    if(it.pic)document.getElementById('pic-btn').onclick=()=>{showPic=!showPic;render();};
+    if(it.kind==='input'){
+        const inp=document.getElementById('inp');
+        inp.focus();
+        inp.onkeydown=e=>{if(e.key==='Enter')check(inp.value);};
+        document.getElementById('go').onclick=()=>check(inp.value);
+    }else{
+        card.querySelectorAll('.choices button').forEach(b=>{b.onclick=()=>check(it.choices[+b.dataset.c]);});
+    }
+}
+function check(val){
+    if(answered)return;
+    const it=items[idx];
+    let ok;
+    if(it.kind==='input'){
+        const v=String(val).trim().replace(',','.');
+        if(v==='')return;
+        ok=Number(v)===it.answer;
+    }else ok=val===it.answer;
+    answered=true;
+    if(ok){score++;streak++;if(streak>best)best=streak;}else streak=0;
+    const fb=document.getElementById('fb');
+    fb.className='fb '+(ok?'ok':'no');
+    fb.innerHTML='<b>'+(ok?'Верно.':'Пока нет.')+'</b>'+it.explain+'.';
+    const nx=document.createElement('button');
+    nx.textContent=idx+1<items.length?'Дальше':'Закончить уровень';
+    nx.style.marginTop='10px';
+    nx.onclick=next;
+    fb.appendChild(document.createElement('div')).appendChild(nx);
+    nx.focus();
+    document.addEventListener('keydown',onEnterNext);
+    updBar();
+}
+function onEnterNext(e){if(e.key==='Enter'){e.preventDefault();next();}}
+function next(){
+    document.removeEventListener('keydown',onEnterNext);
+    answered=false;showPic=false;idx++;render();
+}
+function renderDone(){
+    const card=document.getElementById('card');
+    const last=L===LEVELS.length-1;
+    let h='<div class="done"><div class="big">Уровень пройден</div>';
+    h+='<p>Верных ответов за всё время: '+score+'. Самая длинная серия подряд: '+best+'.</p>';
+    h+='<p class="muted">'+(last?'Это был последний уровень. Можно пройти любой ещё раз, числа каждый раз новые.':'Можно идти дальше или повторить этот уровень с новыми числами.')+'</p>';
+    h+='<div class="levels">';
+    if(!last)h+='<button id="nextlvl">Следующий уровень</button>';
+    h+='<button class="ghost" id="again">Ещё раз этот</button>';
+    h+='</div><div class="levels">'+LEVELS.map((l,i)=>'<button class="ghost" data-l="'+i+'">'+(i+1)+'</button>').join('')+'</div></div>';
+    card.innerHTML=h;
+    if(!last)document.getElementById('nextlvl').onclick=()=>startLevel(L+1);
+    document.getElementById('again').onclick=()=>startLevel(L);
+    card.querySelectorAll('[data-l]').forEach(b=>{b.onclick=()=>startLevel(+b.dataset.l);});
+    document.getElementById('bar').style.width='100%';
+}
+startLevel(0);
+</script>
+</body>
+</html>
