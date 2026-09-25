@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Последовательности и равенства (2 класс)</title>
+<style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+        font-family:'Segoe UI',Arial,sans-serif;
+        background:linear-gradient(160deg,#fdf6ec 0%,#eef4fb 45%,#f3ecfb 100%);
+        background-attachment:fixed;
+        color:#1e2430;padding:22px;line-height:1.55;
+    }
+    .container{max-width:860px;margin:0 auto}
+
+    .header{
+        border:3px solid #c2410c;border-radius:14px;padding:18px 24px;margin-bottom:8px;text-align:center;
+        background:linear-gradient(135deg,#fff7ed 0%,#ffedd5 100%);
+        box-shadow:0 3px 10px rgba(0,0,0,.10);
+    }
+    .header .emo{font-size:2em;margin-bottom:6px;letter-spacing:4px}
+    .header h1{font-size:1.7em;color:#9a3412}
+
+    /* у каждой секции свой цвет */
+    .sec{--c:#334155;--bg:#f8fafc;--grid:#dbe3ec}
+    .sec-amber {--c:#b45309;--bg:#fffbeb;--grid:#f0dcae}
+    .sec-teal  {--c:#0e7490;--bg:#ecfeff;--grid:#b8e2ea}
+    .sec-blue  {--c:#1d4ed8;--bg:#eff6ff;--grid:#c5d8f5}
+    .sec-green {--c:#15803d;--bg:#f0fdf4;--grid:#bfe3c9}
+    .sec-violet{--c:#6d28d9;--bg:#f5f3ff;--grid:#d7cdf3}
+    .sec-orange{--c:#c2410c;--bg:#fff7ed;--grid:#f5d3b4}
+    .sec-pink  {--c:#be185d;--bg:#fdf2f8;--grid:#f2cadd}
+
+    h2{font-size:1.26em;margin:26px 0 12px;padding:9px 16px;border-radius:9px;
+       background:var(--c);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.14)}
+
+    .memo{border:2px solid var(--c);border-left:8px solid var(--c);border-radius:9px;
+          padding:13px 18px;margin:12px 0;background:var(--bg)}
+    .memo p{font-size:1.02em;margin-bottom:7px}
+    .memo p:last-child{margin-bottom:0}
+
+    .task{border:2px solid var(--c);border-radius:10px;padding:15px 19px;margin:15px 0;
+          background:#fff;box-shadow:0 2px 7px rgba(0,0,0,.08)}
+    .task-num{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;
+              border-radius:50%;font-weight:800;font-size:.95em;color:#fff;background:var(--c);
+              margin-bottom:7px;padding:0 9px}
+    .task p{font-size:1.06em;margin-bottom:7px}
+    .task strong{color:var(--c)}
+    .task .star{float:right;font-size:1.1em;letter-spacing:2px}
+
+    /* поля для рисования светлые: поверх них видно аннотации Zoom */
+    .grid-space{margin-top:9px;border:2px solid var(--c);border-radius:6px;min-height:130px;background:#fff;
+        background-image:repeating-linear-gradient(0deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px),
+                         repeating-linear-gradient(90deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px);
+        background-size:24px 24px}
+    .grid-tall{min-height:170px}
+
+    .write-line{display:inline-block;border-bottom:2px solid var(--c);min-width:130px;height:1.25em;margin:0 4px}
+    .write-long{min-width:230px}
+    .write-short{min-width:70px}
+
+    .pairs{display:grid;grid-template-columns:1fr 1fr;gap:4px 28px;font-size:1.03em;line-height:2.15}
+    .pairs .row{white-space:nowrap;overflow:hidden}
+
+    .legend{border:2px solid var(--c);border-radius:10px;padding:14px 18px;margin:12px 0;background:#fff}
+    .legend-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px 26px;align-items:center}
+    .legend-item{display:flex;align-items:center;gap:13px;font-size:1.02em}
+    .legend-item svg{flex:none}
+
+    .tree-space{margin-top:11px;border:2px solid var(--c);border-radius:6px;min-height:280px;position:relative;background:#fff;
+        background-image:repeating-linear-gradient(0deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px),
+                         repeating-linear-gradient(90deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px);
+        background-size:24px 24px}
+    .tier{position:absolute;left:0;right:0;border-top:2px dashed var(--c);opacity:.6;
+          color:var(--c);font-size:.85em;font-weight:700;padding-left:8px}
+    .tier span{background:#fff;padding:0 7px;position:relative;top:-.75em}
+    .tier-1{top:60px} .tier-2{top:150px} .tier-3{top:240px}
+
+    .hint{font-size:.95em;color:var(--c);font-style:italic;margin-top:7px;opacity:.95}
+    .lines{margin-top:9px}
+    .lines .line{border-bottom:2px solid var(--grid);height:32px}
+
+
+    .header{border:3px solid #0e7490;border-radius:14px;padding:18px 24px;margin-bottom:8px;text-align:center;
+        background:linear-gradient(135deg,#ecfeff 0%,#e0f2fe 100%);box-shadow:0 3px 10px rgba(0,0,0,.10)}
+    .header h1{color:#0e5a70}
+    .fig{text-align:center;margin:10px 0 4px}
+    .fig svg{max-width:100%;height:auto}
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px 22px;align-items:start}
+    .row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 16px;align-items:start}
+    @media(max-width:640px){.row2,.row3{grid-template-columns:1fr}}
+    .cap{font-size:.97em;font-weight:700;color:var(--c);text-align:center;margin-top:2px}
+    .items{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 8px;margin:10px 0 2px}
+    .item{display:flex;flex-direction:column;align-items:center;min-width:46px;border:2px solid var(--grid);
+          border-radius:10px;padding:6px 8px;background:#fff}
+    .item .e{font-size:1.6em;line-height:1.1}
+    .item .n{font-weight:800;color:var(--c);font-size:.95em}
+    .words{display:flex;flex-wrap:wrap;gap:8px 10px;justify-content:center;margin:8px 0 4px}
+    .words span{border:2px solid var(--grid);border-radius:8px;padding:4px 10px;background:#fff;font-weight:600}
+    .words b{color:var(--c);margin-right:4px}
+    .opt{font-weight:800;color:var(--c)}
+    .theory{border:3px solid var(--c);border-radius:12px;padding:15px 20px;margin:12px 0;background:var(--bg)}
+    .theory p{font-size:1.06em;margin-bottom:8px}
+    .theory p:last-child{margin-bottom:0}
+    .theory .big{font-size:1.2em;font-weight:800;color:var(--c);text-align:center;margin:10px 0 4px}
+    .lst{margin:4px 0 4px 22px}
+    .lst li{font-size:1.05em;margin-bottom:3px}
+
+    @media print{
+        body{background:#fff !important;zoom:.86}
+        .keep,.task,.theory,.memo{break-inside:avoid;page-break-inside:avoid}
+        .fig svg{max-height:270px;width:auto}
+        .row2 .fig svg{max-height:190px}
+        .row3 .fig svg{max-height:128px}
+        .task{margin:10px 0;padding:11px 16px}
+        .grid-space{min-height:96px}
+        h2{margin:16px 0 9px}
+        .task,.memo,.theory,h2,.header,.item{box-shadow:none !important}
+        .theory + .fig svg{max-height:190px}
+        .sec-orange .fig svg{max-height:210px}
+        .row2 .fig svg{max-height:165px}
+        .sec-pink .fig svg{max-height:290px}
+        .container{padding:0 6px}
+        .sec-violet .fig svg{max-height:330px}
+    }
+
+
+    .chain{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0 2px;font-size:1.25em;font-weight:700}
+    .chain span{min-width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+        border-radius:9px;border:2px solid var(--grid);background:#fff;color:#1e2430}
+    .chain span.gap{border-style:dashed;border-color:var(--c);background:var(--bg)}
+    .chain b{font-weight:800;color:var(--c);font-size:.8em;margin-right:4px}
+    .eqs{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin-top:10px}
+    .eqs div{border:2px solid var(--c);border-radius:9px;background:#fff;padding:11px 8px;text-align:center;
+        font-size:1.2em;font-weight:700;white-space:nowrap}
+    .box{display:inline-block;min-width:40px;height:1.45em;border:2px solid var(--c);border-radius:6px;
+        background:var(--bg);vertical-align:-.35em;margin:0 4px}
+    .sample{border:3px solid var(--c);border-radius:12px;background:var(--bg);padding:14px 18px;margin:12px 0}
+    .sample .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media(max-width:640px){.sample .two{grid-template-columns:1fr}}
+    .sample .col{background:#fff;border:2px solid var(--c);border-radius:9px;padding:10px 14px}
+    .sample .col div{font-size:1.12em;font-weight:700;padding:2px 0}
+    .sample .col .chk{color:#64748b;font-weight:600;font-size:.95em;border-top:1px dashed var(--grid);margin-top:6px;padding-top:6px}
+    .rulebox{border:2px dashed var(--c);border-radius:10px;padding:12px 16px;margin:10px 0;background:#fff}
+    .rulebox p{margin-bottom:6px;font-size:1.04em}
+    .rulebox p:last-child{margin-bottom:0}
+    .sq{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;margin:10px 0}
+    .sq figure{text-align:center}
+    .sq figcaption{font-size:.95em;font-weight:700;color:var(--c);margin-top:5px}
+    .patt{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin:6px 0 2px}
+
+    @page{size:A4;margin:12mm}
+    @media print{
+        body{background:#fff;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+        .task,.memo,.header,.legend,.pairs{page-break-inside:avoid}
+        .break{page-break-before:always}
+    }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+    <div class="emo">🔢 ➡️ 🧩</div>
+    <h1>Последовательности и равенства</h1>
+</div>
+
+<section class="sec sec-orange"><div class="keep"><h2>🎨 Разминка: дорисуй следующий</h2>
+<div class="memo"><p>Найди правило и скажи его <strong>словами</strong>, только потом рисуй.</p></div>
+<div class="task"><span class="task-num">1</span>
+<div class="patt"><svg viewBox="0 0 460 90" width="440"><polygon points="50.0,12.0 78.6,61.5 21.4,61.5" fill="#fb923c" stroke="#9a3412" stroke-width="2"/><polygon points="173.3,21.7 173.3,68.3 126.7,68.3 126.7,21.7" fill="#fb923c" stroke="#9a3412" stroke-width="2"/><polygon points="250.0,12.0 281.4,34.8 269.4,71.7 230.6,71.7 218.6,34.8" fill="#fb923c" stroke="#9a3412" stroke-width="2"/><rect x="320" y="12" width="66" height="66" rx="9" fill="#fff" stroke="#c2410c" stroke-width="2.5" stroke-dasharray="7 5"/><text x="353" y="58" font-size="30" text-anchor="middle" fill="#c2410c">?</text></svg></div><div class="patt"><svg viewBox="0 0 460 70" width="440"><circle cx="30" cy="35" r="11" fill="#65a30d" stroke="#3f6212" stroke-width="2"/><line x1="26" y1="25" x2="22" y2="16" stroke="#3f6212" stroke-width="2"/><rect x="39" y="25" width="17" height="20" rx="6" fill="#a3e635" stroke="#3f6212" stroke-width="2"/><rect x="56" y="25" width="17" height="20" rx="6" fill="#a3e635" stroke="#3f6212" stroke-width="2"/><rect x="73" y="25" width="17" height="20" rx="6" fill="#a3e635" stroke="#3f6212" stroke-width="2"/><circle cx="150" cy="35" r="11" fill="#65a30d" stroke="#3f6212" stroke-width="2"/><line x1="146" y1="25" x2="142" y2="16" stroke="#3f6212" stroke-width="2"/><rect x="159" y="25" width="17" height="20" rx="6" fill="#a3e635" stroke="#3f6212" stroke-width="2"/><rect x="176" y="25" width="17" height="20" rx="6" fill="#a3e635" stroke="#3f6212" stroke-width="2"/><rect x="193" y="25" width="17" height="20" rx="6" fill="#a3e635" stroke="#3f6212" stroke-width="2"/><rect x="210" y="25" width="17" height="20" rx="6" fill="#a3e635" stroke="#3f6212" stroke-width="2"/><circle cx="290" cy="35" r="11" fill="#65a30d" stroke="#3f6212" stroke-width="2"/><line x1="286" y1="25" x2="282" y2="16" stroke="#3f6212" stroke-width="2"/><rect x="299" y="25" width="17" height="20" rx="6" fill="#a3e635" stroke="#3f6212" stroke-width="2"/><rect x="316" y="25" width="17" height="20" rx="6" fill="#a3e635" stroke="#3f6212" stroke-width="2"/><rect x="333" y="25" width="17" height="20" rx="6" fill="#a3e635" stroke="#3f6212" stroke-width="2"/><rect x="350" y="25" width="17" height="20" rx="6" fill="#a3e635" stroke="#3f6212" stroke-width="2"/><rect x="367" y="25" width="17" height="20" rx="6" fill="#a3e635" stroke="#3f6212" stroke-width="2"/><rect x="392" y="10" width="58" height="50" rx="9" fill="#fff" stroke="#3f6212" stroke-width="2.5" stroke-dasharray="7 5"/><text x="421" y="45" font-size="26" text-anchor="middle" fill="#3f6212">?</text></svg></div><div class="patt"><svg viewBox="0 0 460 96" width="440"><circle cx="50" cy="48" r="34" fill="#bae6fd" stroke="#0369a1" stroke-width="2.5"/><circle cx="150" cy="48" r="34" fill="#bae6fd" stroke="#0369a1" stroke-width="2.5"/><line x1="150" y1="48" x2="150.0" y2="14.0" stroke="#0369a1" stroke-width="2.5"/><line x1="150" y1="48" x2="150.0" y2="82.0" stroke="#0369a1" stroke-width="2.5"/><circle cx="250" cy="48" r="34" fill="#bae6fd" stroke="#0369a1" stroke-width="2.5"/><line x1="250" y1="48" x2="250.0" y2="14.0" stroke="#0369a1" stroke-width="2.5"/><line x1="250" y1="48" x2="279.4" y2="65.0" stroke="#0369a1" stroke-width="2.5"/><line x1="250" y1="48" x2="220.6" y2="65.0" stroke="#0369a1" stroke-width="2.5"/><rect x="320" y="14" width="68" height="68" rx="9" fill="#fff" stroke="#0369a1" stroke-width="2.5" stroke-dasharray="7 5"/><text x="354" y="60" font-size="30" text-anchor="middle" fill="#0369a1">?</text></svg></div><div class="patt"><svg viewBox="0 0 460 96" width="440"><ellipse cx="50" cy="48" rx="30" ry="34" fill="#f87171" stroke="#7f1d1d" stroke-width="2.5"/><line x1="50" y1="14" x2="50" y2="82" stroke="#7f1d1d" stroke-width="2.5"/><circle cx="50" cy="16" r="9" fill="#111827"/><circle cx="37" cy="38" r="5" fill="#111827"/><circle cx="63" cy="38" r="5" fill="#111827"/><ellipse cx="150" cy="48" rx="30" ry="34" fill="#f87171" stroke="#7f1d1d" stroke-width="2.5"/><line x1="150" y1="14" x2="150" y2="82" stroke="#7f1d1d" stroke-width="2.5"/><circle cx="150" cy="16" r="9" fill="#111827"/><circle cx="137" cy="38" r="5" fill="#111827"/><circle cx="163" cy="38" r="5" fill="#111827"/><circle cx="137" cy="56" r="5" fill="#111827"/><circle cx="163" cy="56" r="5" fill="#111827"/><ellipse cx="250" cy="48" rx="30" ry="34" fill="#f87171" stroke="#7f1d1d" stroke-width="2.5"/><line x1="250" y1="14" x2="250" y2="82" stroke="#7f1d1d" stroke-width="2.5"/><circle cx="250" cy="16" r="9" fill="#111827"/><circle cx="237" cy="38" r="5" fill="#111827"/><circle cx="263" cy="38" r="5" fill="#111827"/><circle cx="237" cy="56" r="5" fill="#111827"/><circle cx="263" cy="56" r="5" fill="#111827"/><circle cx="237" cy="74" r="5" fill="#111827"/><circle cx="263" cy="74" r="5" fill="#111827"/><rect x="320" y="14" width="68" height="68" rx="9" fill="#fff" stroke="#7f1d1d" stroke-width="2.5" stroke-dasharray="7 5"/><text x="354" y="60" font-size="30" text-anchor="middle" fill="#7f1d1d">?</text></svg></div>
+</div></div></section>
+<section class="sec sec-blue"><div class="keep"><h2>🔢 Числовые цепочки</h2><div class="memo"><p>Нашёл правило, проверь его <strong>на всех</strong> известных числах, а не только на первых двух.</p></div><div class="task"><span class="star">⭐</span><span class="task-num">2</span><div class="chain"><b>а)</b><span>3</span><span>6</span><span class="gap"></span><span>12</span><span>15</span><span>18</span></div><div class="chain"><b>б)</b><span>2</span><span>2</span><span>4</span><span>4</span><span class="gap"></span><span>6</span><span>8</span><span>8</span></div><div class="chain"><b>в)</b><span>24</span><span>21</span><span class="gap"></span><span>15</span><span>12</span></div><div class="grid-space"></div></div></div>
+<div class="task"><span class="star">⭐⭐</span><span class="task-num">3</span><div class="chain"><b>а)</b><span>1</span><span>8</span><span>11</span><span>18</span><span class="gap"></span><span>28</span><span>31</span></div><div class="chain"><b>б)</b><span>12</span><span>23</span><span class="gap"></span><span>45</span><span>56</span></div><div class="grid-space"></div></div>
+<div class="task"><span class="star">⭐⭐</span><span class="task-num">4</span><div class="chain"><b></b><span>2</span><span>1</span><span>3</span><span>2</span><span>4</span><span>3</span><span class="gap"></span><span>4</span><span>6</span></div><p class="hint">Если правило не находится, проверь, не спрятаны ли здесь две цепочки через одну.</p><div class="grid-space"></div></div>
+<div class="task"><span class="star">⭐⭐⭐</span><span class="task-num">5</span><div class="chain"><b>а)</b><span>8</span><span>1</span><span>10</span><span>2</span><span>12</span><span>3</span><span>14</span><span class="gap"></span><span class="gap"></span><span class="gap"></span></div><div class="chain"><b>б)</b><span>9</span><span>2</span><span>8</span><span>3</span><span>7</span><span>4</span><span>6</span><span>5</span><span>5</span><span class="gap"></span><span class="gap"></span><span class="gap"></span></div><div class="grid-space"></div></div>
+</section>
+<section class="sec sec-green"><div class="keep"><h2>⚖️ Равенства с окошком</h2><div class="task"><span class="star">⭐</span><span class="task-num">6</span><p>Вставь число, чтобы равенство стало верным.</p><div class="eqs"><div>14 − 9 − <span class="box"></span> = 3</div><div>26 + 7 − <span class="box"></span> = 30</div><div>83 − <span class="box"></span> + 5 = 79</div><div>59 + <span class="box"></span> + 3 = 71</div><div><span class="box"></span> − 4 − 8 = 25</div><div>9 + 2 + <span class="box"></span> = 40</div></div><div class="grid-space"></div></div></div>
+<div class="task"><span class="star">⭐⭐</span><span class="task-num">7</span><p>Поставь скобки так, чтобы равенства стали верными.</p><div class="eqs"><div>35 − 11 − 3 = 27</div><div>5 − 4 − 3 − 2 − 1 = 3</div></div><div class="grid-space"></div></div>
+</section>
+<section class="sec sec-violet"><h2>🔤 Уравнение: у окошка появляется имя</h2>
+<div class="sample">
+<div class="two">
+<div class="col">
+<div>4 + <span class="box"></span> = 7</div>
+<div style="padding-left:18px"><span class="box"></span> = 7 − 4</div>
+<div style="padding-left:18px"><span class="box"></span> = 3</div>
+<div class="chk">проверка: 4 + 3 = 7</div>
+</div>
+<div class="col">
+<div>x + 3 = 10</div>
+<div style="padding-left:18px">x = 10 − 3</div>
+<div style="padding-left:18px">x = 7</div>
+<div class="chk">проверка: 7 + 3 = 10</div>
+</div>
+</div>
+</div>
+<div class="rulebox">
+<p>Равенство с буквой называется <strong>уравнением</strong>, а найденное число это <strong>решение уравнения</strong>.</p>
+<p>Чтобы найти неизвестное <strong>слагаемое</strong>, из суммы вычитают известное слагаемое.</p>
+<p>Чтобы найти неизвестное <strong>вычитаемое</strong>, из уменьшаемого вычитают разность.</p>
+<p>Проверку пишем всегда.</p>
+</div>
+<div class="task"><span class="star">⭐</span><span class="task-num">8</span><p>Реши уравнения и сделай проверку.</p><div class="eqs"><div>10 + x = 15</div><div>x + 23 = 45</div><div>29 + x = 36</div></div><div class="grid-space grid-tall"></div></div>
+<div class="task"><span class="star">⭐⭐</span><span class="task-num">9</span><p>Здесь неизвестно вычитаемое. Буква может быть любая.</p><div class="eqs"><div>29 − x = 15</div><div>79 − y = 21</div><div>53 − a = 33</div></div><div class="grid-space grid-tall"></div></div>
+</section>
+<section class="sec sec-amber"><div class="keep"><h2>🟨 Числовые квадраты</h2><div class="memo"><p>В квадрате стоят числа <strong>от 11 до 19, каждое ровно один раз</strong>. Справа и снизу даны суммы по строкам и столбцам. Восстанови пропущенные числа.</p><p class="hint">Сумма всех чисел от 11 до 19 равна 135. Суммы строк тоже должны дать 135, это первая проверка.</p></div><div class="task"><span class="star">⭐⭐</span><span class="task-num">10</span><div class="sq"><figure><svg viewBox="0 0 228 228" width="220" role="img"><rect x="6" y="6" width="54" height="54" rx="7" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="60" y="6" width="54" height="54" rx="7" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="114" y="6" width="54" height="54" rx="7" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="141" y="41" font-size="21" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">18</text><rect x="6" y="60" width="54" height="54" rx="7" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="33" y="95" font-size="21" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">15</text><rect x="60" y="60" width="54" height="54" rx="7" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="114" y="60" width="54" height="54" rx="7" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="6" y="114" width="54" height="54" rx="7" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="60" y="114" width="54" height="54" rx="7" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="114" y="114" width="54" height="54" rx="7" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="194" y="39" font-size="17" font-weight="800" text-anchor="middle" fill="#b45309" font-family="Segoe UI,Arial">47</text><text x="194" y="93" font-size="17" font-weight="800" text-anchor="middle" fill="#b45309" font-family="Segoe UI,Arial">45</text><text x="194" y="147" font-size="17" font-weight="800" text-anchor="middle" fill="#b45309" font-family="Segoe UI,Arial">43</text><text x="33" y="196" font-size="17" font-weight="800" text-anchor="middle" fill="#b45309" font-family="Segoe UI,Arial">41</text><text x="87" y="196" font-size="17" font-weight="800" text-anchor="middle" fill="#b45309" font-family="Segoe UI,Arial">41</text><text x="141" y="196" font-size="17" font-weight="800" text-anchor="middle" fill="#b45309" font-family="Segoe UI,Arial">53</text></svg><figcaption>а)</figcaption></figure><figure><svg viewBox="0 0 228 228" width="220" role="img"><rect x="6" y="6" width="54" height="54" rx="7" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="60" y="6" width="54" height="54" rx="7" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="87" y="41" font-size="21" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">16</text><rect x="114" y="6" width="54" height="54" rx="7" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="141" y="41" font-size="21" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">13</text><rect x="6" y="60" width="54" height="54" rx="7" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="60" y="60" width="54" height="54" rx="7" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="114" y="60" width="54" height="54" rx="7" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="6" y="114" width="54" height="54" rx="7" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="60" y="114" width="54" height="54" rx="7" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="114" y="114" width="54" height="54" rx="7" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="194" y="39" font-size="17" font-weight="800" text-anchor="middle" fill="#b45309" font-family="Segoe UI,Arial">48</text><text x="194" y="93" font-size="17" font-weight="800" text-anchor="middle" fill="#b45309" font-family="Segoe UI,Arial">50</text><text x="194" y="147" font-size="17" font-weight="800" text-anchor="middle" fill="#b45309" font-family="Segoe UI,Arial">37</text><text x="33" y="196" font-size="17" font-weight="800" text-anchor="middle" fill="#b45309" font-family="Segoe UI,Arial">47</text><text x="87" y="196" font-size="17" font-weight="800" text-anchor="middle" fill="#b45309" font-family="Segoe UI,Arial">48</text><text x="141" y="196" font-size="17" font-weight="800" text-anchor="middle" fill="#b45309" font-family="Segoe UI,Arial">40</text></svg><figcaption>б)</figcaption></figure><figure><svg viewBox="0 0 228 228" width="220" role="img"><rect x="6" y="6" width="54" height="54" rx="7" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="60" y="6" width="54" height="54" rx="7" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="114" y="6" width="54" height="54" rx="7" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="6" y="60" width="54" height="54" rx="7" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="33" y="95" font-size="21" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">11</text><rect x="60" y="60" width="54" height="54" rx="7" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="114" y="60" width="54" height="54" rx="7" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="6" y="114" width="54" height="54" rx="7" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="33" y="149" font-size="21" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">18</text><rect x="60" y="114" width="54" height="54" rx="7" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="87" y="149" font-size="21" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">13</text><rect x="114" y="114" width="54" height="54" rx="7" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="194" y="39" font-size="17" font-weight="800" text-anchor="middle" fill="#b45309" font-family="Segoe UI,Arial">48</text><text x="194" y="93" font-size="17" font-weight="800" text-anchor="middle" fill="#b45309" font-family="Segoe UI,Arial">37</text><text x="194" y="147" font-size="17" font-weight="800" text-anchor="middle" fill="#b45309" font-family="Segoe UI,Arial">50</text><text x="33" y="196" font-size="17" font-weight="800" text-anchor="middle" fill="#b45309" font-family="Segoe UI,Arial">45</text><text x="87" y="196" font-size="17" font-weight="800" text-anchor="middle" fill="#b45309" font-family="Segoe UI,Arial">40</text><text x="141" y="196" font-size="17" font-weight="800" text-anchor="middle" fill="#b45309" font-family="Segoe UI,Arial">50</text></svg><figcaption>в) посложнее</figcaption></figure></div></div></div>
+</section>
+<section class="sec sec-pink"><div class="keep"><h2>⭐ Для тех, кому мало</h2><div class="task"><span class="star">⭐⭐⭐</span><span class="task-num">11</span><p>Продолжи тремя числами.</p><div class="chain"><b></b><span>1</span><span>2</span><span>3</span><span>5</span><span>8</span><span>13</span><span>21</span><span class="gap"></span><span class="gap"></span><span class="gap"></span></div><div class="grid-space"></div></div></div>
+<div class="task"><span class="star">⭐⭐⭐</span><span class="task-num">12</span><p>Продолжи двумя числами.</p><div class="chain"><b></b><span>1</span><span>1</span><span>1</span><span>3</span><span>5</span><span>9</span><span>17</span><span class="gap"></span><span class="gap"></span></div><div class="grid-space"></div></div>
+<div class="task"><span class="star">⭐⭐</span><span class="task-num">13</span><p>Продолжи двумя членами.</p><div class="chain"><b>а)</b><span>1</span><span>11</span><span>101</span><span>1001</span><span class="gap"></span><span class="gap"></span></div><div class="chain"><b>б)</b><span>1</span><span>121</span><span>232</span><span>343</span><span class="gap"></span><span class="gap"></span></div><div class="grid-space"></div></div>
+<div class="task"><span class="star">⭐⭐⭐</span><span class="task-num">14</span><p>Продолжи ряды. Здесь числа спрятаны в буквах и словах.</p><div class="eqs"><div>о, д, т, ч, п, ш, …</div><div>победа, обеда, беда, …</div></div><div class="grid-space"></div></div>
+</section>
+</div>
+</body>
+</html>
