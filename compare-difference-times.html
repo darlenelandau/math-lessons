@@ -25,7 +25,14 @@
     .rule tr:last-child td{border-bottom:none}
 
     .card{background:#fff;border:3px solid #0f766e;border-radius:14px;padding:20px 22px;box-shadow:0 6px 20px rgba(0,0,0,.2)}
-    .lvl{font-size:.9em;letter-spacing:1.2px;text-transform:uppercase;color:#0f766e;font-weight:bold;margin-bottom:8px}
+    .lvl{font-size:.9em;letter-spacing:1.2px;text-transform:uppercase;color:#0f766e;font-weight:bold}
+    .lvl-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+    .tiny{font-size:.85em;padding:5px 12px;background:#fff;color:#0f766e;border:2px solid #0f766e}
+    .tiny:hover{background:#ecfdf5}
+    .menu-item{display:block;width:100%;text-align:left;background:#fff;color:#1f2937;border:2.5px solid #0f766e;margin-bottom:10px;padding:11px 16px}
+    .menu-item:hover{background:#ecfdf5}
+    .menu-item b{display:block;color:#0f766e;font-size:1.06em;margin-bottom:2px}
+    .menu-item span{display:block;font-weight:normal;font-size:.97em;color:#4b5563;line-height:1.35}
     .q{font-size:1.28em;margin-bottom:6px}
     .q b{color:#b45309}
     .hint{font-style:italic;color:#4b5563;font-size:.97em;margin-bottom:10px}
@@ -197,13 +204,18 @@ function levelMix(n){
 
 const LEVELS=[
     {name:'Уровень 1. Одни числа, два вопроса',make:()=>levelPairs(6),
+     about:'Про одну пару чисел спрашивают и «на сколько», и «во сколько раз». Есть картинка с полосками.',
      intro:'Числа в задаче одни и те же, а вопросы разные. Нажми «картинку», если хочется увидеть, почему ответы не совпадают.'},
     {name:'Уровень 2. Выбери действие',make:()=>levelChoice(8),
+     about:'Ничего не считаешь, только выбираешь: вычитание или деление.',
      intro:'Ничего не считай. Реши только, что здесь делают: вычитают или делят.'},
-    {name:'Уровень 3. Реши задачу',make:()=>levelSolve(8),intro:''},
+    {name:'Уровень 3. Реши задачу',make:()=>levelSolve(8),
+     about:'Обычные задачи: вопрос случайный, ответ пишешь числом.',intro:''},
     {name:'Уровень 4. Обратный ход',make:()=>levelBack(6),
+     about:'Дано меньшее число. «На 5 больше» и «в 5 раз больше» это разные действия.',
      intro:'Теперь известно меньшее число. Смотри внимательно: «на 5 больше» и «в 5 раз больше» это разные действия.'},
-    {name:'Уровень 5. Всё вперемешку',make:()=>levelMix(10),intro:''}
+    {name:'Уровень 5. Всё вперемешку',make:()=>levelMix(10),
+     about:'Все четыре вида заданий подряд, десять штук.',intro:''}
 ];
 
 /* ---------- состояние ---------- */
@@ -211,6 +223,19 @@ let L=0,items=[],idx=0,score=0,streak=0,best=0,answered=false,showPic=false;
 
 function startLevel(i){
     L=i;items=LEVELS[i].make();idx=0;answered=false;showPic=false;render();
+}
+function toMenu(){
+    document.removeEventListener('keydown',onEnterNext);
+    L=-1;answered=false;showPic=false;
+    document.getElementById('b-level').textContent='Выбор уровня';
+    document.getElementById('b-score').textContent='Верно: '+score;
+    document.getElementById('b-streak').textContent='Подряд: '+streak;
+    document.getElementById('bar').style.width='0%';
+    const card=document.getElementById('card');
+    card.innerHTML='<div class="lvl">Выбор уровня</div>'
+        +'<p class="hint">Уровни идут от простого к сложному, но заходить можно в любой. Числа каждый раз новые.</p>'
+        +LEVELS.map((l,i)=>'<button class="menu-item" data-l="'+i+'"><b>'+l.name+'</b><span>'+l.about+'</span></button>').join('');
+    card.querySelectorAll('[data-l]').forEach(b=>{b.onclick=()=>startLevel(+b.dataset.l);});
 }
 function updBar(){
     document.getElementById('b-level').textContent='Уровень '+(L+1)+' из '+LEVELS.length;
@@ -223,7 +248,8 @@ function render(){
     const card=document.getElementById('card');
     if(idx>=items.length){renderDone();return;}
     const it=items[idx];
-    let h='<div class="lvl">'+LEVELS[L].name+' · задание '+(idx+1)+' из '+items.length+'</div>';
+    let h='<div class="lvl-row"><div class="lvl">'+LEVELS[L].name+' · задание '+(idx+1)+' из '+items.length+'</div>'
+        +'<button class="tiny" id="to-menu">К выбору уровня</button></div>';
     if(idx===0&&LEVELS[L].intro)h+='<p class="hint">'+LEVELS[L].intro+'</p>';
     h+='<p class="q">'+it.text+'</p>';
     if(it.hint)h+='<p class="hint">'+it.hint+'</p>';
@@ -238,6 +264,7 @@ function render(){
     }
     h+='<div class="fb" id="fb"></div>';
     card.innerHTML=h;
+    document.getElementById('to-menu').onclick=toMenu;
     if(it.pic)document.getElementById('pic-btn').onclick=()=>{showPic=!showPic;render();};
     if(it.kind==='input'){
         const inp=document.getElementById('inp');
@@ -285,14 +312,16 @@ function renderDone(){
     h+='<div class="levels">';
     if(!last)h+='<button id="nextlvl">Следующий уровень</button>';
     h+='<button class="ghost" id="again">Ещё раз этот</button>';
+    h+='<button class="ghost" id="menu">К выбору уровня</button>';
     h+='</div><div class="levels">'+LEVELS.map((l,i)=>'<button class="ghost" data-l="'+i+'">'+(i+1)+'</button>').join('')+'</div></div>';
     card.innerHTML=h;
     if(!last)document.getElementById('nextlvl').onclick=()=>startLevel(L+1);
     document.getElementById('again').onclick=()=>startLevel(L);
+    document.getElementById('menu').onclick=toMenu;
     card.querySelectorAll('[data-l]').forEach(b=>{b.onclick=()=>startLevel(+b.dataset.l);});
     document.getElementById('bar').style.width='100%';
 }
-startLevel(0);
+toMenu();
 </script>
 </body>
 </html>
