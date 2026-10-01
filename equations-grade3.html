@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Равенства, неравенства, уравнения (3 класс)</title>
+<style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+        font-family:'Segoe UI',Arial,sans-serif;
+        background:linear-gradient(180deg,#dff1fd 0%,#eaf7ee 55%,#f2f9e6 100%);
+        background-attachment:fixed;
+        color:#1e2430;padding:22px;line-height:1.55;
+    }
+    .container{max-width:900px;margin:0 auto}
+
+    .header{
+        border:3px solid #15803d;border-radius:14px;padding:18px 24px;margin-bottom:8px;text-align:center;
+        background:linear-gradient(160deg,#e0f2fe 0%,#d1fae5 62%,#dcfce7 100%);
+        box-shadow:0 3px 10px rgba(0,0,0,.10);
+    }
+    .header .emo{font-size:2em;margin-bottom:6px;letter-spacing:6px}
+    .header h1{font-size:1.7em;color:#14532d}
+    .header .lead{margin-top:8px;font-size:1.02em;color:#334155}
+
+    .sec{--c:#44403c;--bg:#fafaf9;--grid:#e2dfdb}
+    .sec-sky   {--c:#0369a1;--bg:#f0f9ff;--grid:#c4e2f5}
+    .sec-grass {--c:#15803d;--bg:#f0fdf4;--grid:#bfe6cb}
+    .sec-pond  {--c:#0e7490;--bg:#ecfeff;--grid:#bae3ec}
+    .sec-meadow{--c:#4d7c0f;--bg:#f7fee7;--grid:#d5e8a9}
+    .sec-earth {--c:#92400e;--bg:#fffbeb;--grid:#eed7b4}
+    .sec-stone {--c:#44403c;--bg:#f6f5f4;--grid:#dcd8d4}
+    .sec-indigo{--c:#4338ca;--bg:#eef2ff;--grid:#c9d0f7}
+
+    h2{font-size:1.26em;margin:26px 0 12px;padding:9px 16px;border-radius:9px;
+       background:var(--c);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.14)}
+
+    .memo{border:2px solid var(--c);border-left:8px solid var(--c);border-radius:9px;
+          padding:13px 18px;margin:12px 0;background:var(--bg)}
+    .memo p{font-size:1.02em;margin-bottom:7px}
+    .memo p:last-child{margin-bottom:0}
+
+    .rule{border:2px dashed var(--c);border-radius:10px;padding:14px 18px;margin:12px 0;background:var(--bg)}
+    .rule .lbl{font-weight:700;color:var(--c);font-size:1.02em}
+    .rule .ex{font-size:1.3em;font-weight:700;color:var(--c);margin-top:8px;text-align:center;letter-spacing:.5px}
+
+    .calc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(238px,1fr));gap:11px;margin-top:12px}
+    .calc{
+        position:relative;border:2px solid var(--c);border-radius:9px;padding:12px 10px 10px;
+        background:#fff;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.07);
+    }
+    .calc .eq{font-size:1.3em;font-weight:600;letter-spacing:.5px;white-space:nowrap}
+    .calc .eq.long{font-size:1.05em;letter-spacing:0}
+    .calc .blank{display:block;border-bottom:2px solid var(--grid);height:1.5em;margin:8px 12px 0}
+    .calc.hard{border-style:dashed;background:var(--bg)}
+    .calc .st{position:absolute;top:3px;right:7px;font-size:.72em}
+
+    .oral{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:9px;margin-top:10px}
+    .oral div{border:2px solid var(--c);border-radius:8px;padding:9px 6px;background:#fff;
+              text-align:center;font-size:1.3em;font-weight:600}
+
+    .task{border:2px solid var(--c);border-radius:10px;padding:15px 19px;margin:15px 0;
+          background:#fff;box-shadow:0 2px 7px rgba(0,0,0,.08)}
+    .task-num{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;
+              border-radius:50%;font-weight:800;font-size:.95em;color:#fff;background:var(--c);
+              margin-bottom:7px;padding:0 9px}
+    .task p{font-size:1.06em;margin-bottom:7px}
+    .task strong{color:var(--c)}
+    .task .star{float:right;font-size:1.05em;letter-spacing:2px}
+
+    .grid-space{margin-top:9px;border:2px solid var(--c);border-radius:6px;min-height:120px;background:#fff;
+        background-image:repeating-linear-gradient(0deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px),
+                         repeating-linear-gradient(90deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px);
+        background-size:24px 24px}
+    .grid-tall{min-height:165px}
+
+    .card4{border:3px solid var(--c);border-radius:12px;padding:16px 20px;background:var(--bg);margin:12px 0}
+    .card4 .row{display:flex;gap:14px;align-items:baseline;padding:9px 0;border-bottom:1px dashed var(--c)}
+    .card4 .row:last-child{border-bottom:none}
+    .card4 .n{flex:none;width:26px;height:26px;border-radius:50%;background:var(--c);color:#fff;
+              font-weight:800;font-size:.85em;display:flex;align-items:center;justify-content:center}
+    .card4 .t{flex:1}
+    .card4 .t b{color:var(--c)}
+    .card4 .t .e{display:block;font-size:1.12em;font-weight:700;margin-top:3px}
+
+    .hint{font-size:.95em;color:var(--c);font-style:italic;margin-top:7px;opacity:.95}
+
+
+    .inv{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0 2px}
+    .inv div{border:2px solid var(--c);border-radius:9px;background:#fff;padding:10px 8px;text-align:center;
+        font-size:1.12em;font-weight:700;color:#1e2430}
+    .inv div b{color:var(--c);font-weight:800}
+    .chainfig{text-align:center;margin:10px 0 2px}
+    .chainfig svg{max-width:100%;height:auto}
+    .calcs{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:9px;margin-top:10px}
+    .calcs div{border:2px solid var(--c);border-radius:8px;background:#fff;padding:9px 6px;text-align:center;
+        font-size:1.06em;font-weight:700;white-space:nowrap}
+    .calcs div i{font-style:normal;color:var(--c);font-weight:800;margin-right:6px;font-size:.9em}
+    .box{display:inline-block;min-width:38px;height:1.35em;border:2px solid var(--c);border-radius:6px;
+        background:var(--bg);vertical-align:-.3em;margin:0 3px}
+
+
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:12px 0 2px}
+    @media(max-width:620px){.two{grid-template-columns:1fr}}
+    .two .col{border:2px solid var(--c);border-radius:10px;background:#fff;padding:12px 16px}
+    .two .col h3{color:var(--c);font-size:1.02em;margin-bottom:7px;text-transform:uppercase;letter-spacing:.6px}
+    .two .col div{font-size:1.1em;font-weight:700;padding:3px 0}
+    .two .col .chk{color:#64748b;font-weight:600;font-size:.95em;border-top:1px dashed var(--grid);margin-top:7px;padding-top:6px}
+    .vals{width:100%;border-collapse:collapse;margin:10px 0 2px;font-size:1.1em}
+    .vals th,.vals td{border:2px solid var(--c);padding:9px 6px;text-align:center}
+    .vals th{background:var(--bg);color:var(--c)}
+    .vals td{background:#fff;height:44px}
+    .scales{text-align:center;margin:10px 0 2px}
+    .lets{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:9px;margin-top:10px}
+    .lets div{border:2px solid var(--c);border-radius:8px;background:#fff;padding:10px 6px;text-align:center;
+        font-size:1.1em;font-weight:700;white-space:nowrap}
+    .lets div i{font-style:normal;color:var(--c);font-weight:800;margin-right:6px;font-size:.88em}
+    .calcbox{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:11px;margin:10px 0 2px}
+    .calcbox .c{border:2px solid var(--c);border-radius:10px;background:#fff;padding:12px 14px 10px;
+        box-shadow:0 1px 4px rgba(0,0,0,.07)}
+    .calcbox .c b{display:block;color:var(--c);font-size:.9em;font-weight:800;margin-bottom:4px}
+    .calcbox .c .e{font-size:1.14em;font-weight:700;line-height:1.3}
+    .calcbox .c .ans{margin-top:9px;border-bottom:2px solid var(--grid);height:26px}
+    .subhead{font-weight:800;color:var(--c);margin:14px 0 2px;font-size:1.04em}
+
+    @page{size:A4;margin:12mm}
+    @media print{
+        body{background:#fff;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+        .task,.memo,.rule,.header,.card4{page-break-inside:avoid}
+        .break{page-break-before:always}
+    }
+
+    .calc .eq.xlong{font-size:.92em;letter-spacing:0}
+    .figure{border:2px solid var(--c);border-radius:10px;padding:14px;margin:12px 0;background:#fff;text-align:center;overflow-x:auto}
+    .figure .cap{margin-top:10px;font-size:1.12em;font-weight:700;color:var(--c)}
+    .figure .sub{margin-top:4px;font-size:.97em;color:#475569}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+    .eqlist{font-size:1.14em;line-height:1.95;font-weight:600}
+    .eqlist .tot{margin-top:9px;padding-top:9px;border-top:2px solid var(--c);color:var(--c);font-size:1.18em}
+    @media(max-width:700px){.two{grid-template-columns:1fr}}
+
+    .tbl{width:100%;border-collapse:collapse;margin-top:12px;background:#fff}
+    .tbl th{background:var(--c);color:#fff;padding:9px 10px;font-size:1em}
+    .tbl td{border:1.6px solid var(--grid);padding:11px 10px;text-align:center;font-size:1.08em;font-weight:600;height:42px}
+    .tbl td.filled{background:var(--bg);color:var(--c)}
+    .way{border:2px solid var(--c);border-radius:10px;padding:14px 18px;background:#fff;margin-top:12px}
+    .way .cap{font-weight:800;font-size:.88em;text-transform:uppercase;letter-spacing:.6px;
+              color:var(--c);margin-bottom:7px}
+    .way ol{margin-left:18px}
+    .way li{margin:7px 0;font-size:1.06em;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+    <div class="emo">⚖️ ❓ 🎯</div>
+    <h1>Равенства, неравенства, уравнения</h1>
+</div>
+<section class="sec sec-sky"><h2>❓ Верно или неверно</h2><div class="memo"><p><strong>Равенство</strong> это запись со знаком «равно», <strong>неравенство</strong> со знаком «больше» или «меньше». И то и другое бывает верным и неверным.</p></div><div class="task"><span class="star">⭐</span><span class="task-num">1</span><p>Верно или неверно? Если неверно, исправь правую часть.</p><div class="lets"><div><i>а)</i>7 × 8 = 54</div><div><i>б)</i>36 : 4 &lt; 10</div><div><i>в)</i>15 + 15 = 3 × 10</div><div><i>г)</i>48 : 6 &gt; 9</div></div><div class="grid-space"></div></div><div class="task"><span class="star">⭐</span><span class="task-num">2</span><p>Поставь знак &gt;, &lt; или =.</p><div class="lets"><div><i>а)</i>25 + 17 … 40</div><div><i>б)</i>9 × 6 … 54</div><div><i>в)</i>100 − 38 … 60</div><div><i>г)</i>72 : 8 … 3 × 3</div></div><div class="grid-space"></div></div></section><section class="sec sec-pond"><h2>⚖️ Уравнение и весы</h2><div class="memo"><p><strong>Уравнение</strong> это равенство с буквой. Число, при котором оно становится верным, это <strong>решение уравнения</strong>.</p><p>Равенство это уравновешенные весы. Что можно делать, не нарушая равновесия:</p><p>1. поменять местами левую и правую части;</p><p>2. прибавить к обеим частям одно и то же число или вычесть его;</p><p>3. умножить или разделить обе части на одно и то же число, кроме нуля.</p></div><p>Одно уравнение двумя способами. Оба верные, проверку делай всегда.</p><div class="two"><div class="col"><h3>Обратный ход</h3><div>(x + 3) × 4 = 24</div><div>x + 3 = 24 : 4 = 6</div><div>x = 6 − 3 = 3</div><div class="chk">проверка: (3 + 3) × 4 = 24</div></div><div class="col"><h3>Весы</h3><div>(x + 3) × 4 = 24</div><div>делим обе части на 4</div><div>x + 3 = 6</div><div>вычитаем из обеих частей 3</div><div>x = 3</div><div class="chk">проверка: (3 + 3) × 4 = 24</div></div></div><div class="task"><span class="star">⭐</span><span class="task-num">3</span><p>Реши и запиши проверку.</p><div class="lets"><div><i>а)</i>x + 17 = 42</div><div><i>б)</i>63 − y = 18</div><div><i>в)</i>8 × z = 96</div><div><i>г)</i>m : 7 = 9</div><div><i>д)</i>84 : n = 12</div></div><div class="grid-space"></div></div><div class="task"><span class="star">⭐⭐</span><span class="task-num">4</span><p>Теперь действий больше.</p><div class="lets"><div><i>а)</i>(x + 3) × 4 = 24</div><div><i>б)</i>(y − 5) × 6 = 30</div><div><i>в)</i>5 × x + 13 = 48</div><div><i>г)</i>90 − 4 × y = 54</div></div><div class="grid-space grid-tall"></div></div><div class="task"><span class="star">⭐⭐</span><span class="task-num">5</span><p>Составь уравнение и реши его.</p><p>а) число умножили на 4 и прибавили 7, получилось 43;<br>б) из задуманного числа вычли 15, результат умножили на 3, получилось 36;<br>в) у Маши <strong>x</strong> наклеек, у Пети вдвое больше, вместе у них 36 наклеек.</p><div class="grid-space grid-tall"></div></div></section><section class="sec sec-earth"><h2>🎯 Сколько решений</h2><div class="memo"><p>Вопрос меняется: не «найди x», а «сколько чисел подходит». Ответов бывает четыре вида: одно число, несколько, бесконечно много и ни одного.</p></div><div class="task"><span class="star">⭐⭐</span><span class="task-num">6</span><p>Сколько решений? Если их немного, выпиши все.</p><div class="lets"><div><i>а)</i>x + 4 = 11</div><div><i>б)</i>x + 0 = x</div><div><i>в)</i>x + 2 = x</div><div><i>г)</i>x × 1 = x</div><div><i>д)</i>x × 0 = 7</div></div><div class="grid-space grid-tall"></div></div><div class="task"><span class="star">⭐⭐</span><span class="task-num">7</span><p>Выпиши все натуральные числа, которые подходят.</p><div class="lets"><div><i>а)</i>x &lt; 6</div><div><i>б)</i>2 &lt; x &lt; 7</div><div><i>в)</i>x &lt; 15 и делится на 4</div></div><div class="grid-space"></div><p class="hint">Запись 2 &lt; x &lt; 7 читается так: x больше двух и меньше семи.</p></div><div class="task"><span class="star">⭐⭐⭐</span><span class="task-num">8</span><p>Придумай уравнение, решение которого равно <strong>10</strong>. А теперь такое, у которого решений нет совсем.</p><div class="grid-space"></div></div></section><section class="sec sec-meadow"><h2>⚡ Считаем группами</h2><div class="calcbox"><div class="c"><b>а)</b><div class="e">25 × 4 × 13</div><div class="ans"></div></div><div class="c"><b>б)</b><div class="e">50 × 2 × 17</div><div class="ans"></div></div><div class="c"><b>в)</b><div class="e">125 × 8 × 6</div><div class="ans"></div></div><div class="c"><b>д)</b><div class="e">2 × 49 × 5</div><div class="ans"></div></div><div class="c"><b>е)</b><div class="e">250 × 4 × 7</div><div class="ans"></div></div><div class="c"><b>ж)</b><div class="e">20 × 5 × 18</div><div class="ans"></div></div></div><p class="hint">Те же пары, что и в прошлый раз: 25 × 4, 50 × 2, 125 × 8, 250 × 4, 20 × 5.</p></section></div></body></html>
