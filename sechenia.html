@@ -1,0 +1,988 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Построение сечений</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  --bg: #f7f9fb; --paper: #fff; --grid: #e6edf3; --ink: #17232d; --muted: #5d6d79; --line: #d5dee6;
+  --accent: #1f6f8b; --accent-soft: #e3f0f5; --sec: #d0532e; --sec-soft: #fbe3da; --xpt: #0b57ff;
+  --given: #d0532e; --ok: #2f7d4f; --ok-soft: #e4f3ea; --no: #b5452f; --no-soft: #fbe9e4;
+  --warn: #b8730a; --warn-soft: #fff4dd; --hint: #7a5cc4; --hint-soft: #efeafb; --sel: #2f9e44;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f161c; --paper: #141d24; --grid: #1b2730; --ink: #e3ebf1; --muted: #9aabb8; --line: #2a3944;
+    --accent: #6cc0dc; --accent-soft: #16303b; --sec: #f08a5a; --sec-soft: #3a2219; --xpt: #7aa4ff;
+    --given: #f08a5a; --ok: #6fd39a; --ok-soft: #163223; --no: #f08a74; --no-soft: #3a1f19;
+    --warn: #f0b24a; --warn-soft: #2d2514; --hint: #b49cf0; --hint-soft: #241d38; --sel: #6fd39a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f161c; --paper: #141d24; --grid: #1b2730; --ink: #e3ebf1; --muted: #9aabb8; --line: #2a3944;
+  --accent: #6cc0dc; --accent-soft: #16303b; --sec: #f08a5a; --sec-soft: #3a2219; --xpt: #7aa4ff;
+  --given: #f08a5a; --ok: #6fd39a; --ok-soft: #163223; --no: #f08a74; --no-soft: #3a1f19;
+  --warn: #f0b24a; --warn-soft: #2d2514; --hint: #b49cf0; --hint-soft: #241d38; --sel: #6fd39a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; padding: 24px 16px 60px; color: var(--ink); background: var(--bg);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px; font: 16px/1.55 "Golos Text", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.wrap { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+h1 { margin: 0; font-size: clamp(1.5rem, 4vw, 2.1rem); line-height: 1.2; }
+.lead { margin: 0; color: var(--muted); max-width: 70ch; }
+.sheet { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: clamp(14px, 3vw, 24px); }
+.tr { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(300px, 1fr); gap: 20px; align-items: start; }
+.fig { position: sticky; top: 12px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.panel { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+@media (max-width: 820px) { .tr { grid-template-columns: minmax(0, 1fr); } .fig { position: static; } }
+
+svg.st { width: 100%; height: auto; display: block; background: var(--paper); border: 1px solid var(--line); border-radius: 8px;
+  touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
+svg.st.dragging { cursor: grabbing; }
+svg.st.pick { cursor: pointer; }
+.e-vis { stroke: var(--ink); stroke-width: 2.2; stroke-linecap: round; fill: none; }
+.e-hid { stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 7 5; fill: none; }
+.l-vis { stroke: var(--accent); stroke-width: 1.4; stroke-linecap: round; fill: none; }
+.l-hid { stroke: var(--accent); stroke-width: 1.2; stroke-dasharray: 5 4; fill: none; }
+.s-vis { stroke: var(--sec); stroke-width: 3.2; stroke-linecap: round; fill: none; }
+.s-hid { stroke: var(--sec); stroke-width: 2.2; stroke-dasharray: 7 5; fill: none; }
+.fillsec { fill: var(--sec); fill-opacity: .18; stroke: none; }
+.halo-sel { stroke: var(--sel); stroke-opacity: .45; stroke-width: 11; stroke-linecap: round; fill: none; }
+.halo-hint { stroke: var(--hint); stroke-opacity: .4; stroke-width: 11; stroke-linecap: round; fill: none; }
+.halo-hov { stroke: var(--accent); stroke-opacity: .25; stroke-width: 10; stroke-linecap: round; fill: none; }
+.p-v { fill: var(--ink); }
+.p-g { fill: var(--given); }
+.p-x { fill: var(--xpt); }
+.ph-sel { fill: var(--sel); fill-opacity: .35; }
+.ph-hint { fill: var(--hint); fill-opacity: .35; }
+.ph-hov { fill: var(--accent); fill-opacity: .2; }
+.lab { font: italic 21px "Times New Roman", Times, serif; fill: var(--ink); paint-order: stroke; stroke: var(--paper); stroke-width: 4px; stroke-linejoin: round; }
+.lab.g { fill: var(--given); }
+.lab.x { fill: var(--xpt); }
+.figbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; color: var(--muted); font-size: .88rem; }
+
+.grp { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.grp > span { flex-basis: 100%; font-size: .74rem; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.tsq { width: 38px; height: 34px; font: 600 .85rem "Golos Text", sans-serif; color: var(--accent); background: var(--paper);
+  border: 1px solid var(--line); border-radius: 6px; cursor: pointer; }
+.tsq:hover, .tsq:focus-visible { border-color: var(--accent); outline: none; }
+.tsq.done { border-color: var(--ok); background: var(--ok-soft); color: var(--ok); }
+.tsq.on { background: var(--accent); border-color: var(--accent); color: var(--paper); }
+.cond { font-size: 1.05rem; margin: 0; }
+.tools { display: flex; flex-wrap: wrap; gap: 6px; }
+.tool { font: 600 .9rem "Golos Text", sans-serif; padding: 8px 12px; border-radius: 7px; border: 1px solid var(--accent);
+  background: var(--paper); color: var(--accent); cursor: pointer; }
+.tool:hover, .tool:focus-visible { background: var(--accent-soft); outline: none; }
+.tool[aria-pressed="true"] { background: var(--accent); color: var(--paper); }
+.tool.minor { border-color: var(--line); color: var(--ink); }
+.tool.minor:hover { border-color: var(--accent); }
+.tool.help { border-color: var(--hint); color: var(--hint); }
+.tool.help:hover { background: var(--hint-soft); }
+.tool:disabled { opacity: .45; cursor: default; }
+.status { margin: 0; color: var(--muted); font-size: .93rem; min-height: 1.5em; }
+.msg { border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: 6px; padding: 10px 13px; }
+.msg.ok { border-color: var(--ok); background: var(--ok-soft); }
+.msg.no { border-color: var(--no); background: var(--no-soft); }
+.msg.warn { border-color: var(--warn); background: var(--warn-soft); }
+.msg.hint { border-color: var(--hint); background: var(--hint-soft); }
+.msg.fin { border-color: var(--ok); background: var(--ok-soft); font-weight: 600; }
+.m { font-family: "Times New Roman", Times, serif; font-style: italic; font-size: 1.12em; white-space: nowrap; }
+.m sub { font-size: .7em; font-style: normal; }
+details { border-top: 1px dashed var(--line); padding-top: 8px; }
+summary { cursor: pointer; font-weight: 600; color: var(--accent); font-size: .92rem; }
+.log { margin: 8px 0 0; padding-left: 1.5em; display: flex; flex-direction: column; gap: 4px; font-size: .95rem; }
+.rules { margin: 8px 0 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 6px; font-size: .95rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Построение сечений</h1>
+    <p class="lead">Построй сечение многогранника плоскостью, проходящей через три точки. Соединяй точки, пересекай прямые, проводи параллельные. После каждого шага тренажёр скажет, верно ли. Чертёж можно поворачивать: тяни его мышкой или пальцем.</p>
+  </header>
+
+  <section class="sheet tr">
+    <div class="fig">
+      <svg class="st" id="fig" viewBox="0 0 640 540" role="img" aria-label="Чертёж многогранника"></svg>
+      <div class="figbar">
+        <button class="tool minor" type="button" id="resetView">Исходный вид</button>
+        <span>Синие точки ты построил(а) сам(а), красные даны в условии.</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div id="nav" style="display:flex;flex-direction:column;gap:10px"></div>
+      <p class="cond" id="cond"></p>
+
+      <div>
+        <div class="tools" role="group" aria-label="Инструменты">
+          <button class="tool" type="button" data-mode="connect" aria-pressed="true">Соединить точки</button>
+          <button class="tool" type="button" data-mode="cut" aria-pressed="false">Пересечь прямые</button>
+          <button class="tool" type="button" data-mode="par" aria-pressed="false">Параллельная</button>
+        </div>
+      </div>
+      <p class="status" id="status"></p>
+
+      <div class="tools">
+        <button class="tool minor" type="button" id="undo">Отменить</button>
+        <button class="tool minor" type="button" id="restart">Заново</button>
+        <button class="tool help" type="button" id="hintBtn">Подсказка</button>
+        <button class="tool help" type="button" id="stepBtn">Сделай шаг за меня</button>
+        <button class="tool help" type="button" id="solveBtn">Показать решение</button>
+      </div>
+
+      <div id="msg"></div>
+
+      <details open>
+        <summary>Ход построения</summary>
+        <ol class="log" id="log"></ol>
+      </details>
+
+      <details>
+        <summary>Три правила построения сечений</summary>
+        <ol class="rules">
+          <li><b>Соединять можно только две точки одной грани.</b> Отрезок между ними и есть сторона сечения в этой грани. Точки разных граней соединять нельзя: такой отрезок прошёл бы внутри тела.</li>
+          <li><b>Пересекать можно только прямые, лежащие в одной плоскости.</b> Если на рисунке прямые пересекаются, а в пространстве они скрещиваются, точки пересечения нет. Ребро можно продлить за пределы тела: полученная точка лежит сразу в двух плоскостях граней.</li>
+          <li><b>Параллельные грани секущая плоскость пересекает по параллельным отрезкам.</b> Если в одной грани сторона сечения уже есть, в параллельной грани проводи через известную точку параллельную ей прямую.</li>
+        </ol>
+      </details>
+    </div>
+  </section>
+</div>
+
+<script>
+/*LOGIC-START*/
+var SEC = (function () {
+  var EPS = 1e-7;
+  function sub(a, b) { return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]; }
+  function add(a, b) { return [a[0] + b[0], a[1] + b[1], a[2] + b[2]]; }
+  function mul(a, s) { return [a[0] * s, a[1] * s, a[2] * s]; }
+  function dot(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
+  function cross(a, b) { return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]; }
+  function len(a) { return Math.sqrt(dot(a, a)); }
+  function nrm(a) { var l = len(a); return l ? mul(a, 1 / l) : a; }
+  function lerp(a, b, t) { return add(a, mul(sub(b, a), t)); }
+  function same(a, b) { return len(sub(a, b)) < 1e-6; }
+
+  /* ---------- тела ---------- */
+  var BODY_DEF = {
+    cube: {
+      title: 'куб', gen: 'куба',
+      V: { A: [0, 0, 0], B: [1, 0, 0], C: [1, 1, 0], D: [0, 1, 0], A1: [0, 0, 1], B1: [1, 0, 1], C1: [1, 1, 1], D1: [0, 1, 1] },
+      F: [['A', 'B', 'C', 'D'], ['A1', 'B1', 'C1', 'D1'], ['A', 'B', 'B1', 'A1'], ['B', 'C', 'C1', 'B1'], ['C', 'D', 'D1', 'C1'], ['D', 'A', 'A1', 'D1']]
+    },
+    pyr3: {
+      title: 'тетраэдр', gen: 'тетраэдра',
+      V: { A: [0, 0.55, 0], B: [0.62, -0.2, 0], C: [1.2, 0.5, 0], S: [0.58, 0.28, 1.15] },
+      F: [['A', 'B', 'C'], ['S', 'A', 'B'], ['S', 'B', 'C'], ['S', 'C', 'A']]
+    },
+    pyr4: {
+      title: 'четырёхугольная пирамида', gen: 'пирамиды',
+      V: { A: [0, 0, 0], B: [1, 0, 0], C: [1, 1, 0], D: [0, 1, 0], S: [0.5, 0.5, 1.2] },
+      F: [['A', 'B', 'C', 'D'], ['S', 'A', 'B'], ['S', 'B', 'C'], ['S', 'C', 'D'], ['S', 'D', 'A']]
+    },
+    prism3: {
+      title: 'треугольная призма', gen: 'призмы',
+      V: { A: [0, 0.55, 0], B: [0.6, -0.2, 0], C: [1.2, 0.55, 0], A1: [0, 0.55, 1], B1: [0.6, -0.2, 1], C1: [1.2, 0.55, 1] },
+      F: [['A', 'B', 'C'], ['A1', 'B1', 'C1'], ['A', 'B', 'B1', 'A1'], ['B', 'C', 'C1', 'B1'], ['C', 'A', 'A1', 'C1']]
+    }
+  };
+
+  function buildBody(key) {
+    var d = BODY_DEF[key], V = d.V, names = Object.keys(V);
+    var c = [0, 0, 0];
+    names.forEach(function (n) { c = add(c, V[n]); });
+    c = mul(c, 1 / names.length);
+    var faces = d.F.map(function (vs) {
+      var n = nrm(cross(sub(V[vs[1]], V[vs[0]]), sub(V[vs[2]], V[vs[0]])));
+      if (dot(n, sub(c, V[vs[0]])) > 0) n = mul(n, -1);
+      return { v: vs, n: n, d: dot(n, V[vs[0]]), name: vs.join('') };
+    });
+    var edges = [], ekey = {};
+    faces.forEach(function (f, fi) {
+      for (var i = 0; i < f.v.length; i++) {
+        var a = f.v[i], b = f.v[(i + 1) % f.v.length];
+        var k = [a, b].sort().join('|');
+        if (!ekey[k]) {
+          var ia = a === 'S' ? -1 : names.indexOf(a), ib = b === 'S' ? -1 : names.indexOf(b);
+          ekey[k] = ia < ib ? { a: a, b: b, faces: [] } : { a: b, b: a, faces: [] };
+          edges.push(ekey[k]);
+        }
+        ekey[k].faces.push(fi);
+      }
+    });
+    edges.forEach(function (e) { e.id = 'e:' + e.a + '-' + e.b; });
+    var R = 0;
+    names.forEach(function (n) { R = Math.max(R, len(sub(V[n], c))); });
+    return { key: key, title: d.title, gen: d.gen, V: V, names: names, faces: faces, edges: edges, c: c, R: R };
+  }
+
+  /* ---------- задачи ---------- */
+  /* given: {K:['A','B',t]} — точка K на ребре AB, AK = t·AB; plane — три точки (данные или вершины) */
+  var TASKS = [
+    { grp: 0, body: 'cube', given: { K: ['B1', 'A1', 1 / 2], L: ['B1', 'C1', 1 / 2], M: ['B1', 'B', 1 / 2] }, plane: ['K', 'L', 'M'] },
+    { grp: 0, body: 'pyr3', given: { K: ['S', 'A', 1 / 3], L: ['S', 'B', 1 / 2], M: ['S', 'C', 2 / 3] }, plane: ['K', 'L', 'M'] },
+    { grp: 0, body: 'cube', given: {}, plane: ['A1', 'C1', 'B'] },
+    { grp: 0, body: 'prism3', given: { K: ['A', 'A1', 1 / 2], L: ['B', 'B1', 1 / 2] }, plane: ['K', 'L', 'C1'] },
+    { grp: 1, body: 'cube', given: { K: ['A', 'B', 1 / 2] }, plane: ['K', 'B1', 'D1'] },
+    { grp: 1, body: 'cube', given: { K: ['A', 'A1', 1 / 2], L: ['B', 'B1', 1 / 3] }, plane: ['K', 'L', 'C1'] },
+    { grp: 1, body: 'prism3', given: { K: ['A', 'B', 1 / 2], L: ['B', 'C', 1 / 3] }, plane: ['K', 'L', 'C1'] },
+    { grp: 1, body: 'cube', given: { K: ['A', 'A1', 2 / 3], L: ['D', 'D1', 1 / 3] }, plane: ['K', 'L', 'B1'] },
+    { grp: 2, body: 'pyr3', given: { K: ['S', 'A', 1 / 2], L: ['S', 'B', 1 / 3], M: ['B', 'C', 1 / 2] }, plane: ['K', 'L', 'M'] },
+    { grp: 2, body: 'cube', given: { K: ['A', 'B', 1 / 2], L: ['B', 'C', 1 / 2], M: ['D', 'D1', 2 / 3] }, plane: ['K', 'L', 'M'] },
+    { grp: 2, body: 'pyr4', given: { K: ['A', 'B', 1 / 2], L: ['B', 'C', 1 / 2], M: ['S', 'D', 1 / 2] }, plane: ['K', 'L', 'M'] },
+    { grp: 2, body: 'cube', given: { K: ['A', 'B', 1 / 2], L: ['B', 'C', 1 / 2], M: ['C1', 'D1', 1 / 2] }, plane: ['K', 'L', 'M'] },
+    { grp: 3, body: 'pyr4', given: { K: ['S', 'A', 1 / 2], L: ['S', 'B', 2 / 3], M: ['S', 'C', 1 / 2] }, plane: ['K', 'L', 'M'] },
+    { grp: 3, body: 'prism3', given: { K: ['A', 'A1', 1 / 3], L: ['B1', 'C1', 1 / 2], M: ['B', 'C', 2 / 3] }, plane: ['K', 'L', 'M'] }
+  ];
+  var GROUPS = ['Разминка: точки в общих гранях', 'Параллельные грани', 'Метод следов', 'Посложнее'];
+
+  /* ---------- построение (состояние ученика) ---------- */
+  var POOL = ['X', 'Y', 'Z', 'T', 'P', 'Q', 'R', 'N', 'E', 'F', 'G', 'H', 'U', 'V', 'W', 'O', 'I', 'J'];
+
+  function Cons(task) {
+    var body = buildBody(task.body);
+    this.task = task;
+    this.body = body;
+    this.pts = {};
+    this.order = [];
+    var self = this;
+    body.names.forEach(function (n) { self.addPt(n, body.V[n], 'v'); });
+    Object.keys(task.given).forEach(function (n) {
+      var g = task.given[n];
+      self.addPt(n, lerp(body.V[g[0]], body.V[g[1]], g[2]), 'g');
+    });
+    var P = task.plane.map(function (n) { return self.pts[n].p; });
+    this.N = nrm(cross(sub(P[1], P[0]), sub(P[2], P[0])));
+    this.D = dot(this.N, P[0]);
+    this.lines = [];
+    this.sides = [];
+    this.log = [];
+    this.nextLine = 1;
+    this.goal = this.computeGoal();
+  }
+
+  Cons.prototype.addPt = function (n, p, kind) { this.pts[n] = { name: n, p: p, kind: kind }; this.order.push(n); };
+  Cons.prototype.inPlane = function (p) { return Math.abs(dot(this.N, p) - this.D) < EPS; };
+  Cons.prototype.onFacePlane = function (p, f) { return Math.abs(dot(f.n, p) - f.d) < EPS; };
+  Cons.prototype.insideBody = function (p) {
+    return this.body.faces.every(function (f) { return dot(f.n, p) <= f.d + EPS; });
+  };
+  Cons.prototype.facesOf = function (p) {
+    var self = this, r = [];
+    this.body.faces.forEach(function (f, i) { if (self.onFacePlane(p, f)) r.push(i); });
+    return r;
+  };
+  /* грань, на которой точка лежит по-настоящему (не на продолжении) */
+  Cons.prototype.realFacesOf = function (p) {
+    if (!this.insideBody(p)) return [];
+    return this.facesOf(p);
+  };
+  Cons.prototype.ptAt = function (p) {
+    for (var i = 0; i < this.order.length; i++) if (same(this.pts[this.order[i]].p, p)) return this.order[i];
+    return null;
+  };
+  Cons.prototype.freeName = function () {
+    for (var k = 0; k < 4; k++)
+      for (var i = 0; i < POOL.length; i++) {
+        var n = POOL[i] + (k ? String(k + 1) : '');
+        if (!this.pts[n]) return n;
+      }
+    return 'X' + this.order.length;
+  };
+
+  /* прямые: рёбра и проведённые учеником */
+  Cons.prototype.lineGeo = function (L) {
+    if (L.edge) { var a = this.body.V[L.a]; return { p: a, d: nrm(sub(this.body.V[L.b], a)) }; }
+    var p = this.pts[L.a].p;
+    return { p: p, d: L.b ? nrm(sub(this.pts[L.b].p, p)) : nrm(L.d) };
+  };
+  Cons.prototype.allLines = function () { return this.body.edges.concat(this.lines); };
+  Cons.prototype.lineById = function (id) {
+    var all = this.allLines();
+    for (var i = 0; i < all.length; i++) if (all[i].id === id) return all[i];
+    return null;
+  };
+  Cons.prototype.onLine = function (p, L) {
+    var g = this.lineGeo(L), v = sub(p, g.p);
+    return len(sub(v, mul(g.d, dot(v, g.d)))) < 1e-6;
+  };
+  Cons.prototype.sameLine = function (L1, L2) {
+    var g1 = this.lineGeo(L1), g2 = this.lineGeo(L2);
+    return len(cross(g1.d, g2.d)) < 1e-6 && this.onLine(g2.p, L1);
+  };
+  Cons.prototype.findLine = function (p, q) {
+    var all = this.lines;
+    for (var i = 0; i < all.length; i++) if (this.onLine(p, all[i]) && this.onLine(q, all[i])) return all[i];
+    return null;
+  };
+  Cons.prototype.lineInPlane = function (L) {
+    var g = this.lineGeo(L);
+    return this.inPlane(g.p) && Math.abs(dot(g.d, this.N)) < 1e-7;
+  };
+  Cons.prototype.lineInFace = function (L, f) {
+    var g = this.lineGeo(L);
+    return this.onFacePlane(g.p, f) && Math.abs(dot(g.d, f.n)) < 1e-7;
+  };
+  /* пересечение двух прямых: {kind:'same'|'par'|'skew'|'pt', p} */
+  Cons.prototype.meet = function (L1, L2) {
+    var g1 = this.lineGeo(L1), g2 = this.lineGeo(L2);
+    var c = cross(g1.d, g2.d);
+    if (len(c) < 1e-9) return { kind: this.onLine(g2.p, L1) ? 'same' : 'par' };
+    var w = sub(g2.p, g1.p);
+    if (Math.abs(dot(w, c)) / len(c) > 1e-6) return { kind: 'skew' };
+    var t = dot(cross(w, g2.d), c) / dot(c, c);
+    return { kind: 'pt', p: add(g1.p, mul(g1.d, t)) };
+  };
+  Cons.prototype.onEdgeSeg = function (p, e) {
+    var a = this.body.V[e.a], b = this.body.V[e.b], ab = sub(b, a);
+    if (!this.onLine(p, e)) return false;
+    var t = dot(sub(p, a), ab) / dot(ab, ab);
+    return t > -1e-7 && t < 1 + 1e-7;
+  };
+
+  /* настоящее сечение: вершины на рёбрах и стороны в гранях */
+  Cons.prototype.computeGoal = function () {
+    var self = this, B = this.body, vs = [];
+    B.edges.forEach(function (e) {
+      var a = B.V[e.a], b = B.V[e.b];
+      var sa = dot(self.N, a) - self.D, sb = dot(self.N, b) - self.D;
+      var cand = [];
+      if (Math.abs(sa) < EPS) cand.push(a);
+      if (Math.abs(sb) < EPS) cand.push(b);
+      if (sa * sb < 0 && Math.abs(sa) >= EPS && Math.abs(sb) >= EPS) cand.push(lerp(a, b, sa / (sa - sb)));
+      cand.forEach(function (p) { if (!vs.some(function (q) { return same(p, q); })) vs.push(p); });
+    });
+    var sides = [];
+    B.faces.forEach(function (f, fi) {
+      var on = vs.filter(function (p) { return self.onFacePlane(p, f); });
+      if (on.length === 2) sides.push({ a: on[0], b: on[1], face: fi });
+      else if (on.length > 2) throw new Error('плоскость содержит грань');
+    });
+    /* порядок вершин по кругу */
+    var c = [0, 0, 0];
+    vs.forEach(function (p) { c = add(c, p); });
+    c = mul(c, 1 / vs.length);
+    var u = nrm(sub(vs[0], c)), w = cross(this.N, u);
+    vs.sort(function (p, q) {
+      return Math.atan2(dot(sub(p, c), w), dot(sub(p, c), u)) - Math.atan2(dot(sub(q, c), w), dot(sub(q, c), u));
+    });
+    return { verts: vs, sides: sides };
+  };
+  Cons.prototype.sideBuilt = function (s) {
+    var self = this;
+    return this.sides.some(function (x) {
+      var p = self.pts[x[0]].p, q = self.pts[x[1]].p;
+      return (same(p, s.a) && same(q, s.b)) || (same(p, s.b) && same(q, s.a));
+    });
+  };
+  Cons.prototype.done = function () {
+    var self = this;
+    return this.goal.sides.every(function (s) { return self.sideBuilt(s); });
+  };
+  Cons.prototype.faceDone = function (fi) {
+    var self = this;
+    return this.goal.sides.every(function (s) { return s.face !== fi || self.sideBuilt(s); });
+  };
+  Cons.prototype.polyName = function () {
+    var self = this, r = this.goal.verts.map(function (p) { return self.ptAt(p) || '?'; });
+    var k = 0;
+    for (var i = 0; i < r.length; i++) if (this.task.plane.indexOf(r[i]) >= 0) { k = i; break; }
+    return r.slice(k).concat(r.slice(0, k));
+  };
+
+  /* ---------- снимок для отмены ---------- */
+  Cons.prototype.snap = function () {
+    return JSON.stringify({ pts: this.pts, order: this.order, lines: this.lines, sides: this.sides, log: this.log, nextLine: this.nextLine });
+  };
+  Cons.prototype.restore = function (s) {
+    var o = JSON.parse(s);
+    this.pts = o.pts; this.order = o.order; this.lines = o.lines; this.sides = o.sides; this.log = o.log; this.nextLine = o.nextLine;
+  };
+
+  /* ---------- тексты ---------- */
+  function nm(n) { return String(n).replace(/^([A-Z])(\d+)$/, '$1<sub>$2</sub>'); }
+  function M(s) { return '<span class="m">' + s + '</span>'; }
+  function pn(n) { return M(nm(n)); }
+  function pair(a, b) { return M(nm(a) + nm(b)); }
+  Cons.prototype.faceTxt = function (fi) { return M(this.body.faces[fi].v.map(nm).join('')); };
+  Cons.prototype.lineTxt = function (L) {
+    if (L.edge) return 'ребро ' + pair(L.a, L.b);
+    if (L.b) return 'прямую ' + pair(L.a, L.b);
+    return 'прямую через ' + pn(L.a) + ', параллельную ' + L.parTxt;
+  };
+  Cons.prototype.lineNom = function (L) {
+    if (L.edge) return 'ребро ' + pair(L.a, L.b);
+    if (L.b) return 'прямая ' + pair(L.a, L.b);
+    return 'прямая через ' + pn(L.a) + ' (параллельная ' + L.parTxt + ')';
+  };
+  Cons.prototype.lineShort = function (L) {
+    if (L.edge || L.b) return pair(L.a, L.b);
+    return 'прямая через ' + pn(L.a);
+  };
+  Cons.prototype.facesTxt = function (fs) {
+    var self = this;
+    return fs.map(function (i) { return self.faceTxt(i); }).join(' и ');
+  };
+
+  /* ---------- действия ученика: {cls, text} ---------- */
+  Cons.prototype.connect = function (a, b) {
+    if (a === b) return { cls: 'no', text: 'Выбери две разные точки.' };
+    var P = this.pts[a].p, Q = this.pts[b].p, self = this;
+    var outA = !this.inPlane(P), outB = !this.inPlane(Q);
+    if (outA || outB) {
+      var bad = outA && outB ? 'Точки ' + pn(a) + ' и ' + pn(b) + ' не лежат' : 'Точка ' + pn(outA ? a : b) + ' не лежит';
+      return { cls: 'no', text: bad + ' в секущей плоскости, поэтому прямая ' + pair(a, b) + ' построению не поможет. Соединяй точки, которые уже точно принадлежат сечению.' };
+    }
+    var fa = this.facesOf(P), fb = this.facesOf(Q);
+    var common = fa.filter(function (i) { return fb.indexOf(i) >= 0; });
+    if (!common.length)
+      return { cls: 'no', text: 'Точки ' + pn(a) + ' и ' + pn(b) + ' не лежат в одной грани: отрезок ' + pair(a, b) + ' прошёл бы внутри тела. Соединять можно только точки одной грани (или одной плоскости грани).' };
+    var real = common.filter(function (i) {
+      return self.realFacesOf(P).indexOf(i) >= 0 && self.realFacesOf(Q).indexOf(i) >= 0;
+    });
+    var L = this.findLine(P, Q);
+    var isSide = real.length > 0 && !this.sides.some(function (s) { return (s[0] === a && s[1] === b) || (s[0] === b && s[1] === a); });
+    if (L && !isSide) return { cls: 'warn', text: 'Прямая ' + pair(a, b) + ' уже проведена.' };
+    if (!L) {
+      L = { id: 'l' + this.nextLine++, a: a, b: b };
+      this.lines.push(L);
+    }
+    if (real.length) {
+      this.sides.push([a, b]);
+      this.log.push(pair(a, b) + ' — сторона сечения в грани ' + this.faceTxt(real[0]));
+      var t = 'Верно: ' + pn(a) + ' и ' + pn(b) + ' лежат в грани ' + this.faceTxt(real[0]) + ' и в секущей плоскости, значит ' + pair(a, b) + ' — сторона сечения.';
+      if (this.done()) return { cls: 'fin', text: t + ' Сечение построено!', id: L.id };
+      return { cls: 'ok', text: t, id: L.id };
+    }
+    this.log.push('прямая ' + pair(a, b) + ' в плоскости ' + this.facesTxt(common));
+    return { cls: 'ok', id: L.id, text: 'Верно: ' + pn(a) + ' и ' + pn(b) + ' лежат в секущей плоскости и в плоскости грани ' + this.facesTxt(common) + '. Прямая ' + pair(a, b) + ' — след: по ней секущая плоскость пересекает плоскость этой грани. Теперь ищи, где она пересекает рёбра этой грани.' };
+  };
+
+  Cons.prototype.cut = function (id1, id2) {
+    var L1 = this.lineById(id1), L2 = this.lineById(id2);
+    if (!L1 || !L2 || id1 === id2) return { cls: 'no', text: 'Выбери две разные прямые.' };
+    var r = this.meet(L1, L2);
+    var both = this.lineShort(L1) + ' и ' + this.lineShort(L2);
+    if (r.kind === 'same') return { cls: 'no', text: 'Это одна и та же прямая.' };
+    if (r.kind === 'par') return { cls: 'no', text: both + ' параллельны: у них нет общей точки.' };
+    if (r.kind === 'skew') return { cls: 'no', text: both + ' скрещиваются: на рисунке они пересекаются, а в пространстве нет. Пересекать можно только прямые, которые лежат в одной плоскости, например в плоскости одной грани.' };
+    var p = r.p;
+    if (len(sub(p, this.body.c)) > this.body.R * 7)
+      return { cls: 'warn', text: 'Прямые пересекаются очень далеко от тела. Попробуй другие прямые.' };
+    var ex = this.ptAt(p);
+    if (ex) return { cls: 'warn', text: 'Прямые пересекаются в точке ' + pn(ex) + ', она уже есть на чертеже.' };
+    if (!this.inPlane(p))
+      return { cls: 'no', text: both + ' пересекаются, но точка пересечения не лежит в секущей плоскости. Пересекай с ребром прямую, которая уже лежит в секущей плоскости.' };
+    var n = this.freeName();
+    this.addPt(n, p, 'x');
+    var self = this, fs = this.facesOf(p);
+    var onEdge = this.body.edges.filter(function (e) { return self.onEdgeSeg(p, e); })[0];
+    if (onEdge) {
+      this.log.push(pn(n) + ' = ' + this.lineShort(L1) + ' ∩ ' + this.lineShort(L2) + ', вершина сечения на ребре ' + pair(onEdge.a, onEdge.b));
+      return { cls: 'ok', pt: n, text: 'Получили точку ' + pn(n) + '. Она лежит на ребре ' + pair(onEdge.a, onEdge.b) + ' и в секущей плоскости, значит это вершина сечения.' };
+    }
+    this.log.push(pn(n) + ' = ' + this.lineShort(L1) + ' ∩ ' + this.lineShort(L2) + ' (вне тела)');
+    return { cls: 'ok', pt: n, text: 'Получили точку ' + pn(n) + ' вне тела. Она лежит в секущей плоскости' + (fs.length ? ' и в плоскости ' + (fs.length > 1 ? 'граней ' : 'грани ') + this.facesTxt(fs) : '') + '. С её помощью можно провести след в соседней грани.' };
+  };
+
+  Cons.prototype.par = function (lineId, a) {
+    var L = this.lineById(lineId);
+    if (!L || !this.pts[a]) return { cls: 'no', text: 'Выбери прямую и точку.' };
+    var g = this.lineGeo(L), P = this.pts[a].p;
+    if (this.onLine(P, L)) return { cls: 'no', text: 'Точка ' + pn(a) + ' лежит на этой прямой. Выбери точку вне её.' };
+    if (!this.inPlane(P)) return { cls: 'no', text: 'Точка ' + pn(a) + ' не лежит в секущей плоскости.' };
+    if (Math.abs(dot(g.d, this.N)) > 1e-7) return { cls: 'no', text: this.lineNom(L) + ' не параллельна секущей плоскости, поэтому прямая через ' + pn(a) + ', параллельная ей, вышла бы из секущей плоскости.' };
+    for (var i = 0; i < this.lines.length; i++) {
+      var g2 = this.lineGeo(this.lines[i]);
+      if (len(cross(g2.d, g.d)) < 1e-6 && this.onLine(P, this.lines[i])) return { cls: 'warn', text: 'Такая прямая уже проведена.' };
+    }
+    var nl = { id: 'l' + this.nextLine++, a: a, b: null, d: g.d, parTxt: this.lineShort(L) };
+    this.lines.push(nl);
+    var fs = this.facesOf(P).filter(function () { return true; });
+    var self = this;
+    var fsIn = fs.filter(function (i) { return self.lineInFace(nl, self.body.faces[i]); });
+    this.log.push('через ' + pn(a) + ' прямая, параллельная ' + this.lineShort(L));
+    return { cls: 'ok', id: nl.id, text: 'Провели через ' + pn(a) + ' прямую, параллельную ' + this.lineShort(L) + '. Она лежит в секущей плоскости' + (fsIn.length ? ' и в плоскости грани ' + this.facesTxt(fsIn) : '') + '. Найди, где она пересекает рёбра.' };
+  };
+
+  Cons.prototype.undoLast = null;
+
+  /* ---------- решатель: следующий шаг с того места, где остановился ученик ---------- */
+  Cons.prototype.traceOf = function (fi) {
+    var f = this.body.faces[fi], self = this;
+    return this.lines.filter(function (L) { return self.lineInPlane(L) && self.lineInFace(L, f); })[0] || null;
+  };
+  Cons.prototype.known = function () {
+    var self = this;
+    return this.order.filter(function (n) { return self.inPlane(self.pts[n].p); });
+  };
+
+  Cons.prototype.next = function () {
+    if (this.done()) return null;
+    var self = this, B = this.body, known = this.known(), i, j, fi;
+    /* A: обе вершины стороны уже есть — соединить */
+    for (i = 0; i < this.goal.sides.length; i++) {
+      var s = this.goal.sides[i];
+      if (this.sideBuilt(s)) continue;
+      var a = this.ptAt(s.a), b = this.ptAt(s.b);
+      if (a && b) return { type: 'connect', a: a, b: b, hl: [a, b],
+        text: 'Точки ' + pn(a) + ' и ' + pn(b) + ' лежат в одной грани ' + this.faceTxt(s.face) + '. Соедини их: ' + pair(a, b) + ' — сторона сечения.' };
+    }
+    /* C: след в грани пересекает её ребро внутри ребра — вершина сечения */
+    for (fi = 0; fi < B.faces.length; fi++) {
+      var T = this.traceOf(fi);
+      if (!T) continue;
+      for (j = 0; j < B.edges.length; j++) {
+        var e = B.edges[j];
+        if (e.faces.indexOf(fi) < 0) continue;
+        var r = this.meet(T, e);
+        if (r.kind !== 'pt' || this.ptAt(r.p) || !this.onEdgeSeg(r.p, e)) continue;
+        return { type: 'cut', l1: T.id, l2: e.id, hl: [T.id, e.id],
+          text: this.lineNom(T) + ' и ребро ' + pair(e.a, e.b) + ' лежат в плоскости грани ' + this.faceTxt(fi) + '. Пересеки их: получится вершина сечения на ребре ' + pair(e.a, e.b) + '.' };
+      }
+    }
+    /* B: в плоскости грани две известные точки — провести след */
+    var order = B.faces.map(function (f, k) { return k; });
+    order.sort(function (x, y) { return (self.faceDone(x) ? 1 : 0) - (self.faceDone(y) ? 1 : 0); });
+    for (i = 0; i < order.length; i++) {
+      fi = order[i];
+      if (this.traceOf(fi)) continue;
+      var on = known.filter(function (n) { return self.onFacePlane(self.pts[n].p, B.faces[fi]); });
+      if (on.length < 2) continue;
+      var a2 = on[0], b2 = on[1];
+      var realBoth = this.realFacesOf(this.pts[a2].p).indexOf(fi) >= 0 && this.realFacesOf(this.pts[b2].p).indexOf(fi) >= 0;
+      return { type: 'connect', a: a2, b: b2, hl: [a2, b2],
+        text: 'Точки ' + pn(a2) + ' и ' + pn(b2) + ' лежат и в секущей плоскости, и в плоскости грани ' + this.faceTxt(fi) + '. Соедини их' + (realBoth ? '.' : ': прямая ' + pair(a2, b2) + ' — след секущей плоскости на плоскости этой грани.') };
+    }
+    /* D: параллельные грани — провести параллельную */
+    for (i = 0; i < order.length; i++) {
+      fi = order[i];
+      if (this.faceDone(fi) || this.traceOf(fi)) continue;
+      var g = B.faces[fi];
+      var R = known.filter(function (n) { return self.onFacePlane(self.pts[n].p, g); })[0];
+      if (!R) continue;
+      for (j = 0; j < B.faces.length; j++) {
+        if (j === fi || len(cross(B.faces[j].n, g.n)) > 1e-7) continue;
+        var T2 = this.traceOf(j);
+        if (!T2) continue;
+        return { type: 'par', line: T2.id, p: R, hl: [T2.id, R],
+          text: 'Грани ' + this.faceTxt(j) + ' и ' + this.faceTxt(fi) + ' параллельны, поэтому секущая плоскость пересекает их по параллельным прямым. Проведи через ' + pn(R) + ' прямую, параллельную ' + this.lineShort(T2) + '.' };
+      }
+    }
+    /* E: продлить ребро до пересечения со следом — точка в соседней плоскости грани */
+    var cands = [];
+    for (fi = 0; fi < B.faces.length; fi++) {
+      var T3 = this.traceOf(fi);
+      if (!T3) continue;
+      for (j = 0; j < B.edges.length; j++) {
+        var e3 = B.edges[j];
+        if (e3.faces.indexOf(fi) < 0) continue;
+        var f2 = e3.faces[0] === fi ? e3.faces[1] : e3.faces[0];
+        if (this.traceOf(f2)) continue;
+        var r3 = this.meet(T3, e3);
+        if (r3.kind !== 'pt' || this.ptAt(r3.p) || len(sub(r3.p, B.c)) > B.R * 7) continue;
+        var hasR = known.some(function (n) { return self.onFacePlane(self.pts[n].p, B.faces[f2]) && !self.onLine(self.pts[n].p, e3); });
+        var score = (hasR ? 0 : 2) + (this.faceDone(f2) ? 1 : 0) + len(sub(r3.p, B.c)) / (B.R * 20);
+        cands.push({ score: score, fi: fi, f2: f2, T: T3, e: e3 });
+      }
+    }
+    if (cands.length) {
+      cands.sort(function (x, y) { return x.score - y.score; });
+      var c = cands[0];
+      return { type: 'cut', l1: c.T.id, l2: c.e.id, hl: [c.T.id, c.e.id],
+        text: this.lineNom(c.T) + ' и прямая ' + pair(c.e.a, c.e.b) + ' лежат в плоскости грани ' + this.faceTxt(c.fi) + '. Продли ребро ' + pair(c.e.a, c.e.b) + ' и найди точку пересечения: она лежит ещё и в плоскости грани ' + this.faceTxt(c.f2) + '.' };
+    }
+    return null;
+  };
+  Cons.prototype.apply = function (st) {
+    if (st.type === 'connect') return this.connect(st.a, st.b);
+    if (st.type === 'cut') return this.cut(st.l1, st.l2);
+    return this.par(st.line, st.p);
+  };
+  Cons.prototype.solve = function () {
+    for (var k = 0; k < 60 && !this.done(); k++) {
+      var st = this.next();
+      if (!st) return false;
+      this.apply(st);
+    }
+    return this.done();
+  };
+
+  /* ---------- условие задачи ---------- */
+  function fracTxt(t) {
+    var map = { 0.5: '1 : 1' };
+    for (var q = 2; q <= 6; q++) for (var p = 1; p < q; p++) if (Math.abs(p / q - t) < 1e-9) return p + ' : ' + (q - p);
+    return String(t);
+  }
+  function condition(task) {
+    var b = BODY_DEF[task.body];
+    var parts = Object.keys(task.given).map(function (n) {
+      var g = task.given[n];
+      if (Math.abs(g[2] - 0.5) < 1e-9) return pn(n) + ' — середина ребра ' + pair(g[0], g[1]);
+      return pn(n) + ' на ребре ' + pair(g[0], g[1]) + ', ' + pair(g[0], n) + ' : ' + pair(n, g[1]) + ' = ' + fracTxt(g[2]);
+    });
+    var vnames = { cube: M('ABCDA<sub>1</sub>B<sub>1</sub>C<sub>1</sub>D<sub>1</sub>'), pyr3: M('SABC'), pyr4: M('SABCD'), prism3: M('ABCA<sub>1</sub>B<sub>1</sub>C<sub>1</sub>') }[task.body];
+    var t = 'Постройте сечение ' + b.gen + ' ' + vnames + ' плоскостью ' + M(task.plane.map(nm).join('')) + '.';
+    if (parts.length) t += ' Точка ' + parts.join('; точка ') + '.';
+    return t;
+  }
+
+  return { Cons: Cons, TASKS: TASKS, GROUPS: GROUPS, buildBody: buildBody, condition: condition, nm: nm, pn: pn,
+    v: { sub: sub, add: add, mul: mul, dot: dot, cross: cross, len: len, nrm: nrm, lerp: lerp } };
+})();
+/*LOGIC-END*/
+
+(function () {
+  var V = SEC.v, NS = 'http://www.w3.org/2000/svg';
+  var svg = document.getElementById('fig'), W = 640, H = 540;
+  var $ = function (id) { return document.getElementById(id); };
+  var LSKEY = 'sechenia-done';
+  var doneSet = {};
+  try { doneSet = JSON.parse(localStorage.getItem(LSKEY) || '{}') || {}; } catch (e) { doneSet = {}; }
+
+  var S = { ti: 0, cons: null, hist: [], mode: 'connect', sel: [], hint: null, hov: null, az: 0.42, el: 0.36 };
+
+  /* ---------- проекция ---------- */
+  var cam = {};
+  function setupCam() {
+    var az = S.az, el = S.el;
+    cam.v = [Math.cos(el) * Math.sin(az), -Math.cos(el) * Math.cos(az), Math.sin(el)];
+    cam.r = [Math.cos(az), Math.sin(az), 0];
+    var u = V.cross(cam.v, cam.r);
+    if (u[2] < 0) u = V.mul(u, -1);
+    cam.u = u;
+    var B = S.cons.body;
+    var R = B.R;
+    S.cons.order.forEach(function (n) { R = Math.max(R, V.len(V.sub(S.cons.pts[n].p, B.c)) + 0.05); });
+    cam.s = Math.min(W, H) * 0.44 / R;
+    cam.c = B.c;
+  }
+  function pr(p) {
+    var q = V.sub(p, cam.c);
+    return [W / 2 + V.dot(q, cam.r) * cam.s, H / 2 - V.dot(q, cam.u) * cam.s];
+  }
+  /* точка скрыта, если луч от неё к зрителю проходит внутри тела */
+  function hidden(p) {
+    var lo = 1e-6, hi = Infinity, F = S.cons.body.faces;
+    for (var i = 0; i < F.length; i++) {
+      var a = V.dot(F[i].n, cam.v), b = F[i].d - V.dot(F[i].n, p);
+      if (Math.abs(a) < 1e-12) { if (b < -1e-9) return false; continue; }
+      if (a > 0) hi = Math.min(hi, b / a); else lo = Math.max(lo, b / a);
+    }
+    return hi - lo > 1e-6;
+  }
+  function pieces(a, b) {
+    var N = 64, out = [], cur = null;
+    for (var i = 0; i < N; i++) {
+      var h = hidden(V.lerp(a, b, (i + 0.5) / N));
+      if (!cur || cur.h !== h) { cur = { t0: i / N, t1: (i + 1) / N, h: h }; out.push(cur); } else cur.t1 = (i + 1) / N;
+    }
+    return out.map(function (s) { return { a: V.lerp(a, b, s.t0), b: V.lerp(a, b, s.t1), h: s.h }; });
+  }
+
+  /* ---------- SVG ---------- */
+  function el(tag, at, parent) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in at) e.setAttribute(k, at[k]);
+    (parent || svg).appendChild(e);
+    return e;
+  }
+  function seg(a, b, cls, g) {
+    var A = pr(a), B = pr(b);
+    return el('line', { x1: A[0].toFixed(1), y1: A[1].toFixed(1), x2: B[0].toFixed(1), y2: B[1].toFixed(1), 'class': cls }, g);
+  }
+  function segVis(a, b, vis, hid, g) {
+    pieces(a, b).forEach(function (s) { seg(s.a, s.b, s.h ? hid : vis, g); });
+  }
+  function label(n, cls) {
+    var C = S.cons, p = C.pts[n].p, P = pr(p), c = pr(C.body.c);
+    var dx = P[0] - c[0], dy = P[1] - c[1], l = Math.hypot(dx, dy);
+    if (l < 8) { dx = 1; dy = -1; l = Math.SQRT2; }
+    var x = P[0] + dx / l * 17, y = P[1] + dy / l * 17 + 7;
+    var t = el('text', { x: x.toFixed(1), y: y.toFixed(1), 'class': 'lab ' + cls, 'text-anchor': 'middle' });
+    var m = /^([A-Z])(\d+)$/.exec(n);
+    if (m) {
+      t.appendChild(document.createTextNode(m[1]));
+      var ts = el('tspan', { 'font-size': '15', dy: '5', 'font-style': 'normal' }, t);
+      ts.textContent = m[2];
+    } else t.textContent = n;
+  }
+
+  /* отрезок, который рисуется для прямой: через все точки на ней плюс «хвостики» */
+  function lineExtent(L) {
+    var C = S.cons, g = C.lineGeo(L), ts = [];
+    C.order.forEach(function (n) {
+      var p = C.pts[n].p;
+      if (C.onLine(p, L)) ts.push(V.dot(V.sub(p, g.p), g.d));
+    });
+    if (L.edge) { ts.push(0); ts.push(V.len(V.sub(C.body.V[L.b], C.body.V[L.a]))); }
+    if (!ts.length) ts.push(0);
+    var lo = Math.min.apply(null, ts), hi = Math.max.apply(null, ts), tail = C.body.R * 0.22;
+    return { a: V.add(g.p, V.mul(g.d, lo - tail)), b: V.add(g.p, V.mul(g.d, hi + tail)), lo: lo, hi: hi, g: g };
+  }
+
+  function render() {
+    setupCam();
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    var C = S.cons, B = C.body;
+    var gHalo = el('g', {}), gFill = el('g', {}), gLines = el('g', {}), gEdges = el('g', {}), gSides = el('g', {}), gPts = el('g', {}), gLab = el('g', {});
+    var halo = {};
+    S.sel.forEach(function (id) { halo[id] = 'sel'; });
+    if (S.hint) S.hint.hl.forEach(function (id) { if (!halo[id]) halo[id] = 'hint'; });
+    if (S.hov && !halo[S.hov]) halo[S.hov] = 'hov';
+
+    if (C.done()) {
+      var poly = C.goal.verts.map(function (p) { var q = pr(p); return q[0].toFixed(1) + ',' + q[1].toFixed(1); }).join(' ');
+      el('polygon', { points: poly, 'class': 'fillsec' }, gFill);
+    }
+    /* рёбра: видимое ребро — у него есть грань, обращённая к зрителю */
+    B.edges.forEach(function (e) {
+      var vis = e.faces.some(function (fi) { return V.dot(B.faces[fi].n, cam.v) > 1e-9; });
+      var a = B.V[e.a], b = B.V[e.b];
+      seg(a, b, vis ? 'e-vis' : 'e-hid', gEdges);
+      var ex = lineExtent(e);
+      var Lb = V.len(V.sub(b, a));
+      if (ex.lo < -1e-6) segVis(ex.a, a, 'l-vis', 'l-hid', gLines);
+      if (ex.hi > Lb + 1e-6) segVis(b, ex.b, 'l-vis', 'l-hid', gLines);
+      if (halo[e.id]) {
+        var A1 = ex.lo < -1e-6 ? ex.a : a, B1 = ex.hi > Lb + 1e-6 ? ex.b : b;
+        seg(A1, B1, 'halo-' + halo[e.id], gHalo);
+      }
+    });
+    C.lines.forEach(function (L) {
+      var ex = lineExtent(L);
+      segVis(ex.a, ex.b, 'l-vis', 'l-hid', gLines);
+      if (halo[L.id]) seg(ex.a, ex.b, 'halo-' + halo[L.id], gHalo);
+    });
+    C.sides.forEach(function (s) { segVis(C.pts[s[0]].p, C.pts[s[1]].p, 's-vis', 's-hid', gSides); });
+    C.order.forEach(function (n) {
+      var pt = C.pts[n], P = pr(pt.p);
+      if (halo[n]) el('circle', { cx: P[0], cy: P[1], r: 12, 'class': 'ph-' + halo[n] }, gHalo);
+      el('circle', { cx: P[0], cy: P[1], r: pt.kind === 'v' ? 3.6 : 4.6, 'class': 'p-' + pt.kind }, gPts);
+      label(n, pt.kind === 'v' ? '' : pt.kind);
+    });
+  }
+
+  /* ---------- выбор мышкой ---------- */
+  function svgXY(e) {
+    var r = svg.getBoundingClientRect();
+    return [(e.clientX - r.left) * W / r.width, (e.clientY - r.top) * H / r.height];
+  }
+  function distSeg(p, a, b) {
+    var dx = b[0] - a[0], dy = b[1] - a[1], l2 = dx * dx + dy * dy;
+    var t = l2 ? Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / l2)) : 0;
+    return Math.hypot(p[0] - a[0] - t * dx, p[1] - a[1] - t * dy);
+  }
+  function wantPoint() { return S.mode === 'connect' || (S.mode === 'par' && S.sel.length === 1); }
+  function wantLine() { return S.mode === 'cut' || (S.mode === 'par' && S.sel.length === 0); }
+  function pickAt(xy) {
+    var C = S.cons, best = null, bd = 1e9;
+    if (wantPoint()) {
+      C.order.forEach(function (n) {
+        var P = pr(C.pts[n].p), d = Math.hypot(P[0] - xy[0], P[1] - xy[1]);
+        if (d < 18 && d < bd) { bd = d; best = n; }
+      });
+      return best;
+    }
+    if (wantLine()) {
+      C.allLines().forEach(function (L) {
+        var ex = lineExtent(L), a = L.edge ? (ex.lo < 0 ? ex.a : C.body.V[L.a]) : ex.a, b = L.edge ? (ex.hi > ex.lo ? (ex.hi > V.len(V.sub(C.body.V[L.b], C.body.V[L.a])) + 1e-6 ? ex.b : C.body.V[L.b]) : C.body.V[L.b]) : ex.b;
+        var d = distSeg(xy, pr(a), pr(b));
+        if (d < 11 && d < bd) { bd = d; best = L.id; }
+      });
+      return best;
+    }
+    return null;
+  }
+
+  var drag = null;
+  svg.addEventListener('pointerdown', function (e) {
+    drag = { x: e.clientX, y: e.clientY, az: S.az, el: S.el, moved: false, id: e.pointerId };
+    svg.setPointerCapture(e.pointerId);
+  });
+  svg.addEventListener('pointermove', function (e) {
+    if (drag) {
+      var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      if (!drag.moved && Math.hypot(dx, dy) > 5) { drag.moved = true; svg.classList.add('dragging'); }
+      if (drag.moved) {
+        S.az = drag.az - dx * 0.008;
+        S.el = Math.max(-1.25, Math.min(1.25, drag.el + dy * 0.008));
+        render();
+      }
+      return;
+    }
+    var h = pickAt(svgXY(e));
+    svg.classList.toggle('pick', !!h);
+    if (h !== S.hov) { S.hov = h; render(); }
+  });
+  function endDrag(e) {
+    if (!drag) return;
+    var d = drag;
+    drag = null;
+    svg.classList.remove('dragging');
+    if (!d.moved && e.type === 'pointerup') tap(pickAt(svgXY(e)));
+  }
+  svg.addEventListener('pointerup', endDrag);
+  svg.addEventListener('pointercancel', endDrag);
+  svg.addEventListener('pointerleave', function () { if (!drag && S.hov) { S.hov = null; render(); } });
+
+  function tap(id) {
+    if (!id) { S.sel = []; status(); render(); return; }
+    var i = S.sel.indexOf(id);
+    if (i >= 0) { S.sel.splice(i, 1); status(); render(); return; }
+    S.sel.push(id);
+    if (S.sel.length === 2) {
+      var C = S.cons, before = C.snap(), r;
+      if (S.mode === 'connect') r = C.connect(S.sel[0], S.sel[1]);
+      else if (S.mode === 'cut') r = C.cut(S.sel[0], S.sel[1]);
+      else r = C.par(S.sel[0], S.sel[1]);
+      S.sel = [];
+      after(before, r);
+      return;
+    }
+    status();
+    render();
+  }
+
+  function after(before, r) {
+    var C = S.cons;
+    if (C.snap() !== before) S.hist.push(before);
+    S.hint = null;
+    if (C.done()) {
+      doneSet[S.ti] = 1;
+      try { localStorage.setItem(LSKEY, JSON.stringify(doneSet)); } catch (e) {}
+      r = { cls: 'fin', text: (r && r.text ? r.text + ' ' : '') + finTxt() };
+      nav();
+    }
+    show(r);
+    status();
+    renderLog();
+    render();
+  }
+
+  function finTxt() {
+    var C = S.cons, nv = C.goal.verts.length;
+    var kind = { 3: 'треугольник', 4: 'четырёхугольник', 5: 'пятиугольник', 6: 'шестиугольник' }[nv] || nv + '-угольник';
+    return 'В сечении ' + kind + ' <span class="m">' + C.polyName().map(SEC.nm).join('') + '</span>.';
+  }
+
+  /* ---------- панель ---------- */
+  function show(r) {
+    var m = $('msg');
+    m.innerHTML = '';
+    if (!r) return;
+    var d = document.createElement('div');
+    d.className = 'msg ' + (r.cls || '');
+    d.innerHTML = r.text;
+    m.appendChild(d);
+  }
+  function status() {
+    var t = '', n = S.sel.length, C = S.cons;
+    if (S.mode === 'connect') t = n ? 'Выбрана точка ' + SEC.pn(S.sel[0]) + '. Теперь вторую точку.' : 'Нажми на две точки, чтобы соединить их.';
+    else if (S.mode === 'cut') t = n ? 'Выбрана ' + C.lineNom(C.lineById(S.sel[0])) + '. Теперь вторую прямую или ребро.' : 'Нажми на две прямые (или рёбра), чтобы найти точку их пересечения.';
+    else t = n ? 'Выбрана ' + C.lineNom(C.lineById(S.sel[0])) + '. Теперь точку, через которую провести параллельную.' : 'Нажми на прямую, потом на точку: через точку пройдёт параллельная прямая.';
+    $('status').innerHTML = t;
+  }
+  function renderLog() {
+    var ol = $('log');
+    ol.innerHTML = '';
+    S.cons.log.forEach(function (s) { var li = document.createElement('li'); li.innerHTML = s; ol.appendChild(li); });
+    if (!S.cons.log.length) { var li = document.createElement('li'); li.style.listStyle = 'none'; li.style.color = 'var(--muted)'; li.textContent = 'Пока ничего не построено.'; ol.appendChild(li); }
+  }
+  function nav() {
+    var box = $('nav');
+    box.innerHTML = '';
+    SEC.GROUPS.forEach(function (g, gi) {
+      var d = document.createElement('div');
+      d.className = 'grp';
+      d.innerHTML = '<span>' + g + '</span>';
+      SEC.TASKS.forEach(function (t, i) {
+        if (t.grp !== gi) return;
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'tsq' + (i === S.ti ? ' on' : '') + (doneSet[i] ? ' done' : '');
+        b.textContent = i + 1;
+        b.setAttribute('aria-label', 'Задача ' + (i + 1));
+        b.onclick = function () { load(i); };
+        d.appendChild(b);
+      });
+      box.appendChild(d);
+    });
+  }
+  function setMode(m) {
+    S.mode = m;
+    S.sel = [];
+    document.querySelectorAll('.tool[data-mode]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.mode === m ? 'true' : 'false'); });
+    status();
+    render();
+  }
+  function load(i) {
+    S.ti = i;
+    S.cons = new SEC.Cons(SEC.TASKS[i]);
+    S.hist = [];
+    S.sel = [];
+    S.hint = null;
+    $('cond').innerHTML = '<b>Задача ' + (i + 1) + '.</b> ' + SEC.condition(SEC.TASKS[i]);
+    show(null);
+    nav();
+    status();
+    renderLog();
+    render();
+  }
+
+  document.querySelectorAll('.tool[data-mode]').forEach(function (b) { b.onclick = function () { setMode(b.dataset.mode); }; });
+  $('undo').onclick = function () {
+    if (!S.hist.length) { show({ cls: 'warn', text: 'Отменять нечего.' }); return; }
+    S.cons.restore(S.hist.pop());
+    S.sel = []; S.hint = null;
+    show(null); renderLog(); render();
+  };
+  $('restart').onclick = function () { load(S.ti); };
+  $('hintBtn').onclick = function () {
+    var st = S.cons.next();
+    if (!st) { show(S.cons.done() ? { cls: 'fin', text: 'Сечение уже построено.' } : { cls: 'warn', text: 'Отсюда помощник не видит, как продолжить. Нажми «Отменить» или «Заново».' }); return; }
+    S.hint = st;
+    show({ cls: 'hint', text: '<b>Подсказка.</b> ' + st.text });
+    render();
+  };
+  $('stepBtn').onclick = function () {
+    var C = S.cons, st = C.next();
+    if (!st) { $('hintBtn').onclick(); return; }
+    var before = C.snap(), r = C.apply(st);
+    S.sel = [];
+    after(before, { cls: r.cls === 'fin' ? 'fin' : 'hint', text: '<b>Шаг:</b> ' + st.text + (r.cls === 'fin' ? '' : '<br>' + r.text) });
+  };
+  $('solveBtn').onclick = function () {
+    var C = S.cons, before = C.snap();
+    var ok = C.solve();
+    S.sel = [];
+    if (!ok) { after(before, { cls: 'warn', text: 'Отсюда помощник не видит, как закончить. Нажми «Заново».' }); return; }
+    S.hist.push(before);
+    S.hint = null;
+    show({ cls: 'fin', text: 'Вот решение. ' + finTxt() + ' Посмотри ход построения ниже, потом нажми «Заново» и построй сам(а).' });
+    renderLog();
+    render();
+  };
+  $('resetView').onclick = function () { S.az = 0.42; S.el = 0.36; render(); };
+
+  if (window.matchMedia) {
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    if (mq.addEventListener) mq.addEventListener('change', render);
+  }
+  /* ссылка на конкретную задачу: sechenia.html#10 */
+  var h = parseInt((location.hash || '').slice(1), 10);
+  load(h >= 1 && h <= SEC.TASKS.length ? h - 1 : 0);
+})();
+</script>
+</body>
+</html>
