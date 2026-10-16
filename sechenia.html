@@ -9,26 +9,11 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap">
 <style>
 :root {
+  color-scheme: light;
   --bg: #f7f9fb; --paper: #fff; --grid: #e6edf3; --ink: #17232d; --muted: #5d6d79; --line: #d5dee6;
   --accent: #1f6f8b; --accent-soft: #e3f0f5; --sec: #d0532e; --sec-soft: #fbe3da; --xpt: #0b57ff;
   --given: #d0532e; --ok: #2f7d4f; --ok-soft: #e4f3ea; --no: #b5452f; --no-soft: #fbe9e4;
   --warn: #b8730a; --warn-soft: #fff4dd; --hint: #7a5cc4; --hint-soft: #efeafb; --sel: #2f9e44;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0f161c; --paper: #141d24; --grid: #1b2730; --ink: #e3ebf1; --muted: #9aabb8; --line: #2a3944;
-    --accent: #6cc0dc; --accent-soft: #16303b; --sec: #f08a5a; --sec-soft: #3a2219; --xpt: #7aa4ff;
-    --given: #f08a5a; --ok: #6fd39a; --ok-soft: #163223; --no: #f08a74; --no-soft: #3a1f19;
-    --warn: #f0b24a; --warn-soft: #2d2514; --hint: #b49cf0; --hint-soft: #241d38; --sel: #6fd39a;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0f161c; --paper: #141d24; --grid: #1b2730; --ink: #e3ebf1; --muted: #9aabb8; --line: #2a3944;
-  --accent: #6cc0dc; --accent-soft: #16303b; --sec: #f08a5a; --sec-soft: #3a2219; --xpt: #7aa4ff;
-  --given: #f08a5a; --ok: #6fd39a; --ok-soft: #163223; --no: #f08a74; --no-soft: #3a1f19;
-  --warn: #f0b24a; --warn-soft: #2d2514; --hint: #b49cf0; --hint-soft: #241d38; --sel: #6fd39a;
-  color-scheme: dark;
 }
 * { box-sizing: border-box; }
 body {
@@ -975,10 +960,6 @@ var SEC = (function () {
   };
   $('resetView').onclick = function () { S.az = 0.42; S.el = 0.36; render(); };
 
-  if (window.matchMedia) {
-    var mq = window.matchMedia('(prefers-color-scheme: dark)');
-    if (mq.addEventListener) mq.addEventListener('change', render);
-  }
   /* ссылка на конкретную задачу: sechenia.html#10 */
   var h = parseInt((location.hash || '').slice(1), 10);
   load(h >= 1 && h <= SEC.TASKS.length ? h - 1 : 0);
