@@ -272,9 +272,11 @@ var SEC = (function () {
       var c = cross(sub(P[1], P[0]), sub(P[2], P[0]));
       if (len(c) > 1e-9) { this.N = nrm(c); this.D = dot(this.N, P[0]); } else this.bad = 'line';
     }
+    this.base = JSON.stringify({ pts: this.pts, order: this.order });
     this.lines = [];
     this.sides = [];
     this.log = [];
+    this.ops = [];
     this.nextLine = 1;
     if (this.N) {
       try { this.goal = this.computeGoal(); } catch (e) { this.bad = 'face'; this.N = null; }
@@ -412,14 +414,28 @@ var SEC = (function () {
     return r.slice(k).concat(r.slice(0, k));
   };
 
-  /* ---------- снимок для отмены ---------- */
-  Cons.prototype.snap = function () {
-    return JSON.stringify({ pts: this.pts, order: this.order, lines: this.lines, sides: this.sides, log: this.log, nextLine: this.nextLine });
+  /* ---------- построение хранится как цепочка шагов (ops) ----------
+     При отмене и при перетаскивании данных точек шаги проигрываются заново на новых координатах:
+     построенные прямые и точки едут вслед за данными. Имена точек и прямых сохраняются. */
+  Cons.prototype.reset = function () {
+    var o = JSON.parse(this.base);
+    this.pts = o.pts; this.order = o.order;
+    this.lines = []; this.sides = []; this.log = []; this.ops = []; this.nextLine = 1;
   };
-  Cons.prototype.restore = function (s) {
-    var o = JSON.parse(s);
-    this.pts = o.pts; this.order = o.order; this.lines = o.lines; this.sides = o.sides; this.log = o.log; this.nextLine = o.nextLine;
+  Cons.prototype.newId = function (fid) {
+    if (fid) { this.nextLine = Math.max(this.nextLine, parseInt(fid.slice(1), 10) + 1); return fid; }
+    return 'l' + this.nextLine++;
   };
+  Cons.prototype.replay = function (ops) {
+    for (var i = 0; i < ops.length; i++) {
+      var o = ops[i];
+      if (o.t === 'c' && this.pts[o.a] && this.pts[o.b]) this.connect(o.a, o.b, o.id);
+      else if (o.t === 'x' && this.lineById(o.l1) && this.lineById(o.l2)) this.cut(o.l1, o.l2, o.n);
+      else if (o.t === 'p' && this.lineById(o.l) && this.pts[o.a]) this.par(o.l, o.a, o.id);
+    }
+  };
+  Cons.prototype.snap = function () { return JSON.stringify(this.ops); };
+  Cons.prototype.restore = function (s) { this.reset(); this.replay(JSON.parse(s)); };
 
   /* ---------- тексты ---------- */
   function nm(n) { return String(n).replace(/^([A-Z])(\d+)$/, '$1<sub>$2</sub>'); }
@@ -447,7 +463,7 @@ var SEC = (function () {
   };
 
   /* ---------- действия ученика: {cls, text} ---------- */
-  Cons.prototype.connect = function (a, b) {
+  Cons.prototype.connect = function (a, b, fid) {
     if (a === b) return { cls: 'no', text: 'Выбери две разные точки.' };
     var P = this.pts[a].p, Q = this.pts[b].p, self = this;
     var outA = !this.inPlane(P), outB = !this.inPlane(Q);
@@ -466,9 +482,10 @@ var SEC = (function () {
     var isSide = real.length > 0 && !this.sides.some(function (s) { return (s[0] === a && s[1] === b) || (s[0] === b && s[1] === a); });
     if (L && !isSide) return { cls: 'warn', text: 'Прямая ' + pair(a, b) + ' уже проведена.' };
     if (!L) {
-      L = { id: 'l' + this.nextLine++, a: a, b: b };
+      L = { id: this.newId(fid), a: a, b: b };
       this.lines.push(L);
     }
+    this.ops.push({ t: 'c', a: a, b: b, id: L.id });
     if (real.length) {
       this.sides.push([a, b]);
       this.log.push(pair(a, b) + ' — сторона сечения в грани ' + this.faceTxt(real[0]));
@@ -480,7 +497,7 @@ var SEC = (function () {
     return { cls: 'ok', id: L.id, text: 'Верно: ' + pn(a) + ' и ' + pn(b) + ' лежат в секущей плоскости и в плоскости грани ' + this.facesTxt(common) + '. Прямая ' + pair(a, b) + ' — след: по ней секущая плоскость пересекает плоскость этой грани. Теперь ищи, где она пересекает рёбра этой грани.' };
   };
 
-  Cons.prototype.cut = function (id1, id2) {
+  Cons.prototype.cut = function (id1, id2, fn) {
     var L1 = this.lineById(id1), L2 = this.lineById(id2);
     if (!L1 || !L2 || id1 === id2) return { cls: 'no', text: 'Выбери две разные прямые.' };
     var r = this.meet(L1, L2);
@@ -495,8 +512,9 @@ var SEC = (function () {
     if (ex) return { cls: 'warn', text: 'Прямые пересекаются в точке ' + pn(ex) + ', она уже есть на чертеже.' };
     if (!this.inPlane(p))
       return { cls: 'no', text: both + ' пересекаются, но точка пересечения не лежит в секущей плоскости. Пересекай с ребром прямую, которая уже лежит в секущей плоскости.' };
-    var n = this.freeName();
+    var n = fn && !this.pts[fn] ? fn : this.freeName();
     this.addPt(n, p, 'x');
+    this.ops.push({ t: 'x', l1: id1, l2: id2, n: n });
     var self = this, fs = this.facesOf(p);
     var onEdge = this.body.edges.filter(function (e) { return self.onEdgeSeg(p, e); })[0];
     if (onEdge) {
@@ -507,7 +525,7 @@ var SEC = (function () {
     return { cls: 'ok', pt: n, text: 'Получили точку ' + pn(n) + ' вне тела. Она лежит в секущей плоскости' + (fs.length ? ' и в плоскости ' + (fs.length > 1 ? 'граней ' : 'грани ') + this.facesTxt(fs) : '') + '. С её помощью можно провести след в соседней грани.' };
   };
 
-  Cons.prototype.par = function (lineId, a) {
+  Cons.prototype.par = function (lineId, a, fid) {
     var L = this.lineById(lineId);
     if (!L || !this.pts[a]) return { cls: 'no', text: 'Выбери прямую и точку.' };
     var g = this.lineGeo(L), P = this.pts[a].p;
@@ -518,8 +536,9 @@ var SEC = (function () {
       var g2 = this.lineGeo(this.lines[i]);
       if (len(cross(g2.d, g.d)) < 1e-6 && this.onLine(P, this.lines[i])) return { cls: 'warn', text: 'Такая прямая уже проведена.' };
     }
-    var nl = { id: 'l' + this.nextLine++, a: a, b: null, d: g.d, parTxt: this.lineShort(L) };
+    var nl = { id: this.newId(fid), a: a, b: null, d: g.d, parTxt: this.lineShort(L) };
     this.lines.push(nl);
+    this.ops.push({ t: 'p', l: lineId, a: a, id: nl.id });
     var fs = this.facesOf(P).filter(function () { return true; });
     var self = this;
     var fsIn = fs.filter(function (i) { return self.lineInFace(nl, self.body.faces[i]); });
@@ -527,7 +546,6 @@ var SEC = (function () {
     return { cls: 'ok', id: nl.id, text: 'Провели через ' + pn(a) + ' прямую, параллельную ' + this.lineShort(L) + '. Она лежит в секущей плоскости' + (fsIn.length ? ' и в плоскости грани ' + this.facesTxt(fsIn) : '') + '. Найди, где она пересекает рёбра.' };
   };
 
-  Cons.prototype.undoLast = null;
 
   /* ---------- решатель: следующий шаг с того места, где остановился ученик ---------- */
   Cons.prototype.traceOf = function (fi) {
@@ -863,6 +881,7 @@ var SEC = (function () {
   var drag = null;
   svg.addEventListener('pointerdown', function (e) {
     drag = { x: e.clientX, y: e.clientY, az: S.az, el: S.el, moved: false, id: e.pointerId, pt: givenAt(svgXY(e)) };
+    if (drag.pt) drag.ops = S.cons.snap();
     svg.setPointerCapture(e.pointerId);
   });
   svg.addEventListener('pointermove', function (e) {
@@ -875,10 +894,8 @@ var SEC = (function () {
         if (ed) {
           var t = ed.e.a === gv[0] ? ed.t : 1 - ed.t;
           if (Math.abs(t - gv[2]) > 1e-9) {
-            var had = S.cons.lines.length || S.cons.sides.length;
             gv[2] = t;
-            labRebuild();
-            if (had) show({ cls: 'warn', text: 'Точку передвинули, построение начато заново.' });
+            labRebuild(drag.ops);
           }
         }
         return;
@@ -900,6 +917,13 @@ var SEC = (function () {
     drag = null;
     svg.classList.remove('dragging');
     svg.classList.remove('dragpt');
+    if (d.moved && d.pt) {
+      var lost = JSON.parse(d.ops).length - S.cons.ops.length;
+      if (lost > 0) {
+        S.hist.push(d.ops);
+        show({ cls: 'warn', text: 'При таком положении точки ' + (lost === 1 ? 'один шаг построения не получается' : 'часть шагов построения (' + lost + ') не получается') + ', их убрали. Верни точку или нажми «Отменить», чтобы вернуть шаги.' });
+      }
+    }
     if (!d.moved && e.type === 'pointerup') { S.lastXY = svgXY(e); tap(pickAt(S.lastXY)); }
   }
   svg.addEventListener('pointerup', endDrag);
@@ -915,7 +939,7 @@ var SEC = (function () {
     if (!id) return;
     if (S.labGiven[id]) {
       delete S.labGiven[id];
-      labRebuild();
+      labRebuild(S.cons.snap());
       show({ cls: 'warn', text: 'Точку ' + SEC.pn(id) + ' убрали.' });
       return;
     }
@@ -930,7 +954,7 @@ var SEC = (function () {
     var g = {};
     ['K', 'L', 'M'].forEach(function (n) { if (S.labGiven[n]) g[n] = S.labGiven[n]; });
     S.labGiven = g;
-    labRebuild();
+    labRebuild(S.cons.snap());
     if (Object.keys(S.labGiven).length === 3 && S.cons.goal) {
       setMode('connect');
       show({ cls: 'ok', text: 'Плоскость ' + SEC.pn('K') + SEC.pn('L') + SEC.pn('M') + ' задана. Строй сечение или нажми «Показать ответ». Точки можно перетаскивать вдоль рёбер.' });
@@ -1060,13 +1084,14 @@ var SEC = (function () {
     else if (C.bad === 'face') show({ cls: 'no', text: 'Все три точки лежат в одной грани, и плоскость совпадает с этой гранью. Передвинь одну из точек на другое ребро.' });
     else show({ cls: 'no', text: 'Точки лежат на одной прямой, плоскость через них не задаётся. Передвинь одну из точек.' });
   }
-  function labRebuild() {
+  /* ops — сохранить построение (снимок шагов) и проиграть его на новых точках */
+  function labRebuild(ops) {
     S.cons = new SEC.Cons(labTask());
-    S.hist = [];
+    if (ops) S.cons.replay(JSON.parse(ops)); else S.hist = [];
     S.sel = [];
     S.hint = null;
     $('cond').innerHTML = '<b>Лаборатория.</b> ' + SEC.condition(labTask());
-    show(null);
+    if (!ops) show(null);
     if (Object.keys(S.labGiven).length === 3 && !S.cons.goal) labWhy();
     status();
     renderLog();
