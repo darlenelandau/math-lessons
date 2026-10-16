@@ -41,6 +41,18 @@ svg.st.pick { cursor: pointer; }
 .s-vis { stroke: var(--sec); stroke-width: 3.2; stroke-linecap: round; fill: none; }
 .s-hid { stroke: var(--sec); stroke-width: 2.2; stroke-dasharray: 7 5; fill: none; }
 .fillsec { fill: var(--sec); fill-opacity: .18; stroke: none; }
+.fillans { fill: var(--hint); fill-opacity: .14; stroke: var(--hint); stroke-width: 1.4; stroke-dasharray: 6 4; }
+.tabs { display: flex; gap: 6px; }
+.tab { font: 600 .95rem "Golos Text", sans-serif; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--paper); color: var(--ink); cursor: pointer; }
+.tab:hover, .tab:focus-visible { border-color: var(--accent); outline: none; }
+.tab[aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.bodybtn { font: 600 .88rem "Golos Text", sans-serif; padding: 7px 12px; border-radius: 6px; border: 1px solid var(--line);
+  background: var(--paper); color: var(--accent); cursor: pointer; }
+.bodybtn:hover { border-color: var(--accent); }
+.bodybtn.on { background: var(--accent); border-color: var(--accent); color: var(--paper); }
+.tool[hidden] { display: none; }
+svg.st.dragpt { cursor: grabbing; }
 .halo-sel { stroke: var(--sel); stroke-opacity: .45; stroke-width: 11; stroke-linecap: round; fill: none; }
 .halo-hint { stroke: var(--hint); stroke-opacity: .4; stroke-width: 11; stroke-linecap: round; fill: none; }
 .halo-hov { stroke: var(--accent); stroke-opacity: .25; stroke-width: 10; stroke-linecap: round; fill: none; }
@@ -92,6 +104,10 @@ summary { cursor: pointer; font-weight: 600; color: var(--accent); font-size: .9
 <div class="wrap">
   <header>
     <h1>Построение сечений</h1>
+    <div class="tabs" role="tablist" style="margin:12px 0 10px">
+      <button class="tab" type="button" role="tab" id="tabTasks" aria-selected="true">Задачи</button>
+      <button class="tab" type="button" role="tab" id="tabLab" aria-selected="false">Лаборатория</button>
+    </div>
     <p class="lead">Построй сечение многогранника плоскостью, проходящей через три точки. Соединяй точки, пересекай прямые, проводи параллельные. После каждого шага тренажёр скажет, верно ли. Чертёж можно поворачивать: тяни его мышкой или пальцем.</p>
   </header>
 
@@ -110,6 +126,7 @@ summary { cursor: pointer; font-weight: 600; color: var(--accent); font-size: .9
 
       <div>
         <div class="tools" role="group" aria-label="Инструменты">
+          <button class="tool" type="button" data-mode="place" aria-pressed="false" hidden>Поставить точку</button>
           <button class="tool" type="button" data-mode="connect" aria-pressed="true">Соединить точки</button>
           <button class="tool" type="button" data-mode="cut" aria-pressed="false">Пересечь прямые</button>
           <button class="tool" type="button" data-mode="par" aria-pressed="false">Параллельная</button>
@@ -123,6 +140,8 @@ summary { cursor: pointer; font-weight: 600; color: var(--accent); font-size: .9
         <button class="tool help" type="button" id="hintBtn">Подсказка</button>
         <button class="tool help" type="button" id="stepBtn">Сделай шаг за меня</button>
         <button class="tool help" type="button" id="solveBtn">Показать решение</button>
+        <button class="tool help" type="button" id="ansBtn" hidden>Показать ответ</button>
+        <button class="tool minor" type="button" id="clearPts" hidden>Убрать точки</button>
       </div>
 
       <div id="msg"></div>
@@ -247,17 +266,23 @@ var SEC = (function () {
       self.addPt(n, lerp(body.V[g[0]], body.V[g[1]], g[2]), 'g');
     });
     var P = task.plane.map(function (n) { return self.pts[n].p; });
-    this.N = nrm(cross(sub(P[1], P[0]), sub(P[2], P[0])));
-    this.D = dot(this.N, P[0]);
+    this.N = null;
+    this.goal = null;
+    if (P.length === 3) {
+      var c = cross(sub(P[1], P[0]), sub(P[2], P[0]));
+      if (len(c) > 1e-9) { this.N = nrm(c); this.D = dot(this.N, P[0]); } else this.bad = 'line';
+    }
     this.lines = [];
     this.sides = [];
     this.log = [];
     this.nextLine = 1;
-    this.goal = this.computeGoal();
+    if (this.N) {
+      try { this.goal = this.computeGoal(); } catch (e) { this.bad = 'face'; this.N = null; }
+    }
   }
 
   Cons.prototype.addPt = function (n, p, kind) { this.pts[n] = { name: n, p: p, kind: kind }; this.order.push(n); };
-  Cons.prototype.inPlane = function (p) { return Math.abs(dot(this.N, p) - this.D) < EPS; };
+  Cons.prototype.inPlane = function (p) { return !!this.N && Math.abs(dot(this.N, p) - this.D) < EPS; };
   Cons.prototype.onFacePlane = function (p, f) { return Math.abs(dot(f.n, p) - f.d) < EPS; };
   Cons.prototype.insideBody = function (p) {
     return this.body.faces.every(function (f) { return dot(f.n, p) <= f.d + EPS; });
@@ -372,10 +397,12 @@ var SEC = (function () {
   };
   Cons.prototype.done = function () {
     var self = this;
+    if (!this.goal) return false;
     return this.goal.sides.every(function (s) { return self.sideBuilt(s); });
   };
   Cons.prototype.faceDone = function (fi) {
     var self = this;
+    if (!this.goal) return true;
     return this.goal.sides.every(function (s) { return s.face !== fi || self.sideBuilt(s); });
   };
   Cons.prototype.polyName = function () {
@@ -513,7 +540,7 @@ var SEC = (function () {
   };
 
   Cons.prototype.next = function () {
-    if (this.done()) return null;
+    if (!this.goal || this.done()) return null;
     var self = this, B = this.body, known = this.known(), i, j, fi;
     /* A: обе вершины стороны уже есть — соединить */
     for (i = 0; i < this.goal.sides.length; i++) {
@@ -606,7 +633,7 @@ var SEC = (function () {
   /* ---------- условие задачи ---------- */
   function fracTxt(t) {
     var map = { 0.5: '1 : 1' };
-    for (var q = 2; q <= 6; q++) for (var p = 1; p < q; p++) if (Math.abs(p / q - t) < 1e-9) return p + ' : ' + (q - p);
+    for (var q = 2; q <= 12; q++) for (var p = 1; p < q; p++) if (Math.abs(p / q - t) < 1e-9) return p + ' : ' + (q - p);
     return String(t);
   }
   function condition(task) {
@@ -618,11 +645,20 @@ var SEC = (function () {
     });
     var vnames = { cube: M('ABCDA<sub>1</sub>B<sub>1</sub>C<sub>1</sub>D<sub>1</sub>'), pyr3: M('SABC'), pyr4: M('SABCD'), prism3: M('ABCA<sub>1</sub>B<sub>1</sub>C<sub>1</sub>') }[task.body];
     var t = 'Постройте сечение ' + b.gen + ' ' + vnames + ' плоскостью ' + M(task.plane.map(nm).join('')) + '.';
+    if (task.plane.length < 3) t = 'Поставь на рёбра ' + b.gen + ' ' + vnames + ' три точки: через них пройдёт секущая плоскость.';
     if (parts.length) t += ' Точка ' + parts.join('; точка ') + '.';
     return t;
   }
 
-  return { Cons: Cons, TASKS: TASKS, GROUPS: GROUPS, buildBody: buildBody, condition: condition, nm: nm, pn: pn,
+  var LAB = {
+    cube: { K: ['A', 'B', 1 / 2], L: ['B', 'C', 1 / 2], M: ['D', 'D1', 2 / 3] },
+    pyr3: { K: ['S', 'A', 1 / 2], L: ['S', 'B', 1 / 3], M: ['B', 'C', 1 / 2] },
+    pyr4: { K: ['A', 'B', 1 / 2], L: ['B', 'C', 1 / 2], M: ['S', 'D', 1 / 2] },
+    prism3: { K: ['A', 'A1', 1 / 3], L: ['B1', 'C1', 1 / 2], M: ['B', 'C', 2 / 3] }
+  };
+  var BODIES = Object.keys(BODY_DEF).map(function (k) { return { key: k, title: BODY_DEF[k].title }; });
+
+  return { Cons: Cons, TASKS: TASKS, GROUPS: GROUPS, LAB: LAB, BODIES: BODIES, buildBody: buildBody, condition: condition, nm: nm, pn: pn,
     v: { sub: sub, add: add, mul: mul, dot: dot, cross: cross, len: len, nrm: nrm, lerp: lerp } };
 })();
 /*LOGIC-END*/
@@ -635,7 +671,7 @@ var SEC = (function () {
   var doneSet = {};
   try { doneSet = JSON.parse(localStorage.getItem(LSKEY) || '{}') || {}; } catch (e) { doneSet = {}; }
 
-  var S = { ti: 0, cons: null, hist: [], mode: 'connect', sel: [], hint: null, hov: null, az: 0.42, el: 0.36 };
+  var S = { lab: false, labBody: 'cube', labGiven: {}, showAns: false, ti: 0, cons: null, hist: [], mode: 'connect', sel: [], hint: null, hov: null, az: 0.42, el: 0.36 };
 
   /* ---------- проекция ---------- */
   var cam = {};
@@ -730,6 +766,10 @@ var SEC = (function () {
       var poly = C.goal.verts.map(function (p) { var q = pr(p); return q[0].toFixed(1) + ',' + q[1].toFixed(1); }).join(' ');
       el('polygon', { points: poly, 'class': 'fillsec' }, gFill);
     }
+    if (S.lab && S.showAns && C.goal && !C.done()) {
+      var pa = C.goal.verts.map(function (p) { var q = pr(p); return q[0].toFixed(1) + ',' + q[1].toFixed(1); }).join(' ');
+      el('polygon', { points: pa, 'class': 'fillans' }, gFill);
+    }
     /* рёбра: видимое ребро — у него есть грань, обращённая к зрителю */
     B.edges.forEach(function (e) {
       var vis = e.faces.some(function (fi) { return V.dot(B.faces[fi].n, cam.v) > 1e-9; });
@@ -770,8 +810,38 @@ var SEC = (function () {
   }
   function wantPoint() { return S.mode === 'connect' || (S.mode === 'par' && S.sel.length === 1); }
   function wantLine() { return S.mode === 'cut' || (S.mode === 'par' && S.sel.length === 0); }
+  /* лаборатория: данная точка под пальцем */
+  function givenAt(xy) {
+    if (!S.lab) return null;
+    var C = S.cons, best = null, bd = 16;
+    Object.keys(S.labGiven).forEach(function (n) {
+      var P = pr(C.pts[n].p), d = Math.hypot(P[0] - xy[0], P[1] - xy[1]);
+      if (d < bd) { bd = d; best = n; }
+    });
+    return best;
+  }
+  /* ближайшее ребро и место на нём (доля от начала, шаг 1/12) */
+  function edgeAt(xy, only) {
+    var C = S.cons, best = null, bd = 14;
+    C.body.edges.forEach(function (e) {
+      if (only && e.id !== only) return;
+      var A = pr(C.body.V[e.a]), B = pr(C.body.V[e.b]);
+      var dx = B[0] - A[0], dy = B[1] - A[1], l2 = dx * dx + dy * dy;
+      var t = l2 ? ((xy[0] - A[0]) * dx + (xy[1] - A[1]) * dy) / l2 : 0;
+      var tc = Math.max(0, Math.min(1, t));
+      var d = Math.hypot(xy[0] - A[0] - tc * dx, xy[1] - A[1] - tc * dy);
+      if (only || d < bd) { bd = d; best = { e: e, t: Math.max(1, Math.min(11, Math.round(t * 12))) / 12 }; }
+    });
+    return best;
+  }
   function pickAt(xy) {
     var C = S.cons, best = null, bd = 1e9;
+    if (S.mode === 'place') {
+      var g = givenAt(xy);
+      if (g) return g;
+      var ed = edgeAt(xy);
+      return ed ? ed.e.id : null;
+    }
     if (wantPoint()) {
       C.order.forEach(function (n) {
         var P = pr(C.pts[n].p), d = Math.hypot(P[0] - xy[0], P[1] - xy[1]);
@@ -792,13 +862,27 @@ var SEC = (function () {
 
   var drag = null;
   svg.addEventListener('pointerdown', function (e) {
-    drag = { x: e.clientX, y: e.clientY, az: S.az, el: S.el, moved: false, id: e.pointerId };
+    drag = { x: e.clientX, y: e.clientY, az: S.az, el: S.el, moved: false, id: e.pointerId, pt: givenAt(svgXY(e)) };
     svg.setPointerCapture(e.pointerId);
   });
   svg.addEventListener('pointermove', function (e) {
     if (drag) {
       var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
-      if (!drag.moved && Math.hypot(dx, dy) > 5) { drag.moved = true; svg.classList.add('dragging'); }
+      if (!drag.moved && Math.hypot(dx, dy) > 5) { drag.moved = true; svg.classList.add(drag.pt ? 'dragpt' : 'dragging'); }
+      if (drag.moved && drag.pt) {
+        var gv = S.labGiven[drag.pt], eid = SEC_edgeId(gv[0], gv[1]);
+        var ed = edgeAt(svgXY(e), eid);
+        if (ed) {
+          var t = ed.e.a === gv[0] ? ed.t : 1 - ed.t;
+          if (Math.abs(t - gv[2]) > 1e-9) {
+            var had = S.cons.lines.length || S.cons.sides.length;
+            gv[2] = t;
+            labRebuild();
+            if (had) show({ cls: 'warn', text: 'Точку передвинули, построение начато заново.' });
+          }
+        }
+        return;
+      }
       if (drag.moved) {
         S.az = drag.az - dx * 0.008;
         S.el = Math.max(-1.25, Math.min(1.25, drag.el + dy * 0.008));
@@ -815,14 +899,47 @@ var SEC = (function () {
     var d = drag;
     drag = null;
     svg.classList.remove('dragging');
-    if (!d.moved && e.type === 'pointerup') tap(pickAt(svgXY(e)));
+    svg.classList.remove('dragpt');
+    if (!d.moved && e.type === 'pointerup') { S.lastXY = svgXY(e); tap(pickAt(S.lastXY)); }
   }
   svg.addEventListener('pointerup', endDrag);
   svg.addEventListener('pointercancel', endDrag);
   svg.addEventListener('pointerleave', function () { if (!drag && S.hov) { S.hov = null; render(); } });
 
+  function SEC_edgeId(a, b) {
+    var es = S.cons.body.edges;
+    for (var i = 0; i < es.length; i++) if ((es[i].a === a && es[i].b === b) || (es[i].a === b && es[i].b === a)) return es[i].id;
+    return null;
+  }
+  function placeTap(id) {
+    if (!id) return;
+    if (S.labGiven[id]) {
+      delete S.labGiven[id];
+      labRebuild();
+      show({ cls: 'warn', text: 'Точку ' + SEC.pn(id) + ' убрали.' });
+      return;
+    }
+    var names = Object.keys(S.labGiven);
+    if (names.length >= 3) { show({ cls: 'warn', text: 'Три точки уже стоят. Чтобы поставить другую, нажми на одну из них: она уберётся. Или перетащи её вдоль ребра.' }); return; }
+    var C = S.cons, e = C.lineById(id);
+    var busy = names.filter(function (n) { return SEC_edgeId(S.labGiven[n][0], S.labGiven[n][1]) === id; })[0];
+    if (busy) { show({ cls: 'warn', text: 'На ребре ' + SEC.pn(e.a) + SEC.pn(e.b) + ' уже есть точка ' + SEC.pn(busy) + '. Перетащи её или выбери другое ребро.' }); return; }
+    var ed = edgeAt(S.lastXY, id);
+    var nm = ['K', 'L', 'M'].filter(function (n) { return !S.labGiven[n]; })[0];
+    S.labGiven[nm] = [e.a, e.b, ed.t];
+    var g = {};
+    ['K', 'L', 'M'].forEach(function (n) { if (S.labGiven[n]) g[n] = S.labGiven[n]; });
+    S.labGiven = g;
+    labRebuild();
+    if (Object.keys(S.labGiven).length === 3 && S.cons.goal) {
+      setMode('connect');
+      show({ cls: 'ok', text: 'Плоскость ' + SEC.pn('K') + SEC.pn('L') + SEC.pn('M') + ' задана. Строй сечение или нажми «Показать ответ». Точки можно перетаскивать вдоль рёбер.' });
+    }
+  }
   function tap(id) {
+    if (S.mode === 'place') { placeTap(id); return; }
     if (!id) { S.sel = []; status(); render(); return; }
+    if (S.lab && !S.cons.goal) { labWhy(); return; }
     var i = S.sel.indexOf(id);
     if (i >= 0) { S.sel.splice(i, 1); status(); render(); return; }
     S.sel.push(id);
@@ -844,7 +961,7 @@ var SEC = (function () {
     if (C.snap() !== before) S.hist.push(before);
     S.hint = null;
     if (C.done()) {
-      doneSet[S.ti] = 1;
+      if (!S.lab) doneSet[S.ti] = 1;
       try { localStorage.setItem(LSKEY, JSON.stringify(doneSet)); } catch (e) {}
       r = { cls: 'fin', text: (r && r.text ? r.text + ' ' : '') + finTxt() };
       nav();
@@ -855,6 +972,10 @@ var SEC = (function () {
     render();
   }
 
+  function noWay() {
+    if (S.lab) return 'Здесь помощник не видит, как продолжить: он строит сечение методом следов и параллельными прямыми, а для этих точек нужен другой приём (например, внутреннее проектирование). Нажми «Показать ответ», чтобы увидеть само сечение, или передвинь точки так, чтобы две из них оказались в одной грани.';
+    return 'Отсюда помощник не видит, как продолжить. Нажми «Отменить» или «Заново».';
+  }
   function finTxt() {
     var C = S.cons, nv = C.goal.verts.length;
     var kind = { 3: 'треугольник', 4: 'четырёхугольник', 5: 'пятиугольник', 6: 'шестиугольник' }[nv] || nv + '-угольник';
@@ -873,7 +994,8 @@ var SEC = (function () {
   }
   function status() {
     var t = '', n = S.sel.length, C = S.cons;
-    if (S.mode === 'connect') t = n ? 'Выбрана точка ' + SEC.pn(S.sel[0]) + '. Теперь вторую точку.' : 'Нажми на две точки, чтобы соединить их.';
+    if (S.mode === 'place') t = 'Нажми на ребро, чтобы поставить точку (нужно три). Точку можно тянуть вдоль ребра, нажатие на неё убирает её.';
+    else if (S.mode === 'connect') t = n ? 'Выбрана точка ' + SEC.pn(S.sel[0]) + '. Теперь вторую точку.' : 'Нажми на две точки, чтобы соединить их.';
     else if (S.mode === 'cut') t = n ? 'Выбрана ' + C.lineNom(C.lineById(S.sel[0])) + '. Теперь вторую прямую или ребро.' : 'Нажми на две прямые (или рёбра), чтобы найти точку их пересечения. Продлевать их не нужно: если точка лежит за пределами тела, прямые продлятся до неё сами.';
     else t = n ? 'Выбрана ' + C.lineNom(C.lineById(S.sel[0])) + '. Теперь точку, через которую провести параллельную.' : 'Нажми на прямую, потом на точку: через точку пройдёт параллельная прямая.';
     $('status').innerHTML = t;
@@ -887,6 +1009,21 @@ var SEC = (function () {
   function nav() {
     var box = $('nav');
     box.innerHTML = '';
+    if (S.lab) {
+      var d0 = document.createElement('div');
+      d0.className = 'grp';
+      d0.innerHTML = '<span>Фигура</span>';
+      SEC.BODIES.forEach(function (b) {
+        var bt = document.createElement('button');
+        bt.type = 'button';
+        bt.className = 'bodybtn' + (b.key === S.labBody ? ' on' : '');
+        bt.textContent = b.title[0].toUpperCase() + b.title.slice(1);
+        bt.onclick = function () { labBody(b.key); };
+        d0.appendChild(bt);
+      });
+      box.appendChild(d0);
+      return;
+    }
     SEC.GROUPS.forEach(function (g, gi) {
       var d = document.createElement('div');
       d.className = 'grp';
@@ -911,6 +1048,65 @@ var SEC = (function () {
     status();
     render();
   }
+  /* ---------- лаборатория ---------- */
+  function labTask() {
+    var g = {};
+    Object.keys(S.labGiven).forEach(function (n) { g[n] = S.labGiven[n].slice(); });
+    return { body: S.labBody, given: g, plane: Object.keys(g) };
+  }
+  function labWhy() {
+    var C = S.cons, n = Object.keys(S.labGiven).length;
+    if (n < 3) show({ cls: 'warn', text: 'Сначала поставь три точки на рёбра: инструмент «Поставить точку».' });
+    else if (C.bad === 'face') show({ cls: 'no', text: 'Все три точки лежат в одной грани, и плоскость совпадает с этой гранью. Передвинь одну из точек на другое ребро.' });
+    else show({ cls: 'no', text: 'Точки лежат на одной прямой, плоскость через них не задаётся. Передвинь одну из точек.' });
+  }
+  function labRebuild() {
+    S.cons = new SEC.Cons(labTask());
+    S.hist = [];
+    S.sel = [];
+    S.hint = null;
+    $('cond').innerHTML = '<b>Лаборатория.</b> ' + SEC.condition(labTask());
+    show(null);
+    if (Object.keys(S.labGiven).length === 3 && !S.cons.goal) labWhy();
+    status();
+    renderLog();
+    render();
+  }
+  function labBody(k) {
+    S.labBody = k;
+    S.labGiven = JSON.parse(JSON.stringify(SEC.LAB[k]));
+    S.showAns = false;
+    labRebuild();
+    nav();
+    setMode('connect');
+  }
+  function setLab(on) {
+    S.lab = on;
+    $('tabTasks').setAttribute('aria-selected', on ? 'false' : 'true');
+    $('tabLab').setAttribute('aria-selected', on ? 'true' : 'false');
+    document.querySelector('.tool[data-mode="place"]').hidden = !on;
+    $('ansBtn').hidden = !on;
+    $('clearPts').hidden = !on;
+    S.showAns = false;
+    $('ansBtn').textContent = 'Показать ответ';
+    if (on) labBody(S.labBody); else { setMode('connect'); load(S.ti); }
+  }
+  $('tabTasks').onclick = function () { setLab(false); };
+  $('tabLab').onclick = function () { setLab(true); };
+  $('ansBtn').onclick = function () {
+    if (!S.cons.goal) { labWhy(); return; }
+    S.showAns = !S.showAns;
+    $('ansBtn').textContent = S.showAns ? 'Скрыть ответ' : 'Показать ответ';
+    render();
+  };
+  $('clearPts').onclick = function () {
+    S.labGiven = {};
+    S.showAns = false;
+    $('ansBtn').textContent = 'Показать ответ';
+    labRebuild();
+    setMode('place');
+  };
+
   function load(i) {
     S.ti = i;
     S.cons = new SEC.Cons(SEC.TASKS[i]);
@@ -932,10 +1128,11 @@ var SEC = (function () {
     S.sel = []; S.hint = null;
     show(null); renderLog(); render();
   };
-  $('restart').onclick = function () { load(S.ti); };
+  $('restart').onclick = function () { if (S.lab) labRebuild(); else load(S.ti); };
   $('hintBtn').onclick = function () {
     var st = S.cons.next();
-    if (!st) { show(S.cons.done() ? { cls: 'fin', text: 'Сечение уже построено.' } : { cls: 'warn', text: 'Отсюда помощник не видит, как продолжить. Нажми «Отменить» или «Заново».' }); return; }
+    if (S.lab && !S.cons.goal) { labWhy(); return; }
+    if (!st) { show(S.cons.done() ? { cls: 'fin', text: 'Сечение уже построено.' } : { cls: 'warn', text: noWay() }); return; }
     S.hint = st;
     show({ cls: 'hint', text: '<b>Подсказка.</b> ' + st.text });
     render();
@@ -951,7 +1148,8 @@ var SEC = (function () {
     var C = S.cons, before = C.snap();
     var ok = C.solve();
     S.sel = [];
-    if (!ok) { after(before, { cls: 'warn', text: 'Отсюда помощник не видит, как закончить. Нажми «Заново».' }); return; }
+    if (S.lab && !C.goal) { labWhy(); return; }
+    if (!ok) { after(before, { cls: 'warn', text: noWay() }); return; }
     S.hist.push(before);
     S.hint = null;
     show({ cls: 'fin', text: 'Вот решение. ' + finTxt() + ' Посмотри ход построения ниже, потом нажми «Заново» и построй сам(а).' });
@@ -963,6 +1161,7 @@ var SEC = (function () {
   /* ссылка на конкретную задачу: sechenia.html#10 */
   var h = parseInt((location.hash || '').slice(1), 10);
   load(h >= 1 && h <= SEC.TASKS.length ? h - 1 : 0);
+  if (location.hash === '#lab') setLab(true);
 })();
 </script>
 </body>
