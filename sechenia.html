@@ -41,6 +41,13 @@ svg.st.pick { cursor: pointer; }
 .s-vis { stroke: var(--sec); stroke-width: 3.2; stroke-linecap: round; fill: none; }
 .s-hid { stroke: var(--sec); stroke-width: 2.2; stroke-dasharray: 7 5; fill: none; }
 .fillsec { fill: var(--sec); fill-opacity: .18; stroke: none; }
+.halo-look { stroke: var(--hint); stroke-opacity: .4; stroke-width: 11; stroke-linecap: round; fill: none; }
+.ph-look { fill: var(--hint); fill-opacity: .4; }
+.facelook { fill: var(--hint); fill-opacity: .16; stroke: var(--hint); stroke-opacity: .5; stroke-width: 1.5; }
+.hv { border-radius: 3px; cursor: default; }
+.hv:hover, .hv.on { background: var(--hint-soft); box-shadow: 0 0 0 2px var(--hint-soft); }
+.log li { border-radius: 4px; padding: 1px 4px; margin-left: -4px; cursor: default; }
+.log li:hover, .log li.on { background: var(--hint-soft); }
 .fillans { fill: var(--hint); fill-opacity: .14; stroke: var(--hint); stroke-width: 1.4; stroke-dasharray: 6 4; }
 .tabs { display: flex; gap: 6px; }
 .tab { font: 600 .95rem "Golos Text", sans-serif; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--line);
@@ -440,9 +447,10 @@ var SEC = (function () {
   /* ---------- тексты ---------- */
   function nm(n) { return String(n).replace(/^([A-Z])(\d+)$/, '$1<sub>$2</sub>'); }
   function M(s) { return '<span class="m">' + s + '</span>'; }
-  function pn(n) { return M(nm(n)); }
-  function pair(a, b) { return M(nm(a) + nm(b)); }
-  Cons.prototype.faceTxt = function (fi) { return M(this.body.faces[fi].v.map(nm).join('')); };
+  /* имена в тексте помечены: при наведении чертёж подсвечивает точку, отрезок или грань */
+  function pn(n) { return '<span class="m hv" data-pt="' + n + '">' + nm(n) + '</span>'; }
+  function pair(a, b) { return '<span class="m hv" data-seg="' + a + ' ' + b + '">' + nm(a) + nm(b) + '</span>'; }
+  Cons.prototype.faceTxt = function (fi) { return '<span class="m hv" data-face="' + fi + '">' + this.body.faces[fi].v.map(nm).join('') + '</span>'; };
   Cons.prototype.lineTxt = function (L) {
     if (L.edge) return 'ребро ' + pair(L.a, L.b);
     if (L.b) return 'прямую ' + pair(L.a, L.b);
@@ -771,6 +779,7 @@ var SEC = (function () {
   }
 
   function render() {
+    if (lookEl && !document.body.contains(lookEl)) { lookEl = null; S.look = null; }
     setupCam();
     while (svg.firstChild) svg.removeChild(svg.firstChild);
     var C = S.cons, B = C.body;
@@ -783,6 +792,18 @@ var SEC = (function () {
     if (C.done()) {
       var poly = C.goal.verts.map(function (p) { var q = pr(p); return q[0].toFixed(1) + ',' + q[1].toFixed(1); }).join(' ');
       el('polygon', { points: poly, 'class': 'fillsec' }, gFill);
+    }
+    var lk = S.look;
+    if (lk) {
+      lk.faces.forEach(function (fi) {
+        var f = B.faces[fi];
+        if (!f) return;
+        var pts = f.v.map(function (n) { var q = pr(B.V[n]); return q[0].toFixed(1) + ',' + q[1].toFixed(1); }).join(' ');
+        el('polygon', { points: pts, 'class': 'facelook' }, gFill);
+      });
+      lk.segs.forEach(function (sg) {
+        if (C.pts[sg[0]] && C.pts[sg[1]]) seg(C.pts[sg[0]].p, C.pts[sg[1]].p, 'halo-look', gHalo);
+      });
     }
     if (S.lab && S.showAns && C.goal && !C.done()) {
       var pa = C.goal.verts.map(function (p) { var q = pr(p); return q[0].toFixed(1) + ',' + q[1].toFixed(1); }).join(' ');
@@ -811,6 +832,7 @@ var SEC = (function () {
     C.order.forEach(function (n) {
       var pt = C.pts[n], P = pr(pt.p);
       if (halo[n]) el('circle', { cx: P[0], cy: P[1], r: 12, 'class': 'ph-' + halo[n] }, gHalo);
+      else if (lk && lk.pts.indexOf(n) >= 0) el('circle', { cx: P[0], cy: P[1], r: 12, 'class': 'ph-look' }, gHalo);
       el('circle', { cx: P[0], cy: P[1], r: pt.kind === 'v' ? 3.6 : 4.6, 'class': 'p-' + pt.kind }, gPts);
       label(n, pt.kind === 'v' ? '' : pt.kind);
     });
@@ -1072,6 +1094,46 @@ var SEC = (function () {
     status();
     render();
   }
+  /* ---------- наведение на имена и строки хода построения ---------- */
+  function lookOf(node) {
+    var lk = { pts: [], segs: [], faces: [] };
+    var all = node.matches('[data-pt],[data-seg],[data-face]') ? [node] : [];
+    all = all.concat([].slice.call(node.querySelectorAll('[data-pt],[data-seg],[data-face]')));
+    all.forEach(function (x) {
+      if (x.dataset.pt) lk.pts.push(x.dataset.pt);
+      if (x.dataset.seg) { var ab = x.dataset.seg.split(' '); lk.segs.push(ab); lk.pts.push(ab[0], ab[1]); }
+      if (x.dataset.face) lk.faces.push(+x.dataset.face);
+    });
+    return lk;
+  }
+  var lookEl = null;
+  function setLook(node) {
+    if (node === lookEl) return;
+    if (lookEl) lookEl.classList.remove('on');
+    lookEl = node;
+    S.look = node ? lookOf(node) : null;
+    if (node && 'ontouchstart' in window) node.classList.add('on');
+    render();
+  }
+  function lookTarget(t) {
+    if (!t || !t.closest) return null;
+    return t.closest('.hv') || t.closest('.log li');
+  }
+  var panel = document.querySelector('.panel');
+  panel.addEventListener('mouseover', function (e) { var t = lookTarget(e.target); if (t) setLook(t); });
+  panel.addEventListener('mouseout', function (e) {
+    if (lookEl && !(e.relatedTarget && lookEl.contains(e.relatedTarget))) {
+      var t = lookTarget(e.relatedTarget);
+      setLook(t || null);
+    }
+  });
+  /* на телефоне: нажатие на имя или строку подсвечивает, повторное нажатие или нажатие мимо убирает */
+  panel.addEventListener('click', function (e) {
+    if (!('ontouchstart' in window)) return;
+    var t = lookTarget(e.target);
+    setLook(t && t !== lookEl ? t : null);
+  });
+
   /* ---------- лаборатория ---------- */
   function labTask() {
     var g = {};
