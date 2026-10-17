@@ -91,6 +91,7 @@ summary { cursor: pointer; font-weight: 600; color: var(--accent); font-size: .9
       <button class="tab" type="button" role="tab" data-tab="inv" aria-selected="false">Обратные функции</button>
       <button class="tab" type="button" role="tab" data-tab="eq" aria-selected="false">Уравнения и неравенства</button>
       <button class="tab" type="button" role="tab" data-tab="id" aria-selected="false">Тождества</button>
+      <button class="tab" type="button" role="tab" data-tab="der" aria-selected="false">Производные</button>
     </div>
     <p class="lead" id="lead"></p>
   </header>
@@ -291,7 +292,8 @@ var TRIG = (function () {
     fn: 'sin', t: PI / 6, snap: 'special', partner: 'none', showAll: false, labels: true,
     inv: 'arcsin', a: 0.5, prop: 'none', x: 2.4, asnap: 'special',
     efn: 'sin', sign: '>', ea: 0.5,
-    idp: 'double', ida: 30, idb: 40, idstep: 0
+    idp: 'double', ida: 30, idb: 40, idstep: 0,
+    dmode: 'vel', dfn: 'sin', dt: PI / 6, dfull: false, d2: false
   };
   try { var saved = JSON.parse(localStorage.getItem('trig-lab') || 'null'); if (saved) for (var k in saved) if (k in S) S[k] = saved[k]; } catch (e) {}
   if (typeof S.a !== 'number') S.a = 0.5;
@@ -993,6 +995,17 @@ var TRIG = (function () {
     if (col) t.setAttribute('fill', col);
     return kk(t, k);
   }
+  /* e со степенью: «e» и показатель поменьше и повыше */
+  function Exp(p, ex, col, k, dx, dy) {
+    var q = pp(p);
+    var t = el('text', { x: (q[0] + (dx || 0)).toFixed(1), y: (q[1] + (dy || 0)).toFixed(1), 'class': 'lbl', 'text-anchor': 'middle', fill: col }, circ);
+    t.appendChild(document.createTextNode('e'));
+    var sp = document.createElementNS(NS, 'tspan');
+    sp.setAttribute('dy', '-9'); sp.setAttribute('font-size', '13');
+    sp.textContent = ex;
+    t.appendChild(sp);
+    return kk(t, k);
+  }
   function Dot(p, col, k, r) { var q = pp(p); return kk(el('circle', { cx: q[0], cy: q[1], r: r || 4.5, fill: col, stroke: '#fff', 'stroke-width': 1.3 }, circ), k); }
   /* дуга угла с вершиной v от направления a0 до a1 (радианы, против часовой), радиус в пикселях */
   function Ang(v, a0, a1, r, col, k, label, lr) {
@@ -1210,7 +1223,58 @@ var TRIG = (function () {
       }
     }
   };
-  var PROOF_LIST = [['pyth', 'sin² + cos² = 1'], ['double', 'двойной угол'], ['dist', 'cos(α − β)'], ['rect', 'сумма: прямоугольник'], ['ptol', 'сумма: Птолемей']];
+  PROOFS.cplx = {
+    title: 'через комплексную экспоненту (для любопытных)', angles: [['a', 'α', 0, 180], ['b', 'β', 0, 180]],
+    draw: function (A) {
+      PV = { ox: 200, oy: 200, s: 140 };
+      var a = A.a * D2R, b = A.b * D2R, O = [0, 0];
+      var Z1 = [Math.cos(a), Math.sin(a)], Z2 = [Math.cos(b), Math.sin(b)], Z = [Math.cos(a + b), Math.sin(a + b)];
+      Axes(1.35); Circle(O, 1);
+      Txt([1.33, 0], 'Re', null, null, 0, -8, 'end', 'tkm');
+      Txt([0, 1.33], 'Im', null, null, 8, 0, 'start', 'tkm');
+      /* корни пятой степени из 1 */
+      var pts = [];
+      for (var k = 0; k < 5; k++) pts.push([Math.cos(2 * PI * k / 5), Math.sin(2 * PI * k / 5)]);
+      Poly(pts, C3, 0.08, 'roots');
+      pts.forEach(function (p, i) { L(p, pts[(i + 1) % 5], C3, 1.6, 'roots'); Dot(p, C3, 'roots', 4.5); });
+      Txt([1, 0], '1', C3, 'roots', 10, 18, 'start');
+      L(O, Z1, C1, 2.2, 'e mul calc'); L(O, Z2, CQ, 2.2, 'e mul calc'); L(O, Z, C2, 2.6, 'mul res');
+      Ang(O, 0, a, 26, C1, 'e', 'α', 40);
+      Ang(O, a, a + b, 1.12 * PV.s, C2, 'mul', '+β', 1.12 * PV.s + 16);
+      Ang(O, 0, b, 52, CQ, 'e', 'β', 64);
+      Dot(Z1, C1, 'e mul calc', 6); Dot(Z2, CQ, 'e mul calc', 6); Dot(Z, C2, 'mul res', 7);
+      Exp(Z1, 'iα', C1, 'e mul', Z1[0] * 22, -Z1[1] * 20 + 6);
+      Exp(Z2, 'iβ', CQ, 'e mul', Z2[0] * 22 + 6, -Z2[1] * 20 + 6);
+      Exp(Z, 'i(α+β)', C2, 'mul res', Z[0] * 30, -Z[1] * 22 + 6);
+      Dot([Math.cos(2 * a), Math.sin(2 * a)], C4, 'dbl', 5);
+      L(O, [Math.cos(2 * a), Math.sin(2 * a)], C4, 1.4, 'dbl', true);
+      Exp([Math.cos(2 * a), Math.sin(2 * a)], '2iα', C4, 'dbl', Math.cos(2 * a) * 24, -Math.sin(2 * a) * 22 + 6);
+    },
+    steps: [
+      ['Договоримся записывать точку плоскости (x; y) как число x + iy, где i² = −1. Точку единичной окружности с углом α запишем как cos α + i sin α. Эйлер заметил, что это число ведёт себя как степень: cos α + i sin α = e<sup>iα</sup>.', 'e'],
+      ['Главное свойство степеней: при умножении показатели складываются. e<sup>iα</sup> · e<sup>iβ</sup> = e<sup>i(α+β)</sup>. На картинке это поворот: умножить на e<sup>iβ</sup> значит повернуть точку на угол β.', 'mul'],
+      ['Теперь перемножим те же числа «в лоб», раскрывая скобки и помня, что i² = −1: (cos α + i sin α)(cos β + i sin β) = (cos α cos β − sin α sin β) + i(sin α cos β + cos α sin β).', 'calc mul'],
+      ['Слева e<sup>i(α+β)</sup> = cos(α + β) + i sin(α + β). Два числа равны, когда равны их «обычные» и «мнимые» части. Получаем сразу обе формулы: cos(α + β) = cos α cos β − sin α sin β и sin(α + β) = sin α cos β + cos α sin β.', 'res'],
+      ['Возьмём β = α: (cos α + i sin α)² = cos 2α + i sin 2α. Раскрыв квадрат, получаем cos 2α = cos²α − sin²α и sin 2α = 2 sin α cos α. А формула Муавра (cos α + i sin α)ⁿ = cos nα + i sin nα даёт любой кратный угол, например cos 3α = 4cos³α − 3cos α.', 'dbl'],
+      ['Применение: уравнение z⁵ = 1 имеет пять корней — вершины правильного пятиугольника на окружности (углы 0°, 72°, 144°, …). Сумма этих пяти чисел равна 0 (пятиугольник симметричен), и из этого получается точное значение cos 72° = (√5 − 1)/4.', 'roots']
+    ],
+    check: function (A) {
+      var a = A.a * D2R, b = A.b * D2R;
+      var re = Math.cos(a) * Math.cos(b) - Math.sin(a) * Math.sin(b), im = Math.sin(a) * Math.cos(b) + Math.cos(a) * Math.sin(b);
+      return M('(cos α + i sin α)(cos β + i sin β) = ' + n3(re) + ' + ' + n3(im) + 'i') + '<br>' + M('cos ' + dg(A.a + A.b) + ' + i sin ' + dg(A.a + A.b) + ' = ' + n3(Math.cos(a + b)) + ' + ' + n3(Math.sin(a + b)) + 'i');
+    },
+    extra: '<details open><summary>Что это за числа и почему экспонента</summary><div style="display:flex;flex-direction:column;gap:6px;padding-top:6px;font-size:.95rem">' +
+      '<div>Комплексное число — это точка плоскости, записанная как <span class="m">x + iy</span>. Складываются они как векторы. А умножаются интереснее: <b>длины перемножаются, углы складываются</b>. Число <span class="m">i</span> — это точка (0; 1): умножить на <span class="m">i</span> значит повернуть на 90°. Поэтому <span class="m">i · i = −1</span>: два поворота на 90° дают разворот.</div>' +
+      '<div>Почему именно экспонента? Вспомни вкладку «Производные»: точка, бегущая по окружности, имеет скорость, перпендикулярную радиусу. «Перпендикулярно радиусу» — это и есть умножение на <span class="m">i</span>. Получается, что производная точки равна самой точке, умноженной на <span class="m">i</span>: <span class="m">z′ = i·z</span>. А функция, производная которой пропорциональна ей самой, — экспонента. Отсюда <span class="m">z = e<sup>it</sup></span>.</div>' +
+      '<div>При <span class="m">α = π</span> получаем знаменитое <span class="m">e<sup>iπ</sup> + 1 = 0</span>: в одной формуле пять главных чисел математики.</div></div></details>' +
+      '<details><summary>Где это применяется</summary><ul class="try" style="padding-left:1.2em">' +
+      '<li>Тригонометрия: формулы кратных углов, точные значения вроде cos 72°, суммы sin x + sin 2x + … + sin nx.</li>' +
+      '<li>Электротехника: переменный ток описывают вращающимся вектором e<sup>iωt</sup>. Амплитуда — длина, фаза — угол, и сложные цепи считаются простой алгеброй.</li>' +
+      '<li>Звук и сигналы: любой звук раскладывается в сумму вращающихся векторов (преобразование Фурье). Так работают сжатие в MP3, шумоподавление, эквалайзер.</li>' +
+      '<li>Компьютерная графика и игры: повороты на плоскости — это умножение на e<sup>iα</sup>.</li>' +
+      '<li>Физика: колебания, волны, квантовая механика — там комплексные числа основной язык.</li></ul></details>'
+  };
+  var PROOF_LIST = [['pyth', 'sin² + cos² = 1'], ['double', 'двойной угол'], ['dist', 'cos(α − β)'], ['rect', 'сумма: прямоугольник'], ['ptol', 'сумма: Птолемей'], ['cplx', 'сумма: комплексные (для любопытных)']];
 
   function idControls() {
     var c = $('ctl');
@@ -1261,7 +1325,7 @@ var TRIG = (function () {
     });
     h += '</ol><div class="ctl"><button class="tab" type="button" id="idPrev">Назад</button><button class="tab" type="button" id="idNext">Дальше</button>' +
       '<button class="tab" type="button" id="idAll">' + (st < 0 ? 'По шагам' : 'Показать всё сразу') + '</button></div>';
-    h += '<div class="chk ok"><b>Проверка на числах:</b> ' + Pf.check(A) + '</div>';
+    h += '<div class="chk ok"><b>Проверка на числах:</b> ' + Pf.check(A) + '</div>' + (Pf.extra || '');
     $('read').innerHTML = h;
     $('idPrev').onclick = function () { S.idstep = Math.max(0, (S.idstep < 0 ? 0 : st) - 1); redraw(); };
     $('idNext').onclick = function () { S.idstep = Math.min(Pf.steps.length - 1, (S.idstep < 0 ? -1 : st) + 1); redraw(); };
@@ -1295,11 +1359,140 @@ var TRIG = (function () {
     }
   }
 
+  /* =====================================================================
+     Вкладка 5. Производные: скорость точки, касательная, площадь
+     ===================================================================== */
+  var DF = {
+    sin: { f: Math.sin, d1: Math.cos, d2: function (x) { return -Math.sin(x); }, F: function (x) { return 1 - Math.cos(x); }, d1t: 'cos t', d2t: '−sin t', Ft: '1 − cos t' },
+    cos: { f: Math.cos, d1: function (x) { return -Math.sin(x); }, d2: function (x) { return -Math.cos(x); }, F: Math.sin, d1t: '−sin t', d2t: '−cos t', Ft: 'sin t' },
+    tg: { f: T.F.tg, d1: function (x) { var c = Math.cos(x); return Math.abs(c) < 1e-9 ? NaN : 1 / (c * c); }, d2: function (x) { var c = Math.cos(x); return Math.abs(c) < 1e-9 ? NaN : 2 * Math.sin(x) / (c * c * c); }, d1t: '1/cos² t', d2t: '2 sin t / cos³ t' }
+  };
+  function arrowC(a, b, col, w, g) {
+    var A = cp(a[0], a[1]), B = cp(b[0], b[1]), dx = B[0] - A[0], dy = B[1] - A[1], l = Math.hypot(dx, dy);
+    if (l < 2) return;
+    var ux = dx / l, uy = dy / l, hs = 10;
+    el('line', { x1: A[0], y1: A[1], x2: B[0] - ux * hs * 0.6, y2: B[1] - uy * hs * 0.6, stroke: col, 'stroke-width': w || 3, 'stroke-linecap': 'round' }, g || circ);
+    el('path', { d: 'M' + B[0] + ' ' + B[1] + 'L' + (B[0] - ux * hs - uy * hs * 0.5) + ' ' + (B[1] - uy * hs + ux * hs * 0.5) + 'L' + (B[0] - ux * hs + uy * hs * 0.5) + ' ' + (B[1] - uy * hs - ux * hs * 0.5) + 'Z', fill: col }, g || circ);
+  }
+  function derControls() {
+    var c = $('ctl');
+    c.innerHTML = '';
+    segCtl(c, [['vel', 'скорость точки'], ['tan', 'касательная'], ['area', 'площадь']], S.dmode, '', function (v) { S.dmode = v; if (v !== 'tan' && S.dfn === 'tg') S.dfn = 'sin'; drawAll(); });
+    segCtl(c, S.dmode === 'tan' ? [['sin', 'sin'], ['cos', 'cos'], ['tg', 'tg']] : [['sin', 'sin'], ['cos', 'cos']], S.dfn, 'fn', function (v) { S.dfn = v; drawAll(); });
+    if (S.dmode !== 'area') chkCtl(c, 'весь график производной', S.dfull, function (v) { S.dfull = v; redraw(); });
+    if (S.dmode === 'tan') chkCtl(c, 'вторая производная', S.d2, function (v) { S.d2 = v; redraw(); });
+    var cc = $('circCtl');
+    cc.innerHTML = '';
+    selCtl(cc, 'Шаг угла:', [['special', 'углы π/6 и π/4'], ['pi12', 'π/12'], ['free', 'свободно']], S.snap, function (v) { S.snap = v; redraw(); });
+    chkCtl(cc, 'подписи углов', S.labels, function (v) { S.labels = v; redraw(); });
+  }
+  function drawDer() {
+    var t = S.dt, fn = S.dfn, D = DF[fn], col = COL[fn], mode = S.dmode;
+    var dcol = fn === 'sin' ? COL.cos : fn === 'cos' ? COL.sin : 'var(--q)';
+    circleBase();
+    var P = [Math.cos(t), Math.sin(t)];
+    $('circHint').textContent = 'Тяни точку по окружности или по графику. Клавиши ← → двигают угол.';
+    if (mode === 'vel') {
+      var v = [-Math.sin(t), Math.cos(t)], k = 0.8, E = [P[0] + v[0] * k, P[1] + v[1] * k];
+      cline(0, 0, P[0], P[1], { stroke: 'var(--ink)', 'stroke-width': 1.8 });
+      /* проекции скорости: вертикальная — скорость изменения sin, горизонтальная — cos */
+      cline(E[0], E[1], E[0], P[1], { stroke: 'var(--muted)', 'stroke-width': 1, 'class': 'dash' });
+      cline(E[0], E[1], P[0], E[1], { stroke: 'var(--muted)', 'stroke-width': 1, 'class': 'dash' });
+      if (fn === 'sin') arrowC(P, [P[0], E[1]], COL.cos, 3.4); else arrowC(P, [E[0], P[1]], COL.sin, 3.4);
+      arrowC(P, E, 'var(--accent)', 3);
+      var q = cp(P[0], P[1]), s1 = 9, r1 = [-P[0], -P[1]], r2 = v;
+      el('path', { d: 'M' + (q[0] + r1[0] * s1) + ' ' + (q[1] - r1[1] * s1) + 'L' + (q[0] + (r1[0] + r2[0]) * s1) + ' ' + (q[1] - (r1[1] + r2[1]) * s1) + 'L' + (q[0] + r2[0] * s1) + ' ' + (q[1] - r2[1] * s1), stroke: 'var(--ink)', 'stroke-width': 1.2, fill: 'none' }, circ);
+      cdot(P[0], P[1], 'var(--ink)', 7);
+      ctext(E[0] + v[0] * 0.12, E[1] + v[1] * 0.12 - 0.03, 'v', 'lbl', 'var(--accent)');
+      angleSpiral(t, 'var(--ink)');
+    } else {
+      drawFnOnCircle(fn === 'tg' ? 'tg' : fn, t, col, true);
+      cline(0, 0, P[0], P[1], { stroke: 'var(--ink)', 'stroke-width': 1.8 });
+      cdot(P[0], P[1], 'var(--ink)', 7);
+      angleSpiral(t, 'var(--ink)');
+    }
+    setView(-2 * PI - 0.45, 2 * PI + 0.45, -2.4, 2.4);
+    graphBase();
+    var f0 = D.f(t), k1 = D.d1(t);
+    if (mode === 'area') {
+      /* площадь со знаком от 0 до t */
+      var a0 = Math.min(0, t), a1 = Math.max(0, t), n = Math.max(2, Math.ceil((a1 - a0) * G.sc / 2));
+      var pos = [], neg = [];
+      for (var i = 0; i <= n; i++) {
+        var x = a0 + (a1 - a0) * i / n, y = D.f(x), p0 = gp(x, 0), p1 = gp(x, y);
+        (y >= 0 ? pos : neg).push([x, y]);
+        el('line', { x1: p0[0], y1: p0[1], x2: p1[0], y2: p1[1], stroke: y >= 0 ? 'var(--ok)' : 'var(--no)', 'stroke-width': Math.max(1.2, (a1 - a0) * G.sc / n + 0.6), 'stroke-opacity': 0.28 }, graph);
+      }
+      plot(D.f, G.x0, G.x1, { stroke: col, 'stroke-width': 2.6 });
+      plot(D.F, a0, a1, { stroke: 'var(--ctg)', 'stroke-width': 2.4 });
+      plot(D.F, G.x0, G.x1, { stroke: 'var(--ctg)', 'stroke-width': 1.2, opacity: 0.25, 'stroke-dasharray': '4 4' });
+      gline(t, 0, t, f0, { stroke: col, 'stroke-width': 1.3, 'class': 'dash' });
+      gdot(t, f0, col, 6);
+      gdot(t, D.F(t), 'var(--ctg)', 7);
+      gtext(G.x0 + 0.1, G.y0 + 0.2, 'фиолетовая линия: накопленная площадь F(t) = ' + D.Ft, 'tk', 'var(--ctg)', 'start');
+      var Fv = D.F(t);
+      var h = '<div class="big">' + M('<i>t</i> = ' + T.ang(t)) + ', &nbsp; ' + M('площадь от 0 до <i>t</i> = ' + D.Ft.replace(/t/g, '<i>t</i>') + ' = ' + T.num(Fv)) + '</div>';
+      h += '<div class="chk info">Зелёная площадь над осью считается со знаком плюс, красная под осью — с минусом. ' +
+        (fn === 'sin' ? 'Под одной «аркой» синуса (от 0 до π) площадь ровно ' + M('2') + '. За полный период плюс и минус гасят друг друга: ' + M('0') + '.' : 'От 0 до π/2 площадь под косинусом ровно ' + M('1') + '.') + '</div>';
+      h += '<div class="chk ok">Посмотри на наклон фиолетовой линии: он в каждой точке равен высоте исходного графика. Площадь растёт быстрее там, где график выше. Это и есть связь: ' + M('<i>F</i>′(<i>t</i>) = ' + fn + ' <i>t</i>') + ', то есть площадь — первообразная.</div>';
+      $('read').innerHTML = h;
+      setTry([
+        'Найди t, при котором площадь под синусом от 0 до t равна 1. Почему это π/2?',
+        'Где фиолетовая линия растёт быстрее всего? Где она стоит на месте (горизонтальна)?',
+        'Почему площадь под синусом от 0 до 2π равна 0, хотя «закрашено» много?',
+        'Сравни фиолетовую линию для cos с графиком синуса. Что замечаешь?'
+      ]);
+      return;
+    }
+    /* производная: вычерчивается до t (или целиком) */
+    var from = S.dfull ? G.x1 : t;
+    plot(D.f, G.x0, G.x1, { stroke: col, 'stroke-width': 2.6 });
+    plot(D.d1, G.x0, from, { stroke: dcol, 'stroke-width': 2.4, 'stroke-dasharray': '7 4' });
+    if (S.d2 && mode === 'tan') plot(D.d2, G.x0, S.dfull ? G.x1 : t, { stroke: 'var(--ctg)', 'stroke-width': 1.8, 'stroke-dasharray': '2 4' });
+    if (mode === 'tan' && isFinite(f0) && isFinite(k1) && Math.abs(f0) < 3) {
+      var dx = 1.4 / Math.sqrt(1 + k1 * k1);
+      gline(t - dx, f0 - k1 * dx, t + dx, f0 + k1 * dx, { stroke: 'var(--ink)', 'stroke-width': 1.8 });
+      if (Math.abs(k1) < 2.3) {
+        gline(t, f0, t + 1, f0, { stroke: 'var(--muted)', 'stroke-width': 1.2 });
+        gline(t + 1, f0, t + 1, f0 + k1, { stroke: dcol, 'stroke-width': 2.6 });
+        gtext(t + 0.5, f0, '1', 'tk', null, 'middle', k1 > 0 ? 15 : -5);
+        gtext(t + 1.08, f0 + k1 / 2, 'k', 'lbl', dcol, 'start', 5);
+      }
+    }
+    if (mode === 'vel') gline(t, 0, t, isFinite(k1) ? k1 : 0, { stroke: dcol, 'stroke-width': 3 });
+    if (isFinite(f0) && Math.abs(f0) < G.y1) gdot(t, f0, col, 7);
+    if (isFinite(k1) && Math.abs(k1) < G.y1) gdot(t, k1, dcol, 6);
+    gline(t, G.y0, t, G.y1, { stroke: 'var(--muted)', 'stroke-width': 0.8, 'stroke-dasharray': '2 4' });
+    var h2 = '<div class="big">' + M('<i>t</i> = ' + T.ang(t)) + ', &nbsp; ' + M(fn + ' <i>t</i> = ' + (isFinite(f0) ? T.num(f0) : 'не существует')) + ', &nbsp; ' + M('(' + fn + ' <i>t</i>)′ = ' + D.d1t.replace(/t/g, '<i>t</i>') + ' = ' + (isFinite(k1) ? T.num(k1) : 'не существует')) + '</div>';
+    if (mode === 'vel') {
+      h2 += '<div class="chk info">Точка ' + M('<i>P</i> = (cos <i>t</i>; sin <i>t</i>)') + ' бежит по окружности со скоростью 1. Вектор скорости ' + M('<i>v</i>') + ' касается окружности, то есть перпендикулярен радиусу: ' + M('<i>v</i> = (−sin <i>t</i>; cos <i>t</i>)') + '.</div>';
+      h2 += '<div class="chk ok">' + (fn === 'sin' ? 'Ордината точки — это sin t. Она меняется со скоростью, равной вертикальной составляющей вектора скорости, то есть cos t. Поэтому ' + M('(sin <i>t</i>)′ = cos <i>t</i>') + '. Пунктир на графике — это cos t: он положителен, пока точка поднимается, и отрицателен, пока опускается.' :
+        'Абсцисса точки — это cos t. Она меняется со скоростью, равной горизонтальной составляющей вектора скорости, то есть −sin t. Поэтому ' + M('(cos <i>t</i>)′ = −sin <i>t</i>') + '. В верхней половине окружности точка идёт влево, абсцисса уменьшается: производная отрицательна.') + '</div>';
+    } else {
+      h2 += '<div class="chk info">Чёрная прямая — касательная к графику. Её наклон ' + M('<i>k</i>') + ' (на сколько она поднимается при шаге 1 вправо) и есть значение производной. Двигай точку: пунктирная линия рисует наклон в каждой точке, и получается график производной.</div>';
+      if (fn === 'tg') h2 += '<div class="chk ok">У тангенса наклон всегда положителен и не меньше 1: ' + M('1/cos² <i>t</i> ≥ 1') + '. Около асимптот касательная становится почти вертикальной, и производная уходит в бесконечность.</div>';
+      else h2 += '<div class="chk ok">' + (fn === 'sin' ? 'На вершинах синуса касательная горизонтальна, производная 0: там cos t = 0. Пунктир повторяет косинус: ' + M('(sin <i>t</i>)′ = cos <i>t</i>') + '.' : 'Пунктир получился перевёрнутым синусом: ' + M('(cos <i>t</i>)′ = −sin <i>t</i>') + '.') + (S.d2 ? ' Вторая производная (точечная линия) равна ' + M(D.d2t.replace(/t/g, '<i>t</i>')) + ': функция с обратным знаком.' : '') + '</div>';
+    }
+    $('read').innerHTML = h2;
+    setTry(mode === 'vel' ? [
+      'Где точка P поднимается быстрее всего? Где на мгновение перестаёт подниматься? Сверь с пунктиром на графике.',
+      'Переключи на cos. В какой четверти абсцисса растёт?',
+      'Почему вектор скорости всегда перпендикулярен радиусу? (Подсказка: касательная к окружности.)',
+      'Загляни во вкладку «Тождества», доказательство через комплексную экспоненту: там этот же перпендикуляр превращается в умножение на i.'
+    ] : [
+      'Найди на графике синуса все точки, где касательная горизонтальна. Какие это t?',
+      'Где наклон касательной к синусу максимален? Чему он равен?',
+      'Включи вторую производную у синуса. Как она связана с самим синусом? Где синус «выпуклый вверх»?',
+      'Для tg найди точку с самым маленьким наклоном. Почему наклон тангенса нигде не меньше 1?'
+    ]);
+  }
+
   /* ---------- общая отрисовка ---------- */
   var LEADS = {
     fn: 'Угол t откладывается на единичной окружности. Синус — ордината точки, косинус — абсцисса, тангенс и котангенс читаются на своих осях. Справа тот же угол на графике.',
     inv: 'Арк-функция по значению a находит угол. Таких углов бесконечно много, поэтому берут один, из промежутка главных значений: он выделен на окружности. Справа видно, что график обратной функции симметричен куску исходного графика относительно прямой y = x.',
     eq: 'Уравнение и неравенство решаются одной картинкой: на окружности отмечаем точки или дугу, на графике — промежутки оси x. Ответ записан сериями с n ∈ ℤ.',
+    der: 'Производная — это скорость изменения. Точка на окружности бежит, её координаты меняются, и скорость этого изменения видна прямо на чертеже. На графике производная — наклон касательной, а площадь под графиком связана с первообразной.',
     id: 'Откуда берутся формулы: доказательства на картинках. Иди по шагам, каждый шаг подсвечивает свою часть чертежа. Углы можно менять: картинка перестраивается, а равенство остаётся верным.'
   };
   function drawAll() {
@@ -1308,12 +1501,13 @@ var TRIG = (function () {
     if (S.tab === 'fn') { fnControls(); drawFn(); }
     else if (S.tab === 'inv') { invControls(); drawInv(); }
     else if (S.tab === 'eq') { eqControls(); drawEq(); }
+    else if (S.tab === 'der') { derControls(); drawDer(); }
     else { idControls(); drawId(); }
     graph.style.display = S.tab === 'id' ? 'none' : '';
     save();
   }
   function redraw() {
-    if (S.tab === 'fn') drawFn(); else if (S.tab === 'inv') drawInv(); else if (S.tab === 'eq') drawEq(); else drawId();
+    if (S.tab === 'fn') drawFn(); else if (S.tab === 'inv') drawInv(); else if (S.tab === 'eq') drawEq(); else if (S.tab === 'der') drawDer(); else drawId();
     save();
   }
   document.querySelectorAll('.tab').forEach(function (b) { b.onclick = function () { S.tab = b.dataset.tab; drawAll(); }; });
@@ -1325,6 +1519,13 @@ var TRIG = (function () {
   }
   function onCircle(e) {
     if (S.tab === 'id') return;
+    if (S.tab === 'der') {
+      var pd = svgPt(circ, e), th2 = Math.atan2((CY - pd[1]) / R, (pd[0] - CX) / R);
+      S.dt = clamp(snapAngle(unwrap(th2, S.dt)), -2 * PI, 2 * PI);
+      if (S.dmode === 'area') S.dt = clamp(S.dt, -2 * PI, 2 * PI);
+      redraw();
+      return;
+    }
     var p = svgPt(circ, e), x = (p[0] - CX) / R, y = (CY - p[1]) / R, th = Math.atan2(y, x);
     if (S.tab === 'fn' || (S.tab === 'inv' && S.prop === 'comp')) {
       var key = S.tab === 'fn' ? 't' : 'x';
@@ -1347,6 +1548,7 @@ var TRIG = (function () {
   }
   function onGraph(e) {
     var p = svgPt(graph, e), x = p[0] / G.sc + G.x0, y = G.y1 - p[1] / G.sc;
+    if (S.tab === 'der') { S.dt = clamp(snapAngle(x), -2 * PI, 2 * PI); redraw(); return; }
     if (S.tab === 'fn') S.t = clamp(snapAngle(x), -TMAX, TMAX);
     else if (S.tab === 'inv') {
       if (S.prop === 'comp') S.x = clamp(snapAngle(x), -TMAX, TMAX);
@@ -1364,6 +1566,7 @@ var TRIG = (function () {
       var d = e.key === 'ArrowRight' || e.key === 'ArrowUp' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowDown' ? -1 : 0;
       if (!d || S.tab === 'id') return;
       e.preventDefault();
+      if (S.tab === 'der') { S.dt = clamp(S.dt + d * PI / 12, -2 * PI, 2 * PI); redraw(); return; }
       if (S.tab === 'fn' || (S.tab === 'inv' && S.prop === 'comp')) {
         var key = S.tab === 'fn' ? 't' : 'x';
         S[key] = clamp(S[key] + d * PI / 12, -TMAX, TMAX);
@@ -1412,7 +1615,7 @@ var TRIG = (function () {
   }
 
   var hash = (location.hash || '').slice(1);
-  if (hash === 'fn' || hash === 'inv' || hash === 'eq' || hash === 'id') S.tab = hash;
+  if (hash === 'fn' || hash === 'inv' || hash === 'eq' || hash === 'id' || hash === 'der') S.tab = hash;
   drawAll();
 })();
 </script>
