@@ -1,0 +1,1001 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тригонометрическая лаборатория</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f7f9fb; --paper: #fff; --grid: #e6edf3; --ink: #17232d; --muted: #5d6d79; --line: #d5dee6; --faint: #c3ced7;
+  --accent: #1f6f8b; --accent-soft: #e3f0f5;
+  --sin: #d0532e; --cos: #1f63c9; --tg: #2f8a46; --ctg: #7a4fc4; --q: #c4880a;
+  --ok: #2f7d4f; --ok-soft: #e4f3ea; --no: #b5452f; --no-soft: #fbe9e4; --sol: #e8590c; --sol-soft: #ffe8d9;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; padding: 24px 16px 60px; color: var(--ink); background: var(--bg);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px; font: 16px/1.55 "Golos Text", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.wrap { max-width: 1280px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+h1 { margin: 0; font-size: clamp(1.5rem, 4vw, 2.1rem); line-height: 1.2; }
+.lead { margin: 0; color: var(--muted); max-width: 80ch; }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.tab { font: 600 .95rem "Golos Text", sans-serif; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--paper); color: var(--ink); cursor: pointer; }
+.tab:hover, .tab:focus-visible { border-color: var(--accent); outline: none; }
+.tab[aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.sheet { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: clamp(14px, 3vw, 22px);
+  display: grid; grid-template-columns: minmax(0, 400px) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 900px) { .sheet { grid-template-columns: minmax(0, 1fr); } }
+.colL, .colR { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+svg.fig { width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 8px; background: var(--paper);
+  touch-action: none; user-select: none; -webkit-user-select: none; cursor: crosshair; }
+svg.fig:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ctl { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.ctl > label, .ctl > span.lbl { font-size: .9rem; color: var(--muted); display: inline-flex; gap: 6px; align-items: center; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; flex-wrap: wrap; }
+.seg button { font: 600 .9rem "Golos Text", sans-serif; padding: 6px 11px; border: 0; border-right: 1px solid var(--line);
+  background: var(--paper); color: var(--ink); cursor: pointer; }
+.seg button:last-child { border-right: 0; }
+.seg button:hover { background: var(--accent-soft); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+.seg.fn button[data-v="sin"][aria-pressed="true"], .seg.fn button[data-v="arcsin"][aria-pressed="true"] { background: var(--sin); }
+.seg.fn button[data-v="cos"][aria-pressed="true"], .seg.fn button[data-v="arccos"][aria-pressed="true"] { background: var(--cos); }
+.seg.fn button[data-v="tg"][aria-pressed="true"], .seg.fn button[data-v="arctg"][aria-pressed="true"] { background: var(--tg); }
+.seg.fn button[data-v="ctg"][aria-pressed="true"], .seg.fn button[data-v="arcctg"][aria-pressed="true"] { background: var(--ctg); }
+select { font: 500 .9rem "Golos Text", sans-serif; padding: 5px 8px; border-radius: 6px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); }
+input[type="checkbox"] { accent-color: var(--accent); }
+.read { border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; font-size: .98rem; }
+.read .big { font-size: 1.12rem; font-weight: 600; }
+.vals { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+@media (max-width: 520px) { .vals { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.val { border-radius: 6px; padding: 6px 8px; background: var(--bg); border-left: 3px solid var(--line); }
+.val b { display: block; font-size: .78rem; color: var(--muted); font-weight: 600; }
+.val.sin { border-color: var(--sin); } .val.cos { border-color: var(--cos); } .val.tg { border-color: var(--tg); } .val.ctg { border-color: var(--ctg); }
+.val.on { background: var(--accent-soft); }
+.chk { border-radius: 6px; padding: 8px 12px; }
+.chk.ok { background: var(--ok-soft); border-left: 3px solid var(--ok); }
+.chk.no { background: var(--no-soft); border-left: 3px solid var(--no); }
+.chk.info { background: var(--accent-soft); border-left: 3px solid var(--accent); }
+.ans { background: var(--sol-soft); border-left: 3px solid var(--sol); border-radius: 6px; padding: 10px 14px; font-size: 1.05rem; }
+.m { font-family: "Times New Roman", Times, serif; font-size: 1.12em; white-space: nowrap; }
+.m i { font-style: italic; }
+details { border-top: 1px dashed var(--line); padding-top: 8px; }
+summary { cursor: pointer; font-weight: 600; color: var(--accent); font-size: .95rem; }
+.try { margin: 8px 0 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 6px; font-size: .95rem; }
+.hint { color: var(--muted); font-size: .88rem; margin: 0; }
+/* чертежи */
+.ax { stroke: var(--muted); stroke-width: 1.2; }
+.gr { stroke: var(--grid); stroke-width: 1; }
+.circ { stroke: var(--ink); stroke-width: 1.8; fill: none; }
+.tk { font: 13px "Golos Text", sans-serif; fill: var(--muted); }
+.tkm { font: italic 15px "Times New Roman", serif; fill: var(--muted); }
+.lbl { font: italic 18px "Times New Roman", serif; fill: var(--ink); paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round; }
+.dot { stroke: #fff; stroke-width: 1.5; }
+.thin { stroke-width: 1.2; fill: none; }
+.dash { stroke-dasharray: 5 4; }
+.faint { stroke: var(--faint); stroke-width: 1.6; fill: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header style="display:flex;flex-direction:column;gap:10px">
+    <h1>Тригонометрическая лаборатория</h1>
+    <div class="tabs" role="tablist">
+      <button class="tab" type="button" role="tab" data-tab="fn" aria-selected="true">Функции</button>
+      <button class="tab" type="button" role="tab" data-tab="inv" aria-selected="false">Обратные функции</button>
+      <button class="tab" type="button" role="tab" data-tab="eq" aria-selected="false">Уравнения и неравенства</button>
+    </div>
+    <p class="lead" id="lead"></p>
+  </header>
+
+  <section class="sheet">
+    <div class="colL">
+      <svg class="fig" id="circ" viewBox="0 0 400 400" tabindex="0" role="img" aria-label="Единичная окружность"></svg>
+      <p class="hint" id="circHint"></p>
+      <div class="ctl" id="circCtl"></div>
+    </div>
+    <div class="colR">
+      <div class="ctl" id="ctl"></div>
+      <svg class="fig" id="graph" viewBox="0 0 640 260" tabindex="0" role="img" aria-label="График"></svg>
+      <div class="read" id="read"></div>
+      <details id="tryBox">
+        <summary>Что попробовать</summary>
+        <ol class="try" id="try"></ol>
+      </details>
+    </div>
+  </section>
+</div>
+
+<script>
+/*LOGIC-START*/
+var TRIG = (function () {
+  var PI = Math.PI, EPS = 1e-9;
+  var S3 = Math.sqrt(3);
+  var SPECIAL = [[0, '0'], [0.5, '1/2'], [Math.SQRT2 / 2, '√2/2'], [S3 / 2, '√3/2'], [1, '1'], [S3 / 3, '√3/3'], [S3, '√3'], [2, '2'], [1.5, '1,5'], [0.25, '0,25']];
+  /* «главные» значения a для обратных функций и уравнений */
+  var A_SIN = [-1, -S3 / 2, -Math.SQRT2 / 2, -0.5, 0, 0.5, Math.SQRT2 / 2, S3 / 2, 1];
+  var A_TG = [-S3, -1, -S3 / 3, 0, S3 / 3, 1, S3];
+
+  function gcd(a, b) { return b ? gcd(b, a % b) : a; }
+  function minus(s) { return String(s).replace(/-/g, '−'); }
+  function exactNum(v) {
+    for (var i = 0; i < SPECIAL.length; i++) if (Math.abs(Math.abs(v) - SPECIAL[i][0]) < 1e-9) return (v < -EPS ? '−' : '') + SPECIAL[i][1];
+    return null;
+  }
+  function num(v) {
+    var e = exactNum(v);
+    if (e) return e;
+    var r = Math.round(v * 1000) / 1000;
+    return minus(String(r).replace('.', ','));
+  }
+  /* угол — кратный π/12 записываем через π */
+  function piTxt(t) {
+    var k = t / (PI / 12);
+    if (Math.abs(k - Math.round(k)) > 1e-7) return null;
+    k = Math.round(k);
+    if (k === 0) return '0';
+    var g = gcd(Math.abs(k), 12), p = k / g, q = 12 / g;
+    return (p < 0 ? '−' : '') + (Math.abs(p) === 1 ? '' : Math.abs(p)) + 'π' + (q === 1 ? '' : '/' + q);
+  }
+  function ang(t) { return piTxt(t) || num(t); }
+  function deg(t) { return minus(String(Math.round(t * 180 / PI * 10) / 10).replace('.', ',')) + '°'; }
+
+  var F = {
+    sin: function (x) { return Math.sin(x); },
+    cos: function (x) { return Math.cos(x); },
+    tg: function (x) { return Math.abs(Math.cos(x)) < 1e-9 ? NaN : Math.tan(x); },
+    ctg: function (x) { return Math.abs(Math.sin(x)) < 1e-9 ? NaN : Math.cos(x) / Math.sin(x); }
+  };
+  var INV = {
+    arcsin: { base: 'sin', f: Math.asin, dom: [-1, 1], rng: [-PI / 2, PI / 2], closed: true, A: A_SIN },
+    arccos: { base: 'cos', f: Math.acos, dom: [-1, 1], rng: [0, PI], closed: true, A: A_SIN },
+    arctg: { base: 'tg', f: Math.atan, dom: [-4, 4], rng: [-PI / 2, PI / 2], closed: false, A: A_TG },
+    arcctg: { base: 'ctg', f: function (a) { return PI / 2 - Math.atan(a); }, dom: [-4, 4], rng: [0, PI], closed: false, A: A_TG }
+  };
+  function val(fn, t) {
+    var v = F[fn](t);
+    return isNaN(v) ? 'не существует' : num(v);
+  }
+
+  /* вторая точка: F(партнёр) = знак · G(t) */
+  var PARTNERS = {
+    'neg': { lab: '−t', f: function (t) { return -t; }, rel: { sin: [-1, 'sin'], cos: [1, 'cos'], tg: [-1, 'tg'], ctg: [-1, 'ctg'] },
+      why: { sin: 'синус нечётный', cos: 'косинус чётный', tg: 'тангенс нечётный', ctg: 'котангенс нечётный' }, sym: 'Ox' },
+    'pi-t': { lab: 'π − t', f: function (t) { return PI - t; }, rel: { sin: [1, 'sin'], cos: [-1, 'cos'], tg: [-1, 'tg'], ctg: [-1, 'ctg'] }, sym: 'Oy' },
+    'pi+t': { lab: 'π + t', f: function (t) { return PI + t; }, rel: { sin: [-1, 'sin'], cos: [-1, 'cos'], tg: [1, 'tg'], ctg: [1, 'ctg'] }, sym: 'O' },
+    'pi2-t': { lab: 'π/2 − t', f: function (t) { return PI / 2 - t; }, rel: { sin: [1, 'cos'], cos: [1, 'sin'], tg: [1, 'ctg'], ctg: [1, 'tg'] }, sym: 'y=x' },
+    'pi2+t': { lab: 'π/2 + t', f: function (t) { return PI / 2 + t; }, rel: { sin: [1, 'cos'], cos: [-1, 'sin'], tg: [-1, 'ctg'], ctg: [-1, 'tg'] }, sym: 'rot' },
+    '2pi': { lab: 't + 2π', f: function (t) { return t + 2 * PI; }, rel: { sin: [1, 'sin'], cos: [1, 'cos'], tg: [1, 'tg'], ctg: [1, 'ctg'] }, sym: 'same' },
+    'pi': { lab: 't + π', f: function (t) { return t + PI; }, rel: { tg: [1, 'tg'], ctg: [1, 'ctg'], sin: [-1, 'sin'], cos: [-1, 'cos'] }, sym: 'O' }
+  };
+  /* проверка свойства: {lhs, rhs, ok, text} */
+  function partnerCheck(fn, key, t) {
+    var P = PARTNERS[key], r = P.rel[fn], u = P.f(t);
+    var L = F[fn](u), Rv = F[r[1]](t) * r[0];
+    var lhsName = fn + '(' + P.lab + ')', rhsName = (r[0] < 0 ? '−' : '') + r[1] + ' t';
+    var ex = !isNaN(L), ex2 = !isNaN(Rv);
+    var ok = (!ex && !ex2) || (ex && ex2 && Math.abs(L - Rv) < 1e-9);
+    return { lhs: lhsName, rhs: rhsName, L: ex ? num(L) : 'не существует', R: ex2 ? num(Rv) : 'не существует', ok: ok, both: ex && ex2 };
+  }
+
+  /* ---------- уравнения и неравенства ----------
+     возвращает {none|all|series:[…], intervals:[…]} и текст ответа */
+  function arcTerm(inv, a) {
+    var v = INV[inv].f(a), p = piTxt(v);
+    return { v: v, exact: p !== null, txt: p !== null ? p : inv + ' ' + num(a) };
+  }
+  /* c·π + s·arc */
+  function comb(c, s, A) {
+    var v = c * PI + s * A.v;
+    if (A.exact) return { v: v, txt: piTxt(v) };
+    var head = c === 0 ? '' : (c === 1 ? 'π' : c === -1 ? '−π' : minus(c) + 'π');
+    var t = head + (s < 0 ? (head ? ' − ' : '−') : (head ? ' + ' : '')) + A.txt;
+    return { v: v, txt: t };
+  }
+  function series(x, step) { return x.txt === '0' ? (step === 1 ? 'πn' : '2πn') : x.txt + ' + ' + (step === 1 ? 'πn' : '2πn'); }
+  function solve(fn, sign, a) {
+    var strict = sign === '>' || sign === '<', gt = sign === '>' || sign === '≥';
+    var res = { fn: fn, sign: sign, a: a };
+    var lo, hi, A;
+    if (fn === 'sin' || fn === 'cos') {
+      if (sign === '=') {
+        if (Math.abs(a) > 1 + EPS) return done(res, 'Решений нет: ' + fn + ' x принимает значения только от −1 до 1.');
+        if (fn === 'sin') {
+          if (Math.abs(a - 1) < EPS) return done(res, 'x = π/2 + 2πn', [[PI / 2, 2]]);
+          if (Math.abs(a + 1) < EPS) return done(res, 'x = −π/2 + 2πn', [[-PI / 2, 2]]);
+          if (Math.abs(a) < EPS) return done(res, 'x = πn', [[0, 1]]);
+          A = arcTerm('arcsin', a);
+          var s2 = comb(1, -1, A);
+          return done(res, 'x = ' + series(A, 2) + ',  x = ' + series(s2, 2), [[A.v, 2], [s2.v, 2]]);
+        }
+        if (Math.abs(a - 1) < EPS) return done(res, 'x = 2πn', [[0, 2]]);
+        if (Math.abs(a + 1) < EPS) return done(res, 'x = π + 2πn', [[PI, 2]]);
+        if (Math.abs(a) < EPS) return done(res, 'x = π/2 + πn', [[PI / 2, 1]]);
+        A = arcTerm('arccos', a);
+        return done(res, 'x = ±' + (A.exact ? A.txt : A.txt) + ' + 2πn', [[A.v, 2], [-A.v, 2]]);
+      }
+      /* неравенства: крайние случаи */
+      var top = 1, bot = -1;
+      if (gt) {
+        if (a > top + EPS || (strict && a >= top - EPS)) return done(res, 'Решений нет: ' + fn + ' x не бывает больше 1.', null, []);
+        if (a < bot - EPS || (!strict && a <= bot + EPS)) return done(res, 'x — любое число.', null, 'all');
+        if (strict && a <= bot + EPS) return done(res, fn === 'sin' ? 'x ≠ −π/2 + 2πn' : 'x ≠ π + 2πn', null, 'allbut');
+        if (!strict && a >= top - EPS) return done(res, fn === 'sin' ? 'x = π/2 + 2πn' : 'x = 2πn', fn === 'sin' ? [[PI / 2, 2]] : [[0, 2]]);
+      } else {
+        if (a < bot - EPS || (strict && a <= bot + EPS)) return done(res, 'Решений нет: ' + fn + ' x не бывает меньше −1.', null, []);
+        if (a > top + EPS || (!strict && a >= top - EPS)) return done(res, 'x — любое число.', null, 'all');
+        if (strict && a >= top - EPS) return done(res, fn === 'sin' ? 'x ≠ π/2 + 2πn' : 'x ≠ 2πn', null, 'allbut');
+        if (!strict && a <= bot + EPS) return done(res, fn === 'sin' ? 'x = −π/2 + 2πn' : 'x = π + 2πn', fn === 'sin' ? [[-PI / 2, 2]] : [[PI, 2]]);
+      }
+      if (fn === 'sin') {
+        A = arcTerm('arcsin', a);
+        if (gt) { lo = A; hi = comb(1, -1, A); } else { lo = comb(-1, -1, A); hi = A; }
+      } else {
+        A = arcTerm('arccos', a);
+        if (gt) { lo = comb(0, -1, A); hi = A; } else { lo = A; hi = comb(2, -1, A); }
+      }
+      return interval(res, lo, hi, strict, strict, 2);
+    }
+    /* tg, ctg: значения — все числа */
+    var inv = fn === 'tg' ? 'arctg' : 'arcctg';
+    A = arcTerm(inv, a);
+    if (sign === '=') return done(res, 'x = ' + series(A, 1), [[A.v, 1]]);
+    var asL = fn === 'tg' ? { v: -PI / 2, txt: '−π/2' } : { v: 0, txt: '0' };
+    var asR = fn === 'tg' ? { v: PI / 2, txt: 'π/2' } : { v: PI, txt: 'π' };
+    var incr = fn === 'tg';
+    if (gt === incr) return interval(res, A, asR, strict, true, 1);
+    return interval(res, asL, A, true, strict, 1);
+  }
+  function done(res, text, pts, special) {
+    res.text = text; res.pts = pts || null; res.special = special || null;
+    return res;
+  }
+  function interval(res, lo, hi, openL, openR, step) {
+    var per = step === 1 ? 'πn' : '2πn';
+    var L = lo.txt === '0' ? per : lo.txt + ' + ' + per, R = hi.txt === '0' ? per : hi.txt + ' + ' + per;
+    res.text = 'x ∈ ' + (openL ? '(' : '[') + L + ';  ' + R + (openR ? ')' : ']') + ',';
+    res.iv = { lo: lo.v, hi: hi.v, openL: openL, openR: openR, per: step === 1 ? PI : 2 * PI };
+    return res;
+  }
+  /* выполнено ли условие в точке x (для проверки и рисования) */
+  function holds(fn, sign, a, x) {
+    var v = F[fn](x);
+    if (isNaN(v)) return false;
+    if (sign === '=') return Math.abs(v - a) < 1e-9;
+    if (sign === '>') return v > a + 1e-12;
+    if (sign === '<') return v < a - 1e-12;
+    if (sign === '≥') return v >= a - 1e-12;
+    return v <= a + 1e-12;
+  }
+
+  return { PI: PI, F: F, INV: INV, PARTNERS: PARTNERS, A_SIN: A_SIN, A_TG: A_TG, num: num, ang: ang, deg: deg, piTxt: piTxt,
+    val: val, partnerCheck: partnerCheck, solve: solve, holds: holds, exactNum: exactNum, minus: minus };
+})();
+/*LOGIC-END*/
+
+(function () {
+  var T = TRIG, PI = Math.PI, NS = 'http://www.w3.org/2000/svg';
+  var $ = function (id) { return document.getElementById(id); };
+  var circ = $('circ'), graph = $('graph');
+  var COL = { sin: 'var(--sin)', cos: 'var(--cos)', tg: 'var(--tg)', ctg: 'var(--ctg)' };
+
+  var S = {
+    tab: 'fn',
+    fn: 'sin', t: PI / 6, snap: 'special', partner: 'none', showAll: false, labels: true,
+    inv: 'arcsin', a: 0.5, prop: 'none', x: 2.4, asnap: 'special',
+    efn: 'sin', sign: '>', ea: 0.5
+  };
+  try { var saved = JSON.parse(localStorage.getItem('trig-lab') || 'null'); if (saved) for (var k in saved) if (k in S) S[k] = saved[k]; } catch (e) {}
+  function save() { try { localStorage.setItem('trig-lab', JSON.stringify(S)); } catch (e) {} }
+
+  /* ---------- SVG ---------- */
+  function el(tag, at, parent, text) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in at) e.setAttribute(k, at[k]);
+    if (text != null) e.textContent = text;
+    parent.appendChild(e);
+    return e;
+  }
+  function clear(s) { while (s.firstChild) s.removeChild(s.firstChild); }
+
+  /* окружность: центр (200,200), радиус 130 */
+  var CX = 200, CY = 200, R = 130;
+  function cp(x, y) { return [CX + x * R, CY - y * R]; }
+  function cline(x1, y1, x2, y2, at, g) {
+    var a = cp(x1, y1), b = cp(x2, y2);
+    at = at || {};
+    at.x1 = a[0].toFixed(1); at.y1 = a[1].toFixed(1); at.x2 = b[0].toFixed(1); at.y2 = b[1].toFixed(1);
+    return el('line', at, g || circ);
+  }
+  function cdot(x, y, color, r, hollow) {
+    var p = cp(x, y);
+    return el('circle', { cx: p[0], cy: p[1], r: r || 6, fill: hollow ? '#fff' : color, stroke: hollow ? color : '#fff', 'stroke-width': hollow ? 2.4 : 1.5 }, circ);
+  }
+  function ctext(x, y, txt, cls, color, anchor) {
+    var p = cp(x, y);
+    var t = el('text', { x: p[0], y: p[1], 'class': cls || 'lbl', 'text-anchor': anchor || 'middle' }, circ, txt);
+    if (color) t.setAttribute('fill', color);
+    return t;
+  }
+  /* дуга окружности радиуса r (в долях единицы) от угла a до b против часовой стрелки */
+  function arcPath(r, a, b) {
+    var n = Math.max(8, Math.ceil(Math.abs(b - a) / 0.05)), d = '';
+    for (var i = 0; i <= n; i++) {
+      var t = a + (b - a) * i / n, p = cp(r * Math.cos(t), r * Math.sin(t));
+      d += (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1);
+    }
+    return d;
+  }
+  /* угол от 0 до t: спираль, чтобы было видно лишние обороты */
+  function angleSpiral(t, color, r0) {
+    var n = Math.max(8, Math.ceil(Math.abs(t) / 0.04)), d = '';
+    r0 = r0 || 0.2;
+    for (var i = 0; i <= n; i++) {
+      var u = t * i / n, r = r0 + 0.035 * Math.abs(u) / (2 * PI), p = cp(r * Math.cos(u), r * Math.sin(u));
+      d += (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1);
+    }
+    el('path', { d: d, stroke: color, 'stroke-width': 2, fill: 'none' }, circ);
+    if (Math.abs(t) > 0.15) {
+      var u2 = t, r2 = r0 + 0.035 * Math.abs(u2) / (2 * PI), dir = t > 0 ? 1 : -1;
+      var tip = cp(r2 * Math.cos(u2), r2 * Math.sin(u2));
+      var tg = [-Math.sin(u2) * dir, Math.cos(u2) * dir];
+      var b1 = [tip[0] - (tg[0] * 8) + (-tg[1] * 4) * 1, tip[1] + (tg[1] * 8) + (-tg[0] * 4)];
+      var b2 = [tip[0] - (tg[0] * 8) - (-tg[1] * 4), tip[1] + (tg[1] * 8) - (-tg[0] * 4)];
+      el('path', { d: 'M' + tip[0] + ' ' + tip[1] + 'L' + b1[0] + ' ' + b1[1] + 'L' + b2[0] + ' ' + b2[1] + 'Z', fill: color }, circ);
+    }
+  }
+  var SPEC_ANG = [];
+  for (var k12 = 0; k12 < 24; k12++) if (k12 % 2 === 0 || k12 % 3 === 0) SPEC_ANG.push(k12 * PI / 12);
+
+  function circleBase(opts) {
+    clear(circ);
+    var lim = 1.45;
+    for (var g = -1; g <= 1; g += 0.5) {
+      cline(g, -lim, g, lim, { 'class': 'gr' });
+      cline(-lim, g, lim, g, { 'class': 'gr' });
+    }
+    cline(-lim, 0, lim, 0, { 'class': 'ax' });
+    cline(0, -lim, 0, lim, { 'class': 'ax' });
+    var c = cp(0, 0);
+    el('circle', { cx: c[0], cy: c[1], r: R, 'class': 'circ' }, circ);
+    ctext(1.4, -0.1, 'x', 'tkm');
+    ctext(0.08, 1.38, 'y', 'tkm', null, 'start');
+    ctext(0.96, -0.12, '1', 'tk', null, 'end');
+    ctext(-0.96, -0.12, '−1', 'tk', null, 'start');
+    ctext(0.05, 0.88, '1', 'tk', null, 'start');
+    ctext(0.05, -0.95, '−1', 'tk', null, 'start');
+    SPEC_ANG.forEach(function (u) {
+      var p = cp(Math.cos(u), Math.sin(u)), q = cp(1.04 * Math.cos(u), 1.04 * Math.sin(u));
+      el('line', { x1: p[0], y1: p[1], x2: q[0], y2: q[1], stroke: 'var(--muted)', 'stroke-width': 1.4 }, circ);
+      if (S.labels && (!opts || opts.labels !== false)) {
+        var tx = T.piTxt(u > PI + 1e-9 ? u - 2 * PI : u);
+        var lp = [1.2 * Math.cos(u), 1.2 * Math.sin(u) - 0.04];
+        if (Math.abs(u) < 1e-9) return;
+        ctext(lp[0], lp[1], tx, 'tk');
+      }
+    });
+  }
+
+  /* ---------- график ---------- */
+  var G = {};
+  function setView(x0, x1, y0, y1) {
+    G.x0 = x0; G.x1 = x1; G.y0 = y0; G.y1 = y1;
+    G.W = 640; G.sc = G.W / (x1 - x0); G.H = Math.round(G.sc * (y1 - y0));
+    graph.setAttribute('viewBox', '0 0 ' + G.W + ' ' + G.H);
+  }
+  function gp(x, y) { return [(x - G.x0) * G.sc, (G.y1 - y) * G.sc]; }
+  function gline(x1, y1, x2, y2, at) {
+    var a = gp(x1, y1), b = gp(x2, y2);
+    at.x1 = a[0].toFixed(1); at.y1 = a[1].toFixed(1); at.x2 = b[0].toFixed(1); at.y2 = b[1].toFixed(1);
+    return el('line', at, graph);
+  }
+  function gdot(x, y, color, r, hollow) {
+    var p = gp(x, y);
+    return el('circle', { cx: p[0], cy: p[1], r: r || 6, fill: hollow ? '#fff' : color, stroke: hollow ? color : '#fff', 'stroke-width': hollow ? 2.4 : 1.5 }, graph);
+  }
+  function gtext(x, y, txt, cls, color, anchor, dy) {
+    var p = gp(x, y);
+    var t = el('text', { x: p[0], y: p[1] + (dy || 0), 'class': cls || 'lbl', 'text-anchor': anchor || 'middle' }, graph, txt);
+    if (color) t.setAttribute('fill', color);
+    return t;
+  }
+  /* график функции: разрывы там, где значение не существует или прыгает */
+  function plot(f, a, b, at) {
+    var n = Math.ceil((b - a) * G.sc / 2), d = '', pen = false, prev = null, big = (G.y1 - G.y0) * 1.5;
+    for (var i = 0; i <= n; i++) {
+      var x = a + (b - a) * i / n, y = f(x);
+      if (!isFinite(y) || Math.abs(y) > 50 || (prev !== null && Math.abs(y - prev) > big)) { pen = false; prev = isFinite(y) ? y : null; continue; }
+      var p = gp(x, Math.max(G.y0 - 2, Math.min(G.y1 + 2, y)));
+      d += (pen ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1);
+      pen = true; prev = y;
+    }
+    at.d = d;
+    if (!at.fill) at.fill = 'none';
+    return el('path', at, graph);
+  }
+  function graphBase(opt) {
+    clear(graph);
+    var i, x0 = G.x0, x1 = G.x1;
+    /* сетка по π/2 и по 1 */
+    for (i = Math.ceil(x0 / (PI / 2)); i * PI / 2 <= x1; i++) gline(i * PI / 2, G.y0, i * PI / 2, G.y1, { 'class': 'gr' });
+    for (i = Math.ceil(G.y0); i <= G.y1; i++) gline(x0, i, x1, i, { 'class': 'gr' });
+    if (opt && opt.ypi) for (i = Math.ceil(G.y0 / (PI / 2)); i * PI / 2 <= G.y1; i++) if (i) gline(x0, i * PI / 2, x1, i * PI / 2, { stroke: 'var(--grid)', 'stroke-dasharray': '3 4' });
+    gline(x0, 0, x1, 0, { 'class': 'ax' });
+    gline(0, G.y0, 0, G.y1, { 'class': 'ax' });
+    gtext(x1 - 0.15, -0.35, 'x', 'tkm');
+    gtext(0.12, G.y1 - 0.25, 'y', 'tkm', null, 'start');
+    for (i = Math.ceil(x0 / (PI / 2)); i * PI / 2 <= x1 - 0.2; i++) {
+      if (!i) continue;
+      if (opt && opt.xnum) continue;
+      gtext(i * PI / 2, 0, T.piTxt(i * PI / 2), 'tk', null, 'middle', 18);
+    }
+    if (opt && opt.xnum) for (i = Math.ceil(x0); i <= x1 - 0.3; i++) if (i) gtext(i, 0, T.minus(String(i)), 'tk', null, 'middle', 18);
+    for (i = Math.ceil(G.y0); i <= G.y1 - 0.2; i++) if (i) gtext(-0.1, i, T.minus(String(i)), 'tk', null, 'end', 5);
+    if (opt && opt.ypi) for (i = Math.ceil(G.y0 / (PI / 2)); i * PI / 2 <= G.y1; i++) if (i) gtext(G.x1 - 0.1, i * PI / 2, T.piTxt(i * PI / 2), 'tk', null, 'end', -4);
+  }
+
+  /* ---------- привязка к «красивым» значениям ---------- */
+  function snapAngle(t) {
+    if (S.snap === 'free') return t;
+    if (S.snap === 'pi12') return Math.round(t / (PI / 12)) * PI / 12;
+    var best = t, bd = 1e9, k0 = Math.floor(t / (2 * PI)) - 1;
+    for (var k = k0; k <= k0 + 2; k++) SPEC_ANG.forEach(function (u) {
+      var v = u + 2 * PI * k, d = Math.abs(v - t);
+      if (d < bd) { bd = d; best = v; }
+    });
+    return best;
+  }
+  function snapA(a, list) {
+    if (S.asnap === 'free') return a;
+    if (S.asnap === 'step') return Math.round(a * 20) / 20;
+    var best = a, bd = 1e9;
+    list.forEach(function (v) { var d = Math.abs(v - a); if (d < bd) { bd = d; best = v; } });
+    return bd < 0.12 ? best : Math.round(a * 20) / 20;
+  }
+  /* угол по точке на окружности, ближайший к прежнему (можно наматывать обороты) */
+  function unwrap(theta, prev) {
+    var k = Math.round((prev - theta) / (2 * PI));
+    return theta + 2 * PI * k;
+  }
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+  /* ---------- общие элементы управления ---------- */
+  function segCtl(parent, items, cur, cls, on) {
+    var d = document.createElement('div');
+    d.className = 'seg ' + (cls || '');
+    items.forEach(function (it) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.dataset.v = it[0];
+      b.textContent = it[1];
+      b.setAttribute('aria-pressed', it[0] === cur ? 'true' : 'false');
+      b.onclick = function () { on(it[0]); };
+      d.appendChild(b);
+    });
+    parent.appendChild(d);
+    return d;
+  }
+  function selCtl(parent, label, items, cur, on) {
+    var l = document.createElement('label');
+    l.textContent = label + ' ';
+    var s = document.createElement('select');
+    items.forEach(function (it) { var o = document.createElement('option'); o.value = it[0]; o.textContent = it[1]; if (it[0] === cur) o.selected = true; s.appendChild(o); });
+    s.onchange = function () { on(s.value); };
+    l.appendChild(s);
+    parent.appendChild(l);
+  }
+  function chkCtl(parent, label, cur, on) {
+    var l = document.createElement('label');
+    var c = document.createElement('input');
+    c.type = 'checkbox'; c.checked = cur;
+    c.onchange = function () { on(c.checked); };
+    l.appendChild(c);
+    l.appendChild(document.createTextNode(label));
+    parent.appendChild(l);
+  }
+  function M(s) { return '<span class="m">' + s + '</span>'; }
+
+  /* =====================================================================
+     Вкладка 1. Функции
+     ===================================================================== */
+  var FN_LIST = [['sin', 'sin'], ['cos', 'cos'], ['tg', 'tg'], ['ctg', 'ctg']];
+  var PART_LIST = [['none', 'нет'], ['neg', '−t'], ['pi-t', 'π − t'], ['pi+t', 'π + t'], ['pi2-t', 'π/2 − t'], ['pi2+t', 'π/2 + t'], ['2pi', 't + 2π']];
+
+  function fnControls() {
+    var c = $('ctl');
+    c.innerHTML = '';
+    segCtl(c, FN_LIST, S.fn, 'fn', function (v) { S.fn = v; drawAll(); });
+    selCtl(c, 'Вторая точка:', PART_LIST, S.partner, function (v) { S.partner = v; drawAll(); });
+    var cc = $('circCtl');
+    cc.innerHTML = '';
+    selCtl(cc, 'Шаг угла:', [['special', 'углы π/6 и π/4'], ['pi12', 'π/12'], ['free', 'свободно']], S.snap, function (v) { S.snap = v; drawAll(); });
+    chkCtl(cc, 'все четыре функции', S.showAll, function (v) { S.showAll = v; drawAll(); });
+    chkCtl(cc, 'подписи углов', S.labels, function (v) { S.labels = v; drawAll(); });
+  }
+
+  /* построение функции fn для угла t на окружности */
+  function drawFnOnCircle(fn, t, color, strong) {
+    var c = Math.cos(t), s = Math.sin(t), w = strong ? 3.2 : 1.8, op = strong ? 1 : 0.55;
+    if (fn === 'sin') {
+      cline(c, 0, c, s, { stroke: color, 'stroke-width': w, opacity: op });
+      cline(0, 0, 0, s, { stroke: color, 'stroke-width': strong ? 6 : 3, opacity: op * 0.85, 'stroke-linecap': 'round' });
+      if (strong) cline(c, s, 0, s, { stroke: color, 'stroke-width': 1, 'class': 'dash' });
+    } else if (fn === 'cos') {
+      cline(0, s, c, s, { stroke: color, 'stroke-width': w, opacity: op });
+      cline(0, 0, c, 0, { stroke: color, 'stroke-width': strong ? 6 : 3, opacity: op * 0.85, 'stroke-linecap': 'round' });
+      if (strong) cline(c, s, c, 0, { stroke: color, 'stroke-width': 1, 'class': 'dash' });
+    } else if (fn === 'tg') {
+      cline(1, -1.45, 1, 1.45, { stroke: color, 'stroke-width': 1.3, opacity: op });
+      if (strong) ctext(1.06, 1.36, 'ось tg', 'tk', color, 'start');
+      var v = T.F.tg(t);
+      if (isFinite(v)) {
+        var y = clamp(v, -1.45, 1.45);
+        cline(0, 0, 1, v, { stroke: color, 'stroke-width': 1.2, 'class': 'dash' });
+        cline(1, 0, 1, y, { stroke: color, 'stroke-width': strong ? 6 : 3, opacity: op * 0.85, 'stroke-linecap': 'round' });
+        if (Math.abs(v) <= 1.45) cdot(1, v, color, strong ? 5 : 4);
+      }
+    } else {
+      cline(-1.45, 1, 1.45, 1, { stroke: color, 'stroke-width': 1.3, opacity: op });
+      if (strong) ctext(-1.42, 1.07, 'ось ctg', 'tk', color, 'start');
+      var w2 = T.F.ctg(t);
+      if (isFinite(w2)) {
+        var x = clamp(w2, -1.45, 1.45);
+        cline(0, 0, w2, 1, { stroke: color, 'stroke-width': 1.2, 'class': 'dash' });
+        cline(0, 1, x, 1, { stroke: color, 'stroke-width': strong ? 6 : 3, opacity: op * 0.85, 'stroke-linecap': 'round' });
+        if (Math.abs(w2) <= 1.45) cdot(w2, 1, color, strong ? 5 : 4);
+      }
+    }
+  }
+
+  function drawFn() {
+    var fn = S.fn, t = S.t, col = COL[fn];
+    circleBase();
+    $('circHint').textContent = 'Тяни точку по окружности (можно делать несколько оборотов) или по графику справа. Клавиши ← → тоже двигают угол.';
+    /* вторая точка: ось симметрии */
+    var P = S.partner !== 'none' ? T.PARTNERS[S.partner] : null, u = P ? P.f(t) : null;
+    if (P) {
+      var sy = P.sym;
+      if (sy === 'Ox') cline(-1.4, 0, 1.4, 0, { stroke: 'var(--q)', 'stroke-width': 2, 'class': 'dash' });
+      if (sy === 'Oy') cline(0, -1.4, 0, 1.4, { stroke: 'var(--q)', 'stroke-width': 2, 'class': 'dash' });
+      if (sy === 'y=x') cline(-1.25, -1.25, 1.25, 1.25, { stroke: 'var(--q)', 'stroke-width': 2, 'class': 'dash' });
+      if (sy === 'O') cline(Math.cos(t), Math.sin(t), Math.cos(u), Math.sin(u), { stroke: 'var(--q)', 'stroke-width': 1.5, 'class': 'dash' });
+    }
+    if (S.showAll) ['sin', 'cos', 'tg', 'ctg'].forEach(function (f) { if (f !== fn) drawFnOnCircle(f, t, COL[f], false); });
+    drawFnOnCircle(fn, t, col, true);
+    angleSpiral(t, 'var(--ink)');
+    if (P) {
+      drawFnOnCircle(fn, u, 'var(--q)', false);
+      cline(0, 0, Math.cos(u), Math.sin(u), { stroke: 'var(--q)', 'stroke-width': 1.6 });
+      cdot(Math.cos(u), Math.sin(u), 'var(--q)', 6);
+      ctext(Math.cos(u) * 0.84, Math.sin(u) * 0.84 - 0.05, 'Q', 'lbl', 'var(--q)');
+    }
+    cline(0, 0, Math.cos(t), Math.sin(t), { stroke: 'var(--ink)', 'stroke-width': 1.8 });
+    cdot(Math.cos(t), Math.sin(t), 'var(--ink)', 7);
+    ctext(Math.cos(t) * 0.84 + 0.06, Math.sin(t) * 0.84 - 0.05, 'P', 'lbl');
+
+    /* график */
+    setView(-2 * PI - 0.45, 2 * PI + 0.45, -2.4, 2.4);
+    graphBase();
+    var lim = 2 * PI;
+    if (S.showAll) ['sin', 'cos', 'tg', 'ctg'].forEach(function (f) { if (f !== fn) plot(T.F[f], -lim - 0.4, lim + 0.4, { stroke: COL[f], 'stroke-width': 1.3, opacity: 0.35 }); });
+    plot(T.F[fn], -lim - 0.4, lim + 0.4, { stroke: col, 'stroke-width': 2.6 });
+    var v = T.F[fn](t);
+    gline(t, 0, t, isFinite(v) ? clamp(v, G.y0, G.y1) : 0, { stroke: col, 'stroke-width': 1.4, 'class': 'dash' });
+    gdot(t, 0, 'var(--ink)', 5);
+    if (isFinite(v) && Math.abs(v) < G.y1) gdot(t, v, col, 7);
+    if (P) {
+      var w = T.F[fn](u);
+      if (u >= G.x0 && u <= G.x1) {
+        gline(u, 0, u, isFinite(w) ? clamp(w, G.y0, G.y1) : 0, { stroke: 'var(--q)', 'stroke-width': 1.4, 'class': 'dash' });
+        if (isFinite(w) && Math.abs(w) < G.y1) gdot(u, w, 'var(--q)', 6);
+      }
+    }
+    /* показания */
+    var h = '<div class="big">' + M('<i>t</i> = ' + T.ang(t)) + (T.piTxt(t) ? '' : '') + ' &nbsp;<span style="color:var(--muted);font-weight:400">(' + T.deg(t) + ', ' + T.num(t) + ' рад)</span></div>';
+    h += '<div class="vals">' + ['sin', 'cos', 'tg', 'ctg'].map(function (f) {
+      return '<div class="val ' + f + (f === fn ? ' on' : '') + '"><b>' + f + ' t</b>' + M(T.val(f, t)) + '</div>';
+    }).join('') + '</div>';
+    var q = quarter(t);
+    if (q) h += '<div style="color:var(--muted);font-size:.92rem">Точка ' + M('<i>P</i>') + ' в ' + q + ' четверти: знаки ' + signs(t) + '.</div>';
+    if (P) {
+      var ck = T.partnerCheck(fn, S.partner, t);
+      var why = P.why ? ' (' + P.why[fn] + ')' : '';
+      h += '<div class="chk ' + (ck.ok ? 'ok' : 'no') + '">Вторая точка ' + M('<i>Q</i>') + ' отвечает углу ' + M(P.lab.replace(/t/g, '<i>t</i>')) + '.<br>' +
+        M(ck.lhs.replace(/t/g, '<i>t</i>') + ' = ' + ck.L) + ', &nbsp; ' + M(ck.rhs.replace(/t/g, '<i>t</i>') + ' = ' + ck.R) + '<br><b>' +
+        (ck.ok ? 'Совпадает: ' + M(ck.lhs.replace(/t/g, '<i>t</i>') + ' = ' + ck.rhs.replace(/t/g, '<i>t</i>')) + why + '.' : 'Не совпадает.') + '</b>' +
+        (ck.both ? '' : ' Оба значения не существуют при этом ' + M('<i>t</i>') + '.') + ' Подвигай ' + M('<i>P</i>') + ': равенство держится при любом ' + M('<i>t</i>') + '.</div>';
+    }
+    $('read').innerHTML = h;
+    setTry([
+      'Найди на окружности все углы от 0 до 2π, где sin t = cos t. Сколько их? Где они на графиках sin и cos (включи «все четыре функции»)?',
+      'Сделай полный оборот и ещё немного. Что происходит с точкой на графике? Так видна периодичность.',
+      'Выбери tg и подведи P к углу π/2. Что происходит с точкой на оси тангенсов и на графике?',
+      'Включи вторую точку −t и проверь: какие функции чётные, а какие нечётные? Посмотри, как это видно по графику.',
+      'Выбери вторую точку π − t, потом π/2 − t. Какие формулы приведения получаются для каждой функции?',
+      'В какой четверти sin и cos оба отрицательны? А tg при этом какой?'
+    ]);
+  }
+  function quarter(t) {
+    var u = ((t % (2 * PI)) + 2 * PI) % (2 * PI);
+    if (Math.abs(Math.sin(u)) < 1e-9 || Math.abs(Math.cos(u)) < 1e-9) return null;
+    return ['I', 'II', 'III', 'IV'][Math.floor(u / (PI / 2))];
+  }
+  function signs(t) {
+    var sg = function (v) { return v > 0 ? '+' : '−'; };
+    return 'sin ' + sg(Math.sin(t)) + ', cos ' + sg(Math.cos(t)) + ', tg ' + sg(Math.tan(t)) + ', ctg ' + sg(Math.tan(t));
+  }
+
+  /* =====================================================================
+     Вкладка 2. Обратные функции
+     ===================================================================== */
+  var INV_LIST = [['arcsin', 'arcsin'], ['arccos', 'arccos'], ['arctg', 'arctg'], ['arcctg', 'arcctg']];
+  function invControls() {
+    var c = $('ctl');
+    c.innerHTML = '';
+    segCtl(c, INV_LIST, S.inv, 'fn', function (v) { S.inv = v; var I = T.INV[v]; S.a = clamp(S.a, I.dom[0], I.dom[1]); drawAll(); });
+    var pair = S.inv === 'arcsin' || S.inv === 'arccos' ? 'arcsin a + arccos a = π/2' : 'arctg a + arcctg a = π/2';
+    var negTxt = { arcsin: 'arcsin(−a) = −arcsin a', arccos: 'arccos(−a) = π − arccos a', arctg: 'arctg(−a) = −arctg a', arcctg: 'arcctg(−a) = π − arcctg a' }[S.inv];
+    var base = T.INV[S.inv].base;
+    selCtl(c, 'Свойство:', [['none', 'нет'], ['neg', negTxt], ['sum', pair], ['comp', S.inv + '(' + base + ' x)'], ['comp2', base + '(' + S.inv + ' x)']], S.prop, function (v) { S.prop = v; drawAll(); });
+    var cc = $('circCtl');
+    cc.innerHTML = '';
+    selCtl(cc, 'Значения a:', [['special', 'табличные'], ['step', 'шаг 0,05'], ['free', 'свободно']], S.asnap, function (v) { S.asnap = v; drawAll(); });
+    chkCtl(cc, 'подписи углов', S.labels, function (v) { S.labels = v; drawAll(); });
+  }
+  /* точка главного значения и линия, по которой ищем угол */
+  function invOnCircle(inv, a, color, strong) {
+    var I = T.INV[inv], al = I.f(a), c = Math.cos(al), s = Math.sin(al);
+    var w = strong ? 1 : 0.6;
+    if (inv === 'arcsin') {
+      cline(-1.35, a, 1.35, a, { stroke: color, 'stroke-width': 1.4, 'class': 'dash', opacity: w });
+      cline(0, 0, 0, a, { stroke: color, 'stroke-width': 6, 'stroke-linecap': 'round', opacity: w * 0.85 });
+      if (strong) cdot(-c, s, color, 5, true);
+    } else if (inv === 'arccos') {
+      cline(a, -1.35, a, 1.35, { stroke: color, 'stroke-width': 1.4, 'class': 'dash', opacity: w });
+      cline(0, 0, a, 0, { stroke: color, 'stroke-width': 6, 'stroke-linecap': 'round', opacity: w * 0.85 });
+      if (strong) cdot(c, -s, color, 5, true);
+    } else if (inv === 'arctg') {
+      cline(1, -1.45, 1, 1.45, { stroke: color, 'stroke-width': 1.3, opacity: w });
+      var y = clamp(a, -1.45, 1.45);
+      cline(1, 0, 1, y, { stroke: color, 'stroke-width': 6, 'stroke-linecap': 'round', opacity: w * 0.85 });
+      cline(-c * 1.2, -s * 1.2, Math.abs(a) <= 1.45 ? 1 : c * 1.4, Math.abs(a) <= 1.45 ? a : s * 1.4, { stroke: color, 'stroke-width': 1.3, 'class': 'dash', opacity: w });
+      if (Math.abs(a) <= 1.45) cdot(1, a, color, 5);
+      if (strong) cdot(-c, -s, color, 5, true);
+    } else {
+      cline(-1.45, 1, 1.45, 1, { stroke: color, 'stroke-width': 1.3, opacity: w });
+      var x = clamp(a, -1.45, 1.45);
+      cline(0, 1, x, 1, { stroke: color, 'stroke-width': 6, 'stroke-linecap': 'round', opacity: w * 0.85 });
+      cline(-c * 1.2, -s * 1.2, Math.abs(a) <= 1.45 ? a : c * 1.4, Math.abs(a) <= 1.45 ? 1 : s * 1.4, { stroke: color, 'stroke-width': 1.3, 'class': 'dash', opacity: w });
+      if (Math.abs(a) <= 1.45) cdot(a, 1, color, 5);
+      if (strong) cdot(-c, -s, color, 5, true);
+    }
+    angleSpiral(al, color, strong ? 0.22 : 0.32);
+    cline(0, 0, c, s, { stroke: color, 'stroke-width': strong ? 2 : 1.4 });
+    cdot(c, s, color, strong ? 7 : 6);
+    return al;
+  }
+  function drawInv() {
+    var inv = S.inv, I = T.INV[inv], base = I.base, col = COL[base], comp = S.prop === 'comp' || S.prop === 'comp2';
+    if (comp && S.prop === 'comp') S.x = clamp(S.x, -2 * PI, 2 * PI);
+    circleBase();
+    $('circHint').textContent = comp && S.prop === 'comp' ? 'Тяни точку по окружности или по графику: меняется x.' :
+      'Тяни ' + (inv === 'arcsin' ? 'горизонтальную прямую вверх-вниз' : inv === 'arccos' ? 'вертикальную прямую влево-вправо' : 'точку по окружности') + ' или точку на графике справа: меняется a.';
+    /* дуга главных значений */
+    var arcA = I.rng[0], arcB = I.rng[1];
+    el('path', { d: arcPath(1, arcA, arcB), stroke: col, 'stroke-width': 7, 'stroke-opacity': 0.25, fill: 'none', 'stroke-linecap': 'round' }, circ);
+    var e1 = [Math.cos(arcA), Math.sin(arcA)], e2 = [Math.cos(arcB), Math.sin(arcB)];
+    cdot(e1[0], e1[1], col, 4.5, !I.closed);
+    cdot(e2[0], e2[1], col, 4.5, !I.closed);
+
+    var a = S.a, h = '';
+    if (S.prop === 'comp') {
+      var x = S.x, bx = T.F[base](S.x), ok = isFinite(bx);
+      angleSpiral(x, 'var(--ink)', 0.4);
+      cline(0, 0, Math.cos(x), Math.sin(x), { stroke: 'var(--ink)', 'stroke-width': 1.6 });
+      cdot(Math.cos(x), Math.sin(x), 'var(--ink)', 6);
+      var y = ok ? I.f(bx) : NaN;
+      if (ok) invOnCircle(inv, bx, col, true);
+      setView(-2 * PI - 0.45, 2 * PI + 0.45, -2.1, 3.6);
+      graphBase({ ypi: true });
+      plot(function (v) { return v; }, G.x0, G.x1, { stroke: 'var(--muted)', 'stroke-width': 1.2, 'class': 'dash' });
+      plot(function (v) { var b = T.F[base](v); return isFinite(b) ? I.f(b) : NaN; }, G.x0, G.x1, { stroke: col, 'stroke-width': 2.6 });
+      gline(I.rng[0], I.rng[0], I.rng[1], I.rng[1], { stroke: col, 'stroke-width': 7, 'stroke-opacity': 0.2, 'stroke-linecap': 'round' });
+      gline(x, 0, x, ok ? y : 0, { stroke: col, 'stroke-width': 1.3, 'class': 'dash' });
+      gdot(x, 0, 'var(--ink)', 5);
+      if (ok) gdot(x, y, col, 7);
+      var same = ok && Math.abs(y - x) < 1e-9;
+      h += '<div class="big">' + M('<i>x</i> = ' + T.ang(x)) + ', &nbsp; ' + M(inv + '(' + base + ' <i>x</i>) = ' + (ok ? T.ang(y) : 'не существует')) + '</div>';
+      h += '<div class="chk ' + (same ? 'ok' : 'info') + '">' + (same ? 'Здесь ' + M(inv + '(' + base + ' <i>x</i>) = <i>x</i>') + ': ' + M('<i>x</i>') + ' лежит в промежутке главных значений ' + rngTxt(I) + '.' :
+        'Здесь ' + M(inv + '(' + base + ' <i>x</i>) ≠ <i>x</i>') + '. Арк-функция всегда возвращает угол из ' + rngTxt(I) + ': на окружности это точка той же ' + (base === 'sin' ? 'высоты' : base === 'cos' ? 'абсциссы' : 'прямой через центр') + ' на выделенной дуге.') + ' График получается «пилой» (или «ломаной»): совпадает с прямой ' + M('<i>y</i> = <i>x</i>') + ' только на выделенном отрезке.</div>';
+      $('read').innerHTML = h;
+      setTry(tryInv());
+      return;
+    }
+    var al = invOnCircle(inv, a, col, true), al2 = null, a2 = null, inv2 = null;
+    if (S.prop === 'neg') { a2 = -a; al2 = invOnCircle(inv, a2, 'var(--q)', false); }
+    if (S.prop === 'sum') {
+      inv2 = { arcsin: 'arccos', arccos: 'arcsin', arctg: 'arcctg', arcctg: 'arctg' }[inv];
+      al2 = invOnCircle(inv2, a, 'var(--q)', false);
+      cline(-1.25, -1.25, 1.25, 1.25, { stroke: 'var(--q)', 'stroke-width': 1.5, 'class': 'dash' });
+    }
+    if (!S.labels) ctext(Math.cos(al) * 1.17, Math.sin(al) * 1.17 - 0.05, T.ang(al), 'tk', col);
+
+    /* график: сама функция бледно, её главный кусок ярко, обратная — в цвете, симметрия относительно y = x */
+    if (S.prop === 'comp2') {
+      setView(-4.2, 4.2, -2.6, 2.6);
+      graphBase({ xnum: true });
+      plot(function (v) { return v; }, G.x0, G.x1, { stroke: 'var(--muted)', 'stroke-width': 1.2, 'class': 'dash' });
+      plot(function (v) { return v < I.dom[0] - 1e-9 || v > I.dom[1] + 1e-9 ? NaN : T.F[base](I.f(v)); }, G.x0, G.x1, { stroke: col, 'stroke-width': 2.8 });
+      gdot(a, T.F[base](al), col, 7);
+      h += '<div class="big">' + M(base + '(' + inv + ' <i>a</i>) = ' + T.num(T.F[base](al))) + ' &nbsp;при ' + M('<i>a</i> = ' + T.num(a)) + '</div>';
+      h += '<div class="chk ok">' + M(base + '(' + inv + ' <i>a</i>) = <i>a</i>') + ' всегда, когда ' + M(inv + ' <i>a</i>') + ' существует' + (I.closed ? ': при ' + M('−1 ≤ <i>a</i> ≤ 1') + '. Поэтому график — кусок прямой ' + M('<i>y</i> = <i>x</i>') + ', а не вся прямая.' : ', то есть при любом ' + M('<i>a</i>') + '.') + '</div>';
+      $('read').innerHTML = h;
+      setTry(tryInv());
+      return;
+    }
+    var big = !I.closed;
+    if (big) setView(-4.3, 4.3, -2.2, 3.6); else setView(-3.3, 3.8, -2.0, 3.6);
+    graphBase({ xnum: true, ypi: true });
+    plot(function (v) { return v; }, G.x0, G.x1, { stroke: 'var(--muted)', 'stroke-width': 1.2, 'class': 'dash' });
+    gtext(G.x1 - 0.5, G.x1 - 0.5 > G.y1 ? G.y1 - 0.5 : G.x1 - 0.2, 'y = x', 'tk', null, 'end');
+    plot(T.F[base], G.x0, G.x1, { stroke: col, 'stroke-width': 1.3, opacity: 0.3 });
+    plot(T.F[base], I.rng[0] + (I.closed ? 0 : 0.01), I.rng[1] - (I.closed ? 0 : 0.01), { stroke: col, 'stroke-width': 2.4, opacity: 0.55 });
+    plot(function (v) { return v < I.dom[0] - 1e-9 || v > I.dom[1] + 1e-9 ? NaN : I.f(v); }, Math.max(G.x0, I.dom[0]), Math.min(G.x1, I.dom[1]), { stroke: col, 'stroke-width': 3 });
+    if (!I.closed) {
+      gline(G.x0, I.rng[0], G.x1, I.rng[0], { stroke: col, 'stroke-width': 1, 'class': 'dash', opacity: 0.6 });
+      gline(G.x0, I.rng[1], G.x1, I.rng[1], { stroke: col, 'stroke-width': 1, 'class': 'dash', opacity: 0.6 });
+    }
+    /* пара симметричных точек */
+    gline(a, al, al, a, { stroke: 'var(--muted)', 'stroke-width': 1.2, 'stroke-dasharray': '2 4' });
+    gdot(al, a, col, 5, true);
+    gdot(a, al, col, 7);
+    if (S.prop === 'neg') gdot(a2, al2, 'var(--q)', 6);
+    if (S.prop === 'sum') {
+      plot(function (v) { return v < T.INV[inv2].dom[0] - 1e-9 || v > T.INV[inv2].dom[1] + 1e-9 ? NaN : T.INV[inv2].f(v); }, G.x0, G.x1, { stroke: 'var(--q)', 'stroke-width': 1.8, opacity: 0.8 });
+      gdot(a, al2, 'var(--q)', 6);
+      gline(a, al, a, al2, { stroke: 'var(--q)', 'stroke-width': 1.2, 'class': 'dash' });
+    }
+    h += '<div class="big">' + M(inv + ' <i>a</i> = ' + T.ang(al)) + ' &nbsp;<span style="color:var(--muted);font-weight:400">при ' + M('<i>a</i> = ' + T.num(a)) + ' (' + T.deg(al) + ')</span></div>';
+    h += '<div class="chk info">Это угол из ' + rngTxt(I) + ', у которого ' + M(base + ' = ' + T.num(a)) + '. Проверка: ' + M(base + '(' + T.ang(al) + ') = ' + T.num(T.F[base](al))) + '. Вторая точка окружности с тем же ' + base + ' (пустой кружок) не подходит: она вне выделенной дуги.</div>';
+    if (S.prop === 'neg') {
+      var lhs = I.f(-a), rhs = inv === 'arcsin' || inv === 'arctg' ? -al : PI - al;
+      var rhsT = inv === 'arcsin' || inv === 'arctg' ? '−' + inv + ' <i>a</i>' : 'π − ' + inv + ' <i>a</i>';
+      h += '<div class="chk ' + (Math.abs(lhs - rhs) < 1e-9 ? 'ok' : 'no') + '">' + M(inv + '(−<i>a</i>) = ' + T.ang(lhs)) + ', &nbsp; ' + M(rhsT + ' = ' + T.ang(rhs)) + '. <b>Совпадает.</b> На окружности точки для ' + M('<i>a</i>') + ' и ' + M('−<i>a</i>') + ' симметричны относительно ' + (inv === 'arcsin' || inv === 'arctg' ? 'оси ' + M('<i>Ox</i>') : 'оси ' + M('<i>Oy</i>')) + '.</div>';
+    }
+    if (S.prop === 'sum') {
+      var sum = al + al2;
+      h += '<div class="chk ' + (Math.abs(sum - PI / 2) < 1e-9 ? 'ok' : 'no') + '">' + M(inv + ' <i>a</i> + ' + inv2 + ' <i>a</i> = ' + T.ang(al) + ' + ' + T.ang(al2) + ' = ' + T.ang(sum)) + '. <b>Всегда π/2:</b> две точки на окружности симметричны относительно прямой ' + M('<i>y</i> = <i>x</i>') + '. На графике расстояние между кривыми по вертикали тоже даёт в сумме π/2.</div>';
+    }
+    $('read').innerHTML = h;
+    setTry(tryInv());
+  }
+  function rngTxt(I) {
+    return M((I.closed ? '[' : '(') + T.piTxt(I.rng[0]) + '; ' + T.piTxt(I.rng[1]) + (I.closed ? ']' : ')'));
+  }
+  function tryInv() {
+    return [
+      'Сравни на графике кусок синуса на [−π/2; π/2] (яркий) и график arcsin. Они симметричны относительно прямой y = x. Почему берут именно этот кусок синуса, а не весь?',
+      'Почему arcsin 2 не существует? Попробуй увести прямую выше окружности.',
+      'Найди arccos(−1/2). Почему ответ не −π/3 и не 4π/3?',
+      'Включи свойство «arcsin(sin x)» и пройди x от 0 до 2π. Где arcsin(sin x) = x, а где нет? Какой получается график?',
+      'Сравни свойства arcsin(−a) и arccos(−a). Почему у арккосинуса не «минус», а «π минус»?',
+      'Посмотри на графики arctg: к каким прямым он приближается и никогда их не достигает?'
+    ];
+  }
+
+  /* =====================================================================
+     Вкладка 3. Уравнения и неравенства
+     ===================================================================== */
+  function eqControls() {
+    var c = $('ctl');
+    c.innerHTML = '';
+    segCtl(c, FN_LIST, S.efn, 'fn', function (v) { S.efn = v; drawAll(); });
+    segCtl(c, [['=', '='], ['>', '>'], ['≥', '≥'], ['<', '<'], ['≤', '≤']], S.sign, '', function (v) { S.sign = v; drawAll(); });
+    var cc = $('circCtl');
+    cc.innerHTML = '';
+    selCtl(cc, 'Значения a:', [['special', 'табличные'], ['step', 'шаг 0,05'], ['free', 'свободно']], S.asnap, function (v) { S.asnap = v; drawAll(); });
+    chkCtl(cc, 'подписи углов', S.labels, function (v) { S.labels = v; drawAll(); });
+  }
+  function drawEq() {
+    var fn = S.efn, sign = S.sign, a = S.ea, col = COL[fn];
+    var res = T.solve(fn, sign, a);
+    circleBase();
+    $('circHint').textContent = 'Меняй a: тяни ' + (fn === 'sin' ? 'горизонтальную прямую' : fn === 'cos' ? 'вертикальную прямую' : 'точку на оси ' + fn) + ' на окружности или горизонтальную прямую на графике.';
+    /* решения на окружности: дуги, где условие выполнено */
+    var N = 720, runs = [], cur = null;
+    for (var i = 0; i < N; i++) {
+      var u = 2 * PI * (i + 0.5) / N, okk = sign !== '=' && T.holds(fn, sign === '≥' ? '>' : sign === '≤' ? '<' : sign, a, u);
+      if (okk) { if (!cur) { cur = { a: 2 * PI * i / N, b: 2 * PI * (i + 1) / N }; runs.push(cur); } else cur.b = 2 * PI * (i + 1) / N; } else cur = null;
+    }
+    if (runs.length > 1 && runs[0].a === 0 && runs[runs.length - 1].b >= 2 * PI - 1e-9) { runs[0].a = runs[runs.length - 1].a - 2 * PI; runs.pop(); }
+    runs.forEach(function (r) { el('path', { d: arcPath(1, r.a, r.b), stroke: 'var(--sol)', 'stroke-width': 7, fill: 'none', 'stroke-opacity': 0.75 }, circ); });
+    /* прямая a */
+    if (fn === 'sin') cline(-1.4, clamp(a, -1.4, 1.4), 1.4, clamp(a, -1.4, 1.4), { stroke: col, 'stroke-width': 2 });
+    else if (fn === 'cos') cline(clamp(a, -1.4, 1.4), -1.4, clamp(a, -1.4, 1.4), 1.4, { stroke: col, 'stroke-width': 2 });
+    else if (fn === 'tg') {
+      cline(1, -1.45, 1, 1.45, { stroke: col, 'stroke-width': 1.3 });
+      var al = Math.atan(a);
+      cline(-1.3 * Math.cos(al), -1.3 * Math.sin(al), Math.abs(a) <= 1.45 ? 1 : 1.3 * Math.cos(al), Math.abs(a) <= 1.45 ? a : 1.3 * Math.sin(al), { stroke: col, 'stroke-width': 2 });
+      if (Math.abs(a) <= 1.45) cdot(1, a, col, 5);
+      cdot(0, 1, 'var(--ink)', 4.5, true); cdot(0, -1, 'var(--ink)', 4.5, true);
+    } else {
+      cline(-1.45, 1, 1.45, 1, { stroke: col, 'stroke-width': 1.3 });
+      var be = PI / 2 - Math.atan(a);
+      cline(-1.3 * Math.cos(be), -1.3 * Math.sin(be), Math.abs(a) <= 1.45 ? a : 1.3 * Math.cos(be), Math.abs(a) <= 1.45 ? 1 : 1.3 * Math.sin(be), { stroke: col, 'stroke-width': 2 });
+      if (Math.abs(a) <= 1.45) cdot(a, 1, col, 5);
+      cdot(1, 0, 'var(--ink)', 4.5, true); cdot(-1, 0, 'var(--ink)', 4.5, true);
+    }
+    /* концы: точки уравнения или концы промежутков */
+    var ends = [];
+    if (res.pts) res.pts.forEach(function (p) { ends.push({ v: p[0], open: false }); if (p[1] === 1) ends.push({ v: p[0] + PI, open: false }); });
+    if (res.iv) {
+      ends.push({ v: res.iv.lo, open: res.iv.openL }, { v: res.iv.hi, open: res.iv.openR });
+      if (res.iv.per === PI) ends.push({ v: res.iv.lo + PI, open: res.iv.openL }, { v: res.iv.hi + PI, open: res.iv.openR });
+    }
+    if (res.special === 'allbut') {
+      var bad = fn === 'sin' ? (sign === '>' ? -PI / 2 : PI / 2) : (sign === '>' ? PI : 0);
+      ends.push({ v: bad, open: true });
+    }
+    ends.forEach(function (e) {
+      var isAs = (fn === 'tg' && Math.abs(Math.cos(e.v)) < 1e-9) || (fn === 'ctg' && Math.abs(Math.sin(e.v)) < 1e-9);
+      cdot(Math.cos(e.v), Math.sin(e.v), 'var(--sol)', 6, e.open || isAs);
+      var tx = T.piTxt(((e.v + PI) % (2 * PI) + 2 * PI) % (2 * PI) - PI);
+      if (tx && !S.labels) ctext(Math.cos(e.v) * 1.2, Math.sin(e.v) * 1.2 - 0.04, tx, 'tk', 'var(--sol)');
+    });
+
+    /* график */
+    setView(-2 * PI - 0.45, 2 * PI + 0.45, -2.4, 2.4);
+    graphBase();
+    var x0 = -2 * PI, x1 = 2 * PI, M2 = 2400, gr = [], cr = null;
+    if (sign !== '=') for (i = 0; i < M2; i++) {
+      var xa = x0 + (x1 - x0) * (i + 0.5) / M2, h0 = T.holds(fn, sign === '≥' ? '>' : sign === '≤' ? '<' : sign, a, xa);
+      if (h0) { if (!cr) { cr = { a: x0 + (x1 - x0) * i / M2, b: 0 }; gr.push(cr); } cr.b = x0 + (x1 - x0) * (i + 1) / M2; } else cr = null;
+    }
+    gr.forEach(function (r) {
+      var p = gp(r.a, 0), q = gp(r.b, 0);
+      var rc = el('rect', { x: p[0], y: 0, width: Math.max(0, q[0] - p[0]), height: G.H, fill: 'var(--sol-soft)' }, graph);
+      graph.insertBefore(rc, graph.firstChild);
+    });
+    gr.forEach(function (r) { gline(r.a, 0, r.b, 0, { stroke: 'var(--sol)', 'stroke-width': 5, 'stroke-opacity': 0.85 }); });
+    plot(T.F[fn], G.x0, G.x1, { stroke: col, 'stroke-width': 2.4 });
+    if (sign !== '=') plot(function (x) { return T.holds(fn, sign === '≥' ? '>' : sign === '≤' ? '<' : sign, a, x) ? T.F[fn](x) : NaN; }, x0, x1, { stroke: 'var(--sol)', 'stroke-width': 4 });
+    gline(G.x0, clamp(a, G.y0, G.y1), G.x1, clamp(a, G.y0, G.y1), { stroke: col, 'stroke-width': 1.6, 'class': 'dash' });
+    gtext(G.x0 + 0.1, clamp(a, G.y0, G.y1), 'y = ' + T.num(a), 'tk', col, 'start', a < 0 ? 17 : -6);
+    /* точки решений и концы на графике в пределах [−2π; 2π] */
+    ends.forEach(function (e) {
+      var per = res.pts ? (res.pts.some(function (p) { return p[1] === 1; }) ? PI : 2 * PI) : (res.iv ? res.iv.per : 2 * PI);
+      for (var k = -4; k <= 4; k++) {
+        var xx = e.v + k * per;
+        if (xx < x0 - 1e-9 || xx > x1 + 1e-9) continue;
+        var yy = T.F[fn](xx);
+        if (!isFinite(yy)) continue;
+        gdot(xx, yy, 'var(--sol)', 5.5, e.open);
+        gdot(xx, 0, 'var(--sol)', 4.5, e.open);
+      }
+    });
+    var h = '<div class="big">' + M(fn + ' <i>x</i> ' + sign + ' ' + T.num(a)) + '</div>';
+    h += '<div class="ans"><b>Ответ:</b> ' + M(res.text.replace(/\bx\b/g, '<i>x</i>').replace(/n/g, '<i>n</i>')) + (/n/.test(res.text) ? ' &nbsp;' + M('<i>n</i> ∈ ℤ') : '') + '</div>';
+    h += '<div class="chk info">' + eqWhy(fn, sign, a, res) + '</div>';
+    $('read').innerHTML = h;
+    setTry([
+      'Реши sin x = 1/2: найди обе точки на окружности. Как получить из первой точки вторую?',
+      'Сравни ответы для sin x = 0, sin x = 1 и sin x = 1/2. Почему для 0 и 1 пишут одну серию, а не две?',
+      'Переключи знак с > на ≥. Что меняется на окружности и в ответе?',
+      'Сделай a больше 1 для sin x > a и sin x < a. Почему в одном случае решений нет, а в другом подходит любое x?',
+      'Для неравенства cos x < 1/2 дуга проходит через точку π. Почему левый конец промежутка π/3, а правый 5π/3, а не −π/3?',
+      'Реши tg x ≥ 1. Почему правый конец промежутка всегда с круглой скобкой?'
+    ]);
+  }
+  function eqWhy(fn, sign, a, res) {
+    if (res.special === 'all' || (res.text.indexOf('нет') >= 0)) return 'Посмотри на окружность: прямая ' + M((fn === 'cos' ? '<i>x</i>' : '<i>y</i>') + ' = ' + T.num(a)) + ' не пересекает окружность.';
+    if (sign === '=') {
+      if (fn === 'sin') return 'Ищем точки окружности на высоте ' + M(T.num(a)) + ': их ординаты равны ' + M('<i>a</i>') + '. Каждая точка даёт серию углов через полный оборот 2π.';
+      if (fn === 'cos') return 'Ищем точки окружности с абсциссой ' + M(T.num(a)) + '. Они симметричны относительно оси ' + M('<i>Ox</i>') + ', поэтому ответ записывают со знаком ±.';
+      return 'Прямая через центр и точку на оси ' + fn + ' пересекает окружность в двух противоположных точках. Они отличаются на π, поэтому одна серия с шагом π.';
+    }
+    if (fn === 'sin' || fn === 'cos') return 'Обходим выделенную дугу против часовой стрелки: левый конец промежутка — где дуга начинается, правый — где кончается. Поэтому левый конец всегда меньше правого. Закрашенная точка входит в ответ, пустая нет.';
+    return 'Период ' + fn + ' равен π, поэтому достаточно найти решения на одном промежутке длиной π и добавить πn. Точки, где ' + fn + ' не существует, в ответ не входят.';
+  }
+
+  function setTry(list) {
+    var ol = $('try');
+    ol.innerHTML = '';
+    list.forEach(function (s) { var li = document.createElement('li'); li.textContent = s; ol.appendChild(li); });
+  }
+
+  /* ---------- общая отрисовка ---------- */
+  var LEADS = {
+    fn: 'Угол t откладывается на единичной окружности. Синус — ордината точки, косинус — абсцисса, тангенс и котангенс читаются на своих осях. Справа тот же угол на графике.',
+    inv: 'Арк-функция по значению a находит угол. Таких углов бесконечно много, поэтому берут один, из промежутка главных значений: он выделен на окружности. Справа видно, что график обратной функции симметричен куску исходного графика относительно прямой y = x.',
+    eq: 'Уравнение и неравенство решаются одной картинкой: на окружности отмечаем точки или дугу, на графике — промежутки оси x. Ответ записан сериями с n ∈ ℤ.'
+  };
+  function drawAll() {
+    document.querySelectorAll('.tab').forEach(function (b) { b.setAttribute('aria-selected', b.dataset.tab === S.tab ? 'true' : 'false'); });
+    $('lead').textContent = LEADS[S.tab];
+    if (S.tab === 'fn') { fnControls(); drawFn(); }
+    else if (S.tab === 'inv') { invControls(); drawInv(); }
+    else { eqControls(); drawEq(); }
+    save();
+  }
+  function redraw() {
+    if (S.tab === 'fn') drawFn(); else if (S.tab === 'inv') drawInv(); else drawEq();
+    save();
+  }
+  document.querySelectorAll('.tab').forEach(function (b) { b.onclick = function () { S.tab = b.dataset.tab; drawAll(); }; });
+
+  /* ---------- перетаскивание ---------- */
+  function svgPt(svg, e) {
+    var r = svg.getBoundingClientRect(), vb = svg.viewBox.baseVal;
+    return [(e.clientX - r.left) * vb.width / r.width, (e.clientY - r.top) * vb.height / r.height];
+  }
+  function onCircle(e) {
+    var p = svgPt(circ, e), x = (p[0] - CX) / R, y = (CY - p[1]) / R, th = Math.atan2(y, x);
+    if (S.tab === 'fn' || (S.tab === 'inv' && S.prop === 'comp')) {
+      var key = S.tab === 'fn' ? 't' : 'x';
+      S[key] = clamp(snapAngle(unwrap(th, S[key])), -2 * PI, 2 * PI);
+    } else if (S.tab === 'inv') {
+      var I = T.INV[S.inv], a;
+      if (S.inv === 'arcsin') a = y; else if (S.inv === 'arccos') a = x;
+      else if (S.inv === 'arctg') { th = clamp(x < 0 ? (y > 0 ? PI / 2 : -PI / 2) : th, -PI / 2 + 0.06, PI / 2 - 0.06); a = Math.tan(th); }
+      else { th = clamp(y < 0 ? (x > 0 ? 0 : PI) : th, 0.06, PI - 0.06); a = 1 / Math.tan(th); }
+      S.a = clamp(snapA(a, I.A), I.dom[0], I.dom[1]);
+    } else {
+      var fn = S.efn, b;
+      if (fn === 'sin') b = y; else if (fn === 'cos') b = x;
+      else if (fn === 'tg') b = Math.abs(Math.cos(th)) < 0.03 ? Math.sign(Math.sin(th)) * 30 : Math.tan(th);
+      else b = Math.abs(Math.sin(th)) < 0.03 ? Math.sign(Math.cos(th)) * 30 : 1 / Math.tan(th);
+      S.ea = clamp(snapA(b, fn === 'sin' || fn === 'cos' ? T.A_SIN.concat([-1.5, 1.5]) : T.A_TG), -2.2, 2.2);
+    }
+    redraw();
+  }
+  function onGraph(e) {
+    var p = svgPt(graph, e), x = p[0] / G.sc + G.x0, y = G.y1 - p[1] / G.sc;
+    if (S.tab === 'fn') S.t = clamp(snapAngle(x), -2 * PI, 2 * PI);
+    else if (S.tab === 'inv') {
+      if (S.prop === 'comp') S.x = clamp(snapAngle(x), -2 * PI, 2 * PI);
+      else { var I = T.INV[S.inv]; S.a = clamp(snapA(x, I.A), I.dom[0], I.dom[1]); }
+    } else S.ea = clamp(snapA(y, S.efn === 'sin' || S.efn === 'cos' ? T.A_SIN.concat([-1.5, 1.5]) : T.A_TG), -2.2, 2.2);
+    redraw();
+  }
+  [[circ, onCircle], [graph, onGraph]].forEach(function (pr) {
+    var svg = pr[0], fnc = pr[1], down = false;
+    svg.addEventListener('pointerdown', function (e) { down = true; svg.setPointerCapture(e.pointerId); fnc(e); e.preventDefault(); });
+    svg.addEventListener('pointermove', function (e) { if (down) fnc(e); });
+    svg.addEventListener('pointerup', function () { down = false; });
+    svg.addEventListener('pointercancel', function () { down = false; });
+    svg.addEventListener('keydown', function (e) {
+      var d = e.key === 'ArrowRight' || e.key === 'ArrowUp' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowDown' ? -1 : 0;
+      if (!d) return;
+      e.preventDefault();
+      if (S.tab === 'fn' || (S.tab === 'inv' && S.prop === 'comp')) {
+        var key = S.tab === 'fn' ? 't' : 'x';
+        S[key] = clamp(S[key] + d * PI / 12, -2 * PI, 2 * PI);
+      } else if (S.tab === 'inv') {
+        var I = T.INV[S.inv], list = I.A, j = nearestIdx(list, S.a);
+        S.a = list[clamp(j + d, 0, list.length - 1)];
+      } else {
+        var L = S.efn === 'sin' || S.efn === 'cos' ? T.A_SIN : T.A_TG, j2 = nearestIdx(L, S.ea);
+        S.ea = L[clamp(j2 + d, 0, L.length - 1)];
+      }
+      redraw();
+    });
+  });
+  function nearestIdx(list, v) {
+    var j = 0;
+    list.forEach(function (x, i) { if (Math.abs(x - v) < Math.abs(list[j] - v)) j = i; });
+    return j;
+  }
+
+  var hash = (location.hash || '').slice(1);
+  if (hash === 'fn' || hash === 'inv' || hash === 'eq') S.tab = hash;
+  drawAll();
+})();
+</script>
+</body>
+</html>
