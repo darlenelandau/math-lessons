@@ -90,6 +90,7 @@ summary { cursor: pointer; font-weight: 600; color: var(--accent); font-size: .9
       <button class="tab" type="button" role="tab" data-tab="fn" aria-selected="true">Функции</button>
       <button class="tab" type="button" role="tab" data-tab="inv" aria-selected="false">Обратные функции</button>
       <button class="tab" type="button" role="tab" data-tab="eq" aria-selected="false">Уравнения и неравенства</button>
+      <button class="tab" type="button" role="tab" data-tab="id" aria-selected="false">Тождества</button>
     </div>
     <p class="lead" id="lead"></p>
   </header>
@@ -289,7 +290,8 @@ var TRIG = (function () {
     tab: 'fn',
     fn: 'sin', t: PI / 6, snap: 'special', partner: 'none', showAll: false, labels: true,
     inv: 'arcsin', a: 0.5, prop: 'none', x: 2.4, asnap: 'special',
-    efn: 'sin', sign: '>', ea: 0.5
+    efn: 'sin', sign: '>', ea: 0.5,
+    idp: 'double', ida: 30, idb: 40, idstep: 0
   };
   try { var saved = JSON.parse(localStorage.getItem('trig-lab') || 'null'); if (saved) for (var k in saved) if (k in S) S[k] = saved[k]; } catch (e) {}
   if (typeof S.a !== 'number') S.a = 0.5;
@@ -566,7 +568,7 @@ var TRIG = (function () {
   function drawFn() {
     var fn = S.fn, t = S.t, col = COL[fn];
     circleBase();
-    $('circHint').textContent = 'Тяни точку по окружности: можно намотать до пяти оборотов в любую сторону, график справа поедет следом. Или тяни точку по графику. Клавиши ← → тоже двигают угол.';
+    $('circHint').textContent = 'Тяни точку по окружности: можно намотать до пяти оборотов в любую сторону. На графике видны все углы t + 2πk с той же точкой: одни уходят за край, другие приходят. Клавиши ← → тоже двигают угол.';
     /* вторая точка: ось симметрии */
     var P = S.partner !== 'none' ? T.PARTNERS[S.partner] : null, u = P ? P.f(t) : null;
     if (P) {
@@ -590,20 +592,28 @@ var TRIG = (function () {
     ctext(Math.cos(t) * 0.84 + 0.06, Math.sin(t) * 0.84 - 0.05, 'P', 'lbl');
 
     /* график */
-    var sh = winShift(t);
-    setView(-2 * PI - 0.45 + sh, 2 * PI + 0.45 + sh, -2.4, 2.4);
+    setView(-2 * PI - 0.45, 2 * PI + 0.45, -2.4, 2.4);
     graphBase();
     if (S.showAll) ['sin', 'cos', 'tg', 'ctg'].forEach(function (f) { if (f !== fn) plot(T.F[f], G.x0, G.x1, { stroke: COL[f], 'stroke-width': 1.3, opacity: 0.35 }); });
     plot(T.F[fn], G.x0, G.x1, { stroke: col, 'stroke-width': 2.6 });
+    /* график не ездит: показаны все углы t + 2πk, которые попадают в окно; сам t — крупнее и с подписью */
     var v = T.F[fn](t);
-    gline(t, 0, t, isFinite(v) ? clamp(v, G.y0, G.y1) : 0, { stroke: col, 'stroke-width': 1.4, 'class': 'dash' });
-    gdot(t, 0, 'var(--ink)', 5);
-    if (isFinite(v) && Math.abs(v) < G.y1) gdot(t, v, col, 7);
+    for (var kk = -8; kk <= 8; kk++) {
+      var xk = t + 2 * PI * kk, main = kk === 0;
+      if (xk < G.x0 || xk > G.x1) continue;
+      gline(xk, 0, xk, isFinite(v) ? clamp(v, G.y0, G.y1) : 0, { stroke: col, 'stroke-width': main ? 1.4 : 1, 'class': 'dash', opacity: main ? 1 : 0.6 });
+      gdot(xk, 0, 'var(--ink)', main ? 5 : 3.5).setAttribute('opacity', main ? 1 : 0.55);
+      if (isFinite(v) && Math.abs(v) < G.y1) gdot(xk, v, col, main ? 7 : 5).setAttribute('opacity', main ? 1 : 0.55);
+      if (main) gtext(xk, 0, 't', 'lbl', null, 'middle', v > 0 ? 22 : -10);
+    }
+    if (t < G.x0 || t > G.x1) gtext(t > 0 ? G.x1 - 0.1 : G.x0 + 0.1, G.y1 - 0.35, (t > 0 ? 'сам угол t правее →' : '← сам угол t левее'), 'tk', null, t > 0 ? 'end' : 'start');
     if (P) {
       var w = T.F[fn](u);
-      if (u >= G.x0 && u <= G.x1) {
-        gline(u, 0, u, isFinite(w) ? clamp(w, G.y0, G.y1) : 0, { stroke: 'var(--q)', 'stroke-width': 1.4, 'class': 'dash' });
-        if (isFinite(w) && Math.abs(w) < G.y1) gdot(u, w, 'var(--q)', 6);
+      for (var k2 = -8; k2 <= 8; k2++) {
+        var uk = u + 2 * PI * k2;
+        if (uk < G.x0 || uk > G.x1) continue;
+        gline(uk, 0, uk, isFinite(w) ? clamp(w, G.y0, G.y1) : 0, { stroke: 'var(--q)', 'stroke-width': 1.2, 'class': 'dash', opacity: k2 ? 0.6 : 1 });
+        if (isFinite(w) && Math.abs(w) < G.y1) gdot(uk, w, 'var(--q)', k2 ? 4.5 : 6).setAttribute('opacity', k2 ? 0.6 : 1);
       }
     }
     /* показания */
@@ -714,15 +724,18 @@ var TRIG = (function () {
       cdot(Math.cos(x), Math.sin(x), 'var(--ink)', 6);
       var y = ok ? I.f(bx) : NaN;
       if (ok) invOnCircle(inv, bx, col, true);
-      var sh2 = winShift(x);
-      setView(-2 * PI - 0.45 + sh2, 2 * PI + 0.45 + sh2, -2.1, 3.6);
+      setView(-2 * PI - 0.45, 2 * PI + 0.45, -2.1, 3.6);
       graphBase({ ypi: true });
       plot(function (v) { return v; }, G.x0, G.x1, { stroke: 'var(--muted)', 'stroke-width': 1.2, 'class': 'dash' });
       plot(function (v) { var b = T.F[base](v); return isFinite(b) ? I.f(b) : NaN; }, G.x0, G.x1, { stroke: col, 'stroke-width': 2.6 });
       gline(I.rng[0], I.rng[0], I.rng[1], I.rng[1], { stroke: col, 'stroke-width': 7, 'stroke-opacity': 0.2, 'stroke-linecap': 'round' });
-      gline(x, 0, x, ok ? y : 0, { stroke: col, 'stroke-width': 1.3, 'class': 'dash' });
-      gdot(x, 0, 'var(--ink)', 5);
-      if (ok) gdot(x, y, col, 7);
+      for (var kc = -8; kc <= 8; kc++) {
+        var xc = x + 2 * PI * kc, mc = kc === 0;
+        if (xc < G.x0 || xc > G.x1) continue;
+        gline(xc, 0, xc, ok ? y : 0, { stroke: col, 'stroke-width': 1.3, 'class': 'dash', opacity: mc ? 1 : 0.6 });
+        gdot(xc, 0, 'var(--ink)', mc ? 5 : 3.5).setAttribute('opacity', mc ? 1 : 0.55);
+        if (ok) gdot(xc, y, col, mc ? 7 : 5).setAttribute('opacity', mc ? 1 : 0.55);
+      }
       var same = ok && Math.abs(y - x) < 1e-9;
       h += '<div class="big">' + M('<i>x</i> = ' + T.ang(x)) + ', &nbsp; ' + M(inv + '(' + base + ' <i>x</i>) = ' + (ok ? T.ang(y) : 'не существует')) + '</div>';
       h += '<div class="chk ' + (same ? 'ok' : 'info') + '">' + (same ? 'Здесь ' + M(inv + '(' + base + ' <i>x</i>) = <i>x</i>') + ': ' + M('<i>x</i>') + ' лежит в промежутке главных значений ' + rngTxt(I) + '.' :
@@ -949,22 +962,358 @@ var TRIG = (function () {
     list.forEach(function (s) { var li = document.createElement('li'); li.textContent = s; ol.appendChild(li); });
   }
 
+  /* =====================================================================
+     Вкладка 4. Тождества: доказательства по шагам
+     Каждый элемент чертежа помечен ключами (data-k). Текущий шаг подсвечивает свои ключи,
+     остальное приглушается. Углы задаются ползунками в градусах.
+     ===================================================================== */
+  var D2R = PI / 180, PV = { ox: 200, oy: 200, s: 140 };
+  function pp(p) { return [PV.ox + p[0] * PV.s, PV.oy - p[1] * PV.s]; }
+  function kk(e, k) { if (k) e.setAttribute('data-k', k); return e; }
+  function L(a, b, col, w, k, dash) {
+    var A = pp(a), B = pp(b);
+    var at = { x1: A[0].toFixed(1), y1: A[1].toFixed(1), x2: B[0].toFixed(1), y2: B[1].toFixed(1), stroke: col, 'stroke-width': w, 'stroke-linecap': 'round' };
+    if (dash) at['stroke-dasharray'] = '6 4';
+    return kk(el('line', at, circ), k);
+  }
+  function Poly(pts, col, op, k) {
+    return kk(el('polygon', { points: pts.map(function (p) { var q = pp(p); return q[0].toFixed(1) + ',' + q[1].toFixed(1); }).join(' '), fill: col, 'fill-opacity': op, stroke: 'none' }, circ), k);
+  }
+  function Txt(p, txt, col, k, dx, dy, anchor, cls) {
+    var q = pp(p);
+    var t = el('text', { x: (q[0] + (dx || 0)).toFixed(1), y: (q[1] + (dy || 0)).toFixed(1), 'class': cls || 'lbl', 'text-anchor': anchor || 'middle' }, circ, txt);
+    if (col) t.setAttribute('fill', col);
+    return kk(t, k);
+  }
+  /* подпись отрезка: у середины, сдвиг по нормали в пикселях (side = ±1) */
+  function SegT(a, b, txt, col, k, side, off) {
+    var A = pp(a), B = pp(b), mx = (A[0] + B[0]) / 2, my = (A[1] + B[1]) / 2, dx = B[0] - A[0], dy = B[1] - A[1], l = Math.hypot(dx, dy) || 1;
+    var nx = -dy / l * (side || 1) * (off || 16), ny = dx / l * (side || 1) * (off || 16);
+    var t = el('text', { x: (mx + nx).toFixed(1), y: (my + ny + 5).toFixed(1), 'class': 'lbl', 'text-anchor': 'middle', style: 'font-size:16px' }, circ, txt);
+    if (col) t.setAttribute('fill', col);
+    return kk(t, k);
+  }
+  function Dot(p, col, k, r) { var q = pp(p); return kk(el('circle', { cx: q[0], cy: q[1], r: r || 4.5, fill: col, stroke: '#fff', 'stroke-width': 1.3 }, circ), k); }
+  /* дуга угла с вершиной v от направления a0 до a1 (радианы, против часовой), радиус в пикселях */
+  function Ang(v, a0, a1, r, col, k, label, lr) {
+    var q = pp(v), n = 24, d = '';
+    for (var i = 0; i <= n; i++) {
+      var u = a0 + (a1 - a0) * i / n;
+      d += (i ? 'L' : 'M') + (q[0] + r * Math.cos(u)).toFixed(1) + ' ' + (q[1] - r * Math.sin(u)).toFixed(1);
+    }
+    kk(el('path', { d: d, stroke: col, 'stroke-width': 2, fill: 'none' }, circ), k);
+    if (label) {
+      var m = (a0 + a1) / 2, rr = lr || r + 13;
+      kk(el('text', { x: (q[0] + rr * Math.cos(m)).toFixed(1), y: (q[1] - rr * Math.sin(m) + 5).toFixed(1), 'class': 'lbl', 'text-anchor': 'middle', fill: col, style: 'font-size:16px' }, circ, label), k);
+    }
+  }
+  /* значок прямого угла в вершине v между направлениями d1, d2 (единичные векторы) */
+  function RA(v, d1, d2, k) {
+    var q = pp(v), s = 10;
+    var a = [q[0] + d1[0] * s, q[1] - d1[1] * s], c = [q[0] + d2[0] * s, q[1] - d2[1] * s], b = [a[0] + d2[0] * s, a[1] - d2[1] * s];
+    return kk(el('path', { d: 'M' + a[0] + ' ' + a[1] + 'L' + b[0] + ' ' + b[1] + 'L' + c[0] + ' ' + c[1], stroke: 'var(--ink)', 'stroke-width': 1.3, fill: 'none' }, circ), k);
+  }
+  function unit(a, b) { var dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l]; }
+  function dir(a, b) { return Math.atan2(b[1] - a[1], b[0] - a[0]); }
+  function Circle(c, r, k) { var q = pp(c); return kk(el('circle', { cx: q[0], cy: q[1], r: r * PV.s, 'class': 'circ' }, circ), k); }
+  function Axes(lim) {
+    L([-lim, 0], [lim, 0], 'var(--muted)', 1.2);
+    L([0, -lim], [0, lim], 'var(--muted)', 1.2);
+  }
+  function n3(v) { return T.num(Math.round(v * 1000) / 1000); }
+  function dg(x) { return x + '°'; }
+
+  var C1 = 'var(--cos)', C2 = 'var(--sin)', C3 = 'var(--tg)', C4 = 'var(--ctg)', CQ = 'var(--q)';
+  var PROOFS = {
+    pyth: {
+      title: 'sin²α + cos²α = 1', angles: [['a', 'α', 0, 360]],
+      draw: function (A) {
+        PV = { ox: 200, oy: 200, s: 140 };
+        var a = A.a * D2R, P = [Math.cos(a), Math.sin(a)], H = [P[0], 0], O = [0, 0];
+        Axes(1.35); Circle(O, 1);
+        Poly([O, H, P], C2, 0.12, 'tri');
+        L(O, H, C1, 4, 'cos tri');
+        L(H, P, C2, 4, 'sin tri');
+        L(O, P, 'var(--ink)', 2.4, 'op tri');
+        if (Math.abs(P[0]) > 0.05 && Math.abs(P[1]) > 0.05) RA(H, [-Math.sign(P[0]), 0], [0, Math.sign(P[1])], 'tri');
+        Ang(O, 0, a, 24, 'var(--ink)', 'op', 'α', 38);
+        Dot(P, 'var(--ink)', 'op p', 6);
+        Txt(P, 'P(cos α; sin α)', null, 'p', P[0] >= 0 ? 10 : 12, P[1] >= 0 ? -14 : 26, 'start');
+        SegT(O, P, '1', null, 'op tri', P[0] * P[1] >= 0 ? -1 : 1);
+        SegT(O, H, '|cos α|', C1, 'cos tri', P[1] >= 0 ? -1 : 1, 18);
+        SegT(H, P, '|sin α|', C2, 'sin tri', P[0] * P[1] >= 0 ? -1 : 1, 26);
+      },
+      steps: [
+        ['Отложим угол α на единичной окружности. Точка P имеет координаты (cos α; sin α): так определяются синус и косинус.', 'op p'],
+        ['Опустим перпендикуляр PH на ось Ox. Треугольник OHP прямоугольный: катет OH = |cos α|, катет HP = |sin α|, гипотенуза OP = 1, это радиус.', 'tri'],
+        ['Теорема Пифагора: OH² + HP² = OP², то есть cos²α + sin²α = 1. Модули не мешают: квадрат модуля равен квадрату числа. Если P лежит на оси, треугольник вырождается, но равенство проверяется сразу: 0² + 1² = 1.', 'tri']
+      ],
+      check: function (A) {
+        var a = A.a * D2R, s = Math.sin(a), c = Math.cos(a);
+        return M('sin²' + dg(A.a) + ' + cos²' + dg(A.a) + ' = ' + n3(s * s) + ' + ' + n3(c * c) + ' = ' + n3(s * s + c * c));
+      }
+    },
+    dist: {
+      title: 'cos(α − β)', angles: [['a', 'α', 0, 360], ['b', 'β', 0, 360]],
+      draw: function (A) {
+        PV = { ox: 200, oy: 200, s: 140 };
+        var a = A.a * D2R, b = A.b * D2R, O = [0, 0];
+        var PA = [Math.cos(a), Math.sin(a)], PB = [Math.cos(b), Math.sin(b)], PA2 = [Math.cos(a - b), Math.sin(a - b)], PB2 = [1, 0];
+        Axes(1.35); Circle(O, 1);
+        L(O, PA, 'var(--ink)', 1.6, 'pts'); L(O, PB, 'var(--ink)', 1.6, 'pts');
+        Ang(O, 0, a, 22, C1, 'pts', 'α', 34);
+        Ang(O, 0, b, 46, C2, 'pts', 'β', 58);
+        L(O, PA2, C4, 1.4, 'rot', true);
+        L(PA2, PB2, C4, 3, 'rot', true);
+        L(PA, PB, CQ, 3.4, 'ab');
+        /* стрелка поворота на −β */
+        Ang(O, b, 0, 132, C4, 'rot');
+        Dot(PA, 'var(--ink)', 'pts ab', 6); Dot(PB, 'var(--ink)', 'pts ab', 6);
+        Dot(PA2, C4, 'rot', 5.5); Dot(PB2, C4, 'rot', 5.5);
+        Txt(PA, 'A', null, 'pts ab', PA[0] * 16, -PA[1] * 16 + 6);
+        Txt(PB, 'B', null, 'pts ab', PB[0] * 16, -PB[1] * 16 + 6);
+        Txt(PA2, 'A′', C4, 'rot', PA2[0] * 18, -PA2[1] * 18 + 6);
+        Txt(PB2, 'B′', C4, 'rot', 16, 18);
+      },
+      steps: [
+        ['Точки единичной окружности: A(cos α; sin α) и B(cos β; sin β).', 'pts'],
+        ['Квадрат длины хорды по формуле расстояния: AB² = (cos α − cos β)² + (sin α − sin β)². Раскроем скобки и учтём cos² + sin² = 1: AB² = 2 − 2(cos α cos β + sin α sin β).', 'ab'],
+        ['Повернём окружность вокруг центра на угол β по часовой стрелке. Точка B перейдёт в B′(1; 0), точка A — в A′(cos(α − β); sin(α − β)). При повороте расстояния не меняются: A′B′ = AB.', 'rot ab'],
+        ['Посчитаем A′B′² так же: (cos(α − β) − 1)² + sin²(α − β) = 2 − 2cos(α − β).', 'rot'],
+        ['Приравняем: 2 − 2cos(α − β) = 2 − 2(cos α cos β + sin α sin β), откуда cos(α − β) = cos α cos β + sin α sin β.', 'rot ab'],
+        ['Остальное следует отсюда. Заменим β на −β: cos(α + β) = cos α cos β − sin α sin β. А sin(α + β) = cos(π/2 − α − β) = cos((π/2 − α) − β) = sin α cos β + cos α sin β.', '']
+      ],
+      check: function (A) {
+        var a = A.a * D2R, b = A.b * D2R;
+        return M('cos(' + dg(A.a) + ' − ' + dg(A.b) + ') = ' + n3(Math.cos(a - b))) + ', &nbsp; ' + M('cos α cos β + sin α sin β = ' + n3(Math.cos(a) * Math.cos(b) + Math.sin(a) * Math.sin(b)));
+      }
+    },
+    rect: {
+      title: 'sin и cos суммы', angles: [['a', 'α', 5, 80], ['b', 'β', 5, 80]], limit: 85,
+      draw: function (A) {
+        PV = { ox: 100, oy: 365, s: 285 };
+        var a = A.a * D2R, b = A.b * D2R, ca = Math.cos(a), sa = Math.sin(a), cb = Math.cos(b), sb = Math.sin(b);
+        var O = [0, 0], Rr = [ca * cb, 0], Q = [ca * cb, sa * cb], H = Math.sin(a + b), Tt = [ca * cb, H], P = [Math.cos(a + b), H], U = [0, H];
+        L(O, Rr, 'var(--faint)', 1.4); L(Rr, Tt, 'var(--faint)', 1.4); L(Tt, U, 'var(--faint)', 1.4); L(U, O, 'var(--faint)', 1.4);
+        Poly([O, Rr, Q], C1, 0.13, 't1');
+        Poly([O, Q, P], CQ, 0.13, 't2');
+        Poly([Q, Tt, P], C3, 0.15, 't3');
+        L(O, Rr, C1, 3, 't1 cosr'); L(Rr, Q, C2, 3, 't1 sinr');
+        L(O, Q, 'var(--ink)', 2, 't1 t2'); L(Q, P, 'var(--ink)', 2, 't2 t3');
+        L(Q, Tt, C2, 3, 't3 sinr'); L(Tt, P, C1, 3, 't3 cosr');
+        L(O, P, 'var(--ink)', 2.6, 'op');
+        L(U, O, C2, 5, 'sinr op'); L(U, P, C1, 5, 'cosr op');
+        RA(Rr, [-1, 0], [0, 1], 't1'); RA(Tt, [0, -1], [-1, 0], 't3');
+        RA(Q, unit(Q, O), unit(Q, P), 't2');
+        Ang(O, 0, a, 46, C1, 't1', 'α', 60);
+        Ang(O, a, a + b, 70, CQ, 't2', 'β', 84);
+        Ang(Q, PI / 2, PI / 2 + a, 26, C3, 't3', 'α', 40);
+        Dot(O, 'var(--ink)'); Dot(P, 'var(--ink)', 'op');
+        Txt(O, 'O', null, null, -12, 18); Txt(Rr, 'R', null, null, 10, 18); Txt(Q, 'Q', null, null, 14, 4, 'start'); Txt(Tt, 'T', null, null, 12, -6, 'start'); Txt(P, 'P', null, null, 0, -12); Txt(U, 'U', null, null, -12, -6);
+        SegT(O, P, '1', null, 'op', 1);
+        SegT(O, Q, 'cos β', null, 't2', -1, 14);
+        SegT(Q, P, 'sin β', null, 't2', -1, 14);
+        SegT(O, Rr, 'cos α cos β', C1, 't1', -1, 20);
+        SegT(Rr, Q, 'sin α cos β', C2, 't1', -1, 14).setAttribute('text-anchor', 'start');
+        SegT(Q, Tt, 'cos α sin β', C2, 't3', -1, 14).setAttribute('text-anchor', 'start');
+        SegT(Tt, P, 'sin α sin β', C1, 't3', -1, 16);
+        Txt([0, H / 2], 'sin(α+β)', C2, 'sinr', -8, 0, 'end');
+        Txt([P[0] / 2, H], 'cos(α+β)', C1, 'cosr', 0, -12);
+      },
+      steps: [
+        ['Отрезок OP длины 1 образует с осью угол α + β. Поэтому высота прямоугольника OU равна sin(α + β), а отрезок UP равен cos(α + β).', 'op'],
+        ['В прямоугольном треугольнике OQP гипотенуза 1, угол при O равен β: OQ = cos β, QP = sin β.', 't2'],
+        ['В треугольнике ORQ гипотенуза cos β, угол α: OR = cos α · cos β, RQ = sin α · cos β.', 't1'],
+        ['Угол TQP тоже равен α: точки R, Q, T на одной прямой, поэтому ∠RQO + ∠OQP + ∠TQP = 180°, то есть (90° − α) + 90° + ∠TQP = 180°. В треугольнике QTP с гипотенузой sin β: QT = cos α · sin β, TP = sin α · sin β.', 't3'],
+        ['Правая сторона прямоугольника RT = RQ + QT равна его высоте: sin(α + β) = sin α cos β + cos α sin β.', 'sinr'],
+        ['Верхняя сторона: UP = UT − TP = OR − TP, то есть cos(α + β) = cos α cos β − sin α sin β.', 'cosr']
+      ],
+      check: function (A) {
+        var a = A.a * D2R, b = A.b * D2R;
+        return M('sin(' + dg(A.a) + ' + ' + dg(A.b) + ') = ' + n3(Math.sin(a + b))) + ' и ' + M('sin α cos β + cos α sin β = ' + n3(Math.sin(a) * Math.cos(b) + Math.cos(a) * Math.sin(b))) + '<br>' +
+          M('cos(' + dg(A.a) + ' + ' + dg(A.b) + ') = ' + n3(Math.cos(a + b))) + ' и ' + M('cos α cos β − sin α sin β = ' + n3(Math.cos(a) * Math.cos(b) - Math.sin(a) * Math.sin(b)));
+      }
+    },
+    ptol: {
+      title: 'теорема Птолемея', angles: [['a', 'α', 10, 80], ['b', 'β', 10, 80]],
+      draw: function (A) {
+        PV = { ox: 200, oy: 205, s: 300 };
+        var a = A.a * D2R, b = A.b * D2R, ca = Math.cos(a), sa = Math.sin(a), cb = Math.cos(b), sb = Math.sin(b);
+        var O = [0, 0], D = [-0.5, 0], B = [0.5, 0], Pa = [-0.5 + ca * ca, ca * sa], Pc = [-0.5 + cb * cb, -cb * sb], Mm = [(Pa[0] + Pc[0]) / 2, (Pa[1] + Pc[1]) / 2];
+        Circle(O, 0.5);
+        Poly([O, Pa, Pc], C2, 0.1, 'aoc');
+        L(O, Pa, C2, 1.5, 'aoc'); L(O, Pc, C2, 1.5, 'aoc'); L(O, Mm, C2, 1.3, 'aoc', true);
+        SegT(O, Pa, '1/2', C2, 'aoc', 1, 12); SegT(O, Pc, '1/2', C2, 'aoc', -1, 12);
+        if (A.a + A.b < 88) Ang(O, dir(O, Mm), dir(O, Pa), 22, C2, 'aoc', 'α+β', 40);
+        L(D, B, C3, 2.6, 'bd');
+        L(D, Pa, C1, 3, 't1'); L(Pa, B, CQ, 3, 't1');
+        L(D, Pc, CQ, 3, 't2'); L(Pc, B, C1, 3, 't2');
+        L(Pa, Pc, C2, 3, 'ac');
+        RA(Pa, unit(Pa, D), unit(Pa, B), 't1'); RA(Pc, unit(Pc, D), unit(Pc, B), 't2');
+        Ang(D, 0, a, 40, C1, 't1', 'α', 54);
+        Ang(D, -b, 0, 52, CQ, 't2', 'β', 66);
+        [[D, 'D', -16, 6], [B, 'B', 16, 6], [Pa, 'A', 0, -12], [Pc, 'C', 0, 24], [O, 'O', 0, 20]].forEach(function (x) { Dot(x[0], 'var(--ink)'); Txt(x[0], x[1], null, null, x[2], x[3]); });
+        Txt([0.3, 0], '1', C3, 'bd', 0, 18);
+        SegT(D, Pa, 'cos α', C1, 't1', 1, 16); SegT(Pa, B, 'sin α', CQ, 't1', 1, 16);
+        SegT(D, Pc, 'cos β', CQ, 't2', -1, 18); SegT(Pc, B, 'sin β', C1, 't2', -1, 18);
+        SegT(Pa, Pc, 'sin(α+β)', C2, 'ac', -1, 16);
+      },
+      steps: [
+        ['BD — диаметр окружности, он равен 1. Углы DAB и DCB прямые: они опираются на диаметр.', 'bd t1 t2'],
+        ['В прямоугольном треугольнике DAB гипотенуза 1, угол при D равен α: AD = cos α, AB = sin α.', 't1'],
+        ['В треугольнике DCB с углом β: CD = cos β, BC = sin β.', 't2'],
+        ['Вписанный угол ADC равен α + β, значит центральный угол AOC = 2(α + β). В равнобедренном треугольнике AOC боковые стороны 1/2, высота OM делит угол пополам, AM = ½ sin(α + β). Значит, AC = sin(α + β).', 'aoc ac'],
+        ['Теорема Птолемея для вписанного четырёхугольника ABCD: произведение диагоналей равно сумме произведений противоположных сторон, AC · BD = AB · CD + AD · BC.', 'ac bd t1 t2'],
+        ['Подставляем длины: sin(α + β) · 1 = sin α · cos β + cos α · sin β.', 'ac t1 t2']
+      ],
+      check: function (A) {
+        var a = A.a * D2R, b = A.b * D2R;
+        return M('AC · BD = ' + n3(Math.sin(a + b))) + ', &nbsp; ' + M('AB · CD + AD · BC = ' + n3(Math.sin(a) * Math.cos(b) + Math.cos(a) * Math.sin(b)));
+      }
+    },
+    double: {
+      title: 'двойной угол', angles: [['a', 'α', 5, 85]],
+      draw: function (A) {
+        PV = { ox: 200, oy: 225, s: 150 };
+        var a = A.a * D2R, O = [0, 0], Aa = [-1, 0], B = [1, 0], P = [Math.cos(2 * a), Math.sin(2 * a)], H = [P[0], 0];
+        Axes(1.3); Circle(O, 1);
+        Poly([Aa, P, B], C1, 0.08, 'tri');
+        Poly([Aa, H, P], C2, 0.12, 'h');
+        L(Aa, B, C3, 2.4, 'tri');
+        L(Aa, P, 'var(--ink)', 2.8, 'ins tri h');
+        L(P, B, 'var(--ink)', 1.6, 'tri');
+        L(O, P, CQ, 2.2, 'ang');
+        L(P, H, C2, 3.4, 'h');
+        L(Aa, H, C1, 3.4, 'h');
+        RA(P, unit(P, Aa), unit(P, B), 'tri');
+        if (Math.abs(P[1]) > 0.06) RA(H, [Math.sign(Aa[0] - H[0]) || -1, 0], [0, 1], 'h');
+        Ang(O, 0, 2 * a, 30, CQ, 'ang', '2α', 46);
+        Ang(Aa, 0, a, 52, 'var(--ink)', 'ins', 'α', 66);
+        [[Aa, 'A', -14, 6], [B, 'B', 14, 18], [P, 'P', P[0] * 14, -14], [O, 'O', -10, 18], [H, 'H', 8, 18]].forEach(function (x) { Dot(x[0], 'var(--ink)'); Txt(x[0], x[1], null, null, x[2], x[3]); });
+        SegT(Aa, P, '2 cos α', null, 'tri ins h', 1, 16);
+        SegT(H, P, 'sin 2α', C2, 'h', P[0] > 0 ? -1 : 1, 30);
+        Txt([(Aa[0] + H[0]) / 2, 0], '1 + cos 2α', C1, 'h', 0, 40);
+        Txt([0.5, 0], '1', C3, 'tri', 0, -8);
+      },
+      steps: [
+        ['Возьмём на единичной окружности точку P с углом 2α: P(cos 2α; sin 2α). Центральный угол POB равен 2α.', 'ang'],
+        ['Вписанный угол PAB с вершиной в A(−1; 0) опирается на ту же дугу PB, поэтому он вдвое меньше центрального: ∠PAB = α.', 'ins ang'],
+        ['AB — диаметр, он равен 2, а угол APB прямой (опирается на диаметр). В треугольнике APB: AP = AB · cos α = 2 cos α.', 'tri'],
+        ['Опустим перпендикуляр PH. В прямоугольном треугольнике APH: PH = AP · sin α = 2 sin α cos α, AH = AP · cos α = 2 cos²α.', 'h'],
+        ['Но PH — это ордината точки P, то есть sin 2α. Значит, sin 2α = 2 sin α cos α.', 'h ang'],
+        ['А AH = AO + OH = 1 + cos 2α. Значит, 1 + cos 2α = 2 cos²α, то есть cos 2α = 2 cos²α − 1. Отсюда же формула понижения степени: cos²α = (1 + cos 2α)/2.', 'h ang']
+      ],
+      check: function (A) {
+        var a = A.a * D2R;
+        return M('sin ' + dg(2 * A.a) + ' = ' + n3(Math.sin(2 * a))) + ' и ' + M('2 sin α cos α = ' + n3(2 * Math.sin(a) * Math.cos(a))) + '<br>' +
+          M('cos ' + dg(2 * A.a) + ' = ' + n3(Math.cos(2 * a))) + ' и ' + M('2cos²α − 1 = ' + n3(2 * Math.cos(a) * Math.cos(a) - 1));
+      }
+    }
+  };
+  var PROOF_LIST = [['pyth', 'sin² + cos² = 1'], ['double', 'двойной угол'], ['dist', 'cos(α − β)'], ['rect', 'сумма: прямоугольник'], ['ptol', 'сумма: Птолемей']];
+
+  function idControls() {
+    var c = $('ctl');
+    c.innerHTML = '';
+    segCtl(c, PROOF_LIST, S.idp, '', function (v) { S.idp = v; S.idstep = 0; drawAll(); });
+    var cc = $('circCtl');
+    cc.innerHTML = '';
+    var Pf = PROOFS[S.idp];
+    Pf.angles.forEach(function (an) {
+      var key = 'id' + an[0];
+      S[key] = clamp(Math.round(S[key]), an[2], an[3]);
+      var l = document.createElement('label');
+      l.style.width = '100%';
+      l.innerHTML = '<span class="m" style="min-width:4.2em"><i>' + an[1] + '</i> = <b id="v_' + key + '">' + S[key] + '°</b></span>';
+      var r = document.createElement('input');
+      r.type = 'range'; r.min = an[2]; r.max = an[3]; r.step = 1; r.value = S[key];
+      r.style.flex = '1';
+      r.oninput = function () {
+        S[key] = +r.value;
+        if (Pf.limit && S.ida + S.idb > Pf.limit) { var other = key === 'ida' ? 'idb' : 'ida'; S[other] = Pf.limit - S[key]; var o2 = document.querySelector('input[data-key="' + other + '"]'); if (o2) o2.value = S[other]; $('v_' + other).textContent = S[other] + '°'; }
+        $('v_' + key).textContent = S[key] + '°';
+        redraw();
+      };
+      r.dataset.key = key;
+      l.appendChild(r);
+      cc.appendChild(l);
+    });
+  }
+  var idHover = null;
+  function drawId() {
+    var Pf = PROOFS[S.idp], A = { a: S.ida, b: S.idb };
+    if (Pf.limit && A.a + A.b > Pf.limit) { A.b = S.idb = Pf.limit - A.a; }
+    clear(circ);
+    Pf.draw(A);
+    $('circHint').textContent = 'Меняй углы ползунками: чертёж перестраивается, а доказательство остаётся верным. Наведи мышь на шаг, чтобы увидеть, о чём он.';
+    var st = S.idstep >= Pf.steps.length ? Pf.steps.length - 1 : S.idstep;
+    var act = idHover !== null ? Pf.steps[idHover][1] : (st >= 0 ? Pf.steps[st][1] : null);
+    if (act) {
+      var on = act.split(' ');
+      [].forEach.call(circ.querySelectorAll('[data-k]'), function (e) {
+        var ks = e.getAttribute('data-k').split(' ');
+        if (!ks.some(function (k) { return on.indexOf(k) >= 0; })) e.setAttribute('opacity', '0.25');
+      });
+    }
+    var h = '<div class="big">' + Pf.title + '</div><ol class="try" style="margin:0">';
+    Pf.steps.forEach(function (s, i) {
+      h += '<li data-i="' + i + '" style="cursor:pointer;border-radius:5px;padding:3px 6px;margin-left:-6px;' + (i === st ? 'background:var(--accent-soft);' : '') + (st >= 0 && i > st ? 'color:var(--muted);' : '') + '">' + s[0] + '</li>';
+    });
+    h += '</ol><div class="ctl"><button class="tab" type="button" id="idPrev">Назад</button><button class="tab" type="button" id="idNext">Дальше</button>' +
+      '<button class="tab" type="button" id="idAll">' + (st < 0 ? 'По шагам' : 'Показать всё сразу') + '</button></div>';
+    h += '<div class="chk ok"><b>Проверка на числах:</b> ' + Pf.check(A) + '</div>';
+    $('read').innerHTML = h;
+    $('idPrev').onclick = function () { S.idstep = Math.max(0, (S.idstep < 0 ? 0 : st) - 1); redraw(); };
+    $('idNext').onclick = function () { S.idstep = Math.min(Pf.steps.length - 1, (S.idstep < 0 ? -1 : st) + 1); redraw(); };
+    $('idAll').onclick = function () { S.idstep = S.idstep < 0 ? 0 : -1; redraw(); };
+    [].forEach.call($('read').querySelectorAll('li[data-i]'), function (li) {
+      li.onmouseenter = function () { idHover = +li.dataset.i; clear(circ); redrawIdFigure(); };
+      li.onmouseleave = function () { idHover = null; redrawIdFigure(); };
+      li.onclick = function () { S.idstep = +li.dataset.i; idHover = null; redraw(); };
+    });
+    setTry([
+      'Сдвинь угол α в основном тождестве во вторую или третью четверть. Почему доказательство всё равно работает?',
+      'В доказательстве cos(α − β) возьми β = α. Что получается и почему это очевидно?',
+      'В прямоугольнике подбери α и β так, чтобы α + β = 90°. Чему равен cos(α + β) и как это видно на картинке?',
+      'В двойном угле: при каком α точка P попадает в B? в верхнюю точку окружности? Проверь формулы на этих углах.',
+      'Как из формулы для cos(α − β) получить sin(α − β)? Попробуй сам, потом сверь с прямоугольником.'
+    ]);
+  }
+  /* при наведении перерисовываем только чертёж */
+  function redrawIdFigure() {
+    var Pf = PROOFS[S.idp], A = { a: S.ida, b: S.idb };
+    clear(circ);
+    Pf.draw(A);
+    var st = S.idstep >= Pf.steps.length ? Pf.steps.length - 1 : S.idstep;
+    var act = idHover !== null ? Pf.steps[idHover][1] : (st >= 0 ? Pf.steps[st][1] : null);
+    if (act) {
+      var on = act.split(' ');
+      [].forEach.call(circ.querySelectorAll('[data-k]'), function (e) {
+        var ks = e.getAttribute('data-k').split(' ');
+        if (!ks.some(function (k) { return on.indexOf(k) >= 0; })) e.setAttribute('opacity', '0.25');
+      });
+    }
+  }
+
   /* ---------- общая отрисовка ---------- */
   var LEADS = {
     fn: 'Угол t откладывается на единичной окружности. Синус — ордината точки, косинус — абсцисса, тангенс и котангенс читаются на своих осях. Справа тот же угол на графике.',
     inv: 'Арк-функция по значению a находит угол. Таких углов бесконечно много, поэтому берут один, из промежутка главных значений: он выделен на окружности. Справа видно, что график обратной функции симметричен куску исходного графика относительно прямой y = x.',
-    eq: 'Уравнение и неравенство решаются одной картинкой: на окружности отмечаем точки или дугу, на графике — промежутки оси x. Ответ записан сериями с n ∈ ℤ.'
+    eq: 'Уравнение и неравенство решаются одной картинкой: на окружности отмечаем точки или дугу, на графике — промежутки оси x. Ответ записан сериями с n ∈ ℤ.',
+    id: 'Откуда берутся формулы: доказательства на картинках. Иди по шагам, каждый шаг подсвечивает свою часть чертежа. Углы можно менять: картинка перестраивается, а равенство остаётся верным.'
   };
   function drawAll() {
     document.querySelectorAll('.tab').forEach(function (b) { b.setAttribute('aria-selected', b.dataset.tab === S.tab ? 'true' : 'false'); });
     $('lead').textContent = LEADS[S.tab];
     if (S.tab === 'fn') { fnControls(); drawFn(); }
     else if (S.tab === 'inv') { invControls(); drawInv(); }
-    else { eqControls(); drawEq(); }
+    else if (S.tab === 'eq') { eqControls(); drawEq(); }
+    else { idControls(); drawId(); }
+    graph.style.display = S.tab === 'id' ? 'none' : '';
     save();
   }
   function redraw() {
-    if (S.tab === 'fn') drawFn(); else if (S.tab === 'inv') drawInv(); else drawEq();
+    if (S.tab === 'fn') drawFn(); else if (S.tab === 'inv') drawInv(); else if (S.tab === 'eq') drawEq(); else drawId();
     save();
   }
   document.querySelectorAll('.tab').forEach(function (b) { b.onclick = function () { S.tab = b.dataset.tab; drawAll(); }; });
@@ -975,6 +1324,7 @@ var TRIG = (function () {
     return [(e.clientX - r.left) * vb.width / r.width, (e.clientY - r.top) * vb.height / r.height];
   }
   function onCircle(e) {
+    if (S.tab === 'id') return;
     var p = svgPt(circ, e), x = (p[0] - CX) / R, y = (CY - p[1]) / R, th = Math.atan2(y, x);
     if (S.tab === 'fn' || (S.tab === 'inv' && S.prop === 'comp')) {
       var key = S.tab === 'fn' ? 't' : 'x';
@@ -1012,7 +1362,7 @@ var TRIG = (function () {
     svg.addEventListener('pointercancel', function () { down = false; });
     svg.addEventListener('keydown', function (e) {
       var d = e.key === 'ArrowRight' || e.key === 'ArrowUp' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowDown' ? -1 : 0;
-      if (!d) return;
+      if (!d || S.tab === 'id') return;
       e.preventDefault();
       if (S.tab === 'fn' || (S.tab === 'inv' && S.prop === 'comp')) {
         var key = S.tab === 'fn' ? 't' : 'x';
@@ -1062,7 +1412,7 @@ var TRIG = (function () {
   }
 
   var hash = (location.hash || '').slice(1);
-  if (hash === 'fn' || hash === 'inv' || hash === 'eq') S.tab = hash;
+  if (hash === 'fn' || hash === 'inv' || hash === 'eq' || hash === 'id') S.tab = hash;
   drawAll();
 })();
 </script>
