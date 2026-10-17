@@ -437,7 +437,8 @@ var TRIG = (function () {
       gtext(i * PI / 2, 0, T.piTxt(i * PI / 2), 'tk', null, 'middle', 18);
     }
     if (opt && opt.xnum) for (i = Math.ceil(x0); i <= x1 - 0.3; i++) if (i) gtext(i, 0, T.minus(String(i)), 'tk', null, 'middle', 18);
-    for (i = Math.ceil(G.y0); i <= G.y1 - 0.2; i++) if (i) gtext(-0.1, i, T.minus(String(i)), 'tk', null, 'end', 5);
+    var yIn = G.x0 < 0 && G.x1 > 0;
+    for (i = Math.ceil(G.y0); i <= G.y1 - 0.2; i++) if (i) gtext(yIn ? -0.1 : G.x0 + 0.08, i, T.minus(String(i)), 'tk', null, yIn ? 'end' : 'start', 5);
     if (opt && opt.ypi) for (i = Math.ceil(G.y0 / (PI / 2)); i * PI / 2 <= G.y1; i++) if (i) gtext(G.x1 - 0.1, i * PI / 2, T.piTxt(i * PI / 2), 'tk', null, 'end', -4);
   }
 
@@ -463,6 +464,14 @@ var TRIG = (function () {
   function unwrap(theta, prev) {
     var k = Math.round((prev - theta) / (2 * PI));
     return theta + 2 * PI * k;
+  }
+  /* угол можно крутить на 5 оборотов в каждую сторону; окно графика (два оборота) едет следом шагами по 2π */
+  var TMAX = 10 * PI;
+  function winShift(t) {
+    var k = 0;
+    if (t > 2 * PI + 1e-9) k = Math.ceil((t - 2 * PI) / (2 * PI) - 1e-9);
+    else if (t < -2 * PI - 1e-9) k = -Math.ceil((-t - 2 * PI) / (2 * PI) - 1e-9);
+    return 2 * PI * k;
   }
   function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 
@@ -557,7 +566,7 @@ var TRIG = (function () {
   function drawFn() {
     var fn = S.fn, t = S.t, col = COL[fn];
     circleBase();
-    $('circHint').textContent = 'Тяни точку по окружности (можно делать несколько оборотов) или по графику справа. Клавиши ← → тоже двигают угол.';
+    $('circHint').textContent = 'Тяни точку по окружности: можно намотать до пяти оборотов в любую сторону, график справа поедет следом. Или тяни точку по графику. Клавиши ← → тоже двигают угол.';
     /* вторая точка: ось симметрии */
     var P = S.partner !== 'none' ? T.PARTNERS[S.partner] : null, u = P ? P.f(t) : null;
     if (P) {
@@ -581,11 +590,11 @@ var TRIG = (function () {
     ctext(Math.cos(t) * 0.84 + 0.06, Math.sin(t) * 0.84 - 0.05, 'P', 'lbl');
 
     /* график */
-    setView(-2 * PI - 0.45, 2 * PI + 0.45, -2.4, 2.4);
+    var sh = winShift(t);
+    setView(-2 * PI - 0.45 + sh, 2 * PI + 0.45 + sh, -2.4, 2.4);
     graphBase();
-    var lim = 2 * PI;
-    if (S.showAll) ['sin', 'cos', 'tg', 'ctg'].forEach(function (f) { if (f !== fn) plot(T.F[f], -lim - 0.4, lim + 0.4, { stroke: COL[f], 'stroke-width': 1.3, opacity: 0.35 }); });
-    plot(T.F[fn], -lim - 0.4, lim + 0.4, { stroke: col, 'stroke-width': 2.6 });
+    if (S.showAll) ['sin', 'cos', 'tg', 'ctg'].forEach(function (f) { if (f !== fn) plot(T.F[f], G.x0, G.x1, { stroke: COL[f], 'stroke-width': 1.3, opacity: 0.35 }); });
+    plot(T.F[fn], G.x0, G.x1, { stroke: col, 'stroke-width': 2.6 });
     var v = T.F[fn](t);
     gline(t, 0, t, isFinite(v) ? clamp(v, G.y0, G.y1) : 0, { stroke: col, 'stroke-width': 1.4, 'class': 'dash' });
     gdot(t, 0, 'var(--ink)', 5);
@@ -602,6 +611,9 @@ var TRIG = (function () {
     h += '<div class="vals">' + ['sin', 'cos', 'tg', 'ctg'].map(function (f) {
       return '<div class="val ' + f + (f === fn ? ' on' : '') + '"><b>' + f + ' t</b>' + M(T.val(f, t)) + '</div>';
     }).join('') + '</div>';
+    var kTurn = Math.round(t / (2 * PI)), t0 = t - 2 * PI * kTurn;
+    if (t0 <= -PI + 1e-9) { t0 += 2 * PI; kTurn -= 1; }
+    if (kTurn) h += '<div style="color:var(--muted);font-size:.92rem">' + Math.abs(kTurn) + ' ' + (Math.abs(kTurn) === 1 ? 'полный оборот' : Math.abs(kTurn) < 5 ? 'полных оборота' : 'полных оборотов') + (kTurn > 0 ? ' против' : ' по') + ' часовой стрелке: точка ' + M('<i>P</i>') + ' та же, что для угла ' + M(T.ang(t0)) + ', ведь ' + M('<i>t</i> = ' + T.ang(t0) + (kTurn > 0 ? ' + ' : ' − ') + T.ang(2 * PI * Math.abs(kTurn))) + '. Значения всех функций те же.</div>';
     var q = quarter(t);
     if (q) h += '<div style="color:var(--muted);font-size:.92rem">Точка ' + M('<i>P</i>') + ' в ' + q + ' четверти: знаки ' + signs(t) + '.</div>';
     if (P) {
@@ -683,7 +695,7 @@ var TRIG = (function () {
   }
   function drawInv() {
     var inv = S.inv, I = T.INV[inv], base = I.base, col = COL[base], comp = S.prop === 'comp' || S.prop === 'comp2';
-    if (comp && S.prop === 'comp') S.x = clamp(S.x, -2 * PI, 2 * PI);
+    if (comp && S.prop === 'comp') S.x = clamp(S.x, -TMAX, TMAX);
     circleBase();
     $('circHint').textContent = comp && S.prop === 'comp' ? 'Тяни точку по окружности или по графику: меняется x.' :
       'Тяни ' + (inv === 'arcsin' ? 'горизонтальную прямую вверх-вниз' : inv === 'arccos' ? 'вертикальную прямую влево-вправо' : 'точку по окружности') + ' или точку на графике справа: меняется a.';
@@ -702,7 +714,8 @@ var TRIG = (function () {
       cdot(Math.cos(x), Math.sin(x), 'var(--ink)', 6);
       var y = ok ? I.f(bx) : NaN;
       if (ok) invOnCircle(inv, bx, col, true);
-      setView(-2 * PI - 0.45, 2 * PI + 0.45, -2.1, 3.6);
+      var sh2 = winShift(x);
+      setView(-2 * PI - 0.45 + sh2, 2 * PI + 0.45 + sh2, -2.1, 3.6);
       graphBase({ ypi: true });
       plot(function (v) { return v; }, G.x0, G.x1, { stroke: 'var(--muted)', 'stroke-width': 1.2, 'class': 'dash' });
       plot(function (v) { var b = T.F[base](v); return isFinite(b) ? I.f(b) : NaN; }, G.x0, G.x1, { stroke: col, 'stroke-width': 2.6 });
@@ -965,7 +978,7 @@ var TRIG = (function () {
     var p = svgPt(circ, e), x = (p[0] - CX) / R, y = (CY - p[1]) / R, th = Math.atan2(y, x);
     if (S.tab === 'fn' || (S.tab === 'inv' && S.prop === 'comp')) {
       var key = S.tab === 'fn' ? 't' : 'x';
-      S[key] = clamp(snapAngle(unwrap(th, S[key])), -2 * PI, 2 * PI);
+      S[key] = clamp(snapAngle(unwrap(th, S[key])), -TMAX, TMAX);
     } else if (S.tab === 'inv') {
       var I = T.INV[S.inv], a;
       if (S.inv === 'arcsin') a = y; else if (S.inv === 'arccos') a = x;
@@ -984,9 +997,9 @@ var TRIG = (function () {
   }
   function onGraph(e) {
     var p = svgPt(graph, e), x = p[0] / G.sc + G.x0, y = G.y1 - p[1] / G.sc;
-    if (S.tab === 'fn') S.t = clamp(snapAngle(x), -2 * PI, 2 * PI);
+    if (S.tab === 'fn') S.t = clamp(snapAngle(x), -TMAX, TMAX);
     else if (S.tab === 'inv') {
-      if (S.prop === 'comp') S.x = clamp(snapAngle(x), -2 * PI, 2 * PI);
+      if (S.prop === 'comp') S.x = clamp(snapAngle(x), -TMAX, TMAX);
       else { var I = T.INV[S.inv]; S.a = clamp(snapA(x, I.A), I.dom[0], I.dom[1]); }
     } else S.ea = clamp(snapA(y, S.efn === 'sin' || S.efn === 'cos' ? T.A_SIN.concat([-1.5, 1.5]) : T.A_TG), -2.2, 2.2);
     redraw();
@@ -1003,7 +1016,7 @@ var TRIG = (function () {
       e.preventDefault();
       if (S.tab === 'fn' || (S.tab === 'inv' && S.prop === 'comp')) {
         var key = S.tab === 'fn' ? 't' : 'x';
-        S[key] = clamp(S[key] + d * PI / 12, -2 * PI, 2 * PI);
+        S[key] = clamp(S[key] + d * PI / 12, -TMAX, TMAX);
       } else if (S.tab === 'inv' && (S.inv === 'arctg' || S.inv === 'arcctg')) {
         var Ik = T.INV[S.inv], th0 = Math.round(Ik.f(S.a) / (PI / 12)) * PI / 12;
         S.a = angToA(S.inv, clamp(th0 + d * PI / 12, Ik.rng[0], Ik.rng[1]));
