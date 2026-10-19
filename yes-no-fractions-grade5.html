@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Можно или нельзя. Продолжаем дроби (5 класс)</title>
+<style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+        font-family:'Segoe UI',Arial,sans-serif;
+        background:linear-gradient(180deg,#dff1fd 0%,#eaf7ee 55%,#f2f9e6 100%);
+        background-attachment:fixed;
+        color:#1e2430;padding:22px;line-height:1.55;
+    }
+    .container{max-width:900px;margin:0 auto}
+
+    .header{
+        border:3px solid #15803d;border-radius:14px;padding:18px 24px;margin-bottom:8px;text-align:center;
+        background:linear-gradient(160deg,#e0f2fe 0%,#d1fae5 62%,#dcfce7 100%);
+        box-shadow:0 3px 10px rgba(0,0,0,.10);
+    }
+    .header .emo{font-size:2em;margin-bottom:6px;letter-spacing:6px}
+    .header h1{font-size:1.7em;color:#14532d}
+    .header .lead{margin-top:8px;font-size:1.02em;color:#334155}
+
+    .sec{--c:#44403c;--bg:#fafaf9;--grid:#e2dfdb}
+    .sec-sky   {--c:#0369a1;--bg:#f0f9ff;--grid:#c4e2f5}
+    .sec-grass {--c:#15803d;--bg:#f0fdf4;--grid:#bfe6cb}
+    .sec-pond  {--c:#0e7490;--bg:#ecfeff;--grid:#bae3ec}
+    .sec-meadow{--c:#4d7c0f;--bg:#f7fee7;--grid:#d5e8a9}
+    .sec-earth {--c:#92400e;--bg:#fffbeb;--grid:#eed7b4}
+    .sec-stone {--c:#44403c;--bg:#f6f5f4;--grid:#dcd8d4}
+    .sec-indigo{--c:#4338ca;--bg:#eef2ff;--grid:#c9d0f7}
+
+    h2{font-size:1.26em;margin:26px 0 12px;padding:9px 16px;border-radius:9px;
+       background:var(--c);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.14)}
+
+    .memo{border:2px solid var(--c);border-left:8px solid var(--c);border-radius:9px;
+          padding:13px 18px;margin:12px 0;background:var(--bg)}
+    .memo p{font-size:1.02em;margin-bottom:7px}
+    .memo p:last-child{margin-bottom:0}
+
+    .rule{border:2px dashed var(--c);border-radius:10px;padding:14px 18px;margin:12px 0;background:var(--bg)}
+    .rule .lbl{font-weight:700;color:var(--c);font-size:1.02em}
+    .rule .ex{font-size:1.3em;font-weight:700;color:var(--c);margin-top:8px;text-align:center;letter-spacing:.5px}
+
+    .calc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(238px,1fr));gap:11px;margin-top:12px}
+    .calc{
+        position:relative;border:2px solid var(--c);border-radius:9px;padding:12px 10px 10px;
+        background:#fff;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.07);
+    }
+    .calc .eq{font-size:1.3em;font-weight:600;letter-spacing:.5px;white-space:nowrap}
+    .calc .eq.long{font-size:1.05em;letter-spacing:0}
+    .calc .blank{display:block;border-bottom:2px solid var(--grid);height:1.5em;margin:8px 12px 0}
+    .calc.hard{border-style:dashed;background:var(--bg)}
+    .calc .st{position:absolute;top:3px;right:7px;font-size:.72em}
+
+    .oral{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:9px;margin-top:10px}
+    .oral div{border:2px solid var(--c);border-radius:8px;padding:9px 6px;background:#fff;
+              text-align:center;font-size:1.3em;font-weight:600}
+
+    .task{border:2px solid var(--c);border-radius:10px;padding:15px 19px;margin:15px 0;
+          background:#fff;box-shadow:0 2px 7px rgba(0,0,0,.08)}
+    .task-num{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;
+              border-radius:50%;font-weight:800;font-size:.95em;color:#fff;background:var(--c);
+              margin-bottom:7px;padding:0 9px}
+    .task p{font-size:1.06em;margin-bottom:7px}
+    .task strong{color:var(--c)}
+    .task .star{float:right;font-size:1.05em;letter-spacing:2px}
+
+    .grid-space{margin-top:9px;border:2px solid var(--c);border-radius:6px;min-height:120px;background:#fff;
+        background-image:repeating-linear-gradient(0deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px),
+                         repeating-linear-gradient(90deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px);
+        background-size:24px 24px}
+    .grid-tall{min-height:165px}
+
+    .card4{border:3px solid var(--c);border-radius:12px;padding:16px 20px;background:var(--bg);margin:12px 0}
+    .card4 .row{display:flex;gap:14px;align-items:baseline;padding:9px 0;border-bottom:1px dashed var(--c)}
+    .card4 .row:last-child{border-bottom:none}
+    .card4 .n{flex:none;width:26px;height:26px;border-radius:50%;background:var(--c);color:#fff;
+              font-weight:800;font-size:.85em;display:flex;align-items:center;justify-content:center}
+    .card4 .t{flex:1}
+    .card4 .t b{color:var(--c)}
+    .card4 .t .e{display:block;font-size:1.12em;font-weight:700;margin-top:3px}
+
+    .hint{font-size:.95em;color:var(--c);font-style:italic;margin-top:7px;opacity:.95}
+
+
+    .inv{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0 2px}
+    .inv div{border:2px solid var(--c);border-radius:9px;background:#fff;padding:10px 8px;text-align:center;
+        font-size:1.12em;font-weight:700;color:#1e2430}
+    .inv div b{color:var(--c);font-weight:800}
+    .chainfig{text-align:center;margin:10px 0 2px}
+    .chainfig svg{max-width:100%;height:auto}
+    .calcs{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:9px;margin-top:10px}
+    .calcs div{border:2px solid var(--c);border-radius:8px;background:#fff;padding:9px 6px;text-align:center;
+        font-size:1.06em;font-weight:700;white-space:nowrap}
+    .calcs div i{font-style:normal;color:var(--c);font-weight:800;margin-right:6px;font-size:.9em}
+    .box{display:inline-block;min-width:38px;height:1.35em;border:2px solid var(--c);border-radius:6px;
+        background:var(--bg);vertical-align:-.3em;margin:0 3px}
+
+
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:12px 0 2px}
+    @media(max-width:620px){.two{grid-template-columns:1fr}}
+    .two .col{border:2px solid var(--c);border-radius:10px;background:#fff;padding:12px 16px}
+    .two .col h3{color:var(--c);font-size:1.02em;margin-bottom:7px;text-transform:uppercase;letter-spacing:.6px}
+    .two .col div{font-size:1.1em;font-weight:700;padding:3px 0}
+    .two .col .chk{color:#64748b;font-weight:600;font-size:.95em;border-top:1px dashed var(--grid);margin-top:7px;padding-top:6px}
+    .vals{width:100%;border-collapse:collapse;margin:10px 0 2px;font-size:1.1em}
+    .vals th,.vals td{border:2px solid var(--c);padding:9px 6px;text-align:center}
+    .vals th{background:var(--bg);color:var(--c)}
+    .vals td{background:#fff;height:44px}
+    .scales{text-align:center;margin:10px 0 2px}
+    .lets{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:9px;margin-top:10px}
+    .lets div{border:2px solid var(--c);border-radius:8px;background:#fff;padding:10px 6px;text-align:center;
+        font-size:1.1em;font-weight:700;white-space:nowrap}
+    .lets div i{font-style:normal;color:var(--c);font-weight:800;margin-right:6px;font-size:.88em}
+    .calcbox{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:11px;margin:10px 0 2px}
+    .calcbox .c{border:2px solid var(--c);border-radius:10px;background:#fff;padding:12px 14px 10px;
+        box-shadow:0 1px 4px rgba(0,0,0,.07)}
+    .calcbox .c b{display:block;color:var(--c);font-size:.9em;font-weight:800;margin-bottom:4px}
+    .calcbox .c .e{font-size:1.14em;font-weight:700;line-height:1.3}
+    .calcbox .c .ans{margin-top:9px;border-bottom:2px solid var(--grid);height:26px}
+    .subhead{font-weight:800;color:var(--c);margin:14px 0 2px;font-size:1.04em}
+
+
+    .fcard{border:3px solid var(--c);border-radius:12px;background:var(--bg);padding:14px 18px;margin:12px 0}
+    .fcard .main{font-size:1.5em;font-weight:800;color:var(--c);text-align:center;letter-spacing:.5px}
+    .fcard .two2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+    @media(max-width:600px){.fcard .two2{grid-template-columns:1fr}}
+    .fcard .two2 div{background:#fff;border:2px solid var(--c);border-radius:9px;padding:9px 6px;text-align:center;
+        font-size:1.2em;font-weight:800;color:#1e2430}
+    .fcard p{margin-top:9px;font-size:1.0em}
+    .vtab{width:100%;border-collapse:collapse;margin:10px 0 2px;font-size:1.08em}
+    .vtab th,.vtab td{border:2px solid var(--c);padding:9px 6px;text-align:center}
+    .vtab th{background:var(--bg);color:var(--c);white-space:nowrap}
+    .vtab td{background:#fff;height:46px;font-weight:700}
+
+
+    .euclid{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin:12px 0 2px}
+    .euclid div{border:2px solid var(--c);border-radius:10px;background:#fff;padding:10px 16px;
+        font-size:1.12em;font-weight:700;white-space:nowrap}
+    .euclid div b{color:var(--c)}
+    .lets{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:9px;margin-top:10px}
+    .lets div{border:2px solid var(--c);border-radius:8px;background:#fff;padding:10px 6px;text-align:center;
+        font-size:1.08em;font-weight:700}
+    .lets div i{font-style:normal;color:var(--c);font-weight:800;margin-right:6px;font-size:.88em}
+    .cutpic{text-align:center;margin:10px 0 2px}
+    .cutpic img{max-width:100%;height:auto;border-radius:8px}
+    .keep{page-break-inside:avoid;break-inside:avoid}
+    .cutbox{border:3px dashed var(--c);border-radius:14px;background:var(--bg);padding:26px 20px;margin:12px 0;
+        text-align:center;color:#475569;font-size:1.05em}
+    .cutbox b{display:block;color:var(--c);font-size:1.15em;margin-bottom:6px}
+    .linkbox{border:2px solid var(--c);border-radius:10px;background:var(--bg);padding:12px 16px;margin:10px 0}
+    .linkbox a{color:var(--c);font-weight:700}
+    .order{display:flex;align-items:center;gap:12px;background:var(--c);color:#fff;border-radius:10px;
+        padding:9px 16px;margin:2px 0 10px;box-shadow:0 2px 6px rgba(0,0,0,.14)}
+    .order b{flex:none;background:#fff;color:var(--c);border-radius:7px;padding:2px 9px;font-size:.92em}
+    .order span{font-size:1.04em;font-weight:600}
+
+
+    .road{text-align:center;margin:10px 0 2px}
+    .road svg{max-width:100%;height:auto}
+    .fcard3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0 2px}
+    @media(max-width:600px){.fcard3{grid-template-columns:1fr}}
+    .fcard3 div{border:2px solid var(--c);border-radius:10px;background:#fff;padding:12px 8px;text-align:center;
+        font-size:1.24em;font-weight:800;color:var(--c)}
+
+
+    .bars{display:flex;flex-direction:column;gap:10px;margin:12px 0 2px;align-items:center}
+    .bars .row{display:flex;align-items:center;gap:12px}
+    .bars .lab{font-size:1.2em;font-weight:800;color:var(--c);width:54px;text-align:right}
+    .rules4{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px;margin:12px 0 2px}
+    .rules4 div{border:2px solid var(--c);border-radius:10px;background:#fff;padding:11px 14px;font-size:1.0em}
+    .rules4 div b{color:var(--c);display:block;margin-bottom:3px}
+    .five{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:10px 0 2px}
+    .five figure{margin:0;flex:0 0 auto;border:2px solid var(--c);border-radius:10px;background:#fff;padding:6px 6px 2px}
+    .five figure img{display:block;width:100%;height:auto}
+    .five figcaption{text-align:center;font-weight:800;color:var(--c);font-size:.9em;margin-top:2px}
+    .five.tallpic figure{width:150px}
+    .five.widepic figure{width:200px}
+    .five.smallpic figure{width:150px}
+    .header{position:relative;overflow:hidden;padding-bottom:52px}
+    .header .mts{position:absolute;left:0;right:0;bottom:-2px;width:100%;height:auto;display:block;z-index:0}
+    .header h1,.header .emo{position:relative;z-index:1}
+    .header h1{text-shadow:0 1px 0 rgba(255,255,255,.75)}
+    .pyr{display:flex;flex-direction:column-reverse;align-items:center;gap:6px;margin:12px 0 2px}
+    .pyr .prow{display:flex;gap:6px}
+    .pyr .brick{width:92px;height:46px;border:2px solid var(--c);border-radius:8px;background:#fff;
+        display:flex;align-items:center;justify-content:center;font-weight:800}
+    .pyr .brick.given{background:var(--bg)}
+    .pyr .brick input{width:74px;height:32px;border:2px solid #cbd5e1;border-radius:7px;text-align:center;
+        font-size:1em;font-weight:700;font-family:inherit}
+    .pyr .brick input:focus{outline:none;border-color:var(--c)}
+    .pyr .brick input.ok{border-color:#16a34a;background:#f0fdf4}
+    .pyr .brick input.no{border-color:#dc2626;background:#fef2f2}
+    .five figure svg{display:block;width:100%;height:auto}
+    .five.pyrpic figure{width:240px}
+    .five.kenpic figure{width:172px}
+    .mixn{font-size:1.18em;font-weight:800;margin-right:2px}
+    .cutpic{text-align:center;margin:10px 0 2px}
+    .cutpic img{max-width:100%;height:auto;border-radius:8px}
+    .cutpic img.tall{max-width:300px}
+    .cutpic img.small{max-width:250px}
+    .frac{display:inline-block;text-align:center;vertical-align:middle;font-weight:800;line-height:1.05;margin:0 3px}
+    .frac span{display:block;padding:0 4px}
+    .frac span.d{border-top:2px solid currentColor}
+    .ansrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:9px}
+    .ansrow label{font-weight:700;color:var(--c)}
+    .ansrow input{width:96px;padding:8px 10px;font-size:1.08em;font-weight:700;text-align:center;
+        border:2px solid var(--grid);border-radius:9px;background:#fff;color:#1e2430}
+    .ansrow input:focus{outline:none;border-color:var(--c)}
+    .ansrow input.ok{border-color:#16a34a;background:#f0fdf4}
+    .ansrow input.no{border-color:#dc2626;background:#fef2f2}
+    .ansrow button,.cmp button,.pick2 button{border:2px solid var(--c);border-radius:9px;background:var(--bg);
+        color:var(--c);font-weight:700;font-size:1.0em;padding:8px 14px;cursor:pointer;transition:all .2s}
+    .ansrow button:hover,.cmp button:hover{background:var(--c);color:#fff}
+    .cmp{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:9px}
+    .cmp .side{font-size:1.18em;font-weight:700;min-width:58px;text-align:center}
+    .cmp .side.lbl{min-width:0;flex:1;text-align:left;font-size:1em;font-weight:700}
+    .cmp{align-items:flex-start}
+    .cmp .signs{display:inline-flex;gap:6px;margin:0 4px}
+    .cmp button{min-width:46px;font-size:1.15em}
+    .cmp button.ok{background:#16a34a;border-color:#16a34a;color:#fff}
+    .cmp button.no{background:#fecaca;border-color:#dc2626;color:#7f1d1d}
+    .fb{margin-top:7px;font-weight:700;min-height:1.2em}
+    .fb.ok{color:#15803d}
+    .fb.no{color:#b91c1c}
+    .match{display:grid;grid-template-columns:1fr 1fr;gap:10px 26px;margin-top:10px}
+    .chip{border:2px solid var(--c);border-radius:10px;background:#fff;padding:9px 6px;text-align:center;
+        cursor:pointer;font-weight:800;transition:all .15s}
+    .chip:hover{background:var(--bg)}
+    .chip.sel{background:#fde68a;border-color:#b45309}
+    .chip.done{background:#dcfce7;border-color:#16a34a;color:#15803d;cursor:default}
+    .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+    .chips .chip{min-width:72px;position:relative}
+    .chips .chip.done::after{content:attr(data-pos);position:absolute;top:-8px;right:-8px;background:#16a34a;
+        color:#fff;border-radius:50%;width:20px;height:20px;font-size:.75em;display:flex;align-items:center;
+        justify-content:center}
+
+    @page{size:A4;margin:12mm}
+    @media print{
+        body{background:#fff;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+        .task,.memo,.rule,.header,.card4{page-break-inside:avoid}
+        .break{page-break-before:always}
+    }
+
+    .calc .eq.xlong{font-size:.92em;letter-spacing:0}
+    .figure{border:2px solid var(--c);border-radius:10px;padding:14px;margin:12px 0;background:#fff;text-align:center;overflow-x:auto}
+    .figure .cap{margin-top:10px;font-size:1.12em;font-weight:700;color:var(--c)}
+    .figure .sub{margin-top:4px;font-size:.97em;color:#475569}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+    .eqlist{font-size:1.14em;line-height:1.95;font-weight:600}
+    .eqlist .tot{margin-top:9px;padding-top:9px;border-top:2px solid var(--c);color:var(--c);font-size:1.18em}
+    @media(max-width:700px){.two{grid-template-columns:1fr}}
+
+    .tbl{width:100%;border-collapse:collapse;margin-top:12px;background:#fff}
+    .tbl th{background:var(--c);color:#fff;padding:9px 10px;font-size:1em}
+    .tbl td{border:1.6px solid var(--grid);padding:11px 10px;text-align:center;font-size:1.08em;font-weight:600;height:42px}
+    .tbl td.filled{background:var(--bg);color:var(--c)}
+    .way{border:2px solid var(--c);border-radius:10px;padding:14px 18px;background:#fff;margin-top:12px}
+    .way .cap{font-weight:800;font-size:.88em;text-transform:uppercase;letter-spacing:.6px;
+              color:var(--c);margin-bottom:7px}
+    .way ol{margin-left:18px}
+    .way li{margin:7px 0;font-size:1.06em;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+    <svg class="mts" viewBox="0 0 1200 170" preserveAspectRatio="none" aria-hidden="true">
+      <polygon points="-40,170 180,34 400,170" fill="#7dd3fc" opacity=".55"/>
+      <polygon points="180,34 232,66 118,104" fill="#ffffff" opacity=".9"/>
+      <polygon points="860,170 1060,22 1260,170" fill="#67e8f9" opacity=".5"/>
+      <polygon points="1060,22 1116,56 996,96" fill="#ffffff" opacity=".9"/>
+      <polygon points="330,170 560,48 790,170" fill="#5eead4" opacity=".75"/>
+      <polygon points="560,48 606,76 500,110" fill="#ffffff" opacity=".85"/>
+      <polygon points="-40,170 150,100 340,170" fill="#34d399" opacity=".8"/>
+      <polygon points="250,170 480,92 710,170" fill="#22c55e" opacity=".55"/>
+      <polygon points="640,170 860,86 1080,170" fill="#10b981" opacity=".6"/>
+      <polygon points="960,170 1120,112 1280,170" fill="#16a34a" opacity=".5"/>
+    </svg>
+    <h1>Можно или нельзя</h1>
+</div>
+<section class="sec sec-stone"><h2>🧩 Разминка: кенкен 5 × 5</h2><div class="memo"><p>В каждой строке и в каждом столбце числа <strong>1, 2, 3, 4, 5</strong>, каждое по одному разу. В обведённой области числа дают указанный результат: <strong>11+</strong> это сумма, <strong>1−</strong> разность, <strong>30×</strong> произведение, <strong>4÷</strong> частное. Порядок чисел внутри области любой.</p></div><div class="task"><span class="task-num">1</span><p>Заполни поле.</p><div class="five kenpic"><figure><svg viewBox="0 0 160 160" width="160" role="img"><rect x="5" y="5" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="35" y="5" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="65" y="5" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="95" y="5" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="125" y="5" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="5" y="35" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="35" y="35" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="65" y="35" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="95" y="35" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="125" y="35" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="5" y="65" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="35" y="65" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="65" y="65" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="95" y="65" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="125" y="65" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="5" y="95" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="35" y="95" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="65" y="95" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="95" y="95" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="125" y="95" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="5" y="125" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="35" y="125" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="65" y="125" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="95" y="125" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="125" y="125" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><line x1="5" y1="35" x2="35" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="5" x2="65" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="35" y1="35" x2="65" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="35" x2="95" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="35" x2="125" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="155" y1="5" x2="155" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="125" y1="35" x2="155" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="35" x2="65" y2="65" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="35" y1="65" x2="65" y2="65" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="35" x2="95" y2="65" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="125" y1="35" x2="125" y2="65" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="155" y1="35" x2="155" y2="65" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="35" y1="65" x2="35" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="5" y1="95" x2="35" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="65" x2="65" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="65" x2="95" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="95" x2="95" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="125" y1="65" x2="125" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="95" x2="125" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="155" y1="65" x2="155" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="125" y1="95" x2="155" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="35" y1="95" x2="35" y2="125" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="95" x2="65" y2="125" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="95" x2="95" y2="125" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="125" x2="125" y2="125" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="155" y1="95" x2="155" y2="125" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="35" y1="125" x2="35" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="5" y1="155" x2="35" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="125" x2="65" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="35" y1="155" x2="65" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="155" x2="95" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="125" y1="125" x2="125" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="155" x2="125" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="155" y1="125" x2="155" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="125" y1="155" x2="155" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><rect x="5" y="5" width="150" height="150" fill="none" stroke="#1e2430" stroke-width="3"/><text x="38" y="77" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">11+</text><text x="128" y="47" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">1−</text><text x="98" y="47" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">3+</text><text x="68" y="17" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">30×</text><text x="68" y="47" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">5+</text><text x="98" y="107" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">25×</text><text x="68" y="107" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">9+</text><text x="8" y="107" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">4+</text><text x="8" y="17" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">4÷</text><text x="8" y="47" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">30×</text></svg><figcaption>1</figcaption></figure><figure><svg viewBox="0 0 160 160" width="160" role="img"><rect x="5" y="5" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="35" y="5" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="65" y="5" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="95" y="5" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="125" y="5" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="5" y="35" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="35" y="35" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="65" y="35" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="95" y="35" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="125" y="35" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="5" y="65" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="35" y="65" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="65" y="65" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="95" y="65" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="125" y="65" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="5" y="95" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="35" y="95" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="65" y="95" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="95" y="95" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="125" y="95" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="5" y="125" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="35" y="125" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="65" y="125" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="95" y="125" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="125" y="125" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><line x1="5" y1="35" x2="35" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="5" x2="65" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="35" y1="35" x2="65" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="35" x2="95" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="35" x2="125" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="155" y1="5" x2="155" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="125" y1="35" x2="155" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="35" x2="65" y2="65" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="35" y1="65" x2="65" y2="65" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="35" x2="95" y2="65" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="125" y1="35" x2="125" y2="65" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="155" y1="35" x2="155" y2="65" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="35" y1="65" x2="35" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="5" y1="95" x2="35" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="65" x2="65" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="65" x2="95" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="95" x2="95" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="125" y1="65" x2="125" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="95" x2="125" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="155" y1="65" x2="155" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="125" y1="95" x2="155" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="35" y1="95" x2="35" y2="125" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="95" x2="65" y2="125" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="95" x2="95" y2="125" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="125" x2="125" y2="125" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="155" y1="95" x2="155" y2="125" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="35" y1="125" x2="35" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="5" y1="155" x2="35" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="125" x2="65" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="35" y1="155" x2="65" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="155" x2="95" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="125" y1="125" x2="125" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="155" x2="125" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="155" y1="125" x2="155" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="125" y1="155" x2="155" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><rect x="5" y="5" width="150" height="150" fill="none" stroke="#1e2430" stroke-width="3"/><text x="38" y="77" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">11+</text><text x="128" y="47" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">1−</text><text x="98" y="47" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">3+</text><text x="68" y="17" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">30×</text><text x="68" y="47" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">5+</text><text x="98" y="107" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">25×</text><text x="68" y="107" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">9+</text><text x="8" y="107" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">4+</text><text x="8" y="17" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">4÷</text><text x="8" y="47" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">30×</text></svg><figcaption>2</figcaption></figure><figure><svg viewBox="0 0 160 160" width="160" role="img"><rect x="5" y="5" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="35" y="5" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="65" y="5" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="95" y="5" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="125" y="5" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="5" y="35" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="35" y="35" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="65" y="35" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="95" y="35" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="125" y="35" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="5" y="65" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="35" y="65" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="65" y="65" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="95" y="65" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="125" y="65" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="5" y="95" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="35" y="95" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="65" y="95" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="95" y="95" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="125" y="95" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="5" y="125" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="35" y="125" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="65" y="125" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="95" y="125" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="125" y="125" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><line x1="5" y1="35" x2="35" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="5" x2="65" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="35" y1="35" x2="65" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="35" x2="95" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="35" x2="125" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="155" y1="5" x2="155" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="125" y1="35" x2="155" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="35" x2="65" y2="65" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="35" y1="65" x2="65" y2="65" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="35" x2="95" y2="65" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="125" y1="35" x2="125" y2="65" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="155" y1="35" x2="155" y2="65" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="35" y1="65" x2="35" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="5" y1="95" x2="35" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="65" x2="65" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="65" x2="95" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="95" x2="95" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="125" y1="65" x2="125" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="95" x2="125" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="155" y1="65" x2="155" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="125" y1="95" x2="155" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="35" y1="95" x2="35" y2="125" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="95" x2="65" y2="125" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="95" x2="95" y2="125" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="125" x2="125" y2="125" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="155" y1="95" x2="155" y2="125" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="35" y1="125" x2="35" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="5" y1="155" x2="35" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="125" x2="65" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="35" y1="155" x2="65" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="155" x2="95" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="125" y1="125" x2="125" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="155" x2="125" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="155" y1="125" x2="155" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="125" y1="155" x2="155" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><rect x="5" y="5" width="150" height="150" fill="none" stroke="#1e2430" stroke-width="3"/><text x="38" y="77" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">11+</text><text x="128" y="47" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">1−</text><text x="98" y="47" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">3+</text><text x="68" y="17" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">30×</text><text x="68" y="47" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">5+</text><text x="98" y="107" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">25×</text><text x="68" y="107" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">9+</text><text x="8" y="107" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">4+</text><text x="8" y="17" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">4÷</text><text x="8" y="47" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">30×</text></svg><figcaption>3</figcaption></figure><figure><svg viewBox="0 0 160 160" width="160" role="img"><rect x="5" y="5" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="35" y="5" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="65" y="5" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="95" y="5" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="125" y="5" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="5" y="35" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="35" y="35" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="65" y="35" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="95" y="35" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="125" y="35" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="5" y="65" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="35" y="65" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="65" y="65" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="95" y="65" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="125" y="65" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="5" y="95" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="35" y="95" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="65" y="95" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="95" y="95" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="125" y="95" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="5" y="125" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="35" y="125" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="65" y="125" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="95" y="125" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="125" y="125" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><line x1="5" y1="35" x2="35" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="5" x2="65" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="35" y1="35" x2="65" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="35" x2="95" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="35" x2="125" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="155" y1="5" x2="155" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="125" y1="35" x2="155" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="35" x2="65" y2="65" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="35" y1="65" x2="65" y2="65" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="35" x2="95" y2="65" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="125" y1="35" x2="125" y2="65" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="155" y1="35" x2="155" y2="65" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="35" y1="65" x2="35" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="5" y1="95" x2="35" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="65" x2="65" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="65" x2="95" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="95" x2="95" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="125" y1="65" x2="125" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="95" x2="125" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="155" y1="65" x2="155" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="125" y1="95" x2="155" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="35" y1="95" x2="35" y2="125" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="95" x2="65" y2="125" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="95" x2="95" y2="125" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="125" x2="125" y2="125" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="155" y1="95" x2="155" y2="125" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="35" y1="125" x2="35" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="5" y1="155" x2="35" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="125" x2="65" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="35" y1="155" x2="65" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="155" x2="95" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="125" y1="125" x2="125" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="155" x2="125" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="155" y1="125" x2="155" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="125" y1="155" x2="155" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><rect x="5" y="5" width="150" height="150" fill="none" stroke="#1e2430" stroke-width="3"/><text x="38" y="77" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">11+</text><text x="128" y="47" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">1−</text><text x="98" y="47" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">3+</text><text x="68" y="17" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">30×</text><text x="68" y="47" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">5+</text><text x="98" y="107" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">25×</text><text x="68" y="107" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">9+</text><text x="8" y="107" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">4+</text><text x="8" y="17" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">4÷</text><text x="8" y="47" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">30×</text></svg><figcaption>4</figcaption></figure><figure><svg viewBox="0 0 160 160" width="160" role="img"><rect x="5" y="5" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="35" y="5" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="65" y="5" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="95" y="5" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="125" y="5" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="5" y="35" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="35" y="35" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="65" y="35" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="95" y="35" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="125" y="35" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="5" y="65" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="35" y="65" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="65" y="65" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="95" y="65" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="125" y="65" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="5" y="95" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="35" y="95" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="65" y="95" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="95" y="95" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="125" y="95" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="5" y="125" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="35" y="125" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="65" y="125" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="95" y="125" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="125" y="125" width="30" height="30" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><line x1="5" y1="35" x2="35" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="5" x2="65" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="35" y1="35" x2="65" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="35" x2="95" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="35" x2="125" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="155" y1="5" x2="155" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="125" y1="35" x2="155" y2="35" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="35" x2="65" y2="65" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="35" y1="65" x2="65" y2="65" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="35" x2="95" y2="65" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="125" y1="35" x2="125" y2="65" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="155" y1="35" x2="155" y2="65" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="35" y1="65" x2="35" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="5" y1="95" x2="35" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="65" x2="65" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="65" x2="95" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="95" x2="95" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="125" y1="65" x2="125" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="95" x2="125" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="155" y1="65" x2="155" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="125" y1="95" x2="155" y2="95" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="35" y1="95" x2="35" y2="125" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="95" x2="65" y2="125" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="95" x2="95" y2="125" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="125" x2="125" y2="125" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="155" y1="95" x2="155" y2="125" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="35" y1="125" x2="35" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="5" y1="155" x2="35" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="125" x2="65" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="35" y1="155" x2="65" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="65" y1="155" x2="95" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="125" y1="125" x2="125" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="95" y1="155" x2="125" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="155" y1="125" x2="155" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="125" y1="155" x2="155" y2="155" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><rect x="5" y="5" width="150" height="150" fill="none" stroke="#1e2430" stroke-width="3"/><text x="38" y="77" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">11+</text><text x="128" y="47" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">1−</text><text x="98" y="47" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">3+</text><text x="68" y="17" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">30×</text><text x="68" y="47" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">5+</text><text x="98" y="107" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">25×</text><text x="68" y="107" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">9+</text><text x="8" y="107" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">4+</text><text x="8" y="17" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">4÷</text><text x="8" y="47" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">30×</text></svg><figcaption>5</figcaption></figure></div></div></section><section class="sec sec-amber"><h2>🤔 Можно или нельзя</h2><div class="memo"><p>Два ответа требуют разной работы. Чтобы доказать, что <strong>можно</strong>, достаточно одного примера. Чтобы доказать, что <strong>нельзя</strong>, примеров не хватит никогда: нужно рассуждение, которое закрывает сразу все случаи.</p><p>Чаще всего помогают три вещи: <strong>чётность</strong>, <strong>остатки</strong> и <strong>подсчёт одного и того же двумя способами</strong>.</p></div><div class="task"><span class="task-num">2</span><p>Вовочка сказал: «Позавчера мне было 12 лет, а в следующем году исполнится 15». Мог ли он сказать правду?</p><div class="cmp"><span class="side lbl">Мог ли Вовочка говорить правду?</span><span class="signs"><button onclick="chkCmp(this,'w1',0,0)">можно</button><button onclick="chkCmp(this,'w1',1,0)">нельзя</button></span><span class="fb" id="fb_w1"></span></div><div class="grid-space"></div><p class="hint">В какой день года такое возможно?</p></div><div class="task"><span class="task-num">3</span><p>Может ли в одном месяце быть столько воскресений?</p><div class="cmp"><span class="side lbl">а) три воскресенья</span><span class="signs"><button onclick="chkCmp(this,'v3',0,1)">можно</button><button onclick="chkCmp(this,'v3',1,1)">нельзя</button></span><span class="fb" id="fb_v3"></span></div><div class="cmp"><span class="side lbl">б) четыре воскресенья</span><span class="signs"><button onclick="chkCmp(this,'v4',0,0)">можно</button><button onclick="chkCmp(this,'v4',1,0)">нельзя</button></span><span class="fb" id="fb_v4"></span></div><div class="cmp"><span class="side lbl">в) пять воскресений</span><span class="signs"><button onclick="chkCmp(this,'v5',0,0)">можно</button><button onclick="chkCmp(this,'v5',1,0)">нельзя</button></span><span class="fb" id="fb_v5"></span></div><div class="cmp"><span class="side lbl">г) шесть воскресений</span><span class="signs"><button onclick="chkCmp(this,'v6',0,1)">можно</button><button onclick="chkCmp(this,'v6',1,1)">нельзя</button></span><span class="fb" id="fb_v6"></span></div><p class="hint">В месяце от 28 до 31 дня. Сколько это недель?</p></div><div class="task"><span class="task-num">4</span><p>На доске <strong>6 × 6</strong> расставили шашки, не больше одной в клетку, так, что на всех вертикалях шашек <strong>поровну</strong>. Могло ли при этом на всех горизонталях оказаться <strong>разное</strong> количество шашек?</p><div class="cmp"><span class="side lbl">Могло ли так получиться?</span><span class="signs"><button onclick="chkCmp(this,'sh',0,0)">можно</button><button onclick="chkCmp(this,'sh',1,0)">нельзя</button></span><span class="fb" id="fb_sh"></span></div><div class="grid-space grid-tall"></div><p class="hint">Сосчитай все шашки двумя способами: по вертикалям и по горизонталям.</p></div><div class="task"><span class="task-num">5</span><p>В классе 33 ученика: 18 мальчиков и 15 девочек. Дружба взаимна. Может ли быть так, что</p><div class="cmp"><span class="side lbl">а) у каждого ровно 7 друзей из класса</span><span class="signs"><button onclick="chkCmp(this,'f1',0,1)">можно</button><button onclick="chkCmp(this,'f1',1,1)">нельзя</button></span><span class="fb" id="fb_f1"></span></div><div class="cmp"><span class="side lbl">б) у всех разное число друзей из класса</span><span class="signs"><button onclick="chkCmp(this,'f2',0,1)">можно</button><button onclick="chkCmp(this,'f2',1,1)">нельзя</button></span><span class="fb" id="fb_f2"></span></div><div class="cmp"><span class="side lbl">в) у каждого есть друзья, у мальчиков числа друзей разные и не больше 18, у девочек разные и не больше 15</span><span class="signs"><button onclick="chkCmp(this,'f3',0,1)">можно</button><button onclick="chkCmp(this,'f3',1,1)">нельзя</button></span><span class="fb" id="fb_f3"></span></div><div class="grid-space grid-tall"></div><p class="hint">Посчитай сумму всех чисел друзей. Каждая дружба попадёт в эту сумму дважды.</p></div><div class="task"><span class="task-num">6</span><p>Вовочка записал два подряд идущих натуральных числа и посчитал сумму цифр каждого. Могут ли обе суммы делиться на</p><div class="cmp"><span class="side lbl">а) 8</span><span class="signs"><button onclick="chkCmp(this,'d8',0,0)">можно</button><button onclick="chkCmp(this,'d8',1,0)">нельзя</button></span><span class="fb" id="fb_d8"></span></div><div class="cmp"><span class="side lbl">б) 9</span><span class="signs"><button onclick="chkCmp(this,'d9',0,1)">можно</button><button onclick="chkCmp(this,'d9',1,1)">нельзя</button></span><span class="fb" id="fb_d9"></span></div><div class="cmp"><span class="side lbl">в) 10</span><span class="signs"><button onclick="chkCmp(this,'d10',0,0)">можно</button><button onclick="chkCmp(this,'d10',1,0)">нельзя</button></span><span class="fb" id="fb_d10"></span></div><div class="grid-space grid-tall"></div><p class="hint">Что происходит с суммой цифр при переходе к следующему числу? А если число оканчивается на девятки?</p></div></section><section class="sec sec-sky"><h2>🍰 Продолжаем дроби</h2><div class="memo"><p>Чтобы найти <strong>часть от числа</strong>, число делят на знаменатель и умножают на числитель. Чтобы найти <strong>число по его части</strong>, идут обратно: сначала узнают, сколько приходится на одну долю.</p></div><div class="task"><span class="task-num">7</span><p>В классе <strong>28</strong> человек, из них <strong><span class="frac"><span>3</span><span class="d">7</span></span></strong> мальчики. Сколько в классе мальчиков?</p><div class="ansrow"><label>мальчиков:</label><input id="n1"><button onclick="chkNum('n1', '12')">Проверить</button><span class="fb" id="fb_n1"></span></div><div class="grid-space"></div></div><div class="task"><span class="task-num">8</span><p><strong><span class="frac"><span>2</span><span class="d">5</span></span></strong> пути это <strong>36 км</strong>. Какова длина всего пути?</p><div class="ansrow"><label>весь путь, км:</label><input id="n2"><button onclick="chkNum('n2', '90')">Проверить</button><span class="fb" id="fb_n2"></span></div><div class="grid-space"></div><p class="hint">Сколько километров приходится на одну пятую?</p></div><div class="task"><span class="task-num">9</span><p>Турист прошёл в первый день <strong><span class="frac"><span>1</span><span class="d">4</span></span></strong> пути, во второй <strong><span class="frac"><span>2</span><span class="d">5</span></span></strong>. Какая часть пути ему осталась?</p><div class="ansrow"><label>осталось</label><input id="n3" placeholder="a/b"><button onclick="chkFrac('n3', 7, 20)">Проверить</button><span class="fb" id="fb_n3"></span></div><div class="grid-space"></div></div><div class="task"><span class="task-num">10</span><p>В саду <strong><span class="frac"><span>2</span><span class="d">5</span></span></strong> всех деревьев яблони, <strong><span class="frac"><span>1</span><span class="d">3</span></span></strong> груши, а остальные <strong>24</strong> дерева это сливы. Сколько деревьев в саду?</p><div class="ansrow"><label>всего деревьев:</label><input id="n4"><button onclick="chkNum('n4', '90')">Проверить</button><span class="fb" id="fb_n4"></span></div><div class="grid-space grid-tall"></div><p class="hint">Сначала узнай, какая часть сада засажена сливами.</p></div><div class="task"><span class="task-num">11</span><p>Первая труба наполняет <strong><span class="frac"><span>1</span><span class="d">6</span></span></strong> бассейна за час, вторая <strong><span class="frac"><span>1</span><span class="d">4</span></span></strong> за час. Какая часть бассейна наполнится за час, если открыть обе? А за два часа?</p><div class="ansrow"><label>за час</label><input id="n5" placeholder="a/b"><button onclick="chkFrac('n5', 5, 12)">Проверить</button><span class="fb" id="fb_n5"></span></div><div class="ansrow"><label>за два часа</label><input id="n6" placeholder="a/b"><button onclick="chkFrac('n6', 5, 6)">Проверить</button><span class="fb" id="fb_n6"></span></div><p class="hint">Больше половины или меньше? Проверь свой ответ прикидкой.</p></div></section><section class="sec sec-pond"><h2>Доп</h2><div class="task"><span class="task-num">12</span><p>Рагнарос каждый день охотится на насекомых: либо берёт мухобойку и убивает <strong>одно</strong>, либо запускает огненный шар и убивает сразу <strong>пять</strong>. Охотится он каждый день. Может ли Рагнарос</p><div class="cmp"><span class="side lbl">а) за месяц убить 100 насекомых</span><span class="signs"><button onclick="chkCmp(this,'r1',0,0)">можно</button><button onclick="chkCmp(this,'r1',1,0)">нельзя</button></span><span class="fb" id="fb_r1"></span></div><div class="cmp"><span class="side lbl">б) за месяц убить 33 насекомых</span><span class="signs"><button onclick="chkCmp(this,'r2',0,0)">можно</button><button onclick="chkCmp(this,'r2',1,0)">нельзя</button></span><span class="fb" id="fb_r2"></span></div><div class="cmp"><span class="side lbl">в) за месяц убить 148 насекомых</span><span class="signs"><button onclick="chkCmp(this,'r3',0,1)">можно</button><button onclick="chkCmp(this,'r3',1,1)">нельзя</button></span><span class="fb" id="fb_r3"></span></div><div class="cmp"><span class="side lbl">г) за три месяца подряд убить 101 насекомое</span><span class="signs"><button onclick="chkCmp(this,'r4',0,0)">можно</button><button onclick="chkCmp(this,'r4',1,0)">нельзя</button></span><span class="fb" id="fb_r4"></span></div><div class="grid-space grid-tall"></div><p class="hint">В месяце бывает 28, 29, 30 или 31 день. На сколько меняется итог, если один день заменить?</p></div><div class="task"><span class="task-num">13</span><p>Можно ли разрезать квадрат на квадраты <strong>двух</strong> разных размеров так, чтобы больших и маленьких было <strong>поровну</strong>?</p><div class="cmp"><span class="side lbl">Можно ли так разрезать?</span><span class="signs"><button onclick="chkCmp(this,'sq',0,0)">можно</button><button onclick="chkCmp(this,'sq',1,0)">нельзя</button></span><span class="fb" id="fb_sq"></span></div><div class="grid-space grid-tall"></div><p class="hint">Попробуй квадрат 10 × 10.</p></div><div class="task"><span class="task-num">14</span><p>Вовочка задумал натуральное число больше единицы и выписал подряд все числа от <strong>1</strong> до задуманного, получилось одно длинное число: 1234567891011… Может ли оно читаться одинаково слева направо и справа налево?</p><div class="cmp"><span class="side lbl">Может ли получиться палиндром?</span><span class="signs"><button onclick="chkCmp(this,'pl',0,1)">можно</button><button onclick="chkCmp(this,'pl',1,1)">нельзя</button></span><span class="fb" id="fb_pl"></span></div><div class="grid-space grid-tall"></div><p class="hint">Число начинается на 1, 2, 3… Чем тогда обязано заканчиваться?</p></div></section>
+<script>
+function norm(s){ return (s||"").toString().trim().replace(/\s+/g,"").replace(",", "."); }
+function say(id, ok, text){
+  var fb = document.getElementById("fb_"+id);
+  if(!fb) return;
+  fb.className = "fb " + (ok ? "ok" : "no");
+  fb.textContent = text;
+}
+function gcd(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ var t=a%b; a=b; b=t; } return a; }
+function parseFrac(s){
+  var m = norm(s).match(/^(-?\d+)\/(\d+)$/);
+  if(!m) return null;
+  var d = parseInt(m[2],10);
+  if(!d) return null;
+  return {n: parseInt(m[1],10), d: d};
+}
+/* проверка сокращённой дроби */
+function chkFrac(id, n0, d0){
+  var el = document.getElementById(id);
+  var f = parseFrac(el.value);
+  var ok = false, msg = "Запиши ответ в виде a/b";
+  if(f){
+    var same = f.n * d0 === n0 * f.d;
+    var reduced = gcd(f.n, f.d) === 1;
+    ok = same && reduced;
+    msg = ok ? "Верно" : (same ? "Дробь равна, но её ещё можно сократить" : "Пока нет");
+  }
+  el.classList.remove("ok","no"); el.classList.add(ok ? "ok" : "no");
+  say(id, ok, msg);
+}
+/* проверка числа */
+function chkNum(id, answer){
+  var el = document.getElementById(id);
+  var ok = norm(el.value) === norm(answer);
+  el.classList.remove("ok","no"); el.classList.add(ok ? "ok" : "no");
+  say(id, ok, ok ? "Верно" : "Пока нет");
+}
+/* сравнение: 0 это <, 1 это =, 2 это > */
+function chkCmp(btn, id, i, right){
+  var ok = (i === right);
+  btn.classList.remove("ok","no");
+  btn.classList.add(ok ? "ok" : "no");
+  say(id, ok, ok ? "Верно" : "Нет, посмотри ещё раз");
+}
+/* пирамида: проверяем все заполненные клетки разом */
+function chkPyr(id){
+  var box = document.querySelector('.pyr[data-id="' + id + '"]');
+  if(!box) return;
+  var ins = box.querySelectorAll("input");
+  var done = 0, bad = 0, empty = 0;
+  for(var i = 0; i < ins.length; i++){
+    var el = ins[i];
+    var want = parseFrac(el.getAttribute("data-ans"));
+    var got = parseFrac(el.value);
+    el.classList.remove("ok","no");
+    if(!el.value.trim()){ empty++; continue; }
+    if(got && want && got.n * want.d === want.n * got.d){ el.classList.add("ok"); done++; }
+    else { el.classList.add("no"); bad++; }
+  }
+  if(bad === 0 && empty === 0) say(id, true, "Пирамида собрана целиком");
+  else if(bad === 0) say(id, true, "Пока верно, осталось клеток: " + empty);
+  else say(id, false, "Верных клеток: " + done + ", с ошибкой: " + bad);
+}
+/* соединение равных дробей */
+var MATCH = {};
+function matchInit(id, pairs){ MATCH[id] = {pairs: pairs, sel: null, done: 0}; return MATCH[id]; }
+function matchEnsure(id){
+  var box = document.querySelector('.match[data-id="' + id + '"]');
+  if(!box) return null;
+  return matchInit(id, JSON.parse(box.getAttribute("data-map")));
+}
+function matchClick(el, id, side, key){
+  var st = MATCH[id] || matchEnsure(id);
+  if(!st) return;
+  if(el.classList.contains("done")) return;
+  if(side === "L"){
+    if(st.sel) st.sel.el.classList.remove("sel");
+    st.sel = {el: el, key: key};
+    el.classList.add("sel");
+    return;
+  }
+  if(!st.sel){ say(id, false, "Сначала выбери дробь слева"); return; }
+  if(st.pairs[st.sel.key] === key){
+    st.sel.el.classList.remove("sel");
+    st.sel.el.classList.add("done");
+    el.classList.add("done");
+    st.done++;
+    st.sel = null;
+    var total = Object.keys(st.pairs).length;
+    say(id, true, st.done === total ? "Все пары найдены" : ("Верно, найдено " + st.done + " из " + total));
+  } else {
+    say(id, false, "Эти дроби не равны");
+  }
+}
+/* расстановка по возрастанию */
+var ORDER = {};
+function orderInit(id, right){ ORDER[id] = {right: right, got: []}; return ORDER[id]; }
+function orderEnsure(id){
+  var box = document.querySelector('.chips[data-id="' + id + '"]');
+  if(!box) return null;
+  return orderInit(id, JSON.parse(box.getAttribute("data-order")));
+}
+function orderClick(el, id, key){
+  var st = ORDER[id] || orderEnsure(id);
+  if(!st) return;
+  if(el.classList.contains("done")) return;
+  var pos = st.got.length;
+  if(st.right[pos] === key){
+    el.classList.add("done");
+    el.setAttribute("data-pos", pos + 1);
+    st.got.push(key);
+    say(id, true, st.got.length === st.right.length ? "Весь ряд выстроен" : "Верно, дальше");
+  } else {
+    say(id, false, "Эта дробь не следующая");
+  }
+}
+/* инициализация всех блоков после загрузки страницы */
+function initBlocks(){
+  var m = document.querySelectorAll(".match[data-id]");
+  for(var i = 0; i < m.length; i++) matchEnsure(m[i].getAttribute("data-id"));
+  var o = document.querySelectorAll(".chips[data-id]");
+  for(var k = 0; k < o.length; k++) orderEnsure(o[k].getAttribute("data-id"));
+}
+if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", initBlocks);
+else initBlocks();
+</script>
+</div></body></html>
