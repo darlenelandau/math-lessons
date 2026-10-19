@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Магический квадрат (2 класс)</title>
+<style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+        font-family:'Segoe UI',Arial,sans-serif;
+        background:linear-gradient(160deg,#fdf6ec 0%,#eef4fb 45%,#f3ecfb 100%);
+        background-attachment:fixed;
+        color:#1e2430;padding:22px;line-height:1.55;
+    }
+    .container{max-width:860px;margin:0 auto}
+
+    .header{
+        border:3px solid #c2410c;border-radius:14px;padding:18px 24px;margin-bottom:8px;text-align:center;
+        background:linear-gradient(135deg,#fff7ed 0%,#ffedd5 100%);
+        box-shadow:0 3px 10px rgba(0,0,0,.10);
+    }
+    .header .emo{font-size:2em;margin-bottom:6px;letter-spacing:4px}
+    .header h1{font-size:1.7em;color:#9a3412}
+
+    /* у каждой секции свой цвет */
+    .sec{--c:#334155;--bg:#f8fafc;--grid:#dbe3ec}
+    .sec-amber {--c:#b45309;--bg:#fffbeb;--grid:#f0dcae}
+    .sec-teal  {--c:#0e7490;--bg:#ecfeff;--grid:#b8e2ea}
+    .sec-blue  {--c:#1d4ed8;--bg:#eff6ff;--grid:#c5d8f5}
+    .sec-green {--c:#15803d;--bg:#f0fdf4;--grid:#bfe3c9}
+    .sec-violet{--c:#6d28d9;--bg:#f5f3ff;--grid:#d7cdf3}
+    .sec-orange{--c:#c2410c;--bg:#fff7ed;--grid:#f5d3b4}
+    .sec-pink  {--c:#be185d;--bg:#fdf2f8;--grid:#f2cadd}
+
+    h2{font-size:1.26em;margin:26px 0 12px;padding:9px 16px;border-radius:9px;
+       background:var(--c);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.14)}
+
+    .memo{border:2px solid var(--c);border-left:8px solid var(--c);border-radius:9px;
+          padding:13px 18px;margin:12px 0;background:var(--bg)}
+    .memo p{font-size:1.02em;margin-bottom:7px}
+    .memo p:last-child{margin-bottom:0}
+
+    .task{border:2px solid var(--c);border-radius:10px;padding:15px 19px;margin:15px 0;
+          background:#fff;box-shadow:0 2px 7px rgba(0,0,0,.08)}
+    .task-num{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;
+              border-radius:50%;font-weight:800;font-size:.95em;color:#fff;background:var(--c);
+              margin-bottom:7px;padding:0 9px}
+    .task p{font-size:1.06em;margin-bottom:7px}
+    .task strong{color:var(--c)}
+    .task .star{float:right;font-size:1.1em;letter-spacing:2px}
+
+    /* поля для рисования светлые: поверх них видно аннотации Zoom */
+    .grid-space{margin-top:9px;border:2px solid var(--c);border-radius:6px;min-height:130px;background:#fff;
+        background-image:repeating-linear-gradient(0deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px),
+                         repeating-linear-gradient(90deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px);
+        background-size:24px 24px}
+    .grid-tall{min-height:170px}
+
+    .write-line{display:inline-block;border-bottom:2px solid var(--c);min-width:130px;height:1.25em;margin:0 4px}
+    .write-long{min-width:230px}
+    .write-short{min-width:70px}
+
+    .pairs{display:grid;grid-template-columns:1fr 1fr;gap:4px 28px;font-size:1.03em;line-height:2.15}
+    .pairs .row{white-space:nowrap;overflow:hidden}
+
+    .legend{border:2px solid var(--c);border-radius:10px;padding:14px 18px;margin:12px 0;background:#fff}
+    .legend-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px 26px;align-items:center}
+    .legend-item{display:flex;align-items:center;gap:13px;font-size:1.02em}
+    .legend-item svg{flex:none}
+
+    .tree-space{margin-top:11px;border:2px solid var(--c);border-radius:6px;min-height:280px;position:relative;background:#fff;
+        background-image:repeating-linear-gradient(0deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px),
+                         repeating-linear-gradient(90deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px);
+        background-size:24px 24px}
+    .tier{position:absolute;left:0;right:0;border-top:2px dashed var(--c);opacity:.6;
+          color:var(--c);font-size:.85em;font-weight:700;padding-left:8px}
+    .tier span{background:#fff;padding:0 7px;position:relative;top:-.75em}
+    .tier-1{top:60px} .tier-2{top:150px} .tier-3{top:240px}
+
+    .hint{font-size:.95em;color:var(--c);font-style:italic;margin-top:7px;opacity:.95}
+    .lines{margin-top:9px}
+    .lines .line{border-bottom:2px solid var(--grid);height:32px}
+
+
+    .header{border:3px solid #0e7490;border-radius:14px;padding:18px 24px;margin-bottom:8px;text-align:center;
+        background:linear-gradient(135deg,#ecfeff 0%,#e0f2fe 100%);box-shadow:0 3px 10px rgba(0,0,0,.10)}
+    .header h1{color:#0e5a70}
+    .fig{text-align:center;margin:10px 0 4px}
+    .fig svg{max-width:100%;height:auto}
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px 22px;align-items:start}
+    .row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 16px;align-items:start}
+    @media(max-width:640px){.row2,.row3{grid-template-columns:1fr}}
+    .cap{font-size:.97em;font-weight:700;color:var(--c);text-align:center;margin-top:2px}
+    .items{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 8px;margin:10px 0 2px}
+    .item{display:flex;flex-direction:column;align-items:center;min-width:46px;border:2px solid var(--grid);
+          border-radius:10px;padding:6px 8px;background:#fff}
+    .item .e{font-size:1.6em;line-height:1.1}
+    .item .n{font-weight:800;color:var(--c);font-size:.95em}
+    .words{display:flex;flex-wrap:wrap;gap:8px 10px;justify-content:center;margin:8px 0 4px}
+    .words span{border:2px solid var(--grid);border-radius:8px;padding:4px 10px;background:#fff;font-weight:600}
+    .words b{color:var(--c);margin-right:4px}
+    .opt{font-weight:800;color:var(--c)}
+    .theory{border:3px solid var(--c);border-radius:12px;padding:15px 20px;margin:12px 0;background:var(--bg)}
+    .theory p{font-size:1.06em;margin-bottom:8px}
+    .theory p:last-child{margin-bottom:0}
+    .theory .big{font-size:1.2em;font-weight:800;color:var(--c);text-align:center;margin:10px 0 4px}
+    .lst{margin:4px 0 4px 22px}
+    .lst li{font-size:1.05em;margin-bottom:3px}
+
+    @media print{
+        body{background:#fff !important;zoom:.86}
+        .keep,.task,.theory,.memo{break-inside:avoid;page-break-inside:avoid}
+        .fig svg{max-height:270px;width:auto}
+        .row2 .fig svg{max-height:190px}
+        .row3 .fig svg{max-height:128px}
+        .task{margin:10px 0;padding:11px 16px}
+        .grid-space{min-height:96px}
+        h2{margin:16px 0 9px}
+        .task,.memo,.theory,h2,.header,.item{box-shadow:none !important}
+        .theory + .fig svg{max-height:190px}
+        .sec-orange .fig svg{max-height:210px}
+        .row2 .fig svg{max-height:165px}
+        .sec-pink .fig svg{max-height:290px}
+        .container{padding:0 6px}
+        .sec-violet .fig svg{max-height:330px}
+    }
+
+
+    .chain{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0 2px;font-size:1.25em;font-weight:700}
+    .chain span{min-width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+        border-radius:9px;border:2px solid var(--grid);background:#fff;color:#1e2430}
+    .chain span.gap{border-style:dashed;border-color:var(--c);background:var(--bg)}
+    .chain b{font-weight:800;color:var(--c);font-size:.8em;margin-right:4px}
+    .eqs{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin-top:10px}
+    .eqs div{border:2px solid var(--c);border-radius:9px;background:#fff;padding:11px 8px;text-align:center;
+        font-size:1.2em;font-weight:700;white-space:nowrap}
+    .box{display:inline-block;min-width:40px;height:1.45em;border:2px solid var(--c);border-radius:6px;
+        background:var(--bg);vertical-align:-.35em;margin:0 4px}
+    .sample{border:3px solid var(--c);border-radius:12px;background:var(--bg);padding:14px 18px;margin:12px 0}
+    .sample .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media(max-width:640px){.sample .two{grid-template-columns:1fr}}
+    .sample .col{background:#fff;border:2px solid var(--c);border-radius:9px;padding:10px 14px}
+    .sample .col div{font-size:1.12em;font-weight:700;padding:2px 0}
+    .sample .col .chk{color:#64748b;font-weight:600;font-size:.95em;border-top:1px dashed var(--grid);margin-top:6px;padding-top:6px}
+    .rulebox{border:2px dashed var(--c);border-radius:10px;padding:12px 16px;margin:10px 0;background:#fff}
+    .rulebox p{margin-bottom:6px;font-size:1.04em}
+    .rulebox p:last-child{margin-bottom:0}
+    .sq{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;margin:10px 0}
+    .sq figure{text-align:center}
+    .sq figcaption{font-size:.95em;font-weight:700;color:var(--c);margin-top:5px}
+    .patt{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin:6px 0 2px}
+
+
+    .grids{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;margin:12px 0 2px}
+    .grids figure{text-align:center}
+    .grids figcaption{font-size:.95em;font-weight:700;color:var(--c);margin-top:5px}
+    .why{border:3px solid var(--c);border-radius:12px;background:var(--bg);padding:14px 18px;margin:12px 0}
+    .why p{font-size:1.04em;margin-bottom:7px}
+    .why p:last-child{margin-bottom:0}
+    .why .big{font-size:1.3em;font-weight:800;color:var(--c);text-align:center;margin:8px 0}
+    .steps{counter-reset:s;margin:10px 0 2px}
+    .steps .s{display:flex;gap:12px;align-items:flex-start;background:#fff;border:2px solid var(--c);
+        border-radius:10px;padding:10px 14px;margin-bottom:8px}
+    .steps .s b{flex:none;width:28px;height:28px;border-radius:50%;background:var(--c);color:#fff;
+        display:flex;align-items:center;justify-content:center;font-size:.9em}
+    .steps .s span{font-size:1.02em}
+
+    @page{size:A4;margin:12mm}
+    @media print{
+        body{background:#fff;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+        .task,.memo,.header,.legend,.pairs{page-break-inside:avoid}
+        .break{page-break-before:always}
+    }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+    <div class="emo">🔢 🟨 ✨</div>
+    <h1>Магический квадрат</h1>
+</div>
+<section class="sec sec-orange"><h2>🔥 Разминка: дострой квадрат</h2><div class="memo"><p>В магическом квадрате числа <strong>не повторяются</strong>, а сумма в каждой строке, каждом столбце и на обеих диагоналях <strong>одинаковая</strong>.</p><p>Начинай с того ряда, где уже известно больше всего чисел.</p></div><div class="task"><span class="star">⭐</span><span class="task-num">1</span><p>Числа от <strong>1 до 9</strong>, сумма в каждом ряду <strong>15</strong>.</p><div class="grids"><svg viewBox="0 0 168 168" width="168" role="img"><rect x="6" y="6" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="32.0" y="40.8" font-size="23" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">8</text><rect x="58" y="6" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="84.0" y="40.8" font-size="23" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">1</text><rect x="110" y="6" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="136.0" y="40.8" font-size="23" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">6</text><rect x="6" y="58" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="58" y="58" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="110" y="58" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="6" y="110" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="58" y="110" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="110" y="110" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="136.0" y="144.8" font-size="23" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">2</text><rect x="6" y="6" width="156" height="156" fill="none" stroke="#334155" stroke-width="3"/></svg></div></div><div class="task"><span class="star">⭐⭐</span><span class="task-num">2</span><p>Снова числа от <strong>1 до 9</strong>, сумма <strong>15</strong>.</p><div class="grids"><svg viewBox="0 0 168 168" width="168" role="img"><rect x="6" y="6" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="58" y="6" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="110" y="6" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="136.0" y="40.8" font-size="23" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">6</text><rect x="6" y="58" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="32.0" y="92.8" font-size="23" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">9</text><rect x="58" y="58" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="110" y="58" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="136.0" y="92.8" font-size="23" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">1</text><rect x="6" y="110" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="58" y="110" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="110" y="110" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="6" y="6" width="156" height="156" fill="none" stroke="#334155" stroke-width="3"/></svg></div><p class="hint">Здесь подсказок меньше. Посмотри на средний ряд.</p></div></section><section class="sec sec-blue"><h2>🧠 Откуда берётся 15</h2><div class="why"><p>Сумму не выбирают, её считают.</p><p class="big">1 + 2 + 3 + … + 9 = 45</p><p>Все девять чисел делятся на три строки, значит на одну строку приходится</p><p class="big">45 : 3 = 15</p><p><strong>Почему в центре всегда 5.</strong> Через центр проходят четыре линии: средняя строка, средний столбец и две диагонали. Вместе они дают 4 × 15 = 60. Но при этом каждое число посчитано один раз, а центральное <strong>четыре</strong> раза, то есть три лишних.</p><p class="big">60 − 45 = 15, это три центра, значит центр = 5</p></div><div class="task"><span class="star">⭐⭐</span><span class="task-num">3</span><p>Чему равна сумма ряда, если в квадрате стоят числа от <strong>2 до 10</strong>? А какое число будет в центре?</p><div class="grid-space"></div></div><div class="task"><span class="star">⭐⭐⭐</span><span class="task-num">4</span><p>А если взять числа <strong>2, 4, 6, 8, 10, 12, 14, 16, 18</strong>?</p><div class="grid-space"></div></div></section><section class="sec sec-green"><h2>🔁 Меняем все числа сразу</h2><div class="memo"><p>Возьмём готовый квадрат и изменим в нём <strong>все</strong> числа одинаково.</p><p>Прибавили каждому по 1: каждый ряд вырос на 3, сумма стала 18.</p><p>Умножили каждое на 2: каждый ряд удвоился, сумма стала 30.</p></div><div class="task"><span class="star">⭐⭐</span><span class="task-num">5</span><p>Числа от <strong>2 до 10</strong>, сумма <strong>18</strong>.</p><div class="grids"><svg viewBox="0 0 168 168" width="168" role="img"><rect x="6" y="6" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="58" y="6" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="110" y="6" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="136.0" y="40.8" font-size="23" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">7</text><rect x="6" y="58" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="32.0" y="92.8" font-size="23" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">4</text><rect x="58" y="58" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="84.0" y="92.8" font-size="23" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">6</text><rect x="110" y="58" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="6" y="110" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="58" y="110" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="84.0" y="144.8" font-size="23" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">10</text><rect x="110" y="110" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="6" y="6" width="156" height="156" fill="none" stroke="#334155" stroke-width="3"/></svg></div></div><div class="task"><span class="star">⭐⭐⭐</span><span class="task-num">6</span><p>Чётные числа от <strong>2 до 18</strong>, сумма <strong>30</strong>.</p><div class="grids"><svg viewBox="0 0 168 168" width="168" role="img"><rect x="6" y="6" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="58" y="6" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="110" y="6" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="6" y="58" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="58" y="58" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="84.0" y="92.8" font-size="23" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">10</text><rect x="110" y="58" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="136.0" y="92.8" font-size="23" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">14</text><rect x="6" y="110" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="32.0" y="144.8" font-size="23" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">8</text><rect x="58" y="110" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="84.0" y="144.8" font-size="23" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">18</text><rect x="110" y="110" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="6" y="6" width="156" height="156" fill="none" stroke="#334155" stroke-width="3"/></svg></div></div></section><section class="sec sec-amber"><h2>🐍 Строим квадрат змейкой</h2><div class="steps"><div class="s"><b>1</b><span>Единицу ставим в <strong>середину верхней строки</strong>.</span></div><div class="s"><b>2</b><span>Каждое следующее число ставим <strong>на клетку вверх и на клетку вправо</strong>.</span></div><div class="s"><b>3</b><span>Вышли за верх, продолжаем <strong>снизу</strong> того же столбца. Вышли вправо, продолжаем <strong>слева</strong> той же строки.</span></div><div class="s"><b>4</b><span>Клетка занята, пишем число <strong>прямо под предыдущим</strong>.</span></div></div><div class="task"><span class="star">⭐⭐</span><span class="task-num">7</span><p>Построй по этому правилу квадрат <strong>3 × 3</strong> из чисел от 1 до 9 и проверь суммы.</p><div class="grids"><svg viewBox="0 0 168 168" width="168" role="img"><rect x="6" y="6" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="58" y="6" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="110" y="6" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="6" y="58" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="58" y="58" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="110" y="58" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="6" y="110" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="58" y="110" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="110" y="110" width="52" height="52" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="6" y="6" width="156" height="156" fill="none" stroke="#334155" stroke-width="3"/></svg></div></div><div class="task"><span class="star">⭐⭐⭐</span><span class="task-num">8</span><p>Теперь квадрат <strong>5 × 5</strong> из чисел от 1 до 25. Сначала сосчитай, какой должна получиться сумма ряда, и только потом заполняй.</p><div class="grids"><svg viewBox="0 0 232 232" width="232" role="img"><rect x="6" y="6" width="44" height="44" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="50" y="6" width="44" height="44" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="94" y="6" width="44" height="44" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="138" y="6" width="44" height="44" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="182" y="6" width="44" height="44" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="6" y="50" width="44" height="44" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="50" y="50" width="44" height="44" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="94" y="50" width="44" height="44" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="138" y="50" width="44" height="44" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="182" y="50" width="44" height="44" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="6" y="94" width="44" height="44" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="50" y="94" width="44" height="44" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="94" y="94" width="44" height="44" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="138" y="94" width="44" height="44" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="182" y="94" width="44" height="44" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="6" y="138" width="44" height="44" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="50" y="138" width="44" height="44" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="94" y="138" width="44" height="44" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="138" y="138" width="44" height="44" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="182" y="138" width="44" height="44" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="6" y="182" width="44" height="44" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="50" y="182" width="44" height="44" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="94" y="182" width="44" height="44" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="138" y="182" width="44" height="44" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="182" y="182" width="44" height="44" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="6" y="6" width="220" height="220" fill="none" stroke="#334155" stroke-width="3"/></svg></div><p class="hint">Сумму ряда считаем так же, как в начале занятия.</p></div></section><section class="sec sec-violet"><h2>🔤 Латинский квадрат</h2><div class="memo"><p>В латинском квадрате числа <strong>повторяются</strong>, а суммы не важны. Важно другое: в каждой строке и в каждом столбце все числа <strong>разные</strong>.</p><p>Сегодня условие строже: числа должны быть разными ещё и на обеих диагоналях.</p></div><div class="task"><span class="star">⭐⭐</span><span class="task-num">9</span><p>Заполни квадрат числами от <strong>1 до 4</strong>.</p><div class="grids"><svg viewBox="0 0 204 204" width="204" role="img"><rect x="6" y="6" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="54" y="6" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="102" y="6" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="150" y="6" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="6" y="54" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="54" y="54" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="102" y="54" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="150" y="54" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="174.0" y="86.2" font-size="22" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">2</text><rect x="6" y="102" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="54" y="102" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="78.0" y="134.2" font-size="22" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">1</text><rect x="102" y="102" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="150" y="102" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="6" y="150" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="54" y="150" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="102" y="150" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="126.0" y="182.2" font-size="22" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">4</text><rect x="150" y="150" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="6" y="6" width="192" height="192" fill="none" stroke="#334155" stroke-width="3"/></svg></div><p class="hint">Подсказок всего три, поэтому начинай с диагоналей.</p></div><div class="task"><span class="star">⭐⭐⭐</span><span class="task-num">10</span><p>И ещё один, тоже числами от 1 до 4.</p><div class="grids"><svg viewBox="0 0 204 204" width="204" role="img"><rect x="6" y="6" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="30.0" y="38.2" font-size="22" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">4</text><rect x="54" y="6" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="102" y="6" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="150" y="6" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="174.0" y="38.2" font-size="22" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">3</text><rect x="6" y="54" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="30.0" y="86.2" font-size="22" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">1</text><rect x="54" y="54" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="102" y="54" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="150" y="54" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="6" y="102" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="54" y="102" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="102" y="102" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="150" y="102" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="6" y="150" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="54" y="150" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="102" y="150" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="150" y="150" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><rect x="6" y="6" width="192" height="192" fill="none" stroke="#334155" stroke-width="3"/></svg></div></div></section><section class="sec sec-pink"><h2>⭐ Для тех, кому мало</h2><div class="task"><span class="star">⭐⭐⭐</span><span class="task-num">11</span><p>Это квадрат с гравюры Альбрехта Дюрера «Меланхолия», ему больше пятисот лет. Найди в нём как можно больше четвёрок чисел с суммой <strong>34</strong>.</p><div class="grids"><figure><svg viewBox="0 0 204 204" width="204" role="img"><rect x="6" y="6" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="30.0" y="38.2" font-size="22" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">16</text><rect x="54" y="6" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="78.0" y="38.2" font-size="22" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">3</text><rect x="102" y="6" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="126.0" y="38.2" font-size="22" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">2</text><rect x="150" y="6" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="174.0" y="38.2" font-size="22" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">13</text><rect x="6" y="54" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="30.0" y="86.2" font-size="22" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">5</text><rect x="54" y="54" width="48" height="48" rx="6" fill="#fef3c7" stroke="#94a3b8" stroke-width="2"/><text x="78.0" y="86.2" font-size="22" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">10</text><rect x="102" y="54" width="48" height="48" rx="6" fill="#fef3c7" stroke="#94a3b8" stroke-width="2"/><text x="126.0" y="86.2" font-size="22" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">11</text><rect x="150" y="54" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="174.0" y="86.2" font-size="22" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">8</text><rect x="6" y="102" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="30.0" y="134.2" font-size="22" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">9</text><rect x="54" y="102" width="48" height="48" rx="6" fill="#fef3c7" stroke="#94a3b8" stroke-width="2"/><text x="78.0" y="134.2" font-size="22" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">6</text><rect x="102" y="102" width="48" height="48" rx="6" fill="#fef3c7" stroke="#94a3b8" stroke-width="2"/><text x="126.0" y="134.2" font-size="22" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">7</text><rect x="150" y="102" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="174.0" y="134.2" font-size="22" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">12</text><rect x="6" y="150" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="30.0" y="182.2" font-size="22" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">4</text><rect x="54" y="150" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="78.0" y="182.2" font-size="22" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">15</text><rect x="102" y="150" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="126.0" y="182.2" font-size="22" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">14</text><rect x="150" y="150" width="48" height="48" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/><text x="174.0" y="182.2" font-size="22" font-weight="800" text-anchor="middle" fill="#1e2430" font-family="Segoe UI,Arial">1</text><rect x="6" y="6" width="192" height="192" fill="none" stroke="#334155" stroke-width="3"/></svg><figcaption>внизу стоит год: 15 и 14</figcaption></figure></div><div class="grid-space grid-tall"></div><p class="hint">Строки и столбцы это только начало. Посмотри на подсвеченный центр и на углы.</p></div></section></div></body></html>
