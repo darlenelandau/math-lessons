@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Арифметика и движение (5 класс)</title>
+<style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+        font-family:'Segoe UI',Arial,sans-serif;
+        background:linear-gradient(180deg,#dff1fd 0%,#eaf7ee 55%,#f2f9e6 100%);
+        background-attachment:fixed;
+        color:#1e2430;padding:22px;line-height:1.55;
+    }
+    .container{max-width:900px;margin:0 auto}
+
+    .header{
+        border:3px solid #15803d;border-radius:14px;padding:18px 24px;margin-bottom:8px;text-align:center;
+        background:linear-gradient(160deg,#e0f2fe 0%,#d1fae5 62%,#dcfce7 100%);
+        box-shadow:0 3px 10px rgba(0,0,0,.10);
+    }
+    .header .emo{font-size:2em;margin-bottom:6px;letter-spacing:6px}
+    .header h1{font-size:1.7em;color:#14532d}
+    .header .lead{margin-top:8px;font-size:1.02em;color:#334155}
+
+    .sec{--c:#44403c;--bg:#fafaf9;--grid:#e2dfdb}
+    .sec-sky   {--c:#0369a1;--bg:#f0f9ff;--grid:#c4e2f5}
+    .sec-grass {--c:#15803d;--bg:#f0fdf4;--grid:#bfe6cb}
+    .sec-pond  {--c:#0e7490;--bg:#ecfeff;--grid:#bae3ec}
+    .sec-meadow{--c:#4d7c0f;--bg:#f7fee7;--grid:#d5e8a9}
+    .sec-earth {--c:#92400e;--bg:#fffbeb;--grid:#eed7b4}
+    .sec-stone {--c:#44403c;--bg:#f6f5f4;--grid:#dcd8d4}
+    .sec-indigo{--c:#4338ca;--bg:#eef2ff;--grid:#c9d0f7}
+
+    h2{font-size:1.26em;margin:26px 0 12px;padding:9px 16px;border-radius:9px;
+       background:var(--c);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.14)}
+
+    .memo{border:2px solid var(--c);border-left:8px solid var(--c);border-radius:9px;
+          padding:13px 18px;margin:12px 0;background:var(--bg)}
+    .memo p{font-size:1.02em;margin-bottom:7px}
+    .memo p:last-child{margin-bottom:0}
+
+    .rule{border:2px dashed var(--c);border-radius:10px;padding:14px 18px;margin:12px 0;background:var(--bg)}
+    .rule .lbl{font-weight:700;color:var(--c);font-size:1.02em}
+    .rule .ex{font-size:1.3em;font-weight:700;color:var(--c);margin-top:8px;text-align:center;letter-spacing:.5px}
+
+    .calc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(238px,1fr));gap:11px;margin-top:12px}
+    .calc{
+        position:relative;border:2px solid var(--c);border-radius:9px;padding:12px 10px 10px;
+        background:#fff;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.07);
+    }
+    .calc .eq{font-size:1.3em;font-weight:600;letter-spacing:.5px;white-space:nowrap}
+    .calc .eq.long{font-size:1.05em;letter-spacing:0}
+    .calc .blank{display:block;border-bottom:2px solid var(--grid);height:1.5em;margin:8px 12px 0}
+    .calc.hard{border-style:dashed;background:var(--bg)}
+    .calc .st{position:absolute;top:3px;right:7px;font-size:.72em}
+
+    .oral{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:9px;margin-top:10px}
+    .oral div{border:2px solid var(--c);border-radius:8px;padding:9px 6px;background:#fff;
+              text-align:center;font-size:1.3em;font-weight:600}
+
+    .task{border:2px solid var(--c);border-radius:10px;padding:15px 19px;margin:15px 0;
+          background:#fff;box-shadow:0 2px 7px rgba(0,0,0,.08)}
+    .task-num{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;
+              border-radius:50%;font-weight:800;font-size:.95em;color:#fff;background:var(--c);
+              margin-bottom:7px;padding:0 9px}
+    .task p{font-size:1.06em;margin-bottom:7px}
+    .task strong{color:var(--c)}
+    .task .star{float:right;font-size:1.05em;letter-spacing:2px}
+
+    .grid-space{margin-top:9px;border:2px solid var(--c);border-radius:6px;min-height:120px;background:#fff;
+        background-image:repeating-linear-gradient(0deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px),
+                         repeating-linear-gradient(90deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px);
+        background-size:24px 24px}
+    .grid-tall{min-height:165px}
+
+    .card4{border:3px solid var(--c);border-radius:12px;padding:16px 20px;background:var(--bg);margin:12px 0}
+    .card4 .row{display:flex;gap:14px;align-items:baseline;padding:9px 0;border-bottom:1px dashed var(--c)}
+    .card4 .row:last-child{border-bottom:none}
+    .card4 .n{flex:none;width:26px;height:26px;border-radius:50%;background:var(--c);color:#fff;
+              font-weight:800;font-size:.85em;display:flex;align-items:center;justify-content:center}
+    .card4 .t{flex:1}
+    .card4 .t b{color:var(--c)}
+    .card4 .t .e{display:block;font-size:1.12em;font-weight:700;margin-top:3px}
+
+    .hint{font-size:.95em;color:var(--c);font-style:italic;margin-top:7px;opacity:.95}
+
+
+    .inv{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0 2px}
+    .inv div{border:2px solid var(--c);border-radius:9px;background:#fff;padding:10px 8px;text-align:center;
+        font-size:1.12em;font-weight:700;color:#1e2430}
+    .inv div b{color:var(--c);font-weight:800}
+    .chainfig{text-align:center;margin:10px 0 2px}
+    .chainfig svg{max-width:100%;height:auto}
+    .calcs{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:9px;margin-top:10px}
+    .calcs div{border:2px solid var(--c);border-radius:8px;background:#fff;padding:9px 6px;text-align:center;
+        font-size:1.06em;font-weight:700;white-space:nowrap}
+    .calcs div i{font-style:normal;color:var(--c);font-weight:800;margin-right:6px;font-size:.9em}
+    .box{display:inline-block;min-width:38px;height:1.35em;border:2px solid var(--c);border-radius:6px;
+        background:var(--bg);vertical-align:-.3em;margin:0 3px}
+
+
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:12px 0 2px}
+    @media(max-width:620px){.two{grid-template-columns:1fr}}
+    .two .col{border:2px solid var(--c);border-radius:10px;background:#fff;padding:12px 16px}
+    .two .col h3{color:var(--c);font-size:1.02em;margin-bottom:7px;text-transform:uppercase;letter-spacing:.6px}
+    .two .col div{font-size:1.1em;font-weight:700;padding:3px 0}
+    .two .col .chk{color:#64748b;font-weight:600;font-size:.95em;border-top:1px dashed var(--grid);margin-top:7px;padding-top:6px}
+    .vals{width:100%;border-collapse:collapse;margin:10px 0 2px;font-size:1.1em}
+    .vals th,.vals td{border:2px solid var(--c);padding:9px 6px;text-align:center}
+    .vals th{background:var(--bg);color:var(--c)}
+    .vals td{background:#fff;height:44px}
+    .scales{text-align:center;margin:10px 0 2px}
+    .lets{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:9px;margin-top:10px}
+    .lets div{border:2px solid var(--c);border-radius:8px;background:#fff;padding:10px 6px;text-align:center;
+        font-size:1.1em;font-weight:700;white-space:nowrap}
+    .lets div i{font-style:normal;color:var(--c);font-weight:800;margin-right:6px;font-size:.88em}
+    .calcbox{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:11px;margin:10px 0 2px}
+    .calcbox .c{border:2px solid var(--c);border-radius:10px;background:#fff;padding:12px 14px 10px;
+        box-shadow:0 1px 4px rgba(0,0,0,.07)}
+    .calcbox .c b{display:block;color:var(--c);font-size:.9em;font-weight:800;margin-bottom:4px}
+    .calcbox .c .e{font-size:1.14em;font-weight:700;line-height:1.3}
+    .calcbox .c .ans{margin-top:9px;border-bottom:2px solid var(--grid);height:26px}
+    .subhead{font-weight:800;color:var(--c);margin:14px 0 2px;font-size:1.04em}
+
+
+    .fcard{border:3px solid var(--c);border-radius:12px;background:var(--bg);padding:14px 18px;margin:12px 0}
+    .fcard .main{font-size:1.5em;font-weight:800;color:var(--c);text-align:center;letter-spacing:.5px}
+    .fcard .two2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+    @media(max-width:600px){.fcard .two2{grid-template-columns:1fr}}
+    .fcard .two2 div{background:#fff;border:2px solid var(--c);border-radius:9px;padding:9px 6px;text-align:center;
+        font-size:1.2em;font-weight:800;color:#1e2430}
+    .fcard p{margin-top:9px;font-size:1.0em}
+    .vtab{width:100%;border-collapse:collapse;margin:10px 0 2px;font-size:1.08em}
+    .vtab th,.vtab td{border:2px solid var(--c);padding:9px 6px;text-align:center}
+    .vtab th{background:var(--bg);color:var(--c);white-space:nowrap}
+    .vtab td{background:#fff;height:46px;font-weight:700}
+
+
+    .euclid{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin:12px 0 2px}
+    .euclid div{border:2px solid var(--c);border-radius:10px;background:#fff;padding:10px 16px;
+        font-size:1.12em;font-weight:700;white-space:nowrap}
+    .euclid div b{color:var(--c)}
+    .lets{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:9px;margin-top:10px}
+    .lets div{border:2px solid var(--c);border-radius:8px;background:#fff;padding:10px 6px;text-align:center;
+        font-size:1.08em;font-weight:700}
+    .lets div i{font-style:normal;color:var(--c);font-weight:800;margin-right:6px;font-size:.88em}
+    .cutbox{border:3px dashed var(--c);border-radius:14px;background:var(--bg);padding:26px 20px;margin:12px 0;
+        text-align:center;color:#475569;font-size:1.05em}
+    .cutbox b{display:block;color:var(--c);font-size:1.15em;margin-bottom:6px}
+    .linkbox{border:2px solid var(--c);border-radius:10px;background:var(--bg);padding:12px 16px;margin:10px 0}
+    .linkbox a{color:var(--c);font-weight:700}
+    .order{display:flex;align-items:center;gap:12px;background:var(--c);color:#fff;border-radius:10px;
+        padding:9px 16px;margin:2px 0 10px;box-shadow:0 2px 6px rgba(0,0,0,.14)}
+    .order b{flex:none;background:#fff;color:var(--c);border-radius:7px;padding:2px 9px;font-size:.92em}
+    .order span{font-size:1.04em;font-weight:600}
+
+
+    .road{text-align:center;margin:10px 0 2px}
+    .road svg{max-width:100%;height:auto}
+    .fcard3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0 2px}
+    @media(max-width:600px){.fcard3{grid-template-columns:1fr}}
+    .fcard3 div{border:2px solid var(--c);border-radius:10px;background:#fff;padding:12px 8px;text-align:center;
+        font-size:1.24em;font-weight:800;color:var(--c)}
+
+    @page{size:A4;margin:12mm}
+    @media print{
+        body{background:#fff;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+        .task,.memo,.rule,.header,.card4{page-break-inside:avoid}
+        .break{page-break-before:always}
+    }
+
+    .calc .eq.xlong{font-size:.92em;letter-spacing:0}
+    .figure{border:2px solid var(--c);border-radius:10px;padding:14px;margin:12px 0;background:#fff;text-align:center;overflow-x:auto}
+    .figure .cap{margin-top:10px;font-size:1.12em;font-weight:700;color:var(--c)}
+    .figure .sub{margin-top:4px;font-size:.97em;color:#475569}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+    .eqlist{font-size:1.14em;line-height:1.95;font-weight:600}
+    .eqlist .tot{margin-top:9px;padding-top:9px;border-top:2px solid var(--c);color:var(--c);font-size:1.18em}
+    @media(max-width:700px){.two{grid-template-columns:1fr}}
+
+    .tbl{width:100%;border-collapse:collapse;margin-top:12px;background:#fff}
+    .tbl th{background:var(--c);color:#fff;padding:9px 10px;font-size:1em}
+    .tbl td{border:1.6px solid var(--grid);padding:11px 10px;text-align:center;font-size:1.08em;font-weight:600;height:42px}
+    .tbl td.filled{background:var(--bg);color:var(--c)}
+    .way{border:2px solid var(--c);border-radius:10px;padding:14px 18px;background:#fff;margin-top:12px}
+    .way .cap{font-weight:800;font-size:.88em;text-transform:uppercase;letter-spacing:.6px;
+              color:var(--c);margin-bottom:7px}
+    .way ol{margin-left:18px}
+    .way li{margin:7px 0;font-size:1.06em;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+    <div class="emo">🚴 🛣️ ⏱️</div>
+    <h1>Арифметика и движение</h1>
+</div>
+<section class="sec sec-meadow"><h2>🔥 Разминка: считаем и рассуждаем</h2><div class="task"><span class="star">⭐</span><span class="task-num">1</span><p>а) Длину прямоугольника увеличили в <strong>2 раза</strong>, а ширину в <strong>3 раза</strong>. Во сколько раз увеличилась площадь?<br>б) В аквариум помещается <strong>50 литров</strong>. Сколько поместится, если длину, ширину и высоту увеличить в 2 раза?</p><div class="grid-space"></div></div><div class="task"><span class="star">⭐⭐</span><span class="task-num">2</span><p>На пруду росла кувшинка, каждый день их число удваивалось, и через <strong>100 дней</strong> пруд зарос полностью.</p><p>а) На какой день пруд зарос наполовину?<br>б) А если бы изначально росло четыре кувшинки, на какой день он зарос бы полностью?</p><div class="grid-space"></div></div><div class="task"><span class="star">⭐⭐</span><span class="task-num">3</span><p>Вместо каждой отрубленной головы у Змея Горыныча вырастает <strong>три</strong> новых. Сейчас у него <strong>27 голов</strong>. Сколько голов отрубили, если сначала была одна?</p><div class="grid-space"></div></div><div class="task"><span class="star">⭐⭐⭐</span><span class="task-num">4</span><p>Вдоль аллеи растут десять сосен: <strong>15, 16, 17, …, 24 метра</strong>. Каждая вырастает на <strong>90 см в год</strong>. Как только сосна достигает 30 метров, её срубают. Сколько сосен останется через <strong>9 лет</strong>?</p><div class="grid-space"></div></div><div class="task"><span class="star">⭐⭐⭐</span><span class="task-num">5</span><p>Из одного квадратного листа теста выходит одно печенье, а из обрезков от <strong>трёх</strong> печений можно раскатать ещё один лист.</p><p>а) Сколько печений выйдет из 9 листов?<br>б) А из 14?<br>в) Сколько листов нужно, чтобы получить 40 печений?</p><div class="grid-space grid-tall"></div><p class="hint">Обрезки копятся, не теряй остаток.</p></div></section><section class="sec sec-sky"><h2>🛣️ Тройка величин</h2><div class="memo"><p>Третья тройка после стоимости и работы, устроена так же.</p></div><div class="fcard3"><div>s = v × t</div><div>v = s : t</div><div>t = s : v</div></div><div class="task"><span class="star">⭐</span><span class="task-num">6</span><p>Расстояние от Москвы до Владивостока <strong>9288 км</strong>. Навстречу выезжают пассажирский поезд со скоростью <strong>64 км/ч</strong> и товарный со скоростью <strong>39 км/ч</strong>. На каком расстоянии они будут <strong>за час до встречи</strong>? А за сутки?</p><div class="grid-space"></div><p class="hint">Какие числа из условия тебе вообще понадобились?</p></div><div class="task"><span class="star">⭐⭐</span><span class="task-num">7</span><p>Удав прополз мимо стоящей Мартышки за <strong>полминуты</strong>, а мимо бревна длиной <strong>9 метров</strong> за <strong>минуту</strong>. Найди длину и скорость удава.</p><div class="grid-space"></div></div><div class="task"><span class="star">⭐⭐</span><span class="task-num">8</span><p>Костя съедает ужин за <strong>10 минут</strong>, а Денис за <strong>40</strong>. За какое время они съедят <strong>5 порций</strong> вместе? А одну порцию?</p><div class="grid-space"></div></div></section><section class="sec sec-pond"><h2>🚴 Сближение и половина пути</h2><div class="task"><span class="star">⭐⭐</span><span class="task-num">9</span><p>Из села в город выехал велосипедист, через час навстречу ему из города выехал мотоциклист. <strong>Кто из них в момент встречи будет ближе к городу?</strong></p><div class="road"><svg viewBox="0 0 640 110" width="640" role="img"><line x1="40" y1="70" x2="600" y2="70" stroke="#334155" stroke-width="4"/><circle cx="40" cy="70" r="8" fill="#334155"/><text x="40" y="96" font-size="15" font-weight="700" fill="#334155" text-anchor="middle" font-family="Segoe UI,Arial">село</text><circle cx="600" cy="70" r="8" fill="#334155"/><text x="600" y="96" font-size="15" font-weight="700" fill="#334155" text-anchor="middle" font-family="Segoe UI,Arial">город</text><path d="M90 44 h70" stroke="#1d4ed8" stroke-width="4"/><polygon points="176,44 158,36 158,52" fill="#1d4ed8"/><text x="120" y="30" font-size="15" font-weight="800" fill="#1d4ed8" text-anchor="middle" font-family="Segoe UI,Arial">20 км/ч</text><path d="M550 44 h-70" stroke="#b91c1c" stroke-width="4"/><polygon points="464,44 482,36 482,52" fill="#b91c1c"/><text x="515" y="30" font-size="15" font-weight="800" fill="#b91c1c" text-anchor="middle" font-family="Segoe UI,Arial">40 км/ч</text><text x="320" y="96" font-size="15" font-weight="700" fill="#64748b" text-anchor="middle" font-family="Segoe UI,Arial">50 км</text></svg></div><div class="grid-space"></div><p class="hint">Сначала прочитай вопрос до конца, только потом считай.</p></div><div class="task"><span class="star">⭐⭐</span><span class="task-num">10</span><p>Винни-Пух прошёл <strong>половину пути</strong> до дома Пятачка, вспомнил про подарок, вернулся и пошёл снова с той же скоростью. Теперь он придёт на <strong>10 минут позже</strong>. Сколько времени занимает дорога?</p><div class="grid-space"></div></div><div class="task"><span class="star">⭐⭐⭐</span><span class="task-num">11</span><p>Чтобы успеть на занятие, ученику нужно было всю дорогу бежать со скоростью <strong>8 км/ч</strong>. Но полдороги он шёл со скоростью <strong>4 км/ч</strong>. Есть ли у него шанс успеть, и если да, с какой скоростью бежать?</p><div class="grid-space"></div></div><div class="task"><span class="star">⭐⭐⭐</span><span class="task-num">12</span><p>Два велосипедиста выехали навстречу из городов, между которыми <strong>64 км</strong>, со скоростями <strong>15</strong> и <strong>17 км/ч</strong>. С одного взлетела муха и летала между ними со скоростью <strong>20 км/ч</strong>, пока они не встретились. Сколько пролетела муха?</p><div class="grid-space"></div><p class="hint">Считать перелёты не нужно. Сколько времени летела муха?</p></div><div class="task"><span class="star">⭐⭐⭐</span><span class="task-num">13</span><p>Мышке до норки <strong>20 шажков</strong>, а кошке до мышки <strong>5 прыжков</strong>. Пока кошка делает прыжок, мышка делает <strong>три шажка</strong>, но один прыжок равен <strong>десяти шажкам</strong>. Догонит ли кошка мышку?</p><div class="grid-space grid-tall"></div><p class="hint">Переведи всё в шажки.</p></div><div class="task"><span class="star">⭐⭐⭐</span><span class="task-num">14</span><p>Паспарту прошёл <strong>75 м</strong> по мосту длиной <strong>200 м</strong> и увидел машину. Если повернёт назад, они встретятся у начала моста; если побежит вперёд, машина догонит его в конце. Во сколько раз скорость машины больше?</p><div class="grid-space grid-tall"></div></div></section><section class="sec sec-amber"><h2>⭐ Для тех, кому мало</h2><div class="task"><span class="star">⭐⭐⭐</span><span class="task-num">15</span><p>В 9:00 на станцию прибыл поезд, на ней было <strong>200 человек</strong>. Поезда приходят каждые <strong>5 минут</strong>, за это время на станцию заходят ещё <strong>50 человек</strong>, а в каждый поезд садятся <strong>75</strong>. В какое время на станции не останется людей?</p><div class="grid-space"></div></div><div class="task"><span class="star">⭐⭐⭐</span><span class="task-num">16</span><p>Вовочка собирает пазл, соединяя по <strong>4 детали</strong> за <strong>10 секунд</strong>. Сколько деталей в пазле, если он собрал его за три с половиной минуты?</p><div class="grid-space"></div><p class="hint">Что происходит с числом кусков при каждом соединении?</p></div><div class="task"><span class="star">⭐⭐⭐</span><span class="task-num">17</span><p>Спортсмен пробежал <strong>3 километра</strong>, причём на каждом следующем километре скорость была вдвое больше. Сколько времени занял бег, если начальная скорость <strong>5 км/ч</strong>?</p><div class="grid-space"></div></div></section></div></body></html>
