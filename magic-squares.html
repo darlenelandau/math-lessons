@@ -7,7 +7,7 @@
     <style>
         *{box-sizing:border-box;margin:0;padding:0}
         body{font-family:'Segoe UI',Arial,sans-serif;background:linear-gradient(135deg,#ede9fe,#dbeafe,#ecfdf5);min-height:100vh;color:#1e293b;padding:16px}
-        .container{max-width:1100px;margin:0 auto}
+        .container{max-width:1200px;margin:0 auto}
         h1{text-align:center;color:#5b21b6;font-size:2em;margin:14px 0 4px}
         .sub{text-align:center;color:#6d28d9;margin-bottom:20px}
         .card{background:#fff;border-radius:16px;padding:22px 24px;margin-bottom:24px;box-shadow:0 3px 14px rgba(0,0,0,.06);border:2px solid #e2e8f0}
@@ -35,14 +35,14 @@
         .compare-box.magic{border-color:#c4b5fd;background:#faf5ff}
         .compare-box.latin{border-color:#93c5fd;background:#eff6ff}
 
-        .copies{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin:14px 0}
-        .copy-block{background:#f8fafc;border:2px solid #e2e8f0;border-radius:14px;padding:14px;text-align:center;min-width:140px}
+        .copies{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+        .copy-block{background:#f8fafc;border:2px solid #e2e8f0;border-radius:12px;padding:8px;text-align:center;min-width:0}
 
         .single-block{display:flex;justify-content:center;margin:14px 0}
         .single-inner{background:#f8fafc;border:2px solid #ddd6fe;border-radius:14px;padding:18px;text-align:center}
 
         .sq{display:inline-grid;gap:0;margin:4px auto}
-        .sq .c{width:46px;height:46px;border:2px solid #94a3b8;display:flex;align-items:center;justify-content:center;font-size:1.2em;font-weight:700;background:#fff;color:#1e293b}
+        .sq .c{width:34px;height:34px;border:2px solid #94a3b8;display:flex;align-items:center;justify-content:center;font-size:1.2em;font-weight:700;background:#fff;color:#1e293b}
         .sq .c.given{background:#dbeafe;color:#1d4ed8}
         .sq .c input{width:100%;height:100%;border:none;background:transparent;text-align:center;font-size:1.15em;font-weight:700;color:#5b21b6}
         .sq .c input:focus{outline:2px solid #8b5cf6;outline-offset:-2px;background:#f5f3ff}
@@ -138,7 +138,7 @@
 const demo = {size:3, target:6, checkType:'rowcol', given:[{r:1,c:1,v:2}], allowed:[1,2,3]};
 
 function buildSq(task, prefix, n) {
-    let h = `<div class="sq" style="grid-template-columns:repeat(${n},46px)">`;
+    let h = `<div class="sq" style="grid-template-columns:repeat(${n},34px)">`;
     for (let r = 0; r < n; r++) {
         for (let c = 0; c < n; c++) {
             const g = task.given.find(g => g.r === r && g.c === c);
@@ -229,7 +229,7 @@ function renderTasks() {
         html += `<h2>🔮 ${task.title}</h2>`;
         html += `<p>${task.desc}</p>`;
         html += `<div class="copies">`;
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 6; i++) {
             html += `<div class="copy-block">`;
             html += buildSq(task, task.id + '_' + i, n);
             html += `</div>`;
