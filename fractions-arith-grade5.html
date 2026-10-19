@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Арифметика дробей (5 класс)</title>
+<style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+        font-family:'Segoe UI',Arial,sans-serif;
+        background:linear-gradient(180deg,#dff1fd 0%,#eaf7ee 55%,#f2f9e6 100%);
+        background-attachment:fixed;
+        color:#1e2430;padding:22px;line-height:1.55;
+    }
+    .container{max-width:900px;margin:0 auto}
+
+    .header{
+        border:3px solid #15803d;border-radius:14px;padding:18px 24px;margin-bottom:8px;text-align:center;
+        background:linear-gradient(160deg,#e0f2fe 0%,#d1fae5 62%,#dcfce7 100%);
+        box-shadow:0 3px 10px rgba(0,0,0,.10);
+    }
+    .header .emo{font-size:2em;margin-bottom:6px;letter-spacing:6px}
+    .header h1{font-size:1.7em;color:#14532d}
+    .header .lead{margin-top:8px;font-size:1.02em;color:#334155}
+
+    .sec{--c:#44403c;--bg:#fafaf9;--grid:#e2dfdb}
+    .sec-sky   {--c:#0369a1;--bg:#f0f9ff;--grid:#c4e2f5}
+    .sec-grass {--c:#15803d;--bg:#f0fdf4;--grid:#bfe6cb}
+    .sec-pond  {--c:#0e7490;--bg:#ecfeff;--grid:#bae3ec}
+    .sec-meadow{--c:#4d7c0f;--bg:#f7fee7;--grid:#d5e8a9}
+    .sec-earth {--c:#92400e;--bg:#fffbeb;--grid:#eed7b4}
+    .sec-stone {--c:#44403c;--bg:#f6f5f4;--grid:#dcd8d4}
+    .sec-indigo{--c:#4338ca;--bg:#eef2ff;--grid:#c9d0f7}
+
+    h2{font-size:1.26em;margin:26px 0 12px;padding:9px 16px;border-radius:9px;
+       background:var(--c);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.14)}
+
+    .memo{border:2px solid var(--c);border-left:8px solid var(--c);border-radius:9px;
+          padding:13px 18px;margin:12px 0;background:var(--bg)}
+    .memo p{font-size:1.02em;margin-bottom:7px}
+    .memo p:last-child{margin-bottom:0}
+
+    .rule{border:2px dashed var(--c);border-radius:10px;padding:14px 18px;margin:12px 0;background:var(--bg)}
+    .rule .lbl{font-weight:700;color:var(--c);font-size:1.02em}
+    .rule .ex{font-size:1.3em;font-weight:700;color:var(--c);margin-top:8px;text-align:center;letter-spacing:.5px}
+
+    .calc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(238px,1fr));gap:11px;margin-top:12px}
+    .calc{
+        position:relative;border:2px solid var(--c);border-radius:9px;padding:12px 10px 10px;
+        background:#fff;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.07);
+    }
+    .calc .eq{font-size:1.3em;font-weight:600;letter-spacing:.5px;white-space:nowrap}
+    .calc .eq.long{font-size:1.05em;letter-spacing:0}
+    .calc .blank{display:block;border-bottom:2px solid var(--grid);height:1.5em;margin:8px 12px 0}
+    .calc.hard{border-style:dashed;background:var(--bg)}
+    .calc .st{position:absolute;top:3px;right:7px;font-size:.72em}
+
+    .oral{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:9px;margin-top:10px}
+    .oral div{border:2px solid var(--c);border-radius:8px;padding:9px 6px;background:#fff;
+              text-align:center;font-size:1.3em;font-weight:600}
+
+    .task{border:2px solid var(--c);border-radius:10px;padding:15px 19px;margin:15px 0;
+          background:#fff;box-shadow:0 2px 7px rgba(0,0,0,.08)}
+    .task-num{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;
+              border-radius:50%;font-weight:800;font-size:.95em;color:#fff;background:var(--c);
+              margin-bottom:7px;padding:0 9px}
+    .task p{font-size:1.06em;margin-bottom:7px}
+    .task strong{color:var(--c)}
+    .task .star{float:right;font-size:1.05em;letter-spacing:2px}
+
+    .grid-space{margin-top:9px;border:2px solid var(--c);border-radius:6px;min-height:120px;background:#fff;
+        background-image:repeating-linear-gradient(0deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px),
+                         repeating-linear-gradient(90deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px);
+        background-size:24px 24px}
+    .grid-tall{min-height:165px}
+
+    .card4{border:3px solid var(--c);border-radius:12px;padding:16px 20px;background:var(--bg);margin:12px 0}
+    .card4 .row{display:flex;gap:14px;align-items:baseline;padding:9px 0;border-bottom:1px dashed var(--c)}
+    .card4 .row:last-child{border-bottom:none}
+    .card4 .n{flex:none;width:26px;height:26px;border-radius:50%;background:var(--c);color:#fff;
+              font-weight:800;font-size:.85em;display:flex;align-items:center;justify-content:center}
+    .card4 .t{flex:1}
+    .card4 .t b{color:var(--c)}
+    .card4 .t .e{display:block;font-size:1.12em;font-weight:700;margin-top:3px}
+
+    .hint{font-size:.95em;color:var(--c);font-style:italic;margin-top:7px;opacity:.95}
+
+
+    .inv{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0 2px}
+    .inv div{border:2px solid var(--c);border-radius:9px;background:#fff;padding:10px 8px;text-align:center;
+        font-size:1.12em;font-weight:700;color:#1e2430}
+    .inv div b{color:var(--c);font-weight:800}
+    .chainfig{text-align:center;margin:10px 0 2px}
+    .chainfig svg{max-width:100%;height:auto}
+    .calcs{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:9px;margin-top:10px}
+    .calcs div{border:2px solid var(--c);border-radius:8px;background:#fff;padding:9px 6px;text-align:center;
+        font-size:1.06em;font-weight:700;white-space:nowrap}
+    .calcs div i{font-style:normal;color:var(--c);font-weight:800;margin-right:6px;font-size:.9em}
+    .box{display:inline-block;min-width:38px;height:1.35em;border:2px solid var(--c);border-radius:6px;
+        background:var(--bg);vertical-align:-.3em;margin:0 3px}
+
+
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:12px 0 2px}
+    @media(max-width:620px){.two{grid-template-columns:1fr}}
+    .two .col{border:2px solid var(--c);border-radius:10px;background:#fff;padding:12px 16px}
+    .two .col h3{color:var(--c);font-size:1.02em;margin-bottom:7px;text-transform:uppercase;letter-spacing:.6px}
+    .two .col div{font-size:1.1em;font-weight:700;padding:3px 0}
+    .two .col .chk{color:#64748b;font-weight:600;font-size:.95em;border-top:1px dashed var(--grid);margin-top:7px;padding-top:6px}
+    .vals{width:100%;border-collapse:collapse;margin:10px 0 2px;font-size:1.1em}
+    .vals th,.vals td{border:2px solid var(--c);padding:9px 6px;text-align:center}
+    .vals th{background:var(--bg);color:var(--c)}
+    .vals td{background:#fff;height:44px}
+    .scales{text-align:center;margin:10px 0 2px}
+    .lets{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:9px;margin-top:10px}
+    .lets div{border:2px solid var(--c);border-radius:8px;background:#fff;padding:10px 6px;text-align:center;
+        font-size:1.1em;font-weight:700;white-space:nowrap}
+    .lets div i{font-style:normal;color:var(--c);font-weight:800;margin-right:6px;font-size:.88em}
+    .calcbox{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:11px;margin:10px 0 2px}
+    .calcbox .c{border:2px solid var(--c);border-radius:10px;background:#fff;padding:12px 14px 10px;
+        box-shadow:0 1px 4px rgba(0,0,0,.07)}
+    .calcbox .c b{display:block;color:var(--c);font-size:.9em;font-weight:800;margin-bottom:4px}
+    .calcbox .c .e{font-size:1.14em;font-weight:700;line-height:1.3}
+    .calcbox .c .ans{margin-top:9px;border-bottom:2px solid var(--grid);height:26px}
+    .subhead{font-weight:800;color:var(--c);margin:14px 0 2px;font-size:1.04em}
+
+
+    .fcard{border:3px solid var(--c);border-radius:12px;background:var(--bg);padding:14px 18px;margin:12px 0}
+    .fcard .main{font-size:1.5em;font-weight:800;color:var(--c);text-align:center;letter-spacing:.5px}
+    .fcard .two2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+    @media(max-width:600px){.fcard .two2{grid-template-columns:1fr}}
+    .fcard .two2 div{background:#fff;border:2px solid var(--c);border-radius:9px;padding:9px 6px;text-align:center;
+        font-size:1.2em;font-weight:800;color:#1e2430}
+    .fcard p{margin-top:9px;font-size:1.0em}
+    .vtab{width:100%;border-collapse:collapse;margin:10px 0 2px;font-size:1.08em}
+    .vtab th,.vtab td{border:2px solid var(--c);padding:9px 6px;text-align:center}
+    .vtab th{background:var(--bg);color:var(--c);white-space:nowrap}
+    .vtab td{background:#fff;height:46px;font-weight:700}
+
+
+    .euclid{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin:12px 0 2px}
+    .euclid div{border:2px solid var(--c);border-radius:10px;background:#fff;padding:10px 16px;
+        font-size:1.12em;font-weight:700;white-space:nowrap}
+    .euclid div b{color:var(--c)}
+    .lets{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:9px;margin-top:10px}
+    .lets div{border:2px solid var(--c);border-radius:8px;background:#fff;padding:10px 6px;text-align:center;
+        font-size:1.08em;font-weight:700}
+    .lets div i{font-style:normal;color:var(--c);font-weight:800;margin-right:6px;font-size:.88em}
+    .cutpic{text-align:center;margin:10px 0 2px}
+    .cutpic img{max-width:100%;height:auto;border-radius:8px}
+    .keep{page-break-inside:avoid;break-inside:avoid}
+    .cutbox{border:3px dashed var(--c);border-radius:14px;background:var(--bg);padding:26px 20px;margin:12px 0;
+        text-align:center;color:#475569;font-size:1.05em}
+    .cutbox b{display:block;color:var(--c);font-size:1.15em;margin-bottom:6px}
+    .linkbox{border:2px solid var(--c);border-radius:10px;background:var(--bg);padding:12px 16px;margin:10px 0}
+    .linkbox a{color:var(--c);font-weight:700}
+    .order{display:flex;align-items:center;gap:12px;background:var(--c);color:#fff;border-radius:10px;
+        padding:9px 16px;margin:2px 0 10px;box-shadow:0 2px 6px rgba(0,0,0,.14)}
+    .order b{flex:none;background:#fff;color:var(--c);border-radius:7px;padding:2px 9px;font-size:.92em}
+    .order span{font-size:1.04em;font-weight:600}
+
+
+    .road{text-align:center;margin:10px 0 2px}
+    .road svg{max-width:100%;height:auto}
+    .fcard3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0 2px}
+    @media(max-width:600px){.fcard3{grid-template-columns:1fr}}
+    .fcard3 div{border:2px solid var(--c);border-radius:10px;background:#fff;padding:12px 8px;text-align:center;
+        font-size:1.24em;font-weight:800;color:var(--c)}
+
+
+    .bars{display:flex;flex-direction:column;gap:10px;margin:12px 0 2px;align-items:center}
+    .bars .row{display:flex;align-items:center;gap:12px}
+    .bars .lab{font-size:1.2em;font-weight:800;color:var(--c);width:54px;text-align:right}
+    .rules4{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px;margin:12px 0 2px}
+    .rules4 div{border:2px solid var(--c);border-radius:10px;background:#fff;padding:11px 14px;font-size:1.0em}
+    .rules4 div b{color:var(--c);display:block;margin-bottom:3px}
+    .five{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:10px 0 2px}
+    .five figure{margin:0;flex:0 0 auto;border:2px solid var(--c);border-radius:10px;background:#fff;padding:6px 6px 2px}
+    .five figure img{display:block;width:100%;height:auto}
+    .five figcaption{text-align:center;font-weight:800;color:var(--c);font-size:.9em;margin-top:2px}
+    .five.tallpic figure{width:150px}
+    .five.widepic figure{width:200px}
+    .five.smallpic figure{width:150px}
+    .mixn{font-size:1.18em;font-weight:800;margin-right:2px}
+    .cutpic{text-align:center;margin:10px 0 2px}
+    .cutpic img{max-width:100%;height:auto;border-radius:8px}
+    .cutpic img.tall{max-width:300px}
+    .cutpic img.small{max-width:250px}
+    .frac{display:inline-block;text-align:center;vertical-align:middle;font-weight:800;line-height:1.05;margin:0 3px}
+    .frac span{display:block;padding:0 4px}
+    .frac span.d{border-top:2px solid currentColor}
+    .ansrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:9px}
+    .ansrow label{font-weight:700;color:var(--c)}
+    .ansrow input{width:96px;padding:8px 10px;font-size:1.08em;font-weight:700;text-align:center;
+        border:2px solid var(--grid);border-radius:9px;background:#fff;color:#1e2430}
+    .ansrow input:focus{outline:none;border-color:var(--c)}
+    .ansrow input.ok{border-color:#16a34a;background:#f0fdf4}
+    .ansrow input.no{border-color:#dc2626;background:#fef2f2}
+    .ansrow button,.cmp button,.pick2 button{border:2px solid var(--c);border-radius:9px;background:var(--bg);
+        color:var(--c);font-weight:700;font-size:1.0em;padding:8px 14px;cursor:pointer;transition:all .2s}
+    .ansrow button:hover,.cmp button:hover{background:var(--c);color:#fff}
+    .cmp{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:9px}
+    .cmp .side{font-size:1.18em;font-weight:700;min-width:58px;text-align:center}
+    .cmp .signs{display:inline-flex;gap:6px;margin:0 4px}
+    .cmp button{min-width:46px;font-size:1.15em}
+    .cmp button.ok{background:#16a34a;border-color:#16a34a;color:#fff}
+    .cmp button.no{background:#fecaca;border-color:#dc2626;color:#7f1d1d}
+    .fb{margin-top:7px;font-weight:700;min-height:1.2em}
+    .fb.ok{color:#15803d}
+    .fb.no{color:#b91c1c}
+    .match{display:grid;grid-template-columns:1fr 1fr;gap:10px 26px;margin-top:10px}
+    .chip{border:2px solid var(--c);border-radius:10px;background:#fff;padding:9px 6px;text-align:center;
+        cursor:pointer;font-weight:800;transition:all .15s}
+    .chip:hover{background:var(--bg)}
+    .chip.sel{background:#fde68a;border-color:#b45309}
+    .chip.done{background:#dcfce7;border-color:#16a34a;color:#15803d;cursor:default}
+    .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+    .chips .chip{min-width:72px;position:relative}
+    .chips .chip.done::after{content:attr(data-pos);position:absolute;top:-8px;right:-8px;background:#16a34a;
+        color:#fff;border-radius:50%;width:20px;height:20px;font-size:.75em;display:flex;align-items:center;
+        justify-content:center}
+
+    @page{size:A4;margin:12mm}
+    @media print{
+        body{background:#fff;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+        .task,.memo,.rule,.header,.card4{page-break-inside:avoid}
+        .break{page-break-before:always}
+    }
+
+    .calc .eq.xlong{font-size:.92em;letter-spacing:0}
+    .figure{border:2px solid var(--c);border-radius:10px;padding:14px;margin:12px 0;background:#fff;text-align:center;overflow-x:auto}
+    .figure .cap{margin-top:10px;font-size:1.12em;font-weight:700;color:var(--c)}
+    .figure .sub{margin-top:4px;font-size:.97em;color:#475569}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+    .eqlist{font-size:1.14em;line-height:1.95;font-weight:600}
+    .eqlist .tot{margin-top:9px;padding-top:9px;border-top:2px solid var(--c);color:var(--c);font-size:1.18em}
+    @media(max-width:700px){.two{grid-template-columns:1fr}}
+
+    .tbl{width:100%;border-collapse:collapse;margin-top:12px;background:#fff}
+    .tbl th{background:var(--c);color:#fff;padding:9px 10px;font-size:1em}
+    .tbl td{border:1.6px solid var(--grid);padding:11px 10px;text-align:center;font-size:1.08em;font-weight:600;height:42px}
+    .tbl td.filled{background:var(--bg);color:var(--c)}
+    .way{border:2px solid var(--c);border-radius:10px;padding:14px 18px;background:#fff;margin-top:12px}
+    .way .cap{font-weight:800;font-size:.88em;text-transform:uppercase;letter-spacing:.6px;
+              color:var(--c);margin-bottom:7px}
+    .way ol{margin-left:18px}
+    .way li{margin:7px 0;font-size:1.06em;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+    <div class="emo">🍰 ➕ 🪙</div>
+    <h1>Арифметика дробей</h1>
+</div>
+<section class="sec sec-amber"><h2>➕ Доли складываются как яблоки</h2><div class="memo"><p>Знаменатель это <strong>имя доли</strong>, а числитель это <strong>сколько таких долей взяли</strong>. Две седьмых плюс три седьмых это пять седьмых: имя не меняется, складываются количества.</p><p>Если имена разные, их сначала делают одинаковыми: это и есть приведение к общему знаменателю с прошлого занятия.</p></div><div class="bars"><div class="row"><span class="lab"><span class="frac"><span>1</span><span class="d">2</span></span></span><svg viewBox="0 0 364 38" width="364" role="img"><rect x="2.0" y="2" width="180.0" height="34" fill="#fbbf24" stroke="#334155" stroke-width="2"/><rect x="182.0" y="2" width="180.0" height="34" fill="#fff" stroke="#334155" stroke-width="2"/></svg></div><div class="row"><span class="lab"><span class="frac"><span>1</span><span class="d">3</span></span></span><svg viewBox="0 0 364 38" width="364" role="img"><rect x="2.0" y="2" width="120.0" height="34" fill="#fbbf24" stroke="#334155" stroke-width="2"/><rect x="122.0" y="2" width="120.0" height="34" fill="#fff" stroke="#334155" stroke-width="2"/><rect x="242.0" y="2" width="120.0" height="34" fill="#fff" stroke="#334155" stroke-width="2"/></svg></div><div class="row"><span class="lab"><span class="frac"><span>1</span><span class="d">6</span></span></span><svg viewBox="0 0 364 38" width="364" role="img"><rect x="2.0" y="2" width="60.0" height="34" fill="#fbbf24" stroke="#334155" stroke-width="2"/><rect x="62.0" y="2" width="60.0" height="34" fill="#fff" stroke="#334155" stroke-width="2"/><rect x="122.0" y="2" width="60.0" height="34" fill="#fff" stroke="#334155" stroke-width="2"/><rect x="182.0" y="2" width="60.0" height="34" fill="#fff" stroke="#334155" stroke-width="2"/><rect x="242.0" y="2" width="60.0" height="34" fill="#fff" stroke="#334155" stroke-width="2"/><rect x="302.0" y="2" width="60.0" height="34" fill="#fff" stroke="#334155" stroke-width="2"/></svg></div></div><div class="task"><span class="task-num">1</span><p>Имена одинаковые: считаем доли. Ответ пиши в виде a/b.</p><div class="ansrow"><label><span class="frac"><span>3</span><span class="d">7</span></span> + <span class="frac"><span>2</span><span class="d">7</span></span> =</label><input id="a1" placeholder="a/b"><button onclick="chkFrac('a1', 5, 7)">Проверить</button><span class="fb" id="fb_a1"></span></div><div class="ansrow"><label><span class="frac"><span>11</span><span class="d">12</span></span> − <span class="frac"><span>5</span><span class="d">12</span></span> =</label><input id="a2" placeholder="a/b"><button onclick="chkFrac('a2', 1, 2)">Проверить</button><span class="fb" id="fb_a2"></span></div><div class="ansrow"><label>1 − <span class="frac"><span>3</span><span class="d">8</span></span> =</label><input id="a3" placeholder="a/b"><button onclick="chkFrac('a3', 5, 8)">Проверить</button><span class="fb" id="fb_a3"></span></div><div class="ansrow"><label><span class="frac"><span>5</span><span class="d">9</span></span> + <span class="frac"><span>7</span><span class="d">9</span></span> =</label><input id="a4" placeholder="a/b"><button onclick="chkFrac('a4', 4, 3)">Проверить</button><span class="fb" id="fb_a4"></span></div><p class="hint">В последней строке получится дробь больше единицы, так и оставь её неправильной.</p></div><div class="task"><span class="task-num">2</span><p>Имена разные: сначала общий знаменатель.</p><div class="ansrow"><label><span class="frac"><span>1</span><span class="d">2</span></span> + <span class="frac"><span>1</span><span class="d">3</span></span> =</label><input id="b1" placeholder="a/b"><button onclick="chkFrac('b1', 5, 6)">Проверить</button><span class="fb" id="fb_b1"></span></div><div class="ansrow"><label><span class="frac"><span>3</span><span class="d">4</span></span> − <span class="frac"><span>2</span><span class="d">5</span></span> =</label><input id="b2" placeholder="a/b"><button onclick="chkFrac('b2', 7, 20)">Проверить</button><span class="fb" id="fb_b2"></span></div><div class="ansrow"><label><span class="frac"><span>5</span><span class="d">6</span></span> − <span class="frac"><span>1</span><span class="d">4</span></span> =</label><input id="b3" placeholder="a/b"><button onclick="chkFrac('b3', 7, 12)">Проверить</button><span class="fb" id="fb_b3"></span></div><div class="ansrow"><label><span class="frac"><span>2</span><span class="d">3</span></span> + <span class="frac"><span>1</span><span class="d">6</span></span> =</label><input id="b4" placeholder="a/b"><button onclick="chkFrac('b4', 5, 6)">Проверить</button><span class="fb" id="fb_b4"></span></div></div><div class="task"><span class="task-num">3</span><p>Посчитай сумму <strong><span class="frac"><span>1</span><span class="d">2</span></span> + <span class="frac"><span>1</span><span class="d">3</span></span> + <span class="frac"><span>1</span><span class="d">6</span></span></strong>. Что получилось? Нарисуй на полоске, почему так и должно было выйти.</p><div class="ansrow"><label>сумма =</label><input id="b5"><button onclick="chkNum('b5', '1')">Проверить</button><span class="fb" id="fb_b5"></span></div><div class="grid-space"></div><p class="hint">Эти три доли ещё встретятся сегодня в задаче про колбасу.</p></div></section><section class="sec sec-sky"><h2>🔢 Смешанные числа</h2><div class="memo"><p>Смешанное число это целое и дробь рядом: <strong><span class="mixn">2</span><span class="frac"><span>1</span><span class="d">3</span></span></strong> это две целых и ещё треть. Чтобы превратить его в неправильную дробь, целые разменивают на доли: две целых это шесть третей, с остатком семь третей.</p></div><div class="task"><span class="task-num">4</span><p>Соедини смешанное число с равной ему неправильной дробью: нажми слева, потом справа.</p><div class="match" data-id="mx" data-map='{"a":"w","b":"x","c":"v","d":"z","e":"y"}'><div class="chip" onclick="matchClick(this,'mx','L','a')"><span class="mixn">1</span><span class="frac"><span>1</span><span class="d">2</span></span></div><div class="chip" onclick="matchClick(this,'mx','R','y')"><span class="frac"><span>12</span><span class="d">5</span></span></div><div class="chip" onclick="matchClick(this,'mx','L','b')"><span class="mixn">2</span><span class="frac"><span>1</span><span class="d">3</span></span></div><div class="chip" onclick="matchClick(this,'mx','R','v')"><span class="frac"><span>7</span><span class="d">4</span></span></div><div class="chip" onclick="matchClick(this,'mx','L','c')"><span class="mixn">1</span><span class="frac"><span>3</span><span class="d">4</span></span></div><div class="chip" onclick="matchClick(this,'mx','R','x')"><span class="frac"><span>7</span><span class="d">3</span></span></div><div class="chip" onclick="matchClick(this,'mx','L','d')"><span class="mixn">3</span><span class="frac"><span>1</span><span class="d">2</span></span></div><div class="chip" onclick="matchClick(this,'mx','R','w')"><span class="frac"><span>3</span><span class="d">2</span></span></div><div class="chip" onclick="matchClick(this,'mx','L','e')"><span class="mixn">2</span><span class="frac"><span>2</span><span class="d">5</span></span></div><div class="chip" onclick="matchClick(this,'mx','R','z')"><span class="frac"><span>7</span><span class="d">2</span></span></div></div><div class="fb" id="fb_mx"></div></div><div class="task"><span class="task-num">5</span><p>Выдели целую часть. Сначала впиши, сколько получилось целых, потом остаток дробью.</p><div class="ansrow"><label><span class="frac"><span>17</span><span class="d">5</span></span>: целых</label><input id="c1"><button onclick="chkNum('c1', '3')">Проверить</button><span class="fb" id="fb_c1"></span></div><div class="ansrow"><label>и ещё</label><input id="c2"><button onclick="chkNum('c2', '2/5')">Проверить</button><span class="fb" id="fb_c2"></span></div><div class="ansrow"><label><span class="frac"><span>23</span><span class="d">4</span></span>: целых</label><input id="c3"><button onclick="chkNum('c3', '5')">Проверить</button><span class="fb" id="fb_c3"></span></div><div class="ansrow"><label>и ещё</label><input id="c4"><button onclick="chkNum('c4', '3/4')">Проверить</button><span class="fb" id="fb_c4"></span></div><div class="ansrow"><label><span class="frac"><span>30</span><span class="d">7</span></span>: целых</label><input id="c5"><button onclick="chkNum('c5', '4')">Проверить</button><span class="fb" id="fb_c5"></span></div><div class="ansrow"><label>и ещё</label><input id="c6"><button onclick="chkNum('c6', '2/7')">Проверить</button><span class="fb" id="fb_c6"></span></div><p class="hint">Сколько раз знаменатель помещается в числителе, столько и целых.</p></div><div class="task"><span class="task-num">6</span><p>Сложи смешанные числа: отдельно целые, отдельно доли.</p><div class="ansrow"><label><span class="mixn">2</span><span class="frac"><span>1</span><span class="d">4</span></span> + <span class="mixn">1</span><span class="frac"><span>1</span><span class="d">2</span></span>: целых</label><input id="d1"><button onclick="chkNum('d1', '3')">Проверить</button><span class="fb" id="fb_d1"></span></div><div class="ansrow"><label>и ещё</label><input id="d2"><button onclick="chkNum('d2', '3/4')">Проверить</button><span class="fb" id="fb_d2"></span></div><div class="ansrow"><label><span class="mixn">3</span><span class="frac"><span>2</span><span class="d">5</span></span> + <span class="mixn">2</span><span class="frac"><span>3</span><span class="d">10</span></span>: целых</label><input id="d3"><button onclick="chkNum('d3', '5')">Проверить</button><span class="fb" id="fb_d3"></span></div><div class="ansrow"><label>и ещё</label><input id="d4"><button onclick="chkNum('d4', '7/10')">Проверить</button><span class="fb" id="fb_d4"></span></div></div><div class="task"><span class="task-num">7</span><p>Вычти. Здесь дробей не хватает, и одну целую придётся разменять на доли.</p><div class="ansrow"><label><span class="mixn">4</span><span class="frac"><span>1</span><span class="d">3</span></span> − <span class="mixn">1</span><span class="frac"><span>2</span><span class="d">3</span></span>: целых</label><input id="e1"><button onclick="chkNum('e1', '2')">Проверить</button><span class="fb" id="fb_e1"></span></div><div class="ansrow"><label>и ещё</label><input id="e2"><button onclick="chkNum('e2', '2/3')">Проверить</button><span class="fb" id="fb_e2"></span></div><div class="ansrow"><label>5 − <span class="mixn">2</span><span class="frac"><span>3</span><span class="d">7</span></span>: целых</label><input id="e3"><button onclick="chkNum('e3', '2')">Проверить</button><span class="fb" id="fb_e3"></span></div><div class="ansrow"><label>и ещё</label><input id="e4"><button onclick="chkNum('e4', '4/7')">Проверить</button><span class="fb" id="fb_e4"></span></div><p class="hint">Четыре целых и одна треть это три целых и четыре трети.</p></div></section><section class="sec sec-pond"><h2>🍰 Задачи</h2><div class="task"><span class="task-num">8</span><p>В холодильнике лежал торт. В понедельник вечером Вовочка съел <strong><span class="frac"><span>1</span><span class="d">20</span></span></strong> торта, а в каждый следующий вечер съедал вдвое больше, чем в предыдущий. Какая часть торта осталась в холодильнике <strong>в пятницу утром</strong>?</p><div class="ansrow"><label>осталось</label><input id="t1" placeholder="a/b"><button onclick="chkFrac('t1', 1, 4)">Проверить</button><span class="fb" id="fb_t1"></span></div><div class="grid-space"></div><p class="hint">Запиши, сколько съедено в каждый из четырёх вечеров.</p></div><div class="task"><span class="task-num">9</span><p>Пирог разрезали на три части. Одна из них составляет <strong><span class="frac"><span>4</span><span class="d">13</span></span></strong> всего пирога, а одна из частей вдвое больше другой. На какие части могли разрезать пирог? Найди все варианты.</p><div class="grid-space grid-tall"></div><p class="hint">Две оставшиеся части вместе дают 9/13. Кто кого может превосходить вдвое?</p></div><div class="task"><span class="task-num">10</span><p>Проходя через портал, Ромуло отдаёт <strong>половину</strong> своих золотых монет, а Джулианна <strong>треть</strong> своих.</p><p>а) Они прошли через четыре портала. После этого у Ромуло осталась одна монета, а у Джулианны шестнадцать. Сколько монет было у каждого сначала?</p><div class="ansrow"><label>у Ромуло было</label><input id="p1"><button onclick="chkNum('p1', '16')">Проверить</button><span class="fb" id="fb_p1"></span></div><div class="ansrow"><label>у Джулианны было</label><input id="p2"><button onclick="chkNum('p2', '81')">Проверить</button><span class="fb" id="fb_p2"></span></div><p>б) Они прошли через один портал и отдали поровну монет. Если пройдут ещё через один, кто отдаст больше?</p><div class="grid-space grid-tall"></div><p class="hint">В пункте а) иди от конца: что было до последнего портала?</p></div><div class="task"><span class="task-num">11</span><p>Члены литературного клуба пили кофе с молоком, и каждый выпил <strong>одинаковое</strong> количество жидкости. Президенту клуба досталась <strong>четверть</strong> всего кофе и <strong>одна шестая</strong> всего молока. Сколько человек в клубе?</p><div class="ansrow"><label>человек:</label><input id="k1"><button onclick="chkNum('k1', '5')">Проверить</button><span class="fb" id="fb_k1"></span></div><div class="grid-space"></div><p class="hint">Доля президента больше одной шестой, но меньше четверти. Какая доля бывает у одного из n?</p></div><div class="task"><span class="task-num">12</span><p>В подземелье живут <strong>150 монстров</strong>. Каждый человек, проходя через подземелье, либо убивает <strong><span class="frac"><span>2</span><span class="d">3</span></span></strong> монстров, либо выводит <strong>10</strong> монстров на поверхность. Ни люди, ни монстры назад не возвращаются. Сколько людей должно пройти, чтобы монстров не осталось? Перечисли все варианты.</p><div class="grid-space grid-tall"></div><p class="hint">После «убил две трети» остаётся треть, а она должна быть целым числом.</p></div><div class="task"><span class="task-num">13</span><p>Трём героям подарили по батону колбасы весом <strong>1 кг</strong>. Каждый разделил свой батон на несколько равных частей и одну часть потерял. Вместе у них осталось <strong>2 кг</strong>. На сколько частей делили колбасу, если</p><p>а) все трое делили на одинаковое число частей;<br>б) одинаково делили только двое;<br>в) все трое делили на разное число частей?</p><div class="grid-space grid-tall"></div><p class="hint">Три потерянные доли вместе весят ровно килограмм.</p></div></section><section class="sec sec-stone"><h2>Доп</h2><div class="task"><span class="task-num">14</span><p>Посчитай сумму <strong><span class="frac"><span>1</span><span class="d">2</span></span> + <span class="frac"><span>1</span><span class="d">4</span></span> + <span class="frac"><span>1</span><span class="d">8</span></span> + <span class="frac"><span>1</span><span class="d">16</span></span></strong>. А если продолжать дальше, получится ли когда-нибудь единица?</p><div class="ansrow"><label>сумма =</label><input id="x1" placeholder="a/b"><button onclick="chkFrac('x1', 15, 16)">Проверить</button><span class="fb" id="fb_x1"></span></div><div class="grid-space"></div><p class="hint">Нарисуй полоску и закрашивай каждый раз половину того, что осталось.</p></div><div class="task"><span class="task-num">15</span><p>Представь <strong><span class="frac"><span>1</span><span class="d">2</span></span></strong> в виде суммы двух <strong>разных</strong> дробей, у которых в числителе единица.</p><div class="grid-space"></div></div><div class="task"><span class="task-num">16</span><p>Вычисли:</p><p style="text-align:center;font-size:1.1em"><span class="frac"><span>1</span><span class="d">1 × 2</span></span> + <span class="frac"><span>1</span><span class="d">2 × 3</span></span> + <span class="frac"><span>1</span><span class="d">3 × 4</span></span> + … + <span class="frac"><span>1</span><span class="d">9 × 10</span></span></p><div class="ansrow"><label>сумма =</label><input id="x2" placeholder="a/b"><button onclick="chkFrac('x2', 9, 10)">Проверить</button><span class="fb" id="fb_x2"></span></div><div class="grid-space grid-tall"></div><p class="hint">Проверь, чему равно 1/2 − 1/3. А 1/3 − 1/4?</p></div></section>
+<script>
+function norm(s){ return (s||"").toString().trim().replace(/\s+/g,"").replace(",", "."); }
+function say(id, ok, text){
+  var fb = document.getElementById("fb_"+id);
+  if(!fb) return;
+  fb.className = "fb " + (ok ? "ok" : "no");
+  fb.textContent = text;
+}
+function gcd(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ var t=a%b; a=b; b=t; } return a; }
+function parseFrac(s){
+  var m = norm(s).match(/^(-?\d+)\/(\d+)$/);
+  if(!m) return null;
+  var d = parseInt(m[2],10);
+  if(!d) return null;
+  return {n: parseInt(m[1],10), d: d};
+}
+/* проверка сокращённой дроби */
+function chkFrac(id, n0, d0){
+  var el = document.getElementById(id);
+  var f = parseFrac(el.value);
+  var ok = false, msg = "Запиши ответ в виде a/b";
+  if(f){
+    var same = f.n * d0 === n0 * f.d;
+    var reduced = gcd(f.n, f.d) === 1;
+    ok = same && reduced;
+    msg = ok ? "Верно" : (same ? "Дробь равна, но её ещё можно сократить" : "Пока нет");
+  }
+  el.classList.remove("ok","no"); el.classList.add(ok ? "ok" : "no");
+  say(id, ok, msg);
+}
+/* проверка числа */
+function chkNum(id, answer){
+  var el = document.getElementById(id);
+  var ok = norm(el.value) === norm(answer);
+  el.classList.remove("ok","no"); el.classList.add(ok ? "ok" : "no");
+  say(id, ok, ok ? "Верно" : "Пока нет");
+}
+/* сравнение: 0 это <, 1 это =, 2 это > */
+function chkCmp(btn, id, i, right){
+  var ok = (i === right);
+  btn.classList.remove("ok","no");
+  btn.classList.add(ok ? "ok" : "no");
+  say(id, ok, ok ? "Верно" : "Нет, посмотри ещё раз");
+}
+/* соединение равных дробей */
+var MATCH = {};
+function matchInit(id, pairs){ MATCH[id] = {pairs: pairs, sel: null, done: 0}; return MATCH[id]; }
+function matchEnsure(id){
+  var box = document.querySelector('.match[data-id="' + id + '"]');
+  if(!box) return null;
+  return matchInit(id, JSON.parse(box.getAttribute("data-map")));
+}
+function matchClick(el, id, side, key){
+  var st = MATCH[id] || matchEnsure(id);
+  if(!st) return;
+  if(el.classList.contains("done")) return;
+  if(side === "L"){
+    if(st.sel) st.sel.el.classList.remove("sel");
+    st.sel = {el: el, key: key};
+    el.classList.add("sel");
+    return;
+  }
+  if(!st.sel){ say(id, false, "Сначала выбери дробь слева"); return; }
+  if(st.pairs[st.sel.key] === key){
+    st.sel.el.classList.remove("sel");
+    st.sel.el.classList.add("done");
+    el.classList.add("done");
+    st.done++;
+    st.sel = null;
+    var total = Object.keys(st.pairs).length;
+    say(id, true, st.done === total ? "Все пары найдены" : ("Верно, найдено " + st.done + " из " + total));
+  } else {
+    say(id, false, "Эти дроби не равны");
+  }
+}
+/* расстановка по возрастанию */
+var ORDER = {};
+function orderInit(id, right){ ORDER[id] = {right: right, got: []}; return ORDER[id]; }
+function orderEnsure(id){
+  var box = document.querySelector('.chips[data-id="' + id + '"]');
+  if(!box) return null;
+  return orderInit(id, JSON.parse(box.getAttribute("data-order")));
+}
+function orderClick(el, id, key){
+  var st = ORDER[id] || orderEnsure(id);
+  if(!st) return;
+  if(el.classList.contains("done")) return;
+  var pos = st.got.length;
+  if(st.right[pos] === key){
+    el.classList.add("done");
+    el.setAttribute("data-pos", pos + 1);
+    st.got.push(key);
+    say(id, true, st.got.length === st.right.length ? "Весь ряд выстроен" : "Верно, дальше");
+  } else {
+    say(id, false, "Эта дробь не следующая");
+  }
+}
+/* инициализация всех блоков после загрузки страницы */
+function initBlocks(){
+  var m = document.querySelectorAll(".match[data-id]");
+  for(var i = 0; i < m.length; i++) matchEnsure(m[i].getAttribute("data-id"));
+  var o = document.querySelectorAll(".chips[data-id]");
+  for(var k = 0; k < o.length; k++) orderEnsure(o[k].getAttribute("data-id"));
+}
+if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", initBlocks);
+else initBlocks();
+</script>
+</div></body></html>
