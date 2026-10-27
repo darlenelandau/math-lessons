@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Футбольный сезон: уравнения и формула квадрата суммы</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+        --grass: #2e8b45; --grass-dark: #1f6b33; --grass-light: #e6f5ea;
+        --ink: #14301d; --muted: #4f6b57; --line: #b9dcc3;
+        --gold: #f2b705; --good: #1f9d55; --good-soft: #e3f6ea; --bad: #d64545; --bad-soft: #fde8e8;
+        --card: rgba(255,255,255,0.97);
+    }
+    body {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background: repeating-linear-gradient(90deg, #3d9e57 0 60px, #359350 60px 120px);
+        background-attachment: fixed;
+        color: var(--ink); min-height: 100vh; padding: 16px; line-height: 1.55;
+    }
+    .app { max-width: 860px; margin: 0 auto; }
+
+    .board {
+        background: #10231a; color: #fff; border: 3px solid #fff; border-radius: 14px;
+        padding: 12px 18px; margin-bottom: 12px; display: flex; align-items: center;
+        justify-content: space-between; gap: 12px; flex-wrap: wrap;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+    }
+    .board .title { font-size: 1.25em; font-weight: bold; }
+    .score { display: flex; align-items: center; gap: 12px; font-variant-numeric: tabular-nums; }
+    .team { text-align: center; font-size: .78em; letter-spacing: 1px; color: #b9d8c4; }
+    .goals { font-size: 2em; font-weight: bold; color: var(--gold); min-width: 34px; text-align: center; }
+    .colon { font-size: 1.8em; font-weight: bold; }
+    .time { font-size: .85em; color: #b9d8c4; }
+
+    .progress { width: 100%; height: 10px; background: rgba(255,255,255,0.5); border-radius: 5px; overflow: hidden; margin-bottom: 14px; border: 1.5px solid #fff; }
+    .progress-bar { height: 100%; background: var(--gold); width: 0; transition: width .35s; }
+
+    .card { background: var(--card); border: 3px solid #fff; border-radius: 14px; padding: 18px 22px; box-shadow: 0 4px 14px rgba(0,0,0,0.25); }
+    .half { display: inline-block; font-size: .8em; font-weight: bold; color: #fff; background: var(--grass-dark); border-radius: 6px; padding: 2px 9px; margin-bottom: 8px; letter-spacing: .5px; }
+    .card h2 { font-size: 1.25em; margin-bottom: 8px; }
+    .story { background: var(--grass-light); border-left: 4px solid var(--grass); padding: 10px 14px; border-radius: 8px; margin: 8px 0 12px; }
+    .ask { font-weight: bold; margin: 8px 0; }
+    .m { font-family: Georgia, 'Times New Roman', serif; white-space: nowrap; }
+
+    .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    @media (max-width: 560px) { .choices { grid-template-columns: 1fr; } }
+    .choice { font: inherit; font-family: Georgia, 'Times New Roman', serif; font-size: 1.1em; padding: 11px 12px; border: 2px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink); cursor: pointer; }
+    .choice:hover:not(:disabled) { border-color: var(--grass); }
+    .choice.right { border-color: var(--good); background: var(--good-soft); }
+    .choice.wrong { border-color: var(--bad); background: var(--bad-soft); }
+    .choice:disabled { cursor: default; }
+
+    .entry { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+    .entry input { font: inherit; font-size: 1.15em; width: 120px; padding: 7px 10px; border: 2px solid var(--line); border-radius: 9px; text-align: center; }
+    .btn { font: inherit; font-weight: bold; border: 0; border-radius: 10px; padding: 9px 16px; cursor: pointer; background: var(--grass); color: #fff; }
+    .btn.gold { background: var(--gold); color: #2b2100; }
+
+    .msg { display: none; margin-top: 12px; padding: 10px 14px; border-radius: 10px; }
+    .msg.show { display: block; }
+    .msg.ok { background: var(--good-soft); color: #145c32; }
+    .msg.bad { background: var(--bad-soft); color: #8a1f1f; }
+    .msg .btn { margin-top: 8px; }
+
+    svg.field { display: block; width: min(330px, 100%); margin: 6px auto 4px; }
+    .zone { transition: opacity .3s; }
+    .lbl { font: bold 20px Georgia, serif; fill: #14301d; text-anchor: middle; }
+    .zl { font: bold 22px Georgia, serif; fill: #fff; text-anchor: middle; }
+
+    .final { text-align: center; }
+    .final .big { font-size: 3em; }
+    .final .fs { font-size: 2.4em; font-weight: bold; margin: 8px 0; color: var(--grass-dark); }
+</style>
+</head>
+<body>
+<div class="app">
+    <div class="board">
+        <div class="title">⚽ Футбольный сезон</div>
+        <div class="score">
+            <div><div class="team">ТЫ</div><div class="goals" id="me">0</div></div>
+            <div class="colon">:</div>
+            <div><div class="team">ОШИБКИ</div><div class="goals" id="op">0</div></div>
+        </div>
+        <div class="time" id="time"></div>
+    </div>
+    <div class="progress"><div class="progress-bar" id="bar"></div></div>
+    <div id="stage"></div>
+</div>
+
+<script>
+(function(){
+    // Верный ответ с первой попытки: гол в ворота соперника. Каждая ошибка: гол в твои ворота.
+    var me = 0, op = 0, idx = 0;
+
+    function svgField(hl){
+        // a = 220, b = 80; зоны: A (a×a), R (b×a справа), D (a×b снизу), C (b×b в углу)
+        var Z = { A:[30,30,220,220,"#2e8b45"], R:[250,30,80,220,"#3aa357"], D:[30,250,220,80,"#3aa357"], C:[250,250,80,80,"#57b96f"] };
+        var s = '<svg class="field" viewBox="0 0 340 340">';
+        s += '<text class="lbl" x="140" y="22">a</text><text class="lbl" x="290" y="22">b</text>';
+        s += '<text class="lbl" x="14" y="146">a</text><text class="lbl" x="14" y="296">b</text>';
+        for (var k in Z){
+            var z = Z[k], alpha = (!hl || hl.indexOf(k) >= 0) ? 1 : 0.35;
+            s += '<rect class="zone" x="'+z[0]+'" y="'+z[1]+'" width="'+z[2]+'" height="'+z[3]+'" fill="'+z[4]+'" stroke="#fff" stroke-width="3" opacity="'+alpha+'"/>';
+        }
+        s += '<circle cx="140" cy="140" r="34" fill="none" stroke="#fff" stroke-width="2" opacity="'+((!hl||hl.indexOf("A")>=0)?0.8:0.2)+'"/>';
+        if (hl && hl.length===1){ var z = Z[hl[0]]; s += '<rect x="'+z[0]+'" y="'+z[1]+'" width="'+z[2]+'" height="'+z[3]+'" fill="none" stroke="#f2b705" stroke-width="6"/>'; }
+        return s + '</svg>';
+    }
+
+    var STEPS = [
+        // ---------- Первый тайм: переводим ----------
+        { half:"Первый тайм · разминка", t:"choice", title:"Переведи на язык математики",
+          story:"Команда забила x голов, а соперник на 2 гола меньше.", q:"Сколько голов забил соперник?",
+          a:"x − 2", w:["x + 2","2x","2 − x"], why:"На 2 меньше значит из x вычесть 2." },
+        { half:"Первый тайм · разминка", t:"choice", title:"Переведи на язык математики",
+          story:"За победу дают 3 очка. Команда выиграла x матчей.", q:"Сколько очков она получила за победы?",
+          a:"3x", w:["x + 3","x/3","3 − x"], why:"По 3 очка за каждую из x побед: 3 · x = 3x." },
+        { half:"Первый тайм · разминка", t:"choice", title:"Переведи на язык математики",
+          story:"В матче забили 5 голов. Хозяева забили x.", q:"Сколько забили гости?",
+          a:"5 − x", w:["x − 5","5x","x + 5"], why:"Из всех 5 голов вычитаем голы хозяев: 5 − x." },
+        { half:"Первый тайм · разминка", t:"choice", title:"Переведи на язык математики",
+          story:"Билет стоит x рублей. Абонемент на 10 матчей на 1500 рублей дешевле, чем 10 отдельных билетов.", q:"Сколько стоит абонемент?",
+          a:"10x − 1500", w:["10(x − 1500)","x − 1500","1500 − 10x"], why:"10 билетов стоят 10x, абонемент на 1500 дешевле всей этой суммы: 10x − 1500." },
+
+        // ---------- Второй тайм: задачи ----------
+        { half:"Второй тайм · турнирная таблица", t:"eq", title:"Очки в таблице",
+          story:"За победу 3 очка, за ничью 1 очко. Команда сыграла 10 матчей без поражений и набрала 24 очка. Пусть x это число побед.",
+          q:"Какое уравнение подходит?", a:"3x + (10 − x) = 24", w:["3x + x = 24","3x + 10 = 24","3(10 − x) + x = 24"],
+          why:"Ничьих 10 − x, за них по 1 очку. Всего 3x + (10 − x) = 24.",
+          ask:"Сколько побед?", ans:7, hint:"Раскрой скобки: 3x + 10 − x = 24, то есть 2x = 14.", check:"Проверка: 7 побед дают 21 очко, 3 ничьи 3 очка, всего 24." },
+        { half:"Второй тайм · турнирная таблица", t:"eq", title:"Лучший бомбардир",
+          story:"Нападающий забил за сезон 21 гол. Во втором круге он забил на 5 голов больше, чем в первом. Пусть x это голы в первом круге.",
+          q:"Какое уравнение подходит?", a:"x + (x + 5) = 21", w:["x + 5 = 21","5x = 21","x + 5x = 21"],
+          why:"Во втором круге x + 5, всего x + (x + 5) = 21.",
+          ask:"Сколько голов он забил во <b>втором</b> круге?", ans:13, trap:8, trapMsg:"8 это x, то есть первый круг. А спрашивают второй: x + 5.", hint:"2x + 5 = 21, значит x = 8. Не забудь, что спрашивают второй круг.", check:"Проверка: 8 + 13 = 21." },
+        { half:"Второй тайм · турнирная таблица", t:"eq", title:"Билеты на матч",
+          story:"Билет за воротами на 400 рублей дешевле билета на центральную трибуну. Семья купила 2 билета на центральную трибуну и 3 за воротами, всего за 5800 рублей. Пусть x это цена центрального билета.",
+          q:"Какое уравнение подходит?", a:"2x + 3(x − 400) = 5800", w:["2x + 3x − 400 = 5800","2x + 3(x + 400) = 5800","5x = 5800"],
+          why:"Билет за воротами x − 400, три таких 3(x − 400). Скобки нужны: скидка 400 на каждом билете.",
+          ask:"Сколько стоит центральный билет?", ans:1400, hint:"2x + 3x − 1200 = 5800, то есть 5x = 7000.", check:"Проверка: 2 · 1400 + 3 · 1000 = 5800." },
+        { half:"Второй тайм · турнирная таблица", t:"eq", title:"Полный стадион",
+          story:"На стадионе 45 000 мест. Болельщиков хозяев пришло в 4 раза больше, чем болельщиков гостей, и 5000 мест остались свободными. Пусть x это болельщики гостей.",
+          q:"Какое уравнение подходит?", a:"x + 4x + 5000 = 45000", w:["x + 4x = 45000","x + 4x = 45000 + 5000","4x = 45000"],
+          why:"Гостей x, хозяев 4x, плюс 5000 свободных мест, вместе все 45 000.",
+          ask:"Сколько пришло болельщиков гостей?", ans:8000, hint:"5x + 5000 = 45000, значит 5x = 40000.", check:"Проверка: 8000 + 32 000 + 5000 = 45 000." },
+        { half:"Второй тайм · турнирная таблица", t:"eq", title:"Сколько пробежал игрок",
+          story:"Полузащитник пробежал за матч 11 км. Во втором тайме он пробежал на 1,2 км меньше, чем в первом. Пусть x это путь в первом тайме.",
+          q:"Какое уравнение подходит?", a:"x + (x − 1,2) = 11", w:["x − 1,2 = 11","2x + 1,2 = 11","x + 1,2x = 11"],
+          why:"Во втором тайме x − 1,2, всего x + (x − 1,2) = 11.",
+          ask:"Сколько километров он пробежал в первом тайме?", ans:6.1, hint:"2x − 1,2 = 11, значит 2x = 12,2.", check:"Проверка: 6,1 + 4,9 = 11." },
+        { half:"Второй тайм · турнирная таблица", t:"eq", title:"Тренер и игрок",
+          story:"Тренеру 48 лет, а игроку 18. Пусть через t лет тренер будет ровно в 2 раза старше игрока.",
+          q:"Какое уравнение подходит?", a:"48 + t = 2(18 + t)", w:["48 + t = 2 · 18 + t","48 = 2(18 + t)","2(48 + t) = 18 + t"],
+          why:"Через t лет тренеру 48 + t, игроку 18 + t. Тренер в 2 раза старше: 48 + t = 2(18 + t).",
+          ask:"Через сколько лет?", ans:12, hint:"48 + t = 36 + 2t, значит 12 = t.", check:"Проверка: тренеру 60, игроку 30." },
+
+        // ---------- Дополнительное время: площадь поля ----------
+        { half:"Дополнительное время · поле", t:"choice", miss:"Площадь прямоугольника это длина, умноженная на ширину. Посмотри на подписи сторон.", title:"Расширяем тренировочное поле", svg:"A",
+          story:"Тренировочное поле было квадратным со стороной a. Его расширили: и длину, и ширину увеличили на b. Получился квадрат со стороной a + b.",
+          q:"Чему равна площадь старого поля (выделено)?", a:"a²", w:["2a","ab","4a"], why:"Квадрат со стороной a: a · a = a²." },
+        { half:"Дополнительное время · поле", t:"choice", miss:"Площадь прямоугольника это длина, умноженная на ширину. Посмотри на подписи сторон.", title:"Расширяем тренировочное поле", svg:"R",
+          story:"Справа добавили полоску.", q:"Чему равна её площадь?",
+          a:"ab", w:["b²","a + b","a²"], why:"Полоска длиной a и шириной b: a · b = ab." },
+        { half:"Дополнительное время · поле", t:"choice", miss:"Площадь прямоугольника это длина, умноженная на ширину. Посмотри на подписи сторон.", title:"Расширяем тренировочное поле", svg:"D",
+          story:"Снизу тоже добавили полоску.", q:"Чему равна её площадь?",
+          a:"ab", w:["b²","2b","a²"], why:"Она такая же: a · b = ab." },
+        { half:"Дополнительное время · поле", t:"choice", miss:"Площадь прямоугольника это длина, умноженная на ширину. Посмотри на подписи сторон.", title:"Расширяем тренировочное поле", svg:"C",
+          story:"А ещё в углу появился маленький квадратик.", q:"Чему равна его площадь?",
+          a:"b²", w:["ab","2b","b"], why:"Квадрат со стороной b: b · b = b²." },
+        { half:"Дополнительное время · поле", t:"choice", miss:"Сложи площади всех четырёх частей: большой квадрат, две полоски и маленький квадратик.", title:"Вся площадь двумя способами", svg:"ARDC",
+          story:"С одной стороны, новое поле это квадрат со стороной a + b, его площадь (a + b)². С другой стороны, оно сложено из четырёх частей.",
+          q:"Чему равно (a + b)²?", a:"a² + 2ab + b²", w:["a² + b²","a² + ab + b²","2a + 2b"],
+          why:"Складываем все части: a² + ab + ab + b² = a² + 2ab + b². Это формула квадрата суммы." },
+        { half:"Дополнительное время · поле", t:"num", title:"Проверим на числах", svg:"ARDC",
+          story:"Пусть старое поле было 30 на 30 м, а расширили на 10 м: a = 30, b = 10.",
+          q:"Чему равна площадь нового поля (a + b)²?", ans:1600,
+          okMsg:"Верно: 40² = 1600. А a² + b² = 900 + 100 = 1000. Не хватает 600: это две полоски ab по 300. Поэтому (a + b)² не равно a² + b².",
+          hint:"Сторона нового поля 30 + 10 = 40 м." },
+        { half:"Дополнительное время · формула", t:"choice", miss:"Подставь в формулу (a + b)² = a² + 2ab + b². Не теряй удвоенное произведение 2ab: это две полоски.", title:"Раскрываем по формуле",
+          story:"(a + b)² = a² + 2ab + b². Здесь a = x, b = 3.", q:"Чему равно (x + 3)²?",
+          a:"x² + 6x + 9", w:["x² + 9","x² + 3x + 9","x² + 6x + 6"], why:"x² + 2 · x · 3 + 3² = x² + 6x + 9. Две полоски дают 6x." },
+        { half:"Дополнительное время · формула", t:"choice", miss:"Подставь в формулу (a + b)² = a² + 2ab + b². Не теряй удвоенное произведение 2ab: это две полоски.", title:"Раскрываем по формуле",
+          story:"(a + b)² = a² + 2ab + b².", q:"Чему равно (x + 5)²?",
+          a:"x² + 10x + 25", w:["x² + 25","x² + 5x + 25","x² + 10x + 10"], why:"x² + 2 · x · 5 + 5² = x² + 10x + 25." },
+        { half:"Дополнительное время · формула", t:"choice", miss:"Подставь в формулу (a + b)² = a² + 2ab + b². Не теряй удвоенное произведение 2ab: это две полоски.", title:"Раскрываем по формуле",
+          story:"(a + b)² = a² + 2ab + b². Здесь a = 2x, b = 1.", q:"Чему равно (2x + 1)²?",
+          a:"4x² + 4x + 1", w:["2x² + 4x + 1","4x² + 2x + 1","4x² + 1"], why:"(2x)² = 4x², удвоенное произведение 2 · 2x · 1 = 4x, и 1² = 1." },
+        { half:"Дополнительное время · фокус", t:"num", title:"Считаем в уме",
+          story:"51² можно посчитать без столбика: 51 = 50 + 1, значит 51² = (50 + 1)² = 50² + 2 · 50 · 1 + 1².",
+          q:"Чему равно 51²?", ans:2601,
+          okMsg:"Верно: 2500 + 100 + 1 = 2601.", hint:"50² = 2500, 2 · 50 · 1 = 100, 1² = 1." }
+    ];
+
+    function num(s){
+        s = String(s||"").replace(/[−–—]/g,"-").replace(/,/g,".").replace(/\s+/g,"");
+        if (!/^[-+]?(\d+\.?\d*|\.\d+)$/.test(s)) return null;
+        return Number(s);
+    }
+    function shuffle(a){ for (var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+    function score(){ document.getElementById("me").textContent = me; document.getElementById("op").textContent = op; }
+    function msg(box, kind, html){ box.className = "msg show " + kind; box.innerHTML = html; }
+
+    function render(){
+        var bar = document.getElementById("bar"), stage = document.getElementById("stage");
+        bar.style.width = (100*idx/STEPS.length) + "%";
+        document.getElementById("time").textContent = idx < STEPS.length ? "момент " + (idx+1) + " из " + STEPS.length : "матч окончен";
+        if (idx >= STEPS.length) return finale(stage);
+        var S = STEPS[idx];
+        stage.innerHTML = '<div class="card"><div class="half">' + S.half + '</div><h2>' + S.title + '</h2>' +
+            (S.svg ? svgField(S.svg.split("")) : "") +
+            '<div class="story">' + S.story + '</div>' +
+            '<div class="ask">' + S.q + '</div>' +
+            '<div id="body"></div><div class="msg" id="msg"></div></div>';
+        var body = stage.querySelector("#body"), box = stage.querySelector("#msg");
+        if (S.t === "num") return numStep(S, body, box, S.ans, S.okMsg, S.hint, true);
+        choiceStep(S, body, box, function(){
+            if (S.t === "eq"){
+                body.insertAdjacentHTML("beforeend", '<div class="ask" style="margin-top:14px">' + S.ask + '</div><div id="b2"></div>');
+                var b2 = body.querySelector("#b2");
+                numStep(S, b2, box, S.ans, (S.check || "Верно!"), S.hint, false);
+            } else {
+                nextBtn(box, "Гол! ⚽ " + S.why);
+            }
+        });
+    }
+
+    function choiceStep(S, body, box, onRight){
+        var wrap = document.createElement("div"); wrap.className = "choices"; body.appendChild(wrap);
+        var missed = false;
+        shuffle([S.a].concat(S.w)).forEach(function(o){
+            var b = document.createElement("button"); b.className = "choice"; b.textContent = o;
+            b.onclick = function(){
+                if (o === S.a){
+                    wrap.querySelectorAll("button").forEach(function(x){ x.disabled = true; });
+                    b.classList.add("right");
+                    if (!missed) me++; score();
+                    if (S.t === "eq") msg(box, "ok", (missed ? "Верно. " : "Гол! ⚽ ") + S.why + " Теперь реши его.");
+                    onRight();
+                } else {
+                    if (b.disabled) return;
+                    missed = true; op++; score();
+                    b.classList.add("wrong"); b.disabled = true;
+                    msg(box, "bad", "Мимо. " + (S.miss || (S.t === "eq" ? "Запиши каждую величину через x и сравни." : "Подумай: что именно делают с x и в каком порядке?")));
+                }
+            };
+            wrap.appendChild(b);
+        });
+    }
+
+    function numStep(S, body, box, ans, okHtml, hint, scoreIt){
+        body.insertAdjacentHTML("beforeend", '<div class="entry"><input id="inp" inputmode="decimal" autocomplete="off" placeholder="ответ"><button class="btn" id="go">Проверить</button></div>');
+        var inp = body.querySelector("#inp"), missed = false, done = false;
+        function go(){
+            if (done) return;
+            var v = num(inp.value);
+            if (v === null){ msg(box, "bad", "Впиши число."); return; }
+            if (Math.abs(v - ans) < 1e-9){
+                done = true; inp.disabled = true;
+                if (scoreIt && !missed) me++;
+                score();
+                nextBtn(box, (missed ? "Верно. " : (scoreIt ? "Гол! ⚽ " : "Верно! ")) + okHtml);
+            } else {
+                if (!missed){ op++; score(); }
+                missed = true;
+                msg(box, "bad", (S.trap !== undefined && Math.abs(v - S.trap) < 1e-9 ? S.trapMsg : "Пока нет. " + hint));
+            }
+        }
+        body.querySelector("#go").onclick = go;
+        inp.addEventListener("keydown", function(e){ if (e.key === "Enter") go(); });
+    }
+
+    function nextBtn(box, html){
+        msg(box, "ok", html + '<div><button class="btn gold" id="nx">' + (idx+1 < STEPS.length ? "Дальше →" : "Финальный свисток →") + '</button></div>');
+        box.querySelector("#nx").onclick = function(){ idx++; render(); window.scrollTo(0,0); };
+    }
+
+    function finale(stage){
+        var res = me > op ? ["🏆","Победа!"] : me === op ? ["🤝","Ничья!"] : ["💪","В следующий раз отыграемся!"];
+        stage.innerHTML = '<div class="card final"><div class="big">' + res[0] + '</div><h2>Финальный свисток</h2>' +
+            '<div class="fs">' + me + ' : ' + op + '</div><p>' + res[1] + '</p>' +
+            '<p style="margin-top:10px">Главное из дополнительного времени: <b class="m">(a + b)² = a² + 2ab + b²</b>. Две полоски ab нельзя терять.</p>' +
+            '<p style="margin-top:14px"><button class="btn" id="again">Сыграть ещё раз</button></p></div>';
+        stage.querySelector("#again").onclick = function(){ me = 0; op = 0; idx = 0; score(); render(); };
+    }
+
+    score(); render();
+})();
+</script>
+</body>
+</html>
