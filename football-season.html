@@ -105,7 +105,7 @@
     <div class="board">
         <div class="side">ТЫ</div>
         <div class="led" id="led">0:0</div>
-        <div class="side r">ВРАТАРЬ</div>
+        <div class="side r">СОПЕРНИК</div>
         <div class="clock" id="clock">МАТЧЕВЫЙ ДЕНЬ</div>
     </div>
     <div class="phases" id="phases"></div>
@@ -114,7 +114,7 @@
 
 <script>
 (function(){
-    // Гол «ТЫ» за верное действие с первой попытки, гол «ВРАТАРЬ» за каждую ошибку (он отбил).
+    // Гол «ТЫ» за верное действие с первой попытки, очко «СОПЕРНИК» за каждую ошибку (вратарь отбил).
     var me = 0, gk = 0;
     var PH = ["Разминка: пенальти", "1 тайм: таблица", "2 тайм: тактика", "Равновесие", "Доп. время: поле", "Серия по формуле", "Бонус ★"];
     var phase = 0;
@@ -457,7 +457,7 @@
 
     function finale(){
         phase = PH.length; phases();
-        var r = me > gk ? "🏆 Победа!" : me === gk ? "🤝 Ничья" : "💪 Вратарь сегодня в ударе, отыграемся!";
+        var r = me > gk ? "🏆 Победа!" : me === gk ? "🤝 Ничья" : "💪 Сегодня соперник сильнее, отыграемся!";
         var s = stage('<div class="final"><div class="kicker">Финальный свисток</div><div class="led">' + me + ':' + gk + '</div><h2>' + r + '</h2>' +
             '<p class="say" style="margin-top:8px">Главное за матч: обозначь неизвестное буквой, запиши всё через неё и найди, что чему равно. И <span class="m">(a + b)² = a² + 2ab + b²</span>: две полоски ab не теряем.</p>' +
             '<button class="btn" id="again">Новый матч</button></div>');
