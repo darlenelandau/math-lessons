@@ -54,7 +54,7 @@
     .zone rect { fill: rgba(255,255,255,0.08); stroke: rgba(255,255,255,0.5); stroke-dasharray: 4 3; }
     .zone:hover rect { fill: rgba(255,210,74,0.2); }
     .zone text { fill: #fff; font: 17px Georgia, serif; text-anchor: middle; }
-    .ball, .keeper { transition: transform .55s cubic-bezier(.2,.8,.3,1); }
+    .ball, .keeper { transition: transform .55s cubic-bezier(.2,.8,.3,1); transform-box: fill-box; transform-origin: center; }
     .shots { text-align: center; font: 14px 'Courier New', monospace; color: var(--muted); margin-top: 4px; }
 
     table.tt { border-collapse: collapse; width: 100%; margin: 8px 0; font-variant-numeric: tabular-nums; }
@@ -162,7 +162,7 @@
                     if (busy || z.getAttribute("data-dead")) return;
                     var i = +z.getAttribute("data-i"), right = (opts[i] === S.a);
                     busy = true;
-                    bl.style.transform = "translate(" + (ZX[i]-165) + "px,-114px) scale(.8)";
+                    bl.style.transform = "translate(" + (ZX[i]-165) + "px,-132px) scale(.8)";
                     if (right){
                         var free = [0,1,2].filter(function(j){ return j!==i && !svg.querySelector('.zone[data-i="'+j+'"]').getAttribute("data-dead"); });
                         var other = free.length ? free[Math.floor(Math.random()*free.length)] : (i===0 ? 2 : 0);
