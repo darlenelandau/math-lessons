@@ -156,6 +156,9 @@ table.q input{width:88px;font-size:1.1em}
 @keyframes popin{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
 .field span.u{display:inline-block;animation:popin .25s ease}
 .daybox{font-weight:900;color:#15803d;background:#dcfce7;border-radius:12px;padding:8px 14px}
+.tip{margin-top:9px;background:#fffbeb;border-left:5px solid #f59e0b;border-radius:10px;padding:10px 14px;font-weight:700;color:#78350f;font-size:.96em;animation:in .2s ease}
+.tipbtn{font-family:inherit;font-size:.88em;font-weight:900;color:#b45309;background:#fffbeb;border:2px solid #fcd34d;border-radius:11px;padding:5px 12px;cursor:pointer;margin-top:8px}
+.tipbtn:hover{background:#fef3c7}
 
 /* ---------- фишки ---------- */
 .board{background:linear-gradient(160deg,#1f2937,#111827);border-radius:18px;padding:18px 22px;min-height:70px;
@@ -286,6 +289,34 @@ table.q input{width:88px;font-size:1.1em}
 <div class="row"><button class="act" id="cch">Проверить</button></div>
 <div class="fb" id="cfb"></div>
 </div>
+<div class="task">
+<div class="lbl">🧠 Задачи того же вида</div>
+<p>Сначала всегда узнавай, что успевает <b>один</b> за то время, которое дано. Если застряла, открой подсказку.</p>
+<div class="cards">
+<div class="qcard"><div class="q"><b>1)</b> Четыре кошки за четыре дня ловят четырёх мышек. За сколько дней восемь кошек поймают восемь мышек?</div>
+<input type="text" id="k1"> дней
+<button class="tipbtn" data-tip="tip1">Подсказка</button><div class="tip" id="tip1" style="display:none">Одна кошка за 4 дня ловит одну мышку. Восемь кошек за те же 4 дня поймают восемь мышек.</div></div>
+
+<div class="qcard"><div class="q"><b>2)</b> Пять землекопов за пять часов выкопали пять ям. Сколько ям выкопают десять землекопов за десять часов?</div>
+<input type="text" id="k2"> ям
+<button class="tipbtn" data-tip="tip2">Подсказка</button><div class="tip" id="tip2" style="display:none">Один землекоп за 5 часов копает одну яму. Значит за 10 часов он выкопает две. Десять землекопов за 10 часов выкопают 10 × 2.</div></div>
+
+<div class="qcard"><div class="q"><b>3)</b> Три курицы за три дня снесли три яйца. Сколько яиц снесут двенадцать кур за двенадцать дней?</div>
+<input type="text" id="k3"> яиц
+<button class="tipbtn" data-tip="tip3">Подсказка</button><div class="tip" id="tip3" style="display:none">Одна курица за 3 дня несёт одно яйцо. За 12 дней она снесёт 4 яйца. Теперь умножь на число кур.</div></div>
+
+<div class="qcard"><div class="q"><b>4)</b> Два маляра за два дня красят два забора. Сколько заборов покрасят шесть маляров за шесть дней?</div>
+<input type="text" id="k4"> заборов
+<button class="tipbtn" data-tip="tip4">Подсказка</button><div class="tip" id="tip4" style="display:none">Один маляр за 2 дня красит один забор, значит за 6 дней три забора. Маляров шесть.</div></div>
+
+<div class="qcard"><div class="q"><b>5)</b> Пять машинисток за пять минут печатают пять страниц. За сколько минут десять машинисток напечатают сто страниц?</div>
+<input type="text" id="k5"> минут
+<button class="tipbtn" data-tip="tip5">Подсказка</button><div class="tip" id="tip5" style="display:none">Одна машинистка за 5 минут печатает одну страницу. Десять за 5 минут напечатают десять страниц. Сколько раз по десять страниц в ста?</div></div>
+</div>
+<div class="row"><button class="act" id="kch">Проверить</button></div>
+<div class="fb" id="kfb"></div>
+</div>
+
 </section>
 
 <!-- 6 -->
@@ -507,6 +538,20 @@ document.getElementById('dayb').onclick=function(){if(mice===0)return;mice=Math.
 document.getElementById('resetb').onclick=function(){mice=startMice;days=0;drawField();};
 drawField();
 document.getElementById('cch').onclick=function(){checkSet([['c1',2,'а'],['c2',1,'б'],['c3',3,'в']],'cfb',2);};
+
+
+/* ---------- 5б. задачи того же вида ---------- */
+document.querySelectorAll('.tipbtn').forEach(function(b){
+    b.onclick=function(){
+        var t=document.getElementById(this.getAttribute('data-tip'));
+        var open=(t.style.display!=='none');
+        t.style.display=open?'none':'block';
+        this.textContent=open?'Подсказка':'Спрятать подсказку';
+    };
+});
+document.getElementById('kch').onclick=function(){
+    checkSet([['k1',4,'1'],['k2',20,'2'],['k3',48,'3'],['k4',18,'4'],['k5',50,'5']],'kfb',2);
+};
 
 /* ---------- 6. фишки ---------- */
 var FORMS=[
