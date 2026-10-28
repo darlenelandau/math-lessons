@@ -159,6 +159,14 @@ table.q input{width:88px;font-size:1.1em}
 .tip{margin-top:9px;background:#fffbeb;border-left:5px solid #f59e0b;border-radius:10px;padding:10px 14px;font-weight:700;color:#78350f;font-size:.96em;animation:in .2s ease}
 .tipbtn{font-family:inherit;font-size:.88em;font-weight:900;color:#b45309;background:#fffbeb;border:2px solid #fcd34d;border-radius:11px;padding:5px 12px;cursor:pointer;margin-top:8px}
 .tipbtn:hover{background:#fef3c7}
+.sim{margin-bottom:14px}
+.simctl{display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin:10px 0;font-weight:800;color:#166534}
+.simctl input[type=range]{width:190px}
+.simfield{background:#fff;border:2px dashed #86efac;border-radius:14px;padding:10px 12px;margin:8px 0;min-height:76px}
+.simfield .ln{font-size:1.55em;line-height:1.35;letter-spacing:3px}
+.simfield .cap{font-size:.84em;font-weight:900;color:#15803d;letter-spacing:0;margin-right:8px;vertical-align:middle}
+.simout{background:#ecfdf5;border-radius:12px;padding:9px 14px;font-weight:800;color:#14532d;margin-bottom:8px}
+.simout .f{display:block;font-size:1.15em;font-weight:900;color:#15803d;margin-top:3px}
 
 /* ---------- фишки ---------- */
 .board{background:linear-gradient(160deg,#1f2937,#111827);border-radius:18px;padding:18px 22px;min-height:70px;
@@ -292,27 +300,7 @@ table.q input{width:88px;font-size:1.1em}
 <div class="task">
 <div class="lbl">🧠 Задачи того же вида</div>
 <p>Сначала всегда узнавай, что успевает <b>один</b> за то время, которое дано. Если застряла, открой подсказку.</p>
-<div class="cards">
-<div class="qcard"><div class="q"><b>1)</b> Четыре кошки за четыре дня ловят четырёх мышек. За сколько дней восемь кошек поймают восемь мышек?</div>
-<input type="text" id="k1"> дней
-<button class="tipbtn" data-tip="tip1">Подсказка</button><div class="tip" id="tip1" style="display:none">Одна кошка за 4 дня ловит одну мышку. Восемь кошек за те же 4 дня поймают восемь мышек.</div></div>
-
-<div class="qcard"><div class="q"><b>2)</b> Пять землекопов за пять часов выкопали пять ям. Сколько ям выкопают десять землекопов за десять часов?</div>
-<input type="text" id="k2"> ям
-<button class="tipbtn" data-tip="tip2">Подсказка</button><div class="tip" id="tip2" style="display:none">Один землекоп за 5 часов копает одну яму. Значит за 10 часов он выкопает две. Десять землекопов за 10 часов выкопают 10 × 2.</div></div>
-
-<div class="qcard"><div class="q"><b>3)</b> Три курицы за три дня снесли три яйца. Сколько яиц снесут двенадцать кур за двенадцать дней?</div>
-<input type="text" id="k3"> яиц
-<button class="tipbtn" data-tip="tip3">Подсказка</button><div class="tip" id="tip3" style="display:none">Одна курица за 3 дня несёт одно яйцо. За 12 дней она снесёт 4 яйца. Теперь умножь на число кур.</div></div>
-
-<div class="qcard"><div class="q"><b>4)</b> Два маляра за два дня красят два забора. Сколько заборов покрасят шесть маляров за шесть дней?</div>
-<input type="text" id="k4"> заборов
-<button class="tipbtn" data-tip="tip4">Подсказка</button><div class="tip" id="tip4" style="display:none">Один маляр за 2 дня красит один забор, значит за 6 дней три забора. Маляров шесть.</div></div>
-
-<div class="qcard"><div class="q"><b>5)</b> Пять машинисток за пять минут печатают пять страниц. За сколько минут десять машинисток напечатают сто страниц?</div>
-<input type="text" id="k5"> минут
-<button class="tipbtn" data-tip="tip5">Подсказка</button><div class="tip" id="tip5" style="display:none">Одна машинистка за 5 минут печатает одну страницу. Десять за 5 минут напечатают десять страниц. Сколько раз по десять страниц в ста?</div></div>
-</div>
+<div id="simcards"></div>
 <div class="row"><button class="act" id="kch">Проверить</button></div>
 <div class="fb" id="kfb"></div>
 </div>
@@ -541,14 +529,81 @@ document.getElementById('cch').onclick=function(){checkSet([['c1',2,'а'],['c2',
 
 
 /* ---------- 5б. задачи того же вида ---------- */
-document.querySelectorAll('.tipbtn').forEach(function(b){
-    b.onclick=function(){
-        var t=document.getElementById(this.getAttribute('data-tip'));
-        var open=(t.style.display!=='none');
-        t.style.display=open?'none':'block';
-        this.textContent=open?'Подсказка':'Спрятать подсказку';
-    };
-});
+var SIMS=[
+ {q:'Четыре кошки за четыре дня ловят четырёх мышек. За сколько дней восемь кошек поймают восемь мышек?',
+  we:'🐱',re:'🐭',T0:4,unit:'дн.',wName:'кошек',rName:'мышек',W:8,maxW:12,maxK:6,ansUnit:'дней',
+  tip:'Одна кошка за 4 дня ловит одну мышку. Значит восемь кошек за те же 4 дня поймают восемь мышек.'},
+ {q:'Пять землекопов за пять часов выкопали пять ям. Сколько ям выкопают десять землекопов за десять часов?',
+  we:'👷',re:'🕳️',T0:5,unit:'ч',wName:'землекопов',rName:'ям',W:10,maxW:12,maxK:5,ansUnit:'ям',
+  tip:'Один землекоп за 5 часов копает одну яму, значит за 10 часов две. Поставь ползунок на 10 часов.'},
+ {q:'Три курицы за три дня снесли три яйца. Сколько яиц снесут двенадцать кур за двенадцать дней?',
+  we:'🐔',re:'🥚',T0:3,unit:'дн.',wName:'кур',rName:'яиц',W:12,maxW:14,maxK:6,ansUnit:'яиц',
+  tip:'Одна курица за 3 дня несёт одно яйцо, за 12 дней четыре. Куриц двенадцать.'},
+ {q:'Два маляра за два дня красят два забора. Сколько заборов покрасят шесть маляров за шесть дней?',
+  we:'🧑‍🎨',re:'🧱',T0:2,unit:'дн.',wName:'маляров',rName:'заборов',W:6,maxW:10,maxK:6,ansUnit:'заборов',
+  tip:'Один маляр за 2 дня красит один забор, значит за 6 дней три. Маляров шесть.'},
+ {q:'Пять машинисток за пять минут печатают пять страниц. За сколько минут десять машинисток напечатают сто страниц?',
+  we:'🧑‍💻',re:'📄',T0:5,unit:'мин',wName:'машинисток',rName:'страниц',W:10,maxW:12,maxK:12,ansUnit:'минут',
+  tip:'Одна машинистка за 5 минут печатает одну страницу, десять за 5 минут десять страниц. Двигай время, пока не наберётся 100 страниц, и посмотри на минуты.'}
+];
+(function(){
+    var box=document.getElementById('simcards');
+    SIMS.forEach(function(s,i){
+        var d=document.createElement('div');
+        d.className='qcard sim';
+        d.innerHTML='<div class="q"><b>'+(i+1)+')</b> '+s.q+'</div>'
+          +'<div class="simctl">'
+          +'<span>'+s.we+' сколько работают: <b id="sw'+i+'">'+s.W+'</b></span>'
+          +'<button class="act ghost mini" data-w="'+i+'" data-d="-1">−</button>'
+          +'<button class="act ghost mini" data-w="'+i+'" data-d="1">+</button>'
+          +'<span>⏱ время: <b id="st'+i+'">'+s.T0+'</b> '+s.unit+'</span>'
+          +'<input type="range" id="sr'+i+'" min="1" max="'+s.maxK+'" value="1">'
+          +'</div>'
+          +'<div class="simfield" id="sf'+i+'"></div>'
+          +'<div class="simout" id="so'+i+'"></div>'
+          +'<div class="row">Ответ: <input type="text" id="k'+(i+1)+'"> '+s.ansUnit
+          +' <button class="tipbtn" data-tip="tip'+i+'">Подсказка</button></div>'
+          +'<div class="tip" id="tip'+i+'" style="display:none">'+s.tip+'</div>';
+        box.appendChild(d);
+    });
+    SIMS.forEach(function(s,i){
+        s.k=1;
+        document.getElementById('sr'+i).oninput=function(){s.k=+this.value;drawSim(i);};
+        drawSim(i);
+    });
+    document.querySelectorAll('[data-w]').forEach(function(b){
+        b.onclick=function(){
+            var i=+this.getAttribute('data-w'), s=SIMS[i];
+            s.W=Math.max(1,Math.min(s.maxW,s.W+ +this.getAttribute('data-d')));
+            drawSim(i);
+        };
+    });
+    document.querySelectorAll('.tipbtn').forEach(function(b){
+        b.onclick=function(){
+            var t=document.getElementById(this.getAttribute('data-tip'));
+            var open=(t.style.display!=='none');
+            t.style.display=open?'none':'block';
+            this.textContent=open?'Подсказка':'Спрятать подсказку';
+        };
+    });
+})();
+function drawSim(i){
+    var s=SIMS[i], total=s.W*s.k, time=s.k*s.T0;
+    document.getElementById('sw'+i).textContent=s.W;
+    document.getElementById('st'+i).textContent=time;
+    var f='<div class="ln"><span class="cap">работают</span>';
+    for(var a=0;a<s.W;a++)f+='<span class="u">'+s.we+'</span>';
+    f+='</div><div class="ln"><span class="cap">сделали</span>';
+    if(total<=36){for(var b=0;b<total;b++)f+='<span class="u">'+s.re+'</span>';}
+    else f+='<span style="font-size:.7em">'+s.re+' × '+total+'</span>';
+    f+='</div>';
+    document.getElementById('sf'+i).innerHTML=f;
+    var line=(s.k===1)
+        ? 'один за '+s.T0+' '+s.unit+' делает 1'
+        : 'один за '+s.T0+' '+s.unit+' делает 1, значит за '+time+' '+s.unit+' делает '+s.k;
+    document.getElementById('so'+i).innerHTML=line
+        +'<span class="f">'+s.W+' × '+s.k+' = '+total+' '+s.rName+' за '+time+' '+s.unit+'</span>';
+}
 document.getElementById('kch').onclick=function(){
     checkSet([['k1',4,'1'],['k2',20,'2'],['k3',48,'3'],['k4',18,'4'],['k5',50,'5']],'kfb',2);
 };
