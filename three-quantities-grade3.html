@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Три величины и одна формула</title>
+<style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',Arial,sans-serif;background:linear-gradient(140deg,#fff7ed 0%,#ffe9d2 45%,#ffd9b3 100%);background-attachment:fixed;color:#1f2937;min-height:100vh;padding:16px;line-height:1.45}
+    .app{max-width:980px;margin:0 auto}
+
+    .top{background:#fff;border:3px solid #c2410c;border-radius:16px;padding:12px 20px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:0 5px 16px rgba(0,0,0,.14)}
+    .top h1{font-size:1.45em;color:#9a3412}
+    .score{background:#fff7ed;border:2px solid #c2410c;border-radius:9px;padding:6px 14px;font-weight:800;color:#7c2d12}
+
+    nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+    nav button{font-family:inherit;font-size:.98em;font-weight:700;padding:8px 14px;border:2.5px solid #c2410c;border-radius:10px;background:#fff;color:#9a3412;cursor:pointer}
+    nav button:hover{background:#ffedd5}
+    nav button.on{background:#c2410c;color:#fff}
+
+    section{display:none;background:#fff;border:3px solid #c2410c;border-radius:16px;padding:18px 22px;box-shadow:0 6px 18px rgba(0,0,0,.16)}
+    section.on{display:block}
+    h2{font-size:1.25em;color:#9a3412;margin-bottom:6px}
+    p{margin-bottom:8px}
+    .hint{font-style:italic;color:#57534e;font-size:.96em}
+    .formula{background:#fff7ed;border:2px dashed #c2410c;border-radius:12px;padding:10px 16px;margin:10px 0;text-align:center;font-size:1.3em;font-weight:800;color:#7c2d12;letter-spacing:.5px}
+    .formula small{display:block;font-size:.62em;font-weight:600;color:#57534e;letter-spacing:0;margin-top:4px}
+
+    button.act{font-family:inherit;font-size:1.02em;font-weight:700;padding:9px 18px;border:none;border-radius:10px;background:#c2410c;color:#fff;cursor:pointer}
+    button.act:hover{background:#9a3412}
+    button.ghost{background:#fff;color:#c2410c;border:2.5px solid #c2410c}
+    button.ghost:hover{background:#ffedd5}
+
+    input[type=text]{font-family:inherit;font-size:1.15em;padding:6px 10px;width:92px;border:2.5px solid #c2410c;border-radius:8px;text-align:center}
+    input.ok{border-color:#15803d;background:#f0fdf4}
+    input.no{border-color:#dc2626;background:#fef2f2}
+
+    .fb{margin-top:12px;padding:10px 14px;border-radius:10px;font-size:1.03em;display:none}
+    .fb.ok{display:block;background:#f0fdf4;border:2px solid #15803d}
+    .fb.no{display:block;background:#fef2f2;border:2px solid #dc2626}
+
+    /* магазин */
+    .shelf{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+    .good{border:2.5px solid #c2410c;border-radius:12px;background:#fff;padding:8px 12px;cursor:pointer;text-align:center;min-width:104px}
+    .good:hover{background:#ffedd5}
+    .good.on{background:#c2410c;color:#fff}
+    .good .em{font-size:1.8em;display:block}
+    .good .nm{display:block;font-weight:700;font-size:.95em}
+    .good .pr{display:block;font-weight:800}
+    .ctl{display:flex;align-items:center;gap:12px;margin:10px 0;flex-wrap:wrap}
+    input[type=range]{width:260px;accent-color:#c2410c}
+    .check{background:#fffbeb;border:2px solid #92400e;border-radius:10px;padding:10px 16px;font-size:1.15em;font-weight:800;color:#7c2d12;display:inline-block;min-width:260px}
+    .check .big{font-size:1.35em;display:block;margin-top:4px}
+
+    /* треугольник */
+    .tri-wrap{display:flex;gap:22px;flex-wrap:wrap;align-items:center}
+    .tri{flex:0 0 300px}
+    .tri svg{width:300px;height:auto}
+    .tri-out{font-size:1.2em;font-weight:800;color:#7c2d12;min-height:60px}
+
+    /* таблицы */
+    table.q{border-collapse:collapse;margin:10px 0}
+    table.q th,table.q td{border:2px solid #7c2d12;padding:7px 12px;text-align:center;font-size:1.05em}
+    table.q th{background:#ffedd5;font-weight:800;white-space:nowrap}
+
+    /* бак */
+    .tankrow{display:flex;gap:24px;align-items:center;flex-wrap:wrap}
+    .tank svg{width:170px;height:auto}
+
+    /* кошки */
+    .field{background:#f0fdf4;border:2px solid #15803d;border-radius:12px;padding:12px;margin:10px 0;min-height:92px;font-size:1.9em;line-height:1.25}
+    .daybox{font-weight:800;color:#166534;font-size:1.05em}
+
+    /* фишки */
+    .chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+    .chip{border:2.5px solid #7c3aed;border-radius:10px;background:#f5f3ff;color:#4c1d95;font-weight:800;font-size:1.15em;padding:7px 14px;cursor:pointer}
+    .chip:hover{background:#ede9fe}
+    .line{border:2.5px dashed #7c3aed;border-radius:10px;min-height:52px;padding:8px 12px;font-size:1.3em;font-weight:800;color:#4c1d95;background:#fff;margin:8px 0}
+
+    .task{border-top:2px solid #ffedd5;margin-top:14px;padding-top:10px}
+    .task b{color:#9a3412}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:6px 0}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div class="top">
+    <h1>Три величины и одна формула</h1>
+    <div class="score" id="score">Звёздочек: 0</div>
+</div>
+
+<nav id="nav"></nav>
+
+<!-- 1 -->
+<section id="s0">
+<h2>Магазин: цена, количество, стоимость</h2>
+<p>Выбери товар и подвигай ползунок. Смотри, что происходит в чеке.</p>
+<div class="shelf" id="shelf"></div>
+<div class="ctl">
+    <span><b>Количество:</b> <span id="nv">1</span> шт.</span>
+    <input type="range" id="nrange" min="1" max="12" value="1">
+</div>
+<div class="check" id="check">выбери товар</div>
+<div class="formula">C = a × n <small>стоимость = цена × количество</small></div>
+<div class="task">
+<p><b>Задание.</b> Собери покупку ровно на <b>96 рублей</b>: подбери товар и количество.</p>
+<div class="row"><button class="act" id="shopcheck">Проверить</button></div>
+<div class="fb" id="shopfb"></div>
+</div>
+</section>
+
+<!-- 2 -->
+<section id="s1">
+<h2>Треугольник величин</h2>
+<p>Нажми на величину, которую надо <b>найти</b>. Она закроется, а внизу появится формула.</p>
+<div class="tri-wrap">
+<div class="tri" id="tri"></div>
+<div>
+    <div class="tri-out" id="triout">Нажми на любую вершину.</div>
+    <p class="hint">Сверху стоит то, что получается умножением. Если закрыть нижнюю вершину, останется деление.</p>
+</div>
+</div>
+<div class="task">
+<p><b>Задание.</b> Реши, закрыв нужную вершину.</p>
+<div class="row">а) 6 тетрадей по 23 рубля. Стоимость: <input type="text" id="t1"> р.</div>
+<div class="row">б) 8 блокнотов стоят 240 рублей. Цена одного: <input type="text" id="t2"> р.</div>
+<div class="row">в) Карандаш 14 рублей, заплатили 98 рублей. Количество: <input type="text" id="t3"> шт.</div>
+<div class="row"><button class="act" id="trich">Проверить</button></div>
+<div class="fb" id="trifb"></div>
+</div>
+</section>
+
+<!-- 3 -->
+<section id="s2">
+<h2>Таблица: заполни пропуски</h2>
+<p>В каждом столбце не хватает одной величины. Подписывать единицы не забывай вслух.</p>
+<table class="q" id="tab1"></table>
+<div class="row"><button class="act" id="tabch">Проверить</button><button class="ghost act" id="tabclr">Очистить</button></div>
+<div class="fb" id="tabfb"></div>
+</section>
+
+<!-- 4 -->
+<section id="s3">
+<h2>Насос: работа, производительность, время</h2>
+<p>Подвигай ползунки и смотри, сколько воды набралось.</p>
+<div class="tankrow">
+<div class="tank" id="tank"></div>
+<div>
+    <div class="ctl"><span><b>Производительность:</b> <span id="vv">5</span> л/мин</span><input type="range" id="vr" min="1" max="20" value="5"></div>
+    <div class="ctl"><span><b>Время:</b> <span id="tv">4</span> мин</span><input type="range" id="tr" min="1" max="12" value="4"></div>
+    <div class="check" id="tankout"></div>
+</div>
+</div>
+<div class="formula">A = v × t <small>работа = производительность × время</small></div>
+<div class="task">
+<p><b>Задание.</b> Отвечай, не двигая ползунки.</p>
+<div class="row">а) Насос даёт 12 л/мин. Сколько литров за 7 минут? <input type="text" id="p1"> л</div>
+<div class="row">б) За 8 минут набралось 128 литров. Какая производительность? <input type="text" id="p2"> л/мин</div>
+<div class="row">в) Надо набрать 180 литров, насос даёт 20 л/мин. Сколько минут? <input type="text" id="p3"> мин</div>
+<div class="row"><button class="act" id="pch">Проверить</button></div>
+<div class="fb" id="pfb"></div>
+</div>
+</section>
+
+<!-- 5 -->
+<section id="s4">
+<h2>Кошки и мышки</h2>
+<p>Правило: <b>одна кошка за один день ловит одну мышку</b>. Нажимай «Прошёл день» и смотри, что остаётся.</p>
+<div class="row">
+    <span>Кошек: <b id="catn">1</b></span><button class="ghost act" data-cat="-1">−</button><button class="ghost act" data-cat="1">+</button>
+    <span style="margin-left:14px">Мышек: <b id="mousen">1</b></span><button class="ghost act" data-mouse="-1">−</button><button class="ghost act" data-mouse="1">+</button>
+</div>
+<div class="field" id="field"></div>
+<div class="row"><button class="act" id="dayb">Прошёл день</button><button class="ghost act" id="resetb">Сначала</button><span class="daybox" id="daybox">Дней прошло: 0</span></div>
+<div class="task">
+<p><b>Задание.</b> Сначала подумай, потом проверь на поле.</p>
+<div class="row">а) Одна кошка и две мышки. Сколько дней? <input type="text" id="c1"></div>
+<div class="row">б) Пять кошек и пять мышек. Сколько дней? <input type="text" id="c2"></div>
+<div class="row">в) Пять кошек и пятнадцать мышек. Сколько дней? <input type="text" id="c3"></div>
+<div class="row"><button class="act" id="cch">Проверить</button></div>
+<div class="fb" id="cfb"></div>
+</div>
+</section>
+
+<!-- 6 -->
+<section id="s5">
+<h2>Собери формулу</h2>
+<p>Нажимай на фишки по порядку. Лишние фишки тоже лежат, бери только нужные.</p>
+<p class="hint" id="fask"></p>
+<div class="line" id="line">&nbsp;</div>
+<div class="chips" id="chips"></div>
+<div class="row"><button class="act" id="fch">Проверить</button><button class="ghost act" id="fclr">Стереть</button><button class="ghost act" id="fnext">Другая формула</button></div>
+<div class="fb" id="ffb"></div>
+</section>
+
+<!-- 7 -->
+<section id="s6">
+<h2>Сколько в одной, сколько групп, сколько всего</h2>
+<div class="formula">всего = (сколько в одной) × (сколько групп)</div>
+<p>Та же самая связь, только величины называются по-другому.</p>
+<div class="row">а) В коробке 12 карандашей. Сколько в 7 коробках? <input type="text" id="g1"></div>
+<div class="row">б) 96 конфет разложили по 8 в пакет. Сколько пакетов? <input type="text" id="g2"></div>
+<div class="row">в) 150 тетрадей по 25 в пачке. Сколько пачек? <input type="text" id="g3"></div>
+<div class="row">г) 4 тетради по 25 р. и 3 ручки по 40 р. Сколько заплатили? <input type="text" id="g4"></div>
+<div class="row">д) На 300 р. купили 5 блокнотов, осталось 45 р. Цена блокнота? <input type="text" id="g5"></div>
+<div class="row"><button class="act" id="gch">Проверить</button></div>
+<div class="fb" id="gfb"></div>
+</section>
+
+</div>
+
+<script>
+/* ---------- общее ---------- */
+var stars=0;
+function addStar(n){stars+=n;document.getElementById('score').textContent='Звёздочек: '+stars;}
+function show(el,ok,html){el.className='fb '+(ok?'ok':'no');el.innerHTML=html;}
+function num(id){var v=document.getElementById(id).value.trim().replace(',','.');return v===''?null:Number(v);}
+function mark(id,ok){var e=document.getElementById(id);e.className=ok?'ok':'no';}
+function checkSet(pairs,fb,bonus){
+    var good=0,bad=[];
+    pairs.forEach(function(p){
+        var v=num(p[0]),ok=(v===p[1]);
+        mark(p[0],ok);
+        if(ok)good++;else bad.push(p[2]);
+    });
+    var el=document.getElementById(fb);
+    if(good===pairs.length){addStar(bonus||1);show(el,true,'<b>Всё верно.</b> Звёздочка твоя.');}
+    else show(el,false,'<b>Верно '+good+' из '+pairs.length+'.</b> Посмотри ещё раз: '+bad.join(', ')+'.');
+}
+
+/* ---------- навигация ---------- */
+var NAMES=['1. Магазин','2. Треугольник','3. Таблица','4. Насос','5. Кошки','6. Формула','7. Всего и группы'];
+var nav=document.getElementById('nav');
+NAMES.forEach(function(nm,i){
+    var b=document.createElement('button');
+    b.textContent=nm;
+    b.onclick=function(){
+        for(var j=0;j<NAMES.length;j++){
+            document.getElementById('s'+j).className=(j===i?'on':'');
+            nav.children[j].className=(j===i?'on':'');
+        }
+        window.scrollTo(0,0);
+    };
+    nav.appendChild(b);
+});
+document.getElementById('s0').className='on';
+nav.children[0].className='on';
+
+/* ---------- 1. магазин ---------- */
+var GOODS=[{e:'📒',n:'тетрадь',p:12},{e:'✏️',n:'карандаш',p:8},{e:'📘',n:'блокнот',p:24},{e:'📏',n:'линейка',p:16},{e:'🖊️',n:'ручка',p:32}];
+var sel=null, cnt=1;
+var shelf=document.getElementById('shelf');
+GOODS.forEach(function(g,i){
+    var d=document.createElement('div');
+    d.className='good';
+    d.innerHTML='<span class="em">'+g.e+'</span><span class="nm">'+g.n+'</span><span class="pr">'+g.p+' р.</span>';
+    d.onclick=function(){
+        sel=i;
+        for(var j=0;j<GOODS.length;j++)shelf.children[j].className='good'+(j===i?' on':'');
+        drawCheck();
+    };
+    shelf.appendChild(d);
+});
+document.getElementById('nrange').oninput=function(){cnt=+this.value;document.getElementById('nv').textContent=cnt;drawCheck();};
+function drawCheck(){
+    var c=document.getElementById('check');
+    if(sel===null){c.textContent='выбери товар';return;}
+    var g=GOODS[sel];
+    c.innerHTML=g.e+' '+g.n+', цена '+g.p+' р., количество '+cnt+' шт.<span class="big">'+g.p+' × '+cnt+' = '+(g.p*cnt)+' р.</span>';
+}
+document.getElementById('shopcheck').onclick=function(){
+    var fb=document.getElementById('shopfb');
+    if(sel===null){show(fb,false,'Сначала выбери товар.');return;}
+    var s=GOODS[sel].p*cnt;
+    if(s===96){addStar(1);show(fb,true,'<b>Точно 96 рублей.</b> '+GOODS[sel].p+' × '+cnt+' = 96.');}
+    else show(fb,false,'Сейчас получается '+s+' р. Подумай, на какие цены 96 делится нацело.');
+};
+
+/* ---------- 2. треугольник ---------- */
+var hidden=null;
+function drawTri(){
+    var s='<svg viewBox="0 0 300 230" width="300" role="img">';
+    s+='<path d="M 150 20 L 30 200 L 270 200 Z" fill="#fff7ed" stroke="#c2410c" stroke-width="4"/>';
+    s+='<line x1="60" y1="140" x2="240" y2="140" stroke="#c2410c" stroke-width="3"/>';
+    var pts=[[150,78,'C','стоимость'],[95,180,'a','цена'],[205,180,'n','количество']];
+    pts.forEach(function(p,i){
+        var isH=(hidden===i);
+        s+='<circle cx="'+p[0]+'" cy="'+(p[1]-14)+'" r="30" fill="'+(isH?'#c2410c':'#fff')+'" stroke="#c2410c" stroke-width="3" style="cursor:pointer" data-i="'+i+'"/>';
+        s+='<text x="'+p[0]+'" y="'+(p[1]-5)+'" font-size="26" font-weight="800" text-anchor="middle" fill="'+(isH?'#fff':'#7c2d12')+'" style="pointer-events:none">'+(isH?'?':p[2])+'</text>';
+        s+='<text x="'+p[0]+'" y="'+(p[1]+32)+'" font-size="13" font-weight="700" text-anchor="middle" fill="#57534e" style="pointer-events:none">'+p[3]+'</text>';
+    });
+    s+='</svg>';
+    document.getElementById('tri').innerHTML=s;
+    document.querySelectorAll('#tri circle').forEach(function(c){
+        c.onclick=function(){hidden=+this.getAttribute('data-i');drawTri();};
+    });
+    var out=document.getElementById('triout');
+    out.innerHTML=['Нажми на любую вершину.','C = a × n','a = C : n','n = C : a'][hidden===null?0:hidden+1];
+}
+drawTri();
+document.getElementById('trich').onclick=function(){
+    checkSet([['t1',138,'а'],['t2',30,'б'],['t3',7,'в']],'trifb',1);
+};
+
+/* ---------- 3. таблица ---------- */
+var TAB=[['Цена, р.',12,null,35,19],['Количество, шт.',5,6,null,4],['Стоимость, р.',null,90,280,null]];
+var ANS={'r0c2':15,'r1c3':8,'r2c1':60,'r2c4':76};
+(function(){
+    var t=document.getElementById('tab1'),html='';
+    for(var r=0;r<3;r++){
+        html+='<tr><th>'+TAB[r][0]+'</th>';
+        for(var c=1;c<=4;c++){
+            var v=TAB[r][c];
+            html+='<td>'+(v===null?'<input type="text" id="r'+r+'c'+c+'">':v)+'</td>';
+        }
+        html+='</tr>';
+    }
+    t.innerHTML=html;
+})();
+document.getElementById('tabch').onclick=function(){
+    var good=0,total=0;
+    for(var k in ANS){total++;var ok=(num(k)===ANS[k]);mark(k,ok);if(ok)good++;}
+    var fb=document.getElementById('tabfb');
+    if(good===total){addStar(2);show(fb,true,'<b>Таблица заполнена верно.</b> Две звёздочки.');}
+    else show(fb,false,'<b>Верно '+good+' из '+total+'.</b> В каждом столбце смотри, какие две величины известны: если известны цена и количество, умножаем, иначе делим.');
+};
+document.getElementById('tabclr').onclick=function(){
+    for(var k in ANS){var e=document.getElementById(k);e.value='';e.className='';}
+    document.getElementById('tabfb').className='fb';
+};
+
+/* ---------- 4. насос ---------- */
+function drawTank(){
+    var v=+document.getElementById('vr').value, t=+document.getElementById('tr').value;
+    document.getElementById('vv').textContent=v;
+    document.getElementById('tv').textContent=t;
+    var A=v*t, MAX=240, part=Math.min(1,A/MAX), H=150, h=H*part;
+    var s='<svg viewBox="0 0 120 190" role="img">';
+    s+='<rect x="18" y="20" width="84" height="'+H+'" rx="6" fill="#eff6ff" stroke="#1d4ed8" stroke-width="3"/>';
+    s+='<rect x="21" y="'+(20+H-h)+'" width="78" height="'+h+'" rx="4" fill="#60a5fa"/>';
+    s+='<text x="60" y="185" font-size="13" font-weight="700" text-anchor="middle" fill="#1e3a8a">бак 240 л</text>';
+    s+='</svg>';
+    document.getElementById('tank').innerHTML=s;
+    document.getElementById('tankout').innerHTML='за '+t+' мин по '+v+' л<span class="big">'+v+' × '+t+' = '+A+' л</span>';
+}
+document.getElementById('vr').oninput=drawTank;
+document.getElementById('tr').oninput=drawTank;
+drawTank();
+document.getElementById('pch').onclick=function(){
+    checkSet([['p1',84,'а'],['p2',16,'б'],['p3',9,'в']],'pfb',1);
+};
+
+/* ---------- 5. кошки ---------- */
+var cats=1, mice=1, startMice=1, days=0;
+function drawField(){
+    document.getElementById('catn').textContent=cats;
+    document.getElementById('mousen').textContent=startMice;
+    var f=document.getElementById('field');
+    var s='';
+    for(var i=0;i<cats;i++)s+='🐱';
+    s+='<br>';
+    if(mice===0)s+='<span style="font-size:.6em;font-weight:700;color:#166534">мышек не осталось</span>';
+    for(var j=0;j<mice;j++)s+='🐭';
+    f.innerHTML=s;
+    document.getElementById('daybox').textContent='Дней прошло: '+days;
+}
+document.querySelectorAll('[data-cat]').forEach(function(b){
+    b.onclick=function(){cats=Math.max(1,Math.min(10,cats+ +this.getAttribute('data-cat')));days=0;mice=startMice;drawField();};
+});
+document.querySelectorAll('[data-mouse]').forEach(function(b){
+    b.onclick=function(){startMice=Math.max(1,Math.min(20,startMice+ +this.getAttribute('data-mouse')));mice=startMice;days=0;drawField();};
+});
+document.getElementById('dayb').onclick=function(){
+    if(mice===0)return;
+    mice=Math.max(0,mice-cats);days++;drawField();
+};
+document.getElementById('resetb').onclick=function(){mice=startMice;days=0;drawField();};
+drawField();
+document.getElementById('cch').onclick=function(){
+    checkSet([['c1',2,'а'],['c2',1,'б'],['c3',3,'в']],'cfb',2);
+};
+
+/* ---------- 6. фишки ---------- */
+var FORMS=[
+    {ask:'Собери формулу работы: как найти работу A?',need:'A = v × t'},
+    {ask:'Собери формулу: как найти производительность v?',need:'v = A : t'},
+    {ask:'Собери формулу: как найти время t?',need:'t = A : v'}
+];
+var fi=0, got=[];
+var CHIPS=['A','v','t','=','×',':','C','n','+'];
+(function(){
+    var c=document.getElementById('chips');
+    CHIPS.forEach(function(ch){
+        var b=document.createElement('button');
+        b.className='chip';b.textContent=ch;
+        b.onclick=function(){got.push(ch);drawLine();};
+        c.appendChild(b);
+    });
+})();
+function drawLine(){
+    document.getElementById('line').innerHTML=got.length?got.join(' '):'&nbsp;';
+    document.getElementById('fask').textContent=FORMS[fi].ask;
+}
+drawLine();
+document.getElementById('fclr').onclick=function(){got=[];drawLine();document.getElementById('ffb').className='fb';};
+document.getElementById('fnext').onclick=function(){fi=(fi+1)%FORMS.length;got=[];drawLine();document.getElementById('ffb').className='fb';};
+document.getElementById('fch').onclick=function(){
+    var fb=document.getElementById('ffb');
+    if(got.join(' ')===FORMS[fi].need){addStar(1);show(fb,true,'<b>Верно.</b> '+FORMS[fi].need);}
+    else show(fb,false,'Пока не то. Подсказка: слева стоит то, что ищем, а справа две другие величины.');
+};
+
+/* ---------- 7. всего и группы ---------- */
+document.getElementById('gch').onclick=function(){
+    checkSet([['g1',84,'а'],['g2',12,'б'],['g3',6,'в'],['g4',220,'г'],['g5',51,'д']],'gfb',2);
+};
+</script>
+</body>
+</html>
