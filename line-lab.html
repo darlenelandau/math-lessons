@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Прямая</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { margin: 0; padding: 16px; font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+         background: #eef2f7; color: #1a202c; font-size: 17px; line-height: 1.5; }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  h1 { font-size: 22px; text-align: center; margin: 4px 0 2px; color: #1a365d; }
+  .sub { text-align: center; color: #718096; font-size: 14px; margin-bottom: 14px; }
+  .bar { height: 8px; background: #d8e0ea; border-radius: 6px; overflow: hidden; margin-bottom: 4px; }
+  .bar i { display: block; height: 100%; background: #4299e1; width: 0; transition: width .25s; }
+  .count { text-align: right; font-size: 13px; color: #718096; margin-bottom: 12px; }
+  .card { background: #fff; border-radius: 14px; padding: 18px; box-shadow: 0 2px 10px rgba(0,0,0,.07); }
+  .q { font-size: 18px; margin-bottom: 12px; }
+  .q b { color: #2c5282; }
+  svg.g { display: block; margin: 0 auto 14px; width: 100%; max-width: 330px; height: auto; }
+  .fields { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .f { flex: 1 1 120px; }
+  .f label { display: block; font-size: 14px; color: #4a5568; margin-bottom: 4px; }
+  input[type=text] { width: 100%; font-size: 20px; padding: 10px 12px; border: 2px solid #cbd5e0;
+                     border-radius: 10px; font-family: inherit; }
+  input[type=text]:focus { outline: none; border-color: #4299e1; }
+  .opts { display: grid; gap: 8px; margin-bottom: 12px; }
+  .opt { padding: 12px 14px; border: 2px solid #cbd5e0; border-radius: 10px; background: #fff;
+         cursor: pointer; font-size: 17px; font-family: inherit; text-align: left; }
+  .opt.sel { border-color: #4299e1; background: #ebf5ff; }
+  .pair { margin-bottom: 10px; }
+  .pair .lbl { font-size: 14px; color: #4a5568; margin-bottom: 4px; }
+  .row { display: flex; gap: 8px; }
+  .row .opt { flex: 1; text-align: center; }
+  button.go { width: 100%; padding: 14px; font-size: 18px; font-weight: 600; border: none;
+              border-radius: 10px; background: #4299e1; color: #fff; cursor: pointer; font-family: inherit; }
+  button.go:disabled { background: #a0aec0; cursor: default; }
+  .fb { margin-top: 12px; padding: 12px 14px; border-radius: 10px; font-size: 16px; display: none; }
+  .fb.ok { background: #e6fffa; border-left: 4px solid #38a169; display: block; }
+  .fb.no { background: #fff5f5; border-left: 4px solid #e53e3e; display: block; }
+  .fb .hint { color: #4a5568; font-size: 15px; margin-top: 6px; }
+  .done { text-align: center; }
+  .done .big { font-size: 46px; font-weight: 700; color: #2c5282; margin: 10px 0; }
+  .done p { color: #4a5568; }
+  .miss { text-align: left; background: #fffaf0; border-radius: 10px; padding: 12px 14px; margin-top: 12px; font-size: 15px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Прямая</h1>
+  <div class="sub">график функции f(x) = kx + b</div>
+  <div class="bar"><i id="bar"></i></div>
+  <div class="count" id="count"></div>
+  <div class="card" id="card"></div>
+</div>
+
+<script>
+/* LOGIC-START */
+// Каждая задача задана прямой: k, b и две отмеченные точки в узлах сетки.
+var TASKS = [
+  { t:'kb',   k:1.5,  b:-0.5, p:[[-1,-2],[3,4]],  xr:[-4,5],  yr:[-5,6] },
+  { t:'val',  k:-1,   b:1,    p:[[-3,4],[1,0]],   xr:[-5,5],  yr:[-5,6],  x0:5 },
+  { t:'sign', k:2,    b:-3,   p:[[0,-3],[2,1]],   xr:[-4,5],  yr:[-6,5] },
+  { t:'kb',   k:-0.5, b:2,    p:[[-2,3],[2,1]],   xr:[-5,5],  yr:[-4,6] },
+  { t:'pick', k:1,    b:-2,   p:[[0,-2],[3,1]],   xr:[-4,5],  yr:[-5,5] },
+  { t:'val',  k:1.5,  b:2,    p:[[-2,-1],[2,5]],  xr:[-5,4],  yr:[-5,7],  x0:4 },
+  { t:'on',   k:2,    b:1,    p:[[0,1],[2,5]],    xr:[-4,4],  yr:[-4,7],  pt:[3,7] },
+  { t:'kb',   k:-2,   b:-1,   p:[[-3,5],[1,-3]],  xr:[-5,4],  yr:[-6,7] },
+  { t:'sign', k:-0.5, b:3,    p:[[-2,4],[4,1]],   xr:[-5,6],  yr:[-3,6] },
+  { t:'val',  k:0.5,  b:-1,   p:[[-2,-2],[4,1]],  xr:[-5,6],  yr:[-5,4],  x0:6 },
+  { t:'pick', k:-1,   b:3,    p:[[0,3],[3,0]],    xr:[-4,5],  yr:[-4,6] },
+  { t:'on',   k:-1.5, b:2,    p:[[0,2],[2,-1]],   xr:[-4,5],  yr:[-5,5],  pt:[4,-3] }
+];
+
+// Ответ ученика к числу: запятая и точка одинаковы, пробелы не мешают.
+function num(s) {
+  s = String(s == null ? '' : s).trim().replace(',', '.').replace(/\s+/g, '');
+  if (!/^[-+]?(\d+\.?\d*|\.\d+)$/.test(s)) return null;
+  var n = Number(s);
+  return isFinite(n) ? n : null;
+}
+function same(a, b) { return a !== null && Math.abs(a - b) < 1e-9; }
+
+// Лежит ли точка на прямой
+function onLine(k, b, pt) { return Math.abs(k * pt[0] + b - pt[1]) < 1e-9; }
+
+// Варианты формул для задачи "выбери формулу": верная плюс три близких подмены
+function choices(k, b) {
+  var list = [[k, b], [-k, b], [k, -b], [b, k]];
+  var seen = {}, out = [];
+  for (var i = 0; i < list.length; i++) {
+    var key = list[i][0] + '|' + list[i][1];
+    if (!seen[key]) { seen[key] = 1; out.push(list[i]); }
+  }
+  while (out.length < 4) { out.push([k + 1, b]); }
+  return out.slice(0, 4);
+}
+
+// Проверка задачи: ans это то, что ввёл ученик
+function check(task, ans) {
+  if (task.t === 'kb')   return same(num(ans.k), task.k) && same(num(ans.b), task.b);
+  if (task.t === 'val')  return same(num(ans.v), task.k * task.x0 + task.b);
+  if (task.t === 'sign') return ans.ks === (task.k > 0 ? '+' : '-') && ans.bs === (task.b > 0 ? '+' : '-');
+  if (task.t === 'pick') return ans.i === 0;
+  if (task.t === 'on')   return ans.yes === onLine(task.k, task.b, task.pt);
+  return false;
+}
+/* LOGIC-END */
+
+function fmt(n) { return String(n).replace('.', ','); }
+function term(k) {
+  if (k === 1) return 'x';
+  if (k === -1) return '-x';
+  return fmt(k) + 'x';
+}
+function formula(k, b) {
+  var s = 'f(x) = ' + term(k);
+  if (b > 0) s += ' + ' + fmt(b);
+  else if (b < 0) s += ' - ' + fmt(-b);
+  return s;
+}
+
+function svg(task, extraPt) {
+  var cell = 26, pad = 10;
+  var x0 = task.xr[0], x1 = task.xr[1], y0 = task.yr[0], y1 = task.yr[1];
+  var W = (x1 - x0) * cell + 2 * pad, H = (y1 - y0) * cell + 2 * pad;
+  var X = function (x) { return pad + (x - x0) * cell; };
+  var Y = function (y) { return pad + (y1 - y) * cell; };
+  var f = function (x) { return task.k * x + task.b; };
+  var s = '<svg class="g" viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg">';
+  s += '<rect width="' + W + '" height="' + H + '" fill="#fff"/>';
+  for (var gx = x0; gx <= x1; gx++) s += '<line x1="' + X(gx) + '" y1="' + pad + '" x2="' + X(gx) + '" y2="' + (H - pad) + '" stroke="#d6dde6" stroke-width="1"/>';
+  for (var gy = y0; gy <= y1; gy++) s += '<line x1="' + pad + '" y1="' + Y(gy) + '" x2="' + (W - pad) + '" y2="' + Y(gy) + '" stroke="#d6dde6" stroke-width="1"/>';
+  s += '<line x1="' + pad + '" y1="' + Y(0) + '" x2="' + (W - pad) + '" y2="' + Y(0) + '" stroke="#2d3748" stroke-width="1.8"/>';
+  s += '<line x1="' + X(0) + '" y1="' + pad + '" x2="' + X(0) + '" y2="' + (H - pad) + '" stroke="#2d3748" stroke-width="1.8"/>';
+  s += '<text x="' + (W - pad - 3) + '" y="' + (Y(0) + 15) + '" font-size="13" font-style="italic" text-anchor="end" fill="#2d3748">x</text>';
+  s += '<text x="' + (X(0) - 15) + '" y="' + (pad + 13) + '" font-size="13" font-style="italic" fill="#2d3748">y</text>';
+  s += '<text x="' + (X(0) - 14) + '" y="' + (Y(0) + 15) + '" font-size="12" fill="#2d3748">O</text>';
+  s += '<text x="' + (X(1) - 3) + '" y="' + (Y(0) + 15) + '" font-size="12" fill="#2d3748">1</text>';
+  s += '<text x="' + (X(0) - 14) + '" y="' + (Y(1) + 5) + '" font-size="12" fill="#2d3748">1</text>';
+  var lo = x0, hi = x1;
+  while (f(lo) > y1 || f(lo) < y0) lo += 0.02;
+  while (f(hi) > y1 || f(hi) < y0) hi -= 0.02;
+  s += '<line x1="' + X(lo).toFixed(1) + '" y1="' + Y(f(lo)).toFixed(1) + '" x2="' + X(hi).toFixed(1) + '" y2="' + Y(f(hi)).toFixed(1) + '" stroke="#dd6b20" stroke-width="2.4"/>';
+  for (var i = 0; i < task.p.length; i++) s += '<circle cx="' + X(task.p[i][0]) + '" cy="' + Y(task.p[i][1]) + '" r="4" fill="#dd6b20"/>';
+  if (extraPt) s += '<circle cx="' + X(extraPt[0]) + '" cy="' + Y(extraPt[1]) + '" r="5" fill="none" stroke="#c53030" stroke-width="2.4"/>';
+  return s + '</svg>';
+}
+
+var idx = 0, firstTry = 0, tried = false, missed = [], pick = null, sign = { ks: null, bs: null }, yesno = null, opts = [];
+
+function render() {
+  var card = document.getElementById('card');
+  document.getElementById('bar').style.width = (idx / TASKS.length * 100) + '%';
+  document.getElementById('count').textContent = idx < TASKS.length ? ('Задача ' + (idx + 1) + ' из ' + TASKS.length) : '';
+  if (idx >= TASKS.length) return finish(card);
+
+  var t = TASKS[idx];
+  tried = false; pick = null; yesno = null; sign = { ks: null, bs: null };
+  var h = '';
+
+  if (t.t === 'kb') {
+    h += '<div class="q">Найди <b>k</b> и <b>b</b> по графику.</div>' + svg(t);
+    h += '<div class="fields"><div class="f"><label>k</label><input type="text" id="ik" inputmode="text" autocomplete="off"></div>' +
+         '<div class="f"><label>b</label><input type="text" id="ib" inputmode="text" autocomplete="off"></div></div>';
+  } else if (t.t === 'val') {
+    h += '<div class="q">Найди <b>f(' + t.x0 + ')</b>.</div>' + svg(t);
+    h += '<div class="fields"><div class="f"><label>f(' + t.x0 + ')</label><input type="text" id="iv" inputmode="text" autocomplete="off"></div></div>';
+  } else if (t.t === 'sign') {
+    h += '<div class="q">Какого знака <b>k</b> и <b>b</b>? Считать ничего не нужно.</div>' + svg(t);
+    h += '<div class="pair"><div class="lbl">k</div><div class="row">' +
+         '<button class="opt" data-s="k:+">больше нуля</button><button class="opt" data-s="k:-">меньше нуля</button></div></div>';
+    h += '<div class="pair"><div class="lbl">b</div><div class="row">' +
+         '<button class="opt" data-s="b:+">больше нуля</button><button class="opt" data-s="b:-">меньше нуля</button></div></div>';
+  } else if (t.t === 'pick') {
+    opts = choices(t.k, t.b).map(function (c, i) { return { f: formula(c[0], c[1]), i: i }; });
+    for (var i = opts.length - 1; i > 0; i--) { var j = (i * 7 + idx * 3) % (i + 1); var tmp = opts[i]; opts[i] = opts[j]; opts[j] = tmp; }
+    h += '<div class="q">Какая формула задаёт эту прямую?</div>' + svg(t) + '<div class="opts">';
+    for (var m = 0; m < opts.length; m++) h += '<button class="opt" data-p="' + opts[m].i + '">' + opts[m].f + '</button>';
+    h += '</div>';
+  } else if (t.t === 'on') {
+    h += '<div class="q">Лежит ли точка (' + t.pt[0] + '; ' + t.pt[1] + ') на этой прямой?</div>' + svg(t, null);
+    h += '<div class="row" style="margin-bottom:12px">' +
+         '<button class="opt" data-y="1">Да</button><button class="opt" data-y="0">Нет</button></div>';
+  }
+
+  h += '<button class="go" id="go">Проверить</button><div class="fb" id="fb"></div>';
+  card.innerHTML = h;
+
+  card.querySelectorAll('[data-s]').forEach(function (el) {
+    el.onclick = function () {
+      var parts = el.dataset.s.split(':');
+      el.parentNode.querySelectorAll('.opt').forEach(function (o) { o.classList.remove('sel'); });
+      el.classList.add('sel');
+      if (parts[0] === 'k') sign.ks = parts[1]; else sign.bs = parts[1];
+    };
+  });
+  card.querySelectorAll('[data-p]').forEach(function (el) {
+    el.onclick = function () {
+      card.querySelectorAll('[data-p]').forEach(function (o) { o.classList.remove('sel'); });
+      el.classList.add('sel'); pick = Number(el.dataset.p);
+    };
+  });
+  card.querySelectorAll('[data-y]').forEach(function (el) {
+    el.onclick = function () {
+      card.querySelectorAll('[data-y]').forEach(function (o) { o.classList.remove('sel'); });
+      el.classList.add('sel'); yesno = el.dataset.y === '1';
+    };
+  });
+  document.getElementById('go').onclick = submit;
+}
+
+function answerOf(t) {
+  if (t.t === 'kb')   return { k: document.getElementById('ik').value, b: document.getElementById('ib').value };
+  if (t.t === 'val')  return { v: document.getElementById('iv').value };
+  if (t.t === 'sign') return { ks: sign.ks, bs: sign.bs };
+  if (t.t === 'pick') return { i: pick };
+  if (t.t === 'on')   return { yes: yesno };
+  return {};
+}
+
+function explain(t) {
+  var p = t.p, s = '';
+  if (t.t === 'kb' || t.t === 'val' || t.t === 'pick') {
+    s = 'Отмечены точки (' + p[0][0] + '; ' + p[0][1] + ') и (' + p[1][0] + '; ' + p[1][1] + '). ' +
+        'k = (' + p[1][1] + ' − (' + p[0][1] + ')) : (' + p[1][0] + ' − (' + p[0][0] + ')) = ' + fmt(t.k) + '. ' +
+        'Подставили точку и нашли b = ' + fmt(t.b) + '. Значит ' + formula(t.k, t.b) + '.';
+    if (t.t === 'val') s += ' Тогда f(' + t.x0 + ') = ' + fmt(t.k * t.x0 + t.b) + '.';
+  } else if (t.t === 'sign') {
+    s = 'Прямая идёт ' + (t.k > 0 ? 'вверх, значит k больше нуля' : 'вниз, значит k меньше нуля') +
+        '. Ось y она пересекает ' + (t.b > 0 ? 'выше нуля, значит b больше нуля' : 'ниже нуля, значит b меньше нуля') + '.';
+  } else if (t.t === 'on') {
+    var v = t.k * t.pt[0] + t.b;
+    s = 'Здесь ' + formula(t.k, t.b) + '. Подставляем x = ' + t.pt[0] + ': получается ' + fmt(v) +
+        ', а в точке стоит ' + t.pt[1] + '. ' + (onLine(t.k, t.b, t.pt) ? 'Совпало, точка лежит на прямой.' : 'Не совпало, точка не лежит на прямой.');
+  }
+  return s;
+}
+
+function submit() {
+  var t = TASKS[idx], fb = document.getElementById('fb'), go = document.getElementById('go');
+  var ok = check(t, answerOf(t));
+  if (ok) {
+    if (!tried) firstTry++;
+    fb.className = 'fb ok';
+    fb.innerHTML = '<b>Верно.</b><div class="hint">' + explain(t) + '</div>';
+    go.textContent = idx === TASKS.length - 1 ? 'Итог' : 'Дальше';
+    go.onclick = function () { idx++; render(); };
+  } else {
+    if (!tried) { tried = true; missed.push(idx + 1); }
+    fb.className = 'fb no';
+    fb.innerHTML = '<b>Не сходится.</b><div class="hint">Посмотри на отмеченные точки ещё раз и попробуй снова.</div>';
+  }
+}
+
+function finish(card) {
+  document.getElementById('bar').style.width = '100%';
+  var h = '<div class="done"><p>Готово</p><div class="big">' + firstTry + ' из ' + TASKS.length + '</div>' +
+          '<p>решено с первой попытки</p>';
+  if (missed.length) h += '<div class="miss"><b>Стоит пересмотреть задачи:</b> ' + missed.join(', ') + '</div>';
+  h += '<button class="go" style="margin-top:16px" onclick="location.reload()">Пройти заново</button></div>';
+  card.innerHTML = h;
+}
+
+render();
+</script>
+</body>
+</html>
