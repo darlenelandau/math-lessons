@@ -230,8 +230,9 @@
   <!-- 4. МАРСИАНЕ -->
   <section class="station" data-title="Марсиане">
     <h2>Сколько пальцев у инопланетянина?</h2>
-    <p class="lead">Мы считаем десятками, потому что у нас десять пальцев. Инопланетяне считают по своим пальцам.</p>
+    <p class="lead">Мы считаем десятками, потому что у нас десять пальцев. Инопланетяне считают по своим пальцам: как только пальцы кончились, начинается новый разряд.</p>
     <div class="seg" id="alienSeg" style="margin-bottom:12px"></div>
+    <div class="story" id="alienStory" style="background:#eef5ef;border-left:5px solid var(--green2);padding:10px 14px;border-radius:0 8px 8px 0;margin-bottom:12px"></div>
     <div class="mars">
       <svg id="hand" width="220" height="200" viewBox="0 0 220 200"></svg>
       <div>
@@ -335,9 +336,11 @@ function digitsUpTo(n) { let c = 0; for (let i = 1; i <= n; i++) c += String(i).
 function onesUpTo(n) { let c = 0; for (let i = 1; i <= n; i++) c += String(i).split('').filter(x => x === '1').length; return c; }
 function rev2(n) { return (n % 10) * 10 + Math.floor(n / 10); }
 const ALIENS = [
-  { name: 'Гномы', a: '3', b: '3', op: '+', r: '11', p: 5 },
-  { name: 'Марсиане', a: '13', b: '5', op: '+', r: '20', p: 8 },
-  { name: 'Роботы', a: '4', b: '4', op: '+', r: '10', p: 8 },
+  { name: 'Люди', a: '7', b: '5', op: '+', r: '12', p: 10, human: true,
+    story: 'Сначала про нас. У людей 10 пальцев, поэтому, когда досчитали до десяти, пишем «один десяток и ноль»: 10. Значит, 7 + 5 = 12 это <b>один десяток и ещё 2</b>. Подвигай ползунок: при другом числе пальцев эта же запись станет неверной. А у инопланетян задача наоборот: запись дана, а число пальцев надо найти.' },
+  { name: 'Гномы', a: '3', b: '3', op: '+', r: '11', p: 5, story: 'Гномы пишут 3 + 3 = 11. Двигай ползунок и найди, сколько у гнома пальцев, чтобы эта запись была верной.' },
+  { name: 'Марсиане', a: '13', b: '5', op: '+', r: '20', p: 8, story: 'Марсиане пишут 13 + 5 = 20. Сколько пальцев у марсианина? Сначала попробуй догадаться, потом проверь ползунком.' },
+  { name: 'Роботы', a: '4', b: '4', op: '+', r: '10', p: 8, story: 'Роботы пишут 4 + 4 = 10. Сколько пальцев у робота?' },
 ];
 function romVal(s) {
   const V = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };
@@ -481,18 +484,26 @@ const aSeg = $('#alienSeg');
 ALIENS.forEach((a, i) => { const b = el('button', i ? '' : 'on', a.name); b.onclick = () => { alien = i; [...aSeg.children].forEach((x, j) => x.classList.toggle('on', i === j)); drawAlien(); }; aSeg.appendChild(b); });
 $('#pRange').value = 10;
 $('#pRange').oninput = drawAlien;
-function drawHand(p) {
-  const svg = $('#hand'); let s = '<ellipse cx="110" cy="150" rx="62" ry="45" fill="#8fd18a" stroke="#2f6b2a" stroke-width="3"/>';
-  for (let k = 0; k < p; k++) {
-    const ang = -80 + (160 * (p === 1 ? .5 : k / (p - 1)));
-    s += `<g transform="rotate(${ang} 110 150)"><rect x="100" y="38" width="20" height="80" rx="10" fill="#8fd18a" stroke="#2f6b2a" stroke-width="3"/></g>`;
-  }
-  s += '<ellipse cx="110" cy="150" rx="58" ry="41" fill="#8fd18a"/><circle cx="92" cy="145" r="6" fill="#1f3d1c"/><circle cx="128" cy="145" r="6" fill="#1f3d1c"/><path d="M95 165 q15 10 30 0" stroke="#1f3d1c" stroke-width="3" fill="none"/>';
+function drawHand(p, human) {
+  const fill = human ? '#f5c9a0' : '#8fd18a', line = human ? '#a0623a' : '#2f6b2a';
+  const groups = human ? Array.from({ length: Math.ceil(p / 5) }, (_, i) => Math.min(5, p - 5 * i)) : [p];
+  const svg = $('#hand'); svg.setAttribute('viewBox', `0 0 ${220 * groups.length} 200`); svg.setAttribute('width', 220 * groups.length > 440 ? 440 : 220 * groups.length);
+  let s = '';
+  groups.forEach((n, g) => {
+    const cx = 110 + 220 * g, spread = human ? 110 : 160;
+    s += `<ellipse cx="${cx}" cy="150" rx="62" ry="45" fill="${fill}" stroke="${line}" stroke-width="3"/>`;
+    for (let k = 0; k < n; k++) {
+      const ang = -spread / 2 + (spread * (n === 1 ? .5 : k / (n - 1)));
+      s += `<g transform="rotate(${ang} ${cx} 150)"><rect x="${cx - 10}" y="38" width="20" height="80" rx="10" fill="${fill}" stroke="${line}" stroke-width="3"/></g>`;
+    }
+    s += `<ellipse cx="${cx}" cy="150" rx="58" ry="41" fill="${fill}"/>`;
+    if (!human) s += `<circle cx="${cx - 18}" cy="145" r="6" fill="#1f3d1c"/><circle cx="${cx + 18}" cy="145" r="6" fill="#1f3d1c"/><path d="M${cx - 15} 165 q15 10 30 0" stroke="#1f3d1c" stroke-width="3" fill="none"/>`;
+  });
   svg.innerHTML = s;
 }
 function drawAlien() {
   const a = ALIENS[alien], p = +$('#pRange').value;
-  $('#pVal').textContent = p; drawHand(p);
+  $('#pVal').textContent = p; drawHand(p, a.human); $('#alienStory').innerHTML = a.story;
   $('#alienEq').textContent = `${a.a} ${a.op} ${a.b} = ${a.r}`;
   const va = fromBase(a.a, p), vb = fromBase(a.b, p), vr = fromBase(a.r, p), m = $('#alienMsg');
   if (va === null || vb === null || vr === null) {
@@ -501,8 +512,8 @@ function drawAlien() {
     m.className = 'msg bad'; m.textContent = `С ${p} пальцами нет цифры ${mx}!`; return;
   }
   const show = (s, v) => s.length === 1 ? `${s} = ${v}` : `${s} = ${s.split('').map((d, k) => d + (k < s.length - 1 ? ' · ' + p ** (s.length - 1 - k) : '')).join(' + ')} = ${v}`;
-  $('#alienDecode').innerHTML = `${show(a.a, va)}<br>${show(a.b, vb)}<br>${show(a.r, vr)}<br>Проверка: ${va} + ${vb} = ${va + vb}, а должно быть ${vr}`;
-  if (va + vb === vr) { m.className = 'msg ok'; m.textContent = 'Сходится! Столько пальцев у них и есть.'; }
+  $('#alienDecode').innerHTML = `${show(a.a, va)}<br>${show(a.b, vb)}<br>${show(a.r, vr)}<br>Проверка: ${va} + ${vb} = ${va + vb}, а справа записано ${vr}`;
+  if (va + vb === vr) { m.className = 'msg ok'; m.textContent = a.human ? 'Сходится! Десять пальцев, как у нас.' : 'Сходится! Столько пальцев у них и есть.'; }
   else { m.className = 'msg bad'; m.textContent = 'Не сходится.'; }
 }
 drawAlien();
