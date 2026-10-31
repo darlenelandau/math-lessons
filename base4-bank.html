@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Банк страны Четвёрки</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #2b2118; --paper: #fbf5e6; --green: #1f5c45; --green2: #2f7d5f;
+    --gold: #d9a520; --line: #c9b78f; --ok: #2e8b57; --bad: #c0392b;
+  }
+  body {
+    font-family: 'Trebuchet MS', Arial, sans-serif; color: var(--ink);
+    background: #1f5c45 repeating-linear-gradient(45deg, rgba(255,255,255,.03) 0 12px, transparent 12px 24px);
+    min-height: 100vh; padding: 16px; line-height: 1.5;
+  }
+  .app { max-width: 980px; margin: 0 auto; }
+  header {
+    display: flex; align-items: center; gap: 14px; color: #f6e7b8; margin-bottom: 12px; flex-wrap: wrap;
+  }
+  header .logo {
+    width: 54px; height: 54px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffe48a, #d9a520 60%, #9b7210);
+    display: grid; place-items: center; font-size: 26px; font-weight: bold; color: #5a3e00; border: 3px solid #f6e7b8;
+  }
+  header h1, h2 { font-family: Georgia, serif; }
+  header h1 { font-size: 1.8em; letter-spacing: .5px; }
+  header small { display: block; font-size: .5em; opacity: .8; font-style: italic; }
+  nav { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  nav button {
+    font: inherit; font-size: .95em; padding: 7px 12px; border-radius: 20px; cursor: pointer;
+    border: 2px solid #f6e7b8; background: transparent; color: #f6e7b8;
+  }
+  nav button.active { background: #f6e7b8; color: var(--green); font-weight: bold; }
+  .station {
+    display: none; background: var(--paper); border-radius: 6px; padding: 22px 26px;
+    border: 3px double var(--line); box-shadow: 0 8px 24px rgba(0,0,0,.35);
+  }
+  .station.active { display: block; }
+  h2 { font-size: 1.5em; color: var(--green); margin-bottom: 4px; }
+  .lead { font-style: italic; color: #6b5a40; margin-bottom: 14px; }
+  h3 { font-size: 1.12em; margin: 18px 0 8px; color: var(--green); }
+  .task { border-top: 1px dashed var(--line); padding: 12px 0; }
+  .task .q { margin-bottom: 8px; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  input.ans {
+    font: inherit; font-size: 1.1em; width: 90px; padding: 4px 8px; border: 2px solid var(--line);
+    border-radius: 6px; background: #fff; text-align: center;
+  }
+  input.ans.ok { border-color: var(--ok); background: #e7f6ec; }
+  input.ans.bad { border-color: var(--bad); background: #fbeaea; }
+  button.btn {
+    font: inherit; padding: 6px 14px; border-radius: 6px; cursor: pointer; border: 2px solid var(--green);
+    background: var(--green); color: #fff;
+  }
+  button.btn.light { background: #fff; color: var(--green); }
+  button.btn:disabled { opacity: .4; cursor: default; }
+  .reveal { display: none; margin-top: 6px; padding: 8px 12px; background: #eef5ef; border-left: 4px solid var(--green2); border-radius: 0 6px 6px 0; }
+  .reveal.show { display: block; }
+  .msg { min-height: 1.5em; font-weight: bold; }
+  .msg.ok { color: var(--ok); } .msg.bad { color: var(--bad); }
+  sub { font-size: .65em; }
+
+  /* карточки фокуса */
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; }
+  .mcard {
+    border: 3px solid #b9a77f; border-radius: 10px; padding: 10px; cursor: pointer; background: #fff;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; text-align: center; font-weight: bold; font-size: 1.15em;
+    transition: transform .15s;
+  }
+  .mcard.on { border-color: var(--ok); background: #e3f4e8; transform: translateY(-3px); box-shadow: 0 4px 0 var(--ok); }
+  .mcard .hit { background: #ffe48a; border-radius: 4px; }
+  .big { font-size: 3em; font-weight: bold; color: var(--green); text-align: center; min-height: 1.3em; }
+
+  /* разрядная доска */
+  .pv { display: flex; gap: 10px; flex-wrap: wrap; }
+  .pvcol { border: 2px solid var(--line); border-radius: 8px; background: #fff; text-align: center; padding: 8px; width: 110px; }
+  .pvcol .name { font-size: .85em; color: #6b5a40; }
+  .pvcol .d { font-size: 2.4em; font-weight: bold; color: var(--green); }
+  .pvcol button { width: 36px; height: 30px; font-size: 1.1em; cursor: pointer; border-radius: 6px; border: 1px solid var(--line); background: #faf3df; }
+  .expand { font-size: 1.3em; margin-top: 10px; }
+
+  /* банк */
+  .bank { display: flex; gap: 10px; flex-wrap: wrap; flex-direction: row-reverse; justify-content: flex-end; }
+  .col {
+    width: 130px; min-height: 270px; background: #fff; border: 2px solid var(--line); border-radius: 10px; padding: 8px;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  .col.full { border-color: var(--bad); animation: shake .4s; }
+  @keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+  .col .head { font-weight: bold; }
+  .col .pile { flex: 1; display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; align-content: flex-end; width: 100%; min-height: 120px; }
+  .coin {
+    width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-size: .75em; font-weight: bold;
+    border: 2px solid rgba(0,0,0,.25); box-shadow: inset 0 -3px 0 rgba(0,0,0,.15); animation: pop .25s;
+  }
+  @keyframes pop { from { transform: scale(.3); } to { transform: scale(1); } }
+  .c0 { background: radial-gradient(circle at 35% 30%, #f3b98a, #b8662e); color: #4a2205; }
+  .c1 { background: radial-gradient(circle at 35% 30%, #ffffff, #a9b2bb); color: #333; }
+  .c2 { background: radial-gradient(circle at 35% 30%, #ffe48a, #d9a520); color: #5a3e00; }
+  .c3 { background: radial-gradient(circle at 35% 30%, #d9b8ff, #7b3fc4); color: #fff; }
+  .c4 { background: radial-gradient(circle at 35% 30%, #a8f0e0, #1d8f75); color: #fff; }
+  .col .cnt { font-size: 1.6em; font-weight: bold; color: var(--green); }
+  .col .ctl button { width: 34px; height: 30px; font-size: 1.1em; cursor: pointer; border-radius: 6px; border: 1px solid var(--line); background: #faf3df; }
+  .col .ex { font-size: .85em; padding: 3px 8px; }
+  .wallet { display: flex; gap: 24px; flex-wrap: wrap; align-items: baseline; margin: 12px 0; font-size: 1.25em; }
+  .wallet b { font-size: 1.4em; color: var(--green); }
+  .seg { display: inline-flex; border: 2px solid var(--green); border-radius: 8px; overflow: hidden; }
+  .seg button { font: inherit; padding: 4px 12px; border: none; background: #fff; color: var(--green); cursor: pointer; }
+  .seg button.on { background: var(--green); color: #fff; }
+
+  /* марсиане */
+  .mars { display: flex; gap: 24px; flex-wrap: wrap; align-items: center; }
+  .eq { font-size: 2em; font-weight: bold; letter-spacing: 1px; }
+  .decode { font-size: 1.15em; margin-top: 6px; }
+  input[type=range] { width: 260px; accent-color: var(--green); }
+
+  /* цифры-карточки */
+  .tiles, .slots { display: flex; gap: 10px; }
+  .tile, .slot {
+    width: 62px; height: 78px; border-radius: 8px; font-size: 2.2em; font-weight: bold; display: grid; place-items: center; cursor: pointer;
+  }
+  .tile { background: #fff; border: 3px solid var(--green); color: var(--green); box-shadow: 0 4px 0 var(--green); }
+  .tile.used { opacity: .2; cursor: default; box-shadow: none; }
+  .slot { border: 3px dashed var(--line); background: #fffdf6; }
+  .found { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .found span { padding: 3px 9px; border-radius: 6px; background: #eef5ef; border: 1px solid #b6d4c0; font-weight: bold; }
+  .found span.max { background: #ffe48a; border-color: var(--gold); }
+  .found span.min { background: #cfe3ff; border-color: #6f9fd8; }
+
+  /* наборщик */
+  .strip { font-family: 'Courier New', monospace; font-size: 1.05em; background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 8px; word-break: break-all; max-height: 130px; overflow: auto; }
+  .strip .one { background: #ffe48a; }
+
+  /* переставь */
+  .flips { display: flex; flex-wrap: wrap; gap: 10px; }
+  .flip {
+    width: 96px; padding: 10px 4px; border-radius: 10px; background: #fff; border: 3px solid var(--line); text-align: center; cursor: pointer;
+  }
+  .flip .n { font-size: 2em; font-weight: bold; }
+  .flip .d { font-size: .95em; min-height: 1.4em; }
+  .flip.up { border-color: var(--ok); } .flip.down { border-color: var(--bad); }
+  .flip.win { background: #ffe48a; border-color: var(--gold); }
+  .nines { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+  .nines .r { display: flex; gap: 4px; }
+  .nines .r i { width: 16px; height: 16px; border-radius: 50%; background: var(--green2); display: inline-block; }
+
+  /* разгадка */
+  .binrow { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
+  .bincoin { text-align: center; }
+  .bincoin .coin { width: 56px; height: 56px; font-size: 1.1em; opacity: .15; animation: none; }
+  .bincoin.on .coin { opacity: 1; }
+  .bincoin .bit { font-size: 1.8em; font-weight: bold; color: var(--green); }
+  .minicards { display: flex; gap: 8px; flex-wrap: wrap; }
+  .minicards .mcard { font-size: .8em; width: 150px; cursor: default; }
+  @media (max-width: 600px) {
+    body { padding: 8px; } .station { padding: 14px; } .col { width: 46%; } .cards { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo">4</div>
+    <h1>Банк страны Четвёрки<small>системы записи чисел · 3 класс</small></h1>
+  </header>
+  <nav id="nav"></nav>
+
+  <!-- 1. ФОКУС -->
+  <section class="station" data-title="Фокус">
+    <h2>Фокус: угадай число</h2>
+    <p class="lead">Задумай число от 1 до 31. Нажми на все карточки, где оно есть. Банк угадает.</p>
+    <div class="cards" id="trickCards"></div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn" id="trickGo">Угадать!</button>
+      <button class="btn light" id="trickReset">Заново</button>
+    </div>
+    <div class="big" id="trickOut"></div>
+    <p class="lead" style="margin-top:8px">Как это работает? Разгадка в конце урока.</p>
+  </section>
+
+  <!-- 2. НАША СИСТЕМА -->
+  <section class="station" data-title="Наша система">
+    <h2>Наша система: десятки</h2>
+    <p class="lead">Цифр всего десять, а чисел бесконечно много. Всё решает место цифры.</p>
+    <div class="pv" id="pv"></div>
+    <div class="expand" id="pvExpand"></div>
+
+    <div class="task"><div class="q">Сколько существует однозначных, двузначных и трёхзначных натуральных чисел? Сколько цифр в нашей системе?</div>
+      <div class="row">однозначных <input class="ans" data-a="9"> двузначных <input class="ans" data-a="90"> трёхзначных <input class="ans" data-a="900"> цифр <input class="ans" data-a="10"></div></div>
+    <div class="task"><div class="q">Собери на доске: 6 тысяч, 0 сотен, 4 десятка, 9 единиц. Какое это число?</div>
+      <div class="row"><input class="ans" data-a="6049"></div></div>
+    <div class="task"><div class="q">Какое число равно 7 · 1000 + 3 · 10 + 8?</div>
+      <div class="row"><input class="ans" data-a="7038"></div></div>
+    <div class="task"><div class="q">Запись <span style="text-decoration:overline">abc</span> это трёхзначное число: a сотен, b десятков, c единиц. Как записать его через a, b и c?</div>
+      <button class="btn light" data-reveal>Показать</button>
+      <div class="reveal"><span style="text-decoration:overline">abc</span> = 100 · a + 10 · b + c. Например, при a = 2, b = 3, c = 4 это 234, а вот a · b · c = 24. Совсем не то!</div></div>
+  </section>
+
+  <!-- 3. БАНК -->
+  <section class="station" data-title="Банк">
+    <h2>Банк размена</h2>
+    <p class="lead">В стране Четвёрки монеты 1, 4, 16 и 64. Банк меняет <b>четыре одинаковые монеты на одну следующую</b>. Разменянный кошелёк: каждой монеты не больше трёх.</p>
+    <div class="row" style="margin-bottom:10px">
+      <span>Банк меняет по</span>
+      <div class="seg" id="baseSeg"><button data-b="2">2</button><button data-b="4" class="on">4</button><button data-b="10">10</button></div>
+      <button class="btn light" id="bankClear">Очистить кошелёк</button>
+      <button class="btn" id="bankPlus1">+1 рубль</button>
+    </div>
+    <div class="bank" id="bank"></div>
+    <div class="wallet">
+      <div>В кошельке: <b id="wTotal">0</b> руб.</div>
+      <div>Запись кошелька: <b id="wRec">0</b></div>
+    </div>
+    <div class="msg" id="bankMsg"></div>
+
+    <h3>Задания</h3>
+    <div class="task"><div class="q">Положи в кошелёк самым маленьким числом монет: <span id="targets"></span></div>
+      <div class="row"><button class="btn" id="bankCheck">Проверить кошелёк</button></div></div>
+    <div class="task"><div class="q">Сколько рублей в кошельках?</div>
+      <div class="row"><span>12<sub>4</sub> = <input class="ans" data-a="6"></span> <span>103<sub>4</sub> = <input class="ans" data-a="19"></span> <span>231<sub>4</sub> = <input class="ans" data-a="45"></span></div></div>
+    <div class="task"><div class="q">Запиши кошельки для сумм (только цифры):</div>
+      <div class="row"><span>6 = <input class="ans" data-a="12"><sub>4</sub></span> <span>10 = <input class="ans" data-a="22"><sub>4</sub></span> <span>19 = <input class="ans" data-a="103"><sub>4</sub></span></div></div>
+    <div class="task"><div class="q">В кошельке 33<sub>4</sub>. Добавили 1 рубль. Какая запись теперь? А если было 133<sub>4</sub>? (Проверь на монетах.)</div>
+      <div class="row"><span>33<sub>4</sub> + 1 = <input class="ans" data-a="100"><sub>4</sub></span> <span>133<sub>4</sub> + 1 = <input class="ans" data-a="200"><sub>4</sub></span></div></div>
+    <div class="task"><div class="q">Самый большой кошелёк из трёх разрядов. Сколько в нём рублей?</div>
+      <div class="row"><input class="ans" data-a="63"> руб.</div></div>
+  </section>
+
+  <!-- 4. МАРСИАНЕ -->
+  <section class="station" data-title="Марсиане">
+    <h2>Сколько пальцев у инопланетянина?</h2>
+    <p class="lead">Мы считаем десятками, потому что у нас десять пальцев. Инопланетяне считают по своим пальцам.</p>
+    <div class="seg" id="alienSeg" style="margin-bottom:12px"></div>
+    <div class="mars">
+      <svg id="hand" width="220" height="200" viewBox="0 0 220 200"></svg>
+      <div>
+        <div class="eq" id="alienEq"></div>
+        <div style="margin:12px 0">Пальцев: <b id="pVal"></b><br><input type="range" min="2" max="10" id="pRange"></div>
+        <div class="decode" id="alienDecode"></div>
+        <div class="msg" id="alienMsg"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. КАРТОЧКИ -->
+  <section class="station" data-title="0 2 5 7">
+    <h2>Карточки 0, 2, 5, 7</h2>
+    <p class="lead">Составляй четырёхзначные числа, каждая карточка ровно один раз. Нажми на карточку, чтобы положить её, на клетку, чтобы вернуть.</p>
+    <div class="tiles" id="tiles"></div>
+    <div style="height:14px"></div>
+    <div class="slots" id="slots"></div>
+    <div class="msg" id="tileMsg"></div>
+    <div>Найдено чисел: <b id="foundCnt">0</b> <span style="color:#6b5a40">(жёлтое самое большое, голубое самое маленькое)</span></div>
+    <div class="found" id="found"></div>
+    <div class="task"><div class="q">Самое большое минус самое маленькое:</div><div class="row"><input class="ans" data-a="5463"></div></div>
+    <div class="task"><div class="q">Сколько всего таких чисел можно составить?</div><div class="row"><input class="ans" data-a="18"></div></div>
+  </section>
+
+  <!-- 6. НАБОРЩИК -->
+  <section class="station" data-title="Наборщик">
+    <h2>Наборщик страниц</h2>
+    <p class="lead">Наборщик печатает номера страниц по порядку, начиная с 1. Двигай ползунок.</p>
+    <div class="row">Страниц: <b id="pgVal"></b> <input type="range" min="1" max="120" value="12" id="pgRange"> Потрачено цифр: <b id="pgDigits" style="font-size:1.4em;color:var(--green)"></b> Единичек: <b id="pgOnes"></b></div>
+    <div class="strip" id="strip" style="margin-top:8px"></div>
+    <div class="task"><div class="q">Выписали числа от 1 до 35. Сколько цифр? А от 1 до 100?</div>
+      <div class="row">до 35: <input class="ans" data-a="61"> до 100: <input class="ans" data-a="192"></div></div>
+    <div class="task"><div class="q">Сколько раз написана цифра 1 в числах от 1 до 35?</div><div class="row"><input class="ans" data-a="14"></div></div>
+    <div class="task"><div class="q">На номера страниц книги ушло 99 цифр. Сколько страниц в книге?</div><div class="row"><input class="ans" data-a="54"></div></div>
+  </section>
+
+  <!-- 7. ПЕРЕСТАВЬ -->
+  <section class="station" data-title="Переставь">
+    <h2>Переставь цифры</h2>
+    <p class="lead">Цифры двузначного числа в сумме дают 11. После перестановки цифр число увеличилось на 27. Какое это число?</p>
+    <div class="flips" id="flips"></div>
+    <div class="task"><div class="q">Исходное число:</div><div class="row"><input class="ans" data-a="47"></div></div>
+    <h3>Фокус с девяткой</h3>
+    <p>Задумай двузначное число с разными цифрами.</p>
+    <div class="row"><input class="ans" id="nineIn" style="width:80px"> <button class="btn" id="nineGo">Переставить и вычесть</button></div>
+    <div class="decode" id="nineOut"></div>
+    <div class="nines" id="nineDots"></div>
+    <button class="btn light" data-reveal style="margin-top:10px">Почему так?</button>
+    <div class="reveal">Число с цифрами a и b это 10 · a + b, переставленное 10 · b + a. Разность: 9 · a − 9 · b, то есть 9 раз по (a − b). Значит, в задаче выше цифры отличаются на 27 : 9 = 3, а в сумме дают 11. Это 4 и 7.</div>
+  </section>
+
+  <!-- 8. РАЗГАДКА -->
+  <section class="station" data-title="Разгадка">
+    <h2>Разгадка фокуса</h2>
+    <p class="lead">А что если банк меняет <b>по две</b> монеты? Тогда монеты 1, 2, 4, 8, 16, и каждой не больше одной.</p>
+    <div class="row">Число от 1 до 31: <input class="ans" id="binIn" value="26" style="width:80px"> <input type="range" min="1" max="31" value="26" id="binRange"></div>
+    <div class="binrow" id="binRow"></div>
+    <div class="decode" id="binText"></div>
+    <h3>А вот карточки фокуса</h3>
+    <div class="minicards" id="miniCards"></div>
+    <p style="margin-top:10px">Число стоит на карточке, если в его кошельке есть такая монета. Первое число на карточке это и есть монета!</p>
+  </section>
+
+  <!-- 9. РИМ -->
+  <section class="station" data-title="Рим">
+    <h2>Римские цифры</h2>
+    <p class="lead">У римлян нет разрядов: знак значит одно и то же, где бы он ни стоял. Почти: маленький знак перед большим вычитается.</p>
+    <div class="row" style="gap:6px;margin-bottom:6px" id="romKeys"></div>
+    <div class="row"><span style="font-size:2em;font-weight:bold;letter-spacing:3px;min-width:200px;border-bottom:3px solid var(--line)" id="romBuild">&nbsp;</span>
+      <span style="font-size:1.6em">= <b id="romVal" style="color:var(--green)"></b></span>
+      <button class="btn light" id="romBack">⌫</button><button class="btn light" id="romClr">Стереть</button></div>
+    <div class="decode" id="romHint"></div>
+
+    <h3>Прочитай</h3>
+    <div class="task"><div class="row">
+      <span>XIV = <input class="ans" data-a="14"></span> <span>XXIX = <input class="ans" data-a="29"></span> <span>XL = <input class="ans" data-a="40"></span>
+      <span>LXXXVIII = <input class="ans" data-a="88"></span> <span>XCIX = <input class="ans" data-a="99"></span> <span>MMXXVI = <input class="ans" data-a="2026"></span></div></div>
+    <h3>Запиши латинскими буквами</h3>
+    <div class="task"><div class="row">
+      <span>4 = <input class="ans rom" data-a="IV"></span> <span>9 = <input class="ans rom" data-a="IX"></span> <span>19 = <input class="ans rom" data-a="XIX"></span>
+      <span>40 = <input class="ans rom" data-a="XL"></span> <span>90 = <input class="ans rom" data-a="XC"></span> <span>2026 = <input class="ans rom" data-a="MMXXVI"></span></div></div>
+    <div class="task"><div class="q">Какое число до 100 записывается по-римски самым длинным? Сколько в нём знаков?</div>
+      <div class="row"><span>число <input class="ans" data-a="88"></span> <span>знаков <input class="ans" data-a="8"></span></div></div>
+    <div class="task"><div class="q">Почему римляне не складывали в столбик? Попробуй: XXIX + XIV.</div>
+      <button class="btn light" data-reveal>Обсудили, показать</button>
+      <div class="reveal">Столбиков нет: в XXIX четыре знака, в XIV три, и под чем что подписывать, непонятно. А IX и XI из одних и тех же знаков, но 9 и 11. Ответ 43 = XLIII, и по виду он совсем не похож на слагаемые. Поэтому римляне считали на счётной доске с камешками, а это уже почти наш банк с разрядами!</div></div>
+
+    <h3>Спички: переложи одну спичку</h3>
+    <p>Равенство неверное. Переложи <b>одну</b> спичку, чтобы стало верно. Пиши латинскими I, V, X и знаки + − =.</p>
+    <div id="sticks"></div>
+  </section>
+</div>
+
+<script>
+// LOGIC-START
+const BIT_CARDS = [1, 2, 4, 8, 16].map(b => ({ b, nums: Array.from({ length: 31 }, (_, i) => i + 1).filter(n => n & b) }));
+function toBase(n, b) { if (n === 0) return '0'; let s = ''; while (n > 0) { s = (n % b) + s; n = Math.floor(n / b); } return s; }
+function fromBase(s, b) { let v = 0; for (const ch of s) { const d = +ch; if (d >= b) return null; v = v * b + d; } return v; }
+function digitsUpTo(n) { let c = 0; for (let i = 1; i <= n; i++) c += String(i).length; return c; }
+function onesUpTo(n) { let c = 0; for (let i = 1; i <= n; i++) c += String(i).split('').filter(x => x === '1').length; return c; }
+function rev2(n) { return (n % 10) * 10 + Math.floor(n / 10); }
+const ALIENS = [
+  { name: 'Гномы', a: '3', b: '3', op: '+', r: '11', p: 5 },
+  { name: 'Марсиане', a: '13', b: '5', op: '+', r: '20', p: 8 },
+  { name: 'Роботы', a: '4', b: '4', op: '+', r: '10', p: 8 },
+];
+function romVal(s) {
+  const V = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };
+  if (!/^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/.test(s) || !s) return null;
+  let t = 0; for (let i = 0; i < s.length; i++) { const v = V[s[i]], w = V[s[i + 1]] || 0; t += v < w ? -v : v; } return t;
+}
+function normRom(s) { return s.toUpperCase().replace(/Х/g, 'X').replace(/І|Ι|1/g, 'I').replace(/С/g, 'C').replace(/М/g, 'M').replace(/[–—−]/g, '-').replace(/\s/g, ''); }
+// решения проверены перебором (одна спичка: убрать I, + в −, = в −, затем добавить; или X ↔ V)
+const STICKS = [
+  { q: 'X+I=IX', sol: ['IX+I=X', 'X+I=XI'] },
+  { q: 'IV-I=V', sol: ['V-I=IV', 'VI-I=V'] },
+  { q: 'VI-IV=IX', sol: ['V+IV=IX', 'VI+IV=X'] },
+  { q: 'VIII-II=IV', sol: ['VII-III=IV', 'VIII-II=VI', 'VIII-III=V'] },
+  { q: 'V+IV=XI', sol: ['V+IV=IX', 'V+VI=XI', 'VI+IV=X', 'VI+V=XI'] },
+];
+// LOGIC-END
+
+const $ = s => document.querySelector(s);
+const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+
+// навигация
+const stations = [...document.querySelectorAll('.station')];
+const nav = $('#nav');
+stations.forEach((s, i) => {
+  const b = el('button', '', (i + 1) + '. ' + s.dataset.title);
+  b.onclick = () => { location.hash = i + 1; };
+  nav.appendChild(b);
+});
+function show() {
+  let i = parseInt(location.hash.slice(1)) - 1; if (!(i >= 0 && i < stations.length)) i = 0;
+  stations.forEach((s, j) => s.classList.toggle('active', i === j));
+  [...nav.children].forEach((b, j) => b.classList.toggle('active', i === j));
+}
+window.addEventListener('hashchange', show); show();
+
+// проверка ответов
+document.querySelectorAll('input.ans[data-a]:not(.rom)').forEach(inp => {
+  inp.addEventListener('input', () => {
+    const v = inp.value.trim().replace(/\s/g, '');
+    inp.classList.remove('ok', 'bad');
+    if (!v) return;
+    if (v === inp.dataset.a) inp.classList.add('ok');
+    else if (v.length >= inp.dataset.a.length) inp.classList.add('bad');
+  });
+  inp.addEventListener('change', () => { if (inp.value.trim() && inp.value.trim() !== inp.dataset.a) inp.classList.add('bad'); });
+});
+document.querySelectorAll('[data-reveal]').forEach(b => b.onclick = () => b.nextElementSibling.classList.toggle('show'));
+
+// 1. фокус
+const trickWrap = $('#trickCards');
+BIT_CARDS.forEach(c => {
+  const d = el('div', 'mcard'); d.dataset.b = c.b;
+  c.nums.forEach(n => d.appendChild(el('div', '', n)));
+  d.onclick = () => { d.classList.toggle('on'); $('#trickOut').textContent = ''; };
+  trickWrap.appendChild(d);
+});
+$('#trickGo').onclick = () => {
+  const s = [...trickWrap.children].filter(d => d.classList.contains('on')).reduce((a, d) => a + +d.dataset.b, 0);
+  $('#trickOut').textContent = s ? 'Ты задумал ' + s + '!' : 'Выбери карточки';
+};
+$('#trickReset').onclick = () => { [...trickWrap.children].forEach(d => d.classList.remove('on')); $('#trickOut').textContent = ''; };
+
+// 2. разрядная доска
+const pvNames = ['тысячи', 'сотни', 'десятки', 'единицы'], pvW = [1000, 100, 10, 1], pvD = [0, 0, 0, 0];
+const pv = $('#pv');
+pvNames.forEach((nm, i) => {
+  const c = el('div', 'pvcol', `<div class="name">${nm}</div><div class="d">0</div>`);
+  const ctl = el('div', 'row'); ctl.style.justifyContent = 'center';
+  const m = el('button', '', '−'), p = el('button', '', '+');
+  m.onclick = () => { pvD[i] = (pvD[i] + 9) % 10; drawPV(); };
+  p.onclick = () => { pvD[i] = (pvD[i] + 1) % 10; drawPV(); };
+  ctl.append(m, p); c.appendChild(ctl); pv.appendChild(c);
+});
+function drawPV() {
+  [...pv.children].forEach((c, i) => c.querySelector('.d').textContent = pvD[i]);
+  const n = pvD.reduce((a, d, i) => a + d * pvW[i], 0);
+  $('#pvExpand').innerHTML = pvD.map((d, i) => `${d} · ${pvW[i]}`).join(' + ') + ` = <b>${n}</b>`;
+}
+drawPV();
+
+// 3. банк
+let base = 4, counts = [];
+const NAMES = { 2: [1, 2, 4, 8, 16], 4: [1, 4, 16, 64], 10: [1, 10, 100, 1000] };
+const TARGETS = { 2: [5, 13, 26], 4: [27, 6, 10, 19], 10: [345, 1203] };
+function setBase(b) {
+  base = b; counts = NAMES[b].map(() => 0);
+  document.querySelectorAll('#baseSeg button').forEach(x => x.classList.toggle('on', +x.dataset.b === b));
+  $('#targets').innerHTML = TARGETS[b].map(t => `<b>${t}</b>`).join(', ') + ' руб.';
+  $('#bankMsg').textContent = ''; drawBank();
+}
+function drawBank() {
+  const bank = $('#bank'); bank.innerHTML = '';
+  const den = NAMES[base];
+  den.forEach((v, i) => {
+    const col = el('div', 'col' + (counts[i] >= base && i < den.length - 1 ? ' full' : ''));
+    col.appendChild(el('div', 'head', 'монета ' + v));
+    const pile = el('div', 'pile');
+    for (let k = 0; k < Math.min(counts[i], 24); k++) pile.appendChild(el('div', 'coin c' + i, v));
+    col.appendChild(pile);
+    col.appendChild(el('div', 'cnt', counts[i]));
+    const ctl = el('div', 'ctl row');
+    const m = el('button', '', '−'), p = el('button', '', '+');
+    m.onclick = () => { if (counts[i] > 0) { counts[i]--; drawBank(); } };
+    p.onclick = () => { counts[i]++; drawBank(); };
+    ctl.append(m, p); col.appendChild(ctl);
+    if (i < den.length - 1) {
+      const ex = el('button', 'btn ex', `${base} → 1`); ex.title = 'Обменять ' + base + ' монет на одну следующую';
+      ex.disabled = counts[i] < base;
+      ex.onclick = () => { counts[i] -= base; counts[i + 1]++; drawBank(); };
+      col.appendChild(ex);
+    }
+    if (i > 0) {
+      const br = el('button', 'btn light ex', `1 → ${base}`); br.title = 'Разменять одну монету на ' + base + ' младших';
+      br.disabled = counts[i] < 1;
+      br.onclick = () => { counts[i]--; counts[i - 1] += base; drawBank(); };
+      col.appendChild(br);
+    }
+    bank.appendChild(col);
+  });
+  const total = counts.reduce((a, c, i) => a + c * den[i], 0);
+  $('#wTotal').textContent = total;
+  const ok = counts.every((c, i) => c < base || i === den.length - 1) && counts[den.length - 1] < base;
+  if (!ok) $('#wRec').innerHTML = '<span style="font-size:.7em;color:var(--bad)">сначала разменяй!</span>';
+  else { let s = counts.slice().reverse().join('').replace(/^0+(?=.)/, ''); $('#wRec').innerHTML = s + `<sub>${base}</sub>`; }
+}
+document.querySelectorAll('#baseSeg button').forEach(b => b.onclick = () => setBase(+b.dataset.b));
+$('#bankClear').onclick = () => { counts = counts.map(() => 0); $('#bankMsg').textContent = ''; drawBank(); };
+$('#bankPlus1').onclick = () => { counts[0]++; drawBank(); };
+$('#bankCheck').onclick = () => {
+  const den = NAMES[base], total = counts.reduce((a, c, i) => a + c * den[i], 0), m = $('#bankMsg');
+  const minimal = counts.every((c, i) => c < base || i === den.length - 1);
+  if (!TARGETS[base].includes(total)) { m.className = 'msg bad'; m.textContent = `В кошельке ${total} руб. Такой суммы нет в задании.`; return; }
+  if (!minimal) { m.className = 'msg bad'; m.textContent = `${total} руб. верно, но монет можно меньше: где-то набралось ${base} одинаковых.`; return; }
+  m.className = 'msg ok'; m.textContent = `Верно! ${total} = ${toBase(total, base)} в системе с основанием ${base}.`;
+};
+setBase(4);
+
+// 4. марсиане
+let alien = 0;
+const aSeg = $('#alienSeg');
+ALIENS.forEach((a, i) => { const b = el('button', i ? '' : 'on', a.name); b.onclick = () => { alien = i; [...aSeg.children].forEach((x, j) => x.classList.toggle('on', i === j)); drawAlien(); }; aSeg.appendChild(b); });
+$('#pRange').value = 10;
+$('#pRange').oninput = drawAlien;
+function drawHand(p) {
+  const svg = $('#hand'); let s = '<ellipse cx="110" cy="150" rx="62" ry="45" fill="#8fd18a" stroke="#2f6b2a" stroke-width="3"/>';
+  for (let k = 0; k < p; k++) {
+    const ang = -80 + (160 * (p === 1 ? .5 : k / (p - 1)));
+    s += `<g transform="rotate(${ang} 110 150)"><rect x="100" y="38" width="20" height="80" rx="10" fill="#8fd18a" stroke="#2f6b2a" stroke-width="3"/></g>`;
+  }
+  s += '<ellipse cx="110" cy="150" rx="58" ry="41" fill="#8fd18a"/><circle cx="92" cy="145" r="6" fill="#1f3d1c"/><circle cx="128" cy="145" r="6" fill="#1f3d1c"/><path d="M95 165 q15 10 30 0" stroke="#1f3d1c" stroke-width="3" fill="none"/>';
+  svg.innerHTML = s;
+}
+function drawAlien() {
+  const a = ALIENS[alien], p = +$('#pRange').value;
+  $('#pVal').textContent = p; drawHand(p);
+  $('#alienEq').textContent = `${a.a} ${a.op} ${a.b} = ${a.r}`;
+  const va = fromBase(a.a, p), vb = fromBase(a.b, p), vr = fromBase(a.r, p), m = $('#alienMsg');
+  if (va === null || vb === null || vr === null) {
+    const mx = Math.max(...(a.a + a.b + a.r).split('').map(Number));
+    $('#alienDecode').textContent = '';
+    m.className = 'msg bad'; m.textContent = `С ${p} пальцами нет цифры ${mx}!`; return;
+  }
+  const show = (s, v) => s.length === 1 ? `${s} = ${v}` : `${s} = ${s.split('').map((d, k) => d + (k < s.length - 1 ? ' · ' + p ** (s.length - 1 - k) : '')).join(' + ')} = ${v}`;
+  $('#alienDecode').innerHTML = `${show(a.a, va)}<br>${show(a.b, vb)}<br>${show(a.r, vr)}<br>Проверка: ${va} + ${vb} = ${va + vb}, а должно быть ${vr}`;
+  if (va + vb === vr) { m.className = 'msg ok'; m.textContent = 'Сходится! Столько пальцев у них и есть.'; }
+  else { m.className = 'msg bad'; m.textContent = 'Не сходится.'; }
+}
+drawAlien();
+
+// 5. карточки 0 2 5 7
+const DIG = ['0', '2', '5', '7'];
+let slots = [null, null, null, null]; const foundSet = new Set();
+function drawTiles() {
+  const t = $('#tiles'), s = $('#slots'); t.innerHTML = ''; s.innerHTML = '';
+  DIG.forEach((d, i) => {
+    const used = slots.includes(i), e = el('div', 'tile' + (used ? ' used' : ''), d);
+    e.onclick = () => { if (used) return; const k = slots.indexOf(null); if (k < 0) return; slots[k] = i; drawTiles(); };
+    t.appendChild(e);
+  });
+  slots.forEach((v, k) => {
+    const e = el('div', 'slot', v === null ? '' : DIG[v]);
+    e.onclick = () => { slots[k] = null; drawTiles(); };
+    s.appendChild(e);
+  });
+  if (slots.every(v => v !== null)) {
+    const num = slots.map(v => DIG[v]).join(''), m = $('#tileMsg');
+    if (num[0] === '0') { m.className = 'msg bad'; m.textContent = num + ' не четырёхзначное: ноль впереди не ставят.'; }
+    else if (foundSet.has(num)) { m.className = 'msg'; m.textContent = num + ' уже есть.'; }
+    else { foundSet.add(num); m.className = 'msg ok'; m.textContent = 'Новое число ' + num + '!'; }
+    setTimeout(() => { slots = [null, null, null, null]; drawTiles(); }, 900);
+  }
+  const arr = [...foundSet].sort(), f = $('#found'); f.innerHTML = '';
+  arr.forEach((n, i) => f.appendChild(el('span', arr.length > 1 && i === arr.length - 1 ? 'max' : arr.length > 1 && i === 0 ? 'min' : '', n)));
+  $('#foundCnt').textContent = arr.length;
+}
+drawTiles();
+
+// 6. наборщик
+function drawPages() {
+  const n = +$('#pgRange').value;
+  $('#pgVal').textContent = n; $('#pgDigits').textContent = digitsUpTo(n); $('#pgOnes').textContent = onesUpTo(n);
+  let h = ''; for (let i = 1; i <= n; i++) h += String(i).replace(/1/g, '<span class="one">1</span>') + ' ';
+  $('#strip').innerHTML = h; $('#strip').scrollTop = 1e6;
+}
+$('#pgRange').oninput = drawPages; drawPages();
+
+// 7. переставь
+const fl = $('#flips');
+for (let n = 10; n < 100; n++) {
+  if (Math.floor(n / 10) + n % 10 !== 11) continue;
+  const c = el('div', 'flip', `<div class="n">${n}</div><div class="d"></div>`); let flipped = false;
+  c.onclick = () => {
+    flipped = !flipped; const r = rev2(n), d = r - n;
+    c.querySelector('.n').textContent = flipped ? r : n;
+    c.querySelector('.d').textContent = flipped ? (d > 0 ? '+' + d : '−' + (-d)) : '';
+    c.className = 'flip' + (flipped ? (d === 27 ? ' win' : d > 0 ? ' up' : ' down') : '');
+  };
+  fl.appendChild(c);
+}
+$('#nineGo').onclick = () => {
+  const n = parseInt($('#nineIn').value), out = $('#nineOut'), dots = $('#nineDots'); dots.innerHTML = '';
+  if (!(n >= 10 && n <= 99) || Math.floor(n / 10) === n % 10) { out.textContent = 'Нужно двузначное число с разными цифрами.'; return; }
+  const r = rev2(n), big = Math.max(n, r), sm = Math.min(n, r), d = big - sm;
+  out.innerHTML = `${big} − ${String(sm).padStart(2, '0')} = <b>${d}</b> = 9 · ${d / 9}`;
+  for (let k = 0; k < d / 9; k++) { const row = el('div', 'r'); for (let j = 0; j < 9; j++) row.appendChild(el('i')); dots.appendChild(row); }
+};
+
+// 8. разгадка
+function drawBin(n) {
+  n = Math.max(1, Math.min(31, n | 0)); $('#binIn').value = n; $('#binRange').value = n;
+  const row = $('#binRow'); row.innerHTML = '';
+  [16, 8, 4, 2, 1].forEach((b, k) => {
+    const on = (n & b) > 0, c = el('div', 'bincoin' + (on ? ' on' : ''));
+    c.appendChild(el('div', 'coin c' + (4 - k), b)); c.appendChild(el('div', 'bit', on ? 1 : 0)); row.appendChild(c);
+  });
+  $('#binText').innerHTML = `${n} = ${[16, 8, 4, 2, 1].filter(b => n & b).join(' + ')}, запись: <b>${toBase(n, 2)}<sub>2</sub></b>`;
+  const mc = $('#miniCards'); mc.innerHTML = '';
+  BIT_CARDS.forEach(c => {
+    const d = el('div', 'mcard' + (n & c.b ? ' on' : ''));
+    c.nums.forEach(x => d.appendChild(el('div', x === n ? 'hit' : '', x))); mc.appendChild(d);
+  });
+}
+$('#binIn').oninput = () => drawBin(+$('#binIn').value);
+$('#binRange').oninput = () => drawBin(+$('#binRange').value);
+drawBin(26);
+// 9. рим
+let romS = '';
+'IVXLCDM'.split('').forEach(c => { const b = el('button', 'btn light', c); b.style.cssText = 'font-size:1.4em;width:52px'; b.onclick = () => { romS += c; drawRom(); }; $('#romKeys').appendChild(b); });
+$('#romBack').onclick = () => { romS = romS.slice(0, -1); drawRom(); };
+$('#romClr').onclick = () => { romS = ''; drawRom(); };
+function drawRom() {
+  $('#romBuild').innerHTML = romS || '&nbsp;'; const v = romVal(romS);
+  $('#romVal').textContent = romS ? (v === null ? '?' : v) : '';
+  $('#romHint').textContent = romS && v === null ? 'Так римляне не писали. Например, нельзя ставить четыре одинаковых знака подряд (IIII), а вычитать можно только I, X, C.' : '';
+}
+drawRom();
+document.querySelectorAll('input.rom').forEach(inp => inp.addEventListener('input', () => {
+  const v = normRom(inp.value); inp.classList.remove('ok', 'bad');
+  if (v === inp.dataset.a) inp.classList.add('ok'); else if (v.length >= inp.dataset.a.length) inp.classList.add('bad');
+}));
+const pretty = e => e.replace(/-/g, ' − ').replace(/\+/g, ' + ').replace(/=/g, ' = ');
+STICKS.forEach((t, i) => {
+  const box = el('div', 'task'), got = new Set();
+  box.innerHTML = `<div class="q" style="font-size:1.6em;font-weight:bold;letter-spacing:2px">${pretty(t.q)}</div>`;
+  const row = el('div', 'row'), inp = el('input', 'ans'); inp.style.width = '200px';
+  const b = el('button', 'btn', 'Проверить'), m = el('div', 'msg'), list = el('div', 'found');
+  const info = el('span', '', `решений: ${t.sol.length}`); info.style.color = '#6b5a40';
+  b.onclick = () => {
+    const v = normRom(inp.value);
+    if (t.sol.includes(v)) { if (got.has(v)) { m.className = 'msg'; m.textContent = 'Это уже нашли.'; } else { got.add(v); m.className = 'msg ok'; m.textContent = 'Верно!'; list.appendChild(el('span', '', pretty(v))); } inp.value = ''; }
+    else { m.className = 'msg bad'; m.textContent = 'Не подходит: проверь равенство и что переложена ровно одна спичка.'; }
+    info.textContent = `найдено ${got.size} из ${t.sol.length}`;
+  };
+  inp.onkeydown = e => { if (e.key === 'Enter') b.click(); };
+  row.append(inp, b, info); box.append(row, m, list); $('#sticks').appendChild(box);
+});
+</script>
+</body>
+</html>
