@@ -91,6 +91,7 @@ summary { cursor: pointer; font-weight: 600; color: var(--accent); font-size: .9
       <button class="tab" type="button" role="tab" data-tab="inv" aria-selected="false">Обратные функции</button>
       <button class="tab" type="button" role="tab" data-tab="eq" aria-selected="false">Уравнения и неравенства</button>
       <button class="tab" type="button" role="tab" data-tab="id" aria-selected="false">Тождества</button>
+      <button class="tab" type="button" role="tab" data-tab="sel" aria-selected="false">Отбор корней</button>
       <button class="tab" type="button" role="tab" data-tab="der" aria-selected="false">Производные</button>
     </div>
     <p class="lead" id="lead"></p>
@@ -276,7 +277,58 @@ var TRIG = (function () {
     return v <= a + 1e-12;
   }
 
-  return { PI: PI, F: F, INV: INV, PARTNERS: PARTNERS, A_SIN: A_SIN, A_TG: A_TG, num: num, ang: ang, deg: deg, piTxt: piTxt,
+  /* ---------- отбор корней и конструктор серий: углы в «единицах» π/12 (целые числа) ---------- */
+  var U = PI / 12;
+  function ut(k) { return piTxt(k * U); }
+  function mod24(k) { return ((k % 24) + 24) % 24; }
+  /* представитель точки в (−π; π] */
+  function rep(k) { var r = mod24(k); return r > 12 ? r - 24 : r; }
+  var SEL_A = {
+    sin: [0.5, -0.5, Math.SQRT2 / 2, -Math.SQRT2 / 2, S3 / 2, -S3 / 2, 0, 1, -1],
+    cos: [0.5, -0.5, Math.SQRT2 / 2, -Math.SQRT2 / 2, S3 / 2, -S3 / 2, 0, 1, -1],
+    tg: [1, -1, S3, -S3, S3 / 3, -S3 / 3, 0]
+  };
+  function selRoots(fn, a, L, R) {
+    var r = [];
+    for (var k = L; k <= R; k++) if (holds(fn, '=', a, k * U)) r.push(k);
+    return r;
+  }
+  /* задача как на ЕГЭ: концы отрезка кратны π/2, длина π, 3π/2 или 2π, корней от 1 до 4 */
+  function selGen(rnd) {
+    for (var tries = 0; tries < 200; tries++) {
+      var fns = ['sin', 'sin', 'cos', 'cos', 'tg'], fn = fns[Math.floor(rnd() * fns.length)];
+      var A = SEL_A[fn], a = A[Math.floor(rnd() * A.length)];
+      var L = 6 * (Math.floor(rnd() * 15) - 8), lens = [12, 18, 18, 18, 24], len = lens[Math.floor(rnd() * lens.length)];
+      if (L === 0 && rnd() < 0.7) continue;
+      var n = selRoots(fn, a, L, L + len).length;
+      if (n >= 1 && n <= 4) return { fn: fn, a: a, L: L, R: L + len };
+    }
+    return { fn: 'sin', a: -0.5, L: -30, R: -12 };
+  }
+  /* множество корней в «единицах» на [−K; K]: истинное и по сериям ученика */
+  function trueSet(fn, a, K) {
+    var s = [];
+    for (var k = -K; k <= K; k++) if (holds(fn, '=', a, k * U)) s.push(k);
+    return s;
+  }
+  function seriesSet(series, K) {
+    var m = {};
+    series.forEach(function (sr) {
+      if (sr.v == null || !sr.p) return;
+      for (var n = -60; n <= 60; n++) { var k = sr.v + sr.p * n; if (k >= -K && k <= K) m[k] = 1; }
+    });
+    return Object.keys(m).map(Number).sort(function (x, y) { return x - y; });
+  }
+  function cmpSets(student, truth) {
+    var st = {}, tr = {};
+    student.forEach(function (k) { st[k] = 1; });
+    truth.forEach(function (k) { tr[k] = 1; });
+    var miss = truth.filter(function (k) { return !st[k]; }), extra = student.filter(function (k) { return !tr[k]; });
+    var byAbs = function (x, y) { return Math.abs(x) - Math.abs(y) || x - y; };
+    return { miss: miss.sort(byAbs), extra: extra.sort(byAbs), ok: !miss.length && !extra.length };
+  }
+  return { U: U, ut: ut, mod24: mod24, rep: rep, SEL_A: SEL_A, selRoots: selRoots, selGen: selGen, trueSet: trueSet, seriesSet: seriesSet, cmpSets: cmpSets,
+    PI: PI, F: F, INV: INV, PARTNERS: PARTNERS, A_SIN: A_SIN, A_TG: A_TG, num: num, ang: ang, deg: deg, piTxt: piTxt,
     val: val, partnerCheck: partnerCheck, solve: solve, holds: holds, exactNum: exactNum, minus: minus };
 })();
 /*LOGIC-END*/
@@ -293,7 +345,9 @@ var TRIG = (function () {
     inv: 'arcsin', a: 0.5, prop: 'none', x: 2.4, asnap: 'special',
     efn: 'sin', sign: '>', ea: 0.5,
     idp: 'double', ida: 30, idb: 40, idstep: 0,
-    dmode: 'vel', dfn: 'sin', dt: PI / 6, dfull: false, d2: false
+    dmode: 'vel', dfn: 'sin', dt: PI / 6, dfull: false, d2: false,
+    sel: null, selTool: 'arc', selLine: true, selArc: null, selPts: [], selNamed: {}, selMsg: null, selDrag: null,
+    emode: 'solve', twA: 4, twB: 9, twStep: 0, bSeries: null, bKey: '', bOK: false, bMsg: null, bRow: 0
   };
   try { var saved = JSON.parse(localStorage.getItem('trig-lab') || 'null'); if (saved) for (var k in saved) if (k in S) S[k] = saved[k]; } catch (e) {}
   if (typeof S.a !== 'number') S.a = 0.5;
@@ -850,14 +904,18 @@ var TRIG = (function () {
   function eqControls() {
     var c = $('ctl');
     c.innerHTML = '';
-    segCtl(c, FN_LIST, S.efn, 'fn', function (v) { S.efn = v; drawAll(); });
-    segCtl(c, [['=', '='], ['>', '>'], ['≥', '≥'], ['<', '<'], ['≤', '≤']], S.sign, '', function (v) { S.sign = v; drawAll(); });
+    segCtl(c, [['solve', 'смотреть решение'], ['build', 'собери ответ сам'], ['twin', 'опыт: sin f = sin g']], S.emode, '', function (v) { S.emode = v; if (v !== 'solve') S.sign = '='; if (v === 'twin' && S.efn === 'ctg') S.efn = 'tg'; drawAll(); });
+    segCtl(c, S.emode === 'twin' ? FN_LIST.filter(function (f) { return f[0] !== 'ctg'; }) : FN_LIST, S.efn, 'fn', function (v) { S.efn = v; if (S.emode === 'twin') S.twStep = 0; drawAll(); });
+    if (S.emode === 'solve') segCtl(c, [['=', '='], ['>', '>'], ['≥', '≥'], ['<', '<'], ['≤', '≤']], S.sign, '', function (v) { S.sign = v; drawAll(); });
     var cc = $('circCtl');
     cc.innerHTML = '';
     selCtl(cc, 'Значения a:', [['special', 'табличные'], ['step', 'шаг 0,05'], ['free', 'свободно']], S.asnap, function (v) { S.asnap = v; drawAll(); });
     chkCtl(cc, 'подписи углов', S.labels, function (v) { S.labels = v; drawAll(); });
   }
   function drawEq() {
+    if (S.emode === 'twin') { drawTwin(); return; }
+    if (S.emode === 'build') S.sign = '=';
+    var hideSol = S.emode === 'build' && !S.bOK;
     var fn = S.efn, sign = S.sign, a = S.ea, col = COL[fn];
     var res = T.solve(fn, sign, a);
     circleBase();
@@ -897,6 +955,7 @@ var TRIG = (function () {
       var bad = fn === 'sin' ? (sign === '>' ? -PI / 2 : PI / 2) : (sign === '>' ? PI : 0);
       ends.push({ v: bad, open: true });
     }
+    if (hideSol) ends = [];
     ends.forEach(function (e) {
       var isAs = (fn === 'tg' && Math.abs(Math.cos(e.v)) < 1e-9) || (fn === 'ctg' && Math.abs(Math.sin(e.v)) < 1e-9);
       cdot(Math.cos(e.v), Math.sin(e.v), 'var(--sol)', 6, e.open || isAs);
@@ -946,6 +1005,7 @@ var TRIG = (function () {
       'Для неравенства cos x < 1/2 дуга проходит через точку π. Почему левый конец промежутка π/3, а правый 5π/3, а не −π/3?',
       'Реши tg x ≥ 1. Почему правый конец промежутка всегда с круглой скобкой?'
     ]);
+    if (S.emode === 'build') drawBuild();
   }
   function eqWhy(fn, sign, a, res) {
     if (res.special === 'all' || (res.text.indexOf('нет') >= 0)) return 'Посмотри на окружность: прямая ' + M((fn === 'cos' ? '<i>x</i>' : '<i>y</i>') + ' = ' + T.num(a)) + ' не пересекает окружность.';
@@ -1487,11 +1547,360 @@ var TRIG = (function () {
     ]);
   }
 
+  /* =====================================================================
+     Вкладка 6. Отбор корней: дугу отрезка ведёт ученик, корни отмечает и называет сам
+     Углы — целые числа в единицах π/12 (TRIG.U). Шаги: 1) дуга, 2) точки, 3) числа.
+     ===================================================================== */
+  var UU = T.U, ARCC = 'var(--ctg)', ROOTC = '#d6336c';
+  function ux(k) { return T.ut(k); }
+  function turnsTxt(m) { m = Math.abs(m); return m === 1 ? 'один полный оборот' : m + (m < 5 ? ' полных оборота' : ' полных оборотов'); }
+  /* «−5π/2 — та же точка, что −π/2: это −π/2 минус один полный оборот» */
+  function sameAs(k) {
+    var r = T.rep(k), m = (k - r) / 24;
+    if (!m) return '';
+    return ', та же точка, что ' + M(ux(r)) + ' (' + M(ux(k)) + ' = ' + M(ux(r)) + (m > 0 ? ' + ' : ' − ') + M(ux(24 * Math.abs(m))) + ', ' + turnsTxt(m) + (m > 0 ? ' вперёд' : ' назад') + ')';
+  }
+  function partsTxt(len) {
+    var q = len / 6;
+    return { 2: 'половина оборота', 3: 'три четверти оборота', 4: 'целый оборот' }[q] || (q + ' четверти оборота');
+  }
+  function eqTxt(t) { return M(t.fn + ' <i>x</i> = ' + T.num(t.a)); }
+  function selNew(t) {
+    S.sel = t; S.selArc = null; S.selPts = []; S.selNamed = {}; S.selMsg = null; S.selDrag = null; S.selDone = false;
+  }
+  if (!S.sel) { selNew(T.selGen(Math.random)); }
+  function selRootsNow() { var t = S.sel; return T.selRoots(t.fn, t.a, t.L, t.R); }
+
+  function selControls() {
+    var c = $('ctl');
+    c.innerHTML = '';
+    segCtl(c, [['arc', 'Дуга'], ['pt', 'Точка']], S.selTool, '', function (v) { S.selTool = v; drawAll(); });
+    chkCtl(c, 'прямая уравнения', S.selLine, function (v) { S.selLine = v; redraw(); });
+    var b1 = document.createElement('button'); b1.className = 'tab'; b1.type = 'button'; b1.textContent = 'Новая задача';
+    b1.onclick = function () { selNew(T.selGen(Math.random)); drawAll(); };
+    c.appendChild(b1);
+    var cc = $('circCtl');
+    cc.innerHTML = '';
+    var t = S.sel;
+    var spn = document.createElement('span'); spn.className = 'lbl'; spn.textContent = 'Своя задача:'; cc.appendChild(spn);
+    selCtl(cc, '', [['sin', 'sin'], ['cos', 'cos'], ['tg', 'tg']], t.fn, function (v) { var a = T.SEL_A[v].indexOf(S.sel.a) >= 0 ? S.sel.a : T.SEL_A[v][0]; selNew({ fn: v, a: a, L: S.sel.L, R: S.sel.R }); drawAll(); });
+    selCtl(cc, 'x =', T.SEL_A[t.fn].map(function (v) { return [String(v), T.num(v)]; }), String(t.a), function (v) { selNew({ fn: S.sel.fn, a: +v, L: S.sel.L, R: S.sel.R }); drawAll(); });
+    var ends = []; for (var k = -48; k <= 48; k += 6) ends.push([String(k), ux(k)]);
+    selCtl(cc, 'отрезок [', ends, String(t.L), function (v) { var L = +v, R = Math.max(S.sel.R, L + 6); if (R - L > 24) R = L + 24; selNew({ fn: S.sel.fn, a: S.sel.a, L: L, R: R }); drawAll(); });
+    selCtl(cc, ';', ends.filter(function (e) { return +e[0] > t.L && +e[0] <= t.L + 24; }), String(t.R), function (v) { selNew({ fn: S.sel.fn, a: S.sel.a, L: S.sel.L, R: +v }); drawAll(); });
+    var sp2 = document.createElement('span'); sp2.className = 'lbl'; sp2.textContent = ']'; cc.appendChild(sp2);
+  }
+  function arcOnCircle(k0, sw, col, w, dash) {
+    var a0 = k0 * UU, a1 = (k0 + sw) * UU, n = Math.max(6, Math.abs(sw) * 4), d = '';
+    for (var i = 0; i <= n; i++) {
+      var u = a0 + (a1 - a0) * i / n, r = 1 + 0.035 * i / n, p = cp(r * Math.cos(u), r * Math.sin(u));
+      d += (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1);
+    }
+    var at = { d: d, stroke: col, 'stroke-width': w, fill: 'none', 'stroke-linecap': 'butt', 'stroke-opacity': 0.85 };
+    if (dash) at['stroke-dasharray'] = '8 5';
+    el('path', at, circ);
+  }
+  function drawSelLine(fn, a, col) {
+    if (fn === 'sin') cline(-1.4, a, 1.4, a, { stroke: col, 'stroke-width': 1.4 });
+    else if (fn === 'cos') cline(a, -1.4, a, 1.4, { stroke: col, 'stroke-width': 1.4 });
+    else {
+      var al = Math.atan(a);
+      cline(1, -1.45, 1, 1.45, { stroke: col, 'stroke-width': 1, opacity: 0.6 });
+      cline(-1.3 * Math.cos(al), -1.3 * Math.sin(al), 1.3 * Math.cos(al), 1.3 * Math.sin(al), { stroke: col, 'stroke-width': 1.4 });
+    }
+  }
+  function drawSel() {
+    var t = S.sel, col = COL[t.fn], roots = selRootsNow();
+    circleBase();
+    $('circHint').textContent = S.selTool === 'arc' ? 'Дуга: поставь палец на окружность в точку начала отрезка и, не отпуская, веди до его конца. Против часовой стрелки числа растут.' :
+      'Точка: нажми на окружность там, где корень. Повторное нажатие убирает точку.';
+    if (S.selLine) drawSelLine(t.fn, t.a, col);
+    if (S.selArc) {
+      var ok = S.selArc.ok;
+      arcOnCircle(S.selArc.k0, S.selArc.sw, ok ? ARCC : 'var(--no)', 8);
+      var e0 = S.selArc.k0 * UU, e1 = (S.selArc.k0 + S.selArc.sw) * UU;
+      cdot(Math.cos(e0), Math.sin(e0), ok ? ARCC : 'var(--no)', 5.5);
+      cdot(Math.cos(e1) * 1.035, Math.sin(e1) * 1.035, ok ? ARCC : 'var(--no)', 5.5);
+      if (ok) {
+        ctext(Math.cos(e0) * 0.8, Math.sin(e0) * 0.8 - 0.03, ux(t.L), 'lbl', ARCC);
+        ctext(Math.cos(e1) * 0.8, Math.sin(e1) * 0.8 + 0.09, ux(t.R), 'lbl', ARCC);
+      }
+    }
+    if (S.selDrag) arcOnCircle(S.selDrag.k0, Math.round(S.selDrag.acc), ARCC, 6, true);
+    S.selPts.forEach(function (x) {
+      var u = x * UU, nm = S.selNamed[x];
+      cdot(Math.cos(u), Math.sin(u), ROOTC, 7);
+      ctext(Math.cos(u) * 1.22, Math.sin(u) * 1.22 - 0.03, nm ? ux(x) : '?', 'lbl', ROOTC);
+    });
+    /* график: тот же отрезок на оси, корни после того, как их назвали */
+    setView(t.L * UU - 1.2, t.R * UU + 1.2, -2.4, 2.4);
+    graphBase();
+    var p0 = gp(t.L * UU, 0), p1 = gp(t.R * UU, 0);
+    graph.insertBefore(el('rect', { x: p0[0], y: 0, width: p1[0] - p0[0], height: G.H, fill: 'var(--par-soft, #efeafb)' }, graph), graph.firstChild);
+    gline(t.L * UU, 0, t.R * UU, 0, { stroke: ARCC, 'stroke-width': 5 });
+    plot(T.F[t.fn], G.x0, G.x1, { stroke: col, 'stroke-width': 2.4 });
+    gline(G.x0, clamp(t.a, G.y0, G.y1), G.x1, clamp(t.a, G.y0, G.y1), { stroke: col, 'stroke-width': 1.4, 'class': 'dash' });
+    roots.forEach(function (k) { if (S.selNamed[k]) { gdot(k * UU, t.a, ROOTC, 6); gtext(k * UU, 0, ux(k), 'tk', ROOTC, 'middle', t.a > 0 ? 34 : -22); } });
+    /* панель */
+    var h = '<div class="big">а) Решите уравнение ' + eqTxt(t) + '. &nbsp;б) Найдите его корни на отрезке ' + M('[' + ux(t.L) + '; ' + ux(t.R) + ']') + '.</div>';
+    var ser = T.solve(t.fn, '=', t.a).text;
+    h += '<details><summary>Ответ к пункту а)</summary><div class="ans" style="margin-top:6px">' + M(ser.replace(/\bx\b/g, '<i>x</i>').replace(/n/g, '<i>n</i>')) + ' &nbsp;' + M('<i>n</i> ∈ ℤ') + '</div></details>';
+    var st1 = S.selArc && S.selArc.ok, st2 = st1 && S.selPts.length === roots.length && roots.every(function (k) { return S.selPts.indexOf(k) >= 0; });
+    var st3 = st2 && roots.every(function (k) { return S.selNamed[k]; });
+    var mark = function (on, cur) { return on ? '✓' : cur ? '→' : '·'; };
+    h += '<ol class="try" style="list-style:none;padding-left:0;margin:0">' +
+      '<li>' + mark(st1, !st1) + ' <b>1. Дуга отрезка.</b> Отметь на окружности дугу от ' + M(ux(t.L)) + ' до ' + M(ux(t.R)) + '.</li>' +
+      '<li>' + mark(st2, st1 && !st2) + ' <b>2. Корни на дуге.</b> Отметь точки, где ' + eqTxt(t) + ' и которые лежат на дуге.' + (st1 ? ' Отмечено: ' + S.selPts.length + '.' : '') + '</li>' +
+      '<li>' + mark(st3, st2 && !st3) + ' <b>3. Числа.</b> Назови каждую точку числом из отрезка.</li></ol>';
+    if (st2 && !st3) {
+      S.selPts.slice().sort(function (x, y) { return x - y; }).forEach(function (x, i) {
+        if (S.selNamed[x]) return;
+        var c = [x, x + 24, x - 24, T.rep(x)].filter(function (v, j, arr) { return arr.indexOf(v) === j; });
+        c.sort(function (p, q) { return ((p * 7919) % 13) - ((q * 7919) % 13) || p - q; });
+        h += '<div class="chk info">Точка на окружности: ' + M(ux(T.rep(x))) + ' (если считать в пределах одного оборота). Какое это число из отрезка?<div class="ctl" style="margin-top:6px">' +
+          c.map(function (v) { return '<button class="tab" type="button" data-nm="' + x + '" data-v="' + v + '">' + ux(v) + '</button>'; }).join('') + '</div></div>';
+      });
+    }
+    if (S.selMsg) h += '<div class="chk ' + S.selMsg.cls + '">' + S.selMsg.text + '</div>';
+    if (st3) {
+      S.selDone = true;
+      h += '<div class="ans"><b>Ответ б):</b> ' + M(roots.map(ux).join('; ')) + '</div>';
+    }
+    h += '<div class="ctl"><button class="tab" type="button" id="selHint">Подсказка</button><button class="tab" type="button" id="selSolve">Покажи решение</button><button class="tab" type="button" id="selReset">Заново</button></div>';
+    $('read').innerHTML = h;
+    [].forEach.call($('read').querySelectorAll('[data-nm]'), function (b) { b.onclick = function () { selName(+b.dataset.nm, +b.dataset.v); }; });
+    $('selHint').onclick = selHint;
+    $('selSolve').onclick = selSolve;
+    $('selReset').onclick = function () { selNew(S.sel); drawAll(); };
+    setTry([
+      'Реши одну и ту же задачу дважды: на окружности и по графику справа. Где удобнее?',
+      'Почему отрезок [−5π/2; −π] начинается в нижней точке окружности?',
+      'Возьми отрезок длиной 2π. Почему точка начала и точка конца совпадают, и сколько раз надо проверять корень в этой точке?',
+      'Найди отрезок длиной π/2, на котором у уравнения sin x = 1/2 нет корней.',
+      'Сравни отбор корней для tg x = 1 и sin x = √2/2 на одном отрезке. Почему корней разное число?'
+    ]);
+  }
+  function selMsg(cls, text) { S.selMsg = { cls: cls, text: text }; }
+  function selArcCheck(k0, sw) {
+    var t = S.sel, len = t.R - t.L;
+    if (sw === 0) return;
+    var okFwd = T.mod24(k0 - t.L) === 0 && sw === len, okBack = T.mod24(k0 - t.R) === 0 && sw === -len;
+    if (len === 24 && Math.abs(sw) === 24 && T.mod24(k0 - t.L) === 0) okFwd = true;
+    if (okFwd || okBack) {
+      S.selArc = { k0: t.L, sw: len, ok: true };
+      selMsg('ok', 'Верно: дуга от ' + M(ux(t.L)) + ' до ' + M(ux(t.R)) + ', это ' + partsTxt(len) + '. Теперь отметь корни на этой дуге (инструмент «Точка»).');
+      S.selTool = 'pt';
+      return;
+    }
+    S.selArc = { k0: k0, sw: sw, ok: false };
+    var startL = T.mod24(k0 - t.L) === 0, startR = T.mod24(k0 - t.R) === 0;
+    if (startL && sw > 0) selMsg('no', 'Начало верное. Но длина отрезка ' + M(ux(t.R) + ' − (' + ux(t.L) + ') = ' + ux(len)) + ', это ' + partsTxt(len) + ', а у тебя дуга ' + M(ux(sw)) + '.');
+    else if (startL && sw < 0) selMsg('no', 'Начало верное, но ты повёл(а) дугу по часовой стрелке: так числа уменьшаются. Числа отрезка больше ' + M(ux(t.L)) + ', веди против часовой.');
+    else if (startR && sw > 0) selMsg('no', 'Ты начал(а) с правого конца ' + M(ux(t.R)) + ' и пошёл(а) против часовой стрелки: так получаются числа больше ' + M(ux(t.R)) + '. Начни с левого конца ' + M(ux(t.L)) + '.');
+    else selMsg('no', 'Дуга начинается не там. Левый конец отрезка ' + M(ux(t.L)) + sameAs(t.L) + '. Начни дугу в этой точке.');
+  }
+  function selMark(k) {
+    var t = S.sel;
+    if (!S.selArc || !S.selArc.ok) { selMsg('warn', 'Сначала отметь дугу отрезка: инструмент «Дуга».'); return; }
+    var xs = [];
+    for (var x = t.L; x <= t.R; x++) if (T.mod24(x - k) === 0) xs.push(x);
+    if (!xs.length) { selMsg('no', 'Эта точка не лежит на дуге отрезка, её корни нам не нужны.'); return; }
+    var v = T.F[t.fn](k * UU);
+    if (!T.holds(t.fn, '=', t.a, k * UU)) { selMsg('no', 'Здесь ' + M(t.fn + ' = ' + (isFinite(v) ? T.num(v) : 'не существует')) + ', а нужно ' + M(T.num(t.a)) + '. Это не корень.'); return; }
+    var has = S.selPts.indexOf(xs[0]) >= 0;
+    xs.forEach(function (x) {
+      var i = S.selPts.indexOf(x);
+      if (has) { if (i >= 0) S.selPts.splice(i, 1); delete S.selNamed[x]; } else if (i < 0) S.selPts.push(x);
+    });
+    if (has) { selMsg('info', 'Точку убрали.'); return; }
+    var roots = selRootsNow();
+    if (roots.every(function (r) { return S.selPts.indexOf(r) >= 0; })) selMsg('ok', 'Все корни на дуге отмечены' + (xs.length > 1 ? ' (эта точка — оба конца отрезка, в ней два корня)' : '') + '. Теперь назови их числами.');
+    else selMsg('ok', 'Верно, это корень и он на дуге.' + (xs.length > 1 ? ' Точка совпадает с обоими концами отрезка: здесь два корня.' : '') + ' Есть ли ещё?');
+  }
+  function selName(x, v) {
+    var t = S.sel;
+    if (v === x) { S.selNamed[x] = true; selMsg('ok', 'Верно: ' + M(ux(x)) + '.'); redraw(); return; }
+    selMsg('no', 'Это та же точка окружности, но число ' + M(ux(v)) + (v < t.L ? ' меньше левого конца ' + M(ux(t.L)) : ' больше правого конца ' + M(ux(t.R))) + '. Иди от начала отрезка ' + M(ux(t.L)) + ' против часовой стрелки и прибавляй, пока не дойдёшь до точки.');
+    redraw();
+  }
+  function selHint() {
+    var t = S.sel, roots = selRootsNow();
+    if (!S.selArc || !S.selArc.ok) selMsg('hint', 'Левый конец отрезка ' + M(ux(t.L)) + (sameAs(t.L) || ': найди его на окружности') + '. Поставь туда палец и веди дугу против часовой стрелки на ' + M(ux(t.R - t.L)) + ', это ' + partsTxt(t.R - t.L) + '.');
+    else if (!roots.every(function (r) { return S.selPts.indexOf(r) >= 0; })) selMsg('hint', 'Включи «прямую уравнения»: корни — это точки, где она пересекает окружность' + (t.fn === 'tg' ? ' (прямая через центр даёт две противоположные точки)' : '') + '. Отмечай только те, что попали на дугу.');
+    else {
+      var x = S.selPts.filter(function (p) { return !S.selNamed[p]; })[0];
+      selMsg('hint', 'Считай от начала отрезка: ' + M(ux(t.L)) + ' плюс ' + M(ux(x - t.L)) + ' равно ' + M(ux(x)) + '.');
+    }
+    redraw();
+  }
+  function selSolve() {
+    var t = S.sel, roots = selRootsNow();
+    S.selArc = { k0: t.L, sw: t.R - t.L, ok: true };
+    S.selPts = roots.slice();
+    S.selNamed = {}; roots.forEach(function (k) { S.selNamed[k] = true; });
+    selMsg('info', 'Решение. 1) ' + M(ux(t.L)) + (sameAs(t.L) || '') + '; ведём дугу против часовой стрелки на ' + partsTxt(t.R - t.L) + ' до ' + M(ux(t.R)) + '. 2) На дуге ' + (roots.length === 1 ? 'одна точка' : roots.length + ' точки') + ', где ' + eqTxt(t) + '. 3) Считаем от начала: ' +
+      roots.map(function (k) { return M(ux(t.L) + ' + ' + ux(k - t.L) + ' = ' + ux(k)); }).join('; ') + '. Нажми «Заново» и попробуй сам(а).');
+    redraw();
+  }
+  function selPointer(phase, e) {
+    var p = svgPt(circ, e), x = (p[0] - CX) / R, y = (CY - p[1]) / R, r = Math.hypot(x, y), th = Math.atan2(y, x);
+    if (phase === 'down') {
+      if (Math.abs(r - 1) > 0.3) return;
+      var k = Math.round(th / UU);
+      if (S.selTool === 'arc') { S.selDrag = { k0: T.mod24(k), acc: 0, prev: th }; S.selArc = null; redraw(); }
+      else { selMark(k); redraw(); }
+    } else if (phase === 'move' && S.selDrag) {
+      var d = th - S.selDrag.prev;
+      while (d > PI) d -= 2 * PI;
+      while (d < -PI) d += 2 * PI;
+      S.selDrag.acc = clamp(S.selDrag.acc + d / UU, -48, 48);
+      S.selDrag.prev = th;
+      redraw();
+    } else if (phase === 'up' && S.selDrag) {
+      var sw = Math.round(S.selDrag.acc), k0 = S.selDrag.k0;
+      S.selDrag = null;
+      if (sw) selArcCheck(k0, sw); else selMsg('warn', 'Нажми на начало отрезка и, не отпуская, веди по окружности.');
+      drawAll();
+    }
+  }
+
+  /* =====================================================================
+     Опыт «найди вторую точку»: sin f = sin g, cos f = cos g, tg f = tg g
+     ===================================================================== */
+  var TWIN = {
+    sin: { line: 'горизонтальной прямой: у них одинаковая ордината, то есть одинаковый синус', sym: 'симметрична точке A относительно оси Oy. Тогда β = π − α + 2πn',
+      res: 'sin f = sin g ⇔ f = g + 2πn или f = π − g + 2πn, n ∈ ℤ',
+      ex: 'sin 5x = sin 4x: 5x = 4x + 2πn, откуда x = 2πn; или 5x = π − 4x + 2πn, откуда x = π/9 + 2πn/9.' },
+    cos: { line: 'вертикальной прямой: у них одинаковая абсцисса, то есть одинаковый косинус', sym: 'симметрична точке A относительно оси Ox. Тогда β = −α + 2πn',
+      res: 'cos f = cos g ⇔ f = ±g + 2πn, n ∈ ℤ',
+      ex: 'cos 3x = cos x: 3x = x + 2πn, откуда x = πn; или 3x = −x + 2πn, откуда x = πn/2. Первая серия входит во вторую, ответ x = πn/2.' },
+    tg: { line: 'одной прямой, проходящей через центр: у них одинаковый тангенс', sym: 'диаметрально противоположна точке A. Тогда β = α + π + 2πn',
+      res: 'tg f = tg g ⇔ f = g + πn (при условии, что тангенсы существуют)',
+      ex: 'tg 3x = tg x: 3x = x + πn, откуда x = πn/2. Но при x = π/2 + πn тангенс не существует, поэтому ответ x = πn.' }
+  };
+  function drawTwin() {
+    var fn = S.efn === 'ctg' ? 'tg' : S.efn, col = COL[fn], A = S.twA, B = S.twB;
+    var ua = A * UU, ub = B * UU, fa = T.F[fn](ua), fb = T.F[fn](ub);
+    var found = isFinite(fa) && isFinite(fb) && Math.abs(fa - fb) < 1e-9 && T.mod24(A - B) !== 0;
+    if (found && S.twStep < 1) S.twStep = 1;
+    circleBase();
+    $('circHint').textContent = 'Тяни точку B по окружности. Точка A стоит на месте.';
+    if (fn === 'sin') cline(-1.4, Math.sin(ua), 1.4, Math.sin(ua), { stroke: col, 'stroke-width': 1.4, 'class': 'dash' });
+    else if (fn === 'cos') cline(Math.cos(ua), -1.4, Math.cos(ua), 1.4, { stroke: col, 'stroke-width': 1.4, 'class': 'dash' });
+    else cline(-1.35 * Math.cos(ua), -1.35 * Math.sin(ua), 1.35 * Math.cos(ua), 1.35 * Math.sin(ua), { stroke: col, 'stroke-width': 1.4, 'class': 'dash' });
+    if (S.twStep >= 3) {
+      if (fn === 'sin') cline(0, -1.4, 0, 1.4, { stroke: 'var(--q)', 'stroke-width': 2.4 });
+      else if (fn === 'cos') cline(-1.4, 0, 1.4, 0, { stroke: 'var(--q)', 'stroke-width': 2.4 });
+      else cdot(0, 0, 'var(--q)', 6);
+    }
+    drawFnOnCircle(fn, ua, COL.cos, false);
+    cline(0, 0, Math.cos(ua), Math.sin(ua), { stroke: 'var(--cos)', 'stroke-width': 1.8 });
+    cline(0, 0, Math.cos(ub), Math.sin(ub), { stroke: 'var(--q)', 'stroke-width': 1.8 });
+    cdot(Math.cos(ua), Math.sin(ua), 'var(--cos)', 7);
+    cdot(Math.cos(ub), Math.sin(ub), found ? 'var(--ok)' : 'var(--q)', 8);
+    ctext(Math.cos(ua) * 0.82, Math.sin(ua) * 0.82 - 0.04, 'A', 'lbl', 'var(--cos)');
+    ctext(Math.cos(ub) * 0.82, Math.sin(ub) * 0.82 - 0.04, 'B', 'lbl', found ? 'var(--ok)' : 'var(--q)');
+    setView(-2 * PI - 0.45, 2 * PI + 0.45, -2.4, 2.4);
+    graphBase();
+    plot(T.F[fn], G.x0, G.x1, { stroke: col, 'stroke-width': 2.4 });
+    if (isFinite(fa)) gline(G.x0, fa, G.x1, fa, { stroke: col, 'stroke-width': 1.3, 'class': 'dash' });
+    for (var k = -3; k <= 3; k++) {
+      var xa = ua + 2 * PI * k, xb = T.rep(B) * UU + 2 * PI * k;
+      if (xa > G.x0 && xa < G.x1 && (k === 0 || S.twStep >= 2) && isFinite(fa)) gdot(xa, fa, 'var(--cos)', k ? 4.5 : 6.5);
+      if (xb > G.x0 && xb < G.x1 && (k === 0 || S.twStep >= 3) && isFinite(fb)) gdot(xb, fb, found ? 'var(--ok)' : 'var(--q)', k ? 4.5 : 6.5);
+    }
+    var Tx = TWIN[fn], h = '<div class="big">Опыт: где ещё ' + M(fn + ' β = ' + fn + ' α') + '?</div>';
+    h += '<div class="chk info">Точка ' + M('A') + ' отмечает число ' + M('α = ' + ux(A)) + '. Найди точку ' + M('B ≠ A') + ', для которой ' + M(fn + ' β = ' + fn + ' α') + '. Сейчас ' + M(fn + ' α = ' + (isFinite(fa) ? T.num(fa) : '—')) + ', ' + M(fn + ' β = ' + (isFinite(fb) ? T.num(fb) : 'не существует')) + '.</div>';
+    if (!found) h += '<div class="chk ' + (T.mod24(A - B) === 0 ? 'warn' : 'no') + '">' + (T.mod24(A - B) === 0 ? 'Это сама точка A. Найди другую.' : 'Пока не равны. Двигай B дальше.') + '</div>';
+    else {
+      var steps = ['Нашёл(нашла)! Точки A и B лежат на одной ' + Tx.line + '.',
+        'Первый случай: B совпадает с A. Тогда числа отличаются на целое число оборотов: β = α + 2πn. На графике это все синие точки.',
+        'Второй случай, твой: точка B ' + Tx.sym + '. На графике это все зелёные точки.',
+        'Итог: ' + Tx.res + '.',
+        'Пример: ' + Tx.ex];
+      h += '<ol class="try" style="margin:0">' + steps.slice(0, S.twStep).map(function (s) { return '<li>' + s + '</li>'; }).join('') + '</ol>';
+      if (S.twStep < steps.length) h += '<div class="ctl"><button class="tab" type="button" id="twNext">Дальше</button></div>';
+    }
+    h += '<div class="ctl"><button class="tab" type="button" id="twNew">Другая точка A</button></div>';
+    $('read').innerHTML = h;
+    if ($('twNext')) $('twNext').onclick = function () { S.twStep++; redraw(); };
+    $('twNew').onclick = function () {
+      var opts = [2, 3, 4, 8, 9, 10, 14, 15, 16, 20, 21, 22];
+      S.twA = opts[Math.floor(Math.random() * opts.length)]; S.twB = T.mod24(S.twA + 5); S.twStep = 0; redraw();
+    };
+    setTry([
+      'Найди вторую точку для sin, потом для cos с той же точкой A. Чем отличаются ответы?',
+      'Для tg: почему вторая точка всегда напротив, через центр?',
+      'Поставь A в точку π/2. Есть ли вторая точка для синуса? Почему?',
+      'Реши сам(а): sin 3x = sin x, cos 5x = cos 3x.'
+    ]);
+  }
+
+  /* =====================================================================
+     Конструктор серий: ученик сам собирает ответ x = угол + период
+     ===================================================================== */
+  var B_ANG = [-10, -9, -8, -6, -4, -3, -2, 0, 2, 3, 4, 6, 8, 9, 10, 12];
+  function bKey() { return S.efn + '|' + S.ea; }
+  function drawBuild() {
+    var fn = S.efn, a = S.ea;
+    if (S.bKey !== bKey()) { S.bKey = bKey(); S.bSeries = [{ v: null, p: null }]; S.bOK = false; S.bMsg = null; S.bRow = 0; }
+    var table = (fn === 'tg' || fn === 'ctg' ? T.A_TG : T.A_SIN).some(function (v) { return Math.abs(v - a) < 1e-9; }) || Math.abs(a) > 1 && fn !== 'tg' && fn !== 'ctg';
+    var h = '<div class="big">Собери ответ: ' + M(fn + ' <i>x</i> = ' + T.num(a)) + '</div>';
+    if (!table) { $('read').innerHTML = h + '<div class="chk warn">Выбери табличное значение ' + M('<i>a</i>') + ' (переключатель «Значения a: табличные» под окружностью).</div>'; return; }
+    if (S.bOK) {
+      h += '<div class="chk ok"><b>Верно!</b> Серии задают ровно все корни. Ответ в привычной записи: ' + M(T.solve(fn, '=', a).text.replace(/\bx\b/g, '<i>x</i>').replace(/n/g, '<i>n</i>')) + ', ' + M('<i>n</i> ∈ ℤ') + '. Решения отмечены на окружности и графике.</div>';
+    }
+    h += '<div style="display:flex;flex-direction:column;gap:6px">';
+    S.bSeries.forEach(function (sr, i) {
+      var on = i === S.bRow;
+      h += '<div class="ctl" style="padding:6px 8px;border-radius:6px;' + (on ? 'background:var(--accent-soft)' : '') + '" data-row="' + i + '">' + M('<i>x</i> =') +
+        ' <button class="tab" type="button" data-slot="v" data-i="' + i + '" style="min-width:4.5em">' + (sr.v == null ? '…' : ux(sr.v)) + '</button> + ' +
+        '<button class="tab" type="button" data-slot="p" data-i="' + i + '" style="min-width:4em">' + (sr.p == null ? '…' : sr.p === 24 ? '2πn' : 'πn') + '</button>' +
+        (S.bSeries.length > 1 ? ' <button class="tab" type="button" data-del="' + i + '" title="Убрать серию">✕</button>' : '') + '</div>';
+    });
+    h += '</div><div class="hint" style="margin:0">Нажимай карточки: они встают в пустые места выделенной строки. Нажатие на заполненное место очищает его.</div>';
+    h += '<div class="ctl">' + B_ANG.map(function (k) { return '<button class="tab" type="button" data-ang="' + k + '">' + ux(k) + '</button>'; }).join('') + '</div>';
+    h += '<div class="ctl"><button class="tab" type="button" data-per="24">+ 2πn</button><button class="tab" type="button" data-per="12">+ πn</button>' +
+      '<button class="tab" type="button" id="bAdd">+ ещё серия</button><button class="tab" type="button" id="bNone">Решений нет</button><button class="tab" type="button" id="bCheck" style="border-color:var(--accent);color:var(--accent)">Проверить</button></div>';
+    if (S.bMsg) h += '<div class="chk ' + S.bMsg.cls + '">' + S.bMsg.text + '</div>';
+    $('read').innerHTML = h;
+    var R2 = $('read');
+    [].forEach.call(R2.querySelectorAll('[data-row]'), function (d) { d.onclick = function (e) { if (e.target.closest('[data-slot],[data-del]')) return; S.bRow = +d.dataset.row; redraw(); }; });
+    [].forEach.call(R2.querySelectorAll('[data-slot]'), function (b) { b.onclick = function () { var i = +b.dataset.i; S.bRow = i; S.bSeries[i][b.dataset.slot] = null; S.bOK = false; redraw(); }; });
+    [].forEach.call(R2.querySelectorAll('[data-del]'), function (b) { b.onclick = function () { S.bSeries.splice(+b.dataset.del, 1); S.bRow = 0; S.bOK = false; redraw(); }; });
+    [].forEach.call(R2.querySelectorAll('[data-ang]'), function (b) { b.onclick = function () { S.bSeries[S.bRow].v = +b.dataset.ang; S.bOK = false; redraw(); }; });
+    [].forEach.call(R2.querySelectorAll('[data-per]'), function (b) { b.onclick = function () { S.bSeries[S.bRow].p = +b.dataset.per; S.bOK = false; redraw(); }; });
+    $('bAdd').onclick = function () { S.bSeries.push({ v: null, p: null }); S.bRow = S.bSeries.length - 1; redraw(); };
+    $('bNone').onclick = function () { buildCheck(true); };
+    $('bCheck').onclick = function () { buildCheck(false); };
+  }
+  function buildCheck(none) {
+    var fn = S.efn, a = S.ea, K = 48, truth = T.trueSet(fn, a, K);
+    if (none) {
+      if (!truth.length) { S.bOK = true; S.bMsg = { cls: 'ok', text: 'Верно: решений нет, прямая не пересекает окружность.' }; }
+      else { S.bOK = false; S.bMsg = { cls: 'no', text: 'Решения есть, например ' + M('<i>x</i> = ' + ux(truth.sort(function (x, y) { return Math.abs(x) - Math.abs(y); })[0])) + '.' }; }
+      redraw(); return;
+    }
+    if (S.bSeries.some(function (sr) { return sr.v == null || sr.p == null; })) { S.bMsg = { cls: 'warn', text: 'Заполни все места в сериях или убери лишнюю строку.' }; redraw(); return; }
+    var cmp = T.cmpSets(T.seriesSet(S.bSeries, K), truth);
+    if (cmp.ok) { S.bOK = true; S.bMsg = null; }
+    else {
+      S.bOK = false;
+      var t = '';
+      if (cmp.miss.length) t += 'Не хватает корней, например ' + M('<i>x</i> = ' + ux(cmp.miss[0])) + ': там ' + M(fn + ' <i>x</i> = ' + T.num(a)) + '. ';
+      if (cmp.extra.length) { var v = T.F[fn](cmp.extra[0] * UU); t += 'Есть лишние корни, например ' + M('<i>x</i> = ' + ux(cmp.extra[0])) + ': там ' + M(fn + ' <i>x</i> = ' + (isFinite(v) ? T.num(v) : 'не существует')) + '. '; }
+      if (!truth.length) t = 'У этого уравнения нет корней: нажми «Решений нет».';
+      S.bMsg = { cls: 'no', text: t + 'Посмотри на окружность: сколько точек и через какой шаг они повторяются?' };
+    }
+    redraw();
+  }
+
   /* ---------- общая отрисовка ---------- */
   var LEADS = {
     fn: 'Угол t откладывается на единичной окружности. Синус — ордината точки, косинус — абсцисса, тангенс и котангенс читаются на своих осях. Справа тот же угол на графике.',
     inv: 'Арк-функция по значению a находит угол. Таких углов бесконечно много, поэтому берут один, из промежутка главных значений: он выделен на окружности. Справа видно, что график обратной функции симметричен куску исходного графика относительно прямой y = x.',
     eq: 'Уравнение и неравенство решаются одной картинкой: на окружности отмечаем точки или дугу, на графике — промежутки оси x. Ответ записан сериями с n ∈ ℤ.',
+    sel: 'Пункт б) задачи 13: отбор корней на отрезке. Сначала отметь на окружности дугу отрезка, потом корни на ней, потом назови каждый корень числом. Справа тот же отрезок на графике.',
     der: 'Производная — это скорость изменения. Точка на окружности бежит, её координаты меняются, и скорость этого изменения видна прямо на чертеже. На графике производная — наклон касательной, а площадь под графиком связана с первообразной.',
     id: 'Откуда берутся формулы: доказательства на картинках. Иди по шагам, каждый шаг подсвечивает свою часть чертежа. Углы можно менять: картинка перестраивается, а равенство остаётся верным.'
   };
@@ -1502,12 +1911,13 @@ var TRIG = (function () {
     else if (S.tab === 'inv') { invControls(); drawInv(); }
     else if (S.tab === 'eq') { eqControls(); drawEq(); }
     else if (S.tab === 'der') { derControls(); drawDer(); }
+    else if (S.tab === 'sel') { selControls(); drawSel(); }
     else { idControls(); drawId(); }
     graph.style.display = S.tab === 'id' ? 'none' : '';
     save();
   }
   function redraw() {
-    if (S.tab === 'fn') drawFn(); else if (S.tab === 'inv') drawInv(); else if (S.tab === 'eq') drawEq(); else if (S.tab === 'der') drawDer(); else drawId();
+    if (S.tab === 'fn') drawFn(); else if (S.tab === 'inv') drawInv(); else if (S.tab === 'eq') drawEq(); else if (S.tab === 'der') drawDer(); else if (S.tab === 'sel') drawSel(); else drawId();
     save();
   }
   document.querySelectorAll('.tab').forEach(function (b) { b.onclick = function () { S.tab = b.dataset.tab; drawAll(); }; });
@@ -1537,6 +1947,8 @@ var TRIG = (function () {
       else th = clamp(y < 0 ? (x > 0 ? 0 : PI) : th, 0, PI);
       if (S.inv === 'arctg' || S.inv === 'arcctg') S.a = angToA(S.inv, snapTh(th));
       else S.a = clamp(snapA(a, I.A), I.dom[0], I.dom[1]);
+    } else if (S.emode === 'twin') {
+      S.twB = Math.round(th / (PI / 12));
     } else {
       var fn = S.efn, b;
       if (fn === 'sin') b = y; else if (fn === 'cos') b = x;
@@ -1547,6 +1959,7 @@ var TRIG = (function () {
     redraw();
   }
   function onGraph(e) {
+    if (S.tab === 'sel' || (S.tab === 'eq' && S.emode === 'twin')) return;
     var p = svgPt(graph, e), x = p[0] / G.sc + G.x0, y = G.y1 - p[1] / G.sc;
     if (S.tab === 'der') { S.dt = clamp(snapAngle(x), -2 * PI, 2 * PI); redraw(); return; }
     if (S.tab === 'fn') S.t = clamp(snapAngle(x), -TMAX, TMAX);
@@ -1558,13 +1971,14 @@ var TRIG = (function () {
   }
   [[circ, onCircle], [graph, onGraph]].forEach(function (pr) {
     var svg = pr[0], fnc = pr[1], down = false;
-    svg.addEventListener('pointerdown', function (e) { down = true; svg.setPointerCapture(e.pointerId); fnc(e); e.preventDefault(); });
-    svg.addEventListener('pointermove', function (e) { if (down) fnc(e); });
-    svg.addEventListener('pointerup', function () { down = false; });
-    svg.addEventListener('pointercancel', function () { down = false; });
+    var selMode = function () { return svg === circ && S.tab === 'sel'; };
+    svg.addEventListener('pointerdown', function (e) { down = true; svg.setPointerCapture(e.pointerId); if (selMode()) selPointer('down', e); else fnc(e); e.preventDefault(); });
+    svg.addEventListener('pointermove', function (e) { if (down) { if (selMode()) selPointer('move', e); else fnc(e); } });
+    svg.addEventListener('pointerup', function (e) { if (down && selMode()) selPointer('up', e); down = false; });
+    svg.addEventListener('pointercancel', function (e) { if (down && selMode()) selPointer('up', e); down = false; });
     svg.addEventListener('keydown', function (e) {
       var d = e.key === 'ArrowRight' || e.key === 'ArrowUp' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowDown' ? -1 : 0;
-      if (!d || S.tab === 'id') return;
+      if (!d || S.tab === 'id' || S.tab === 'sel') return;
       e.preventDefault();
       if (S.tab === 'der') { S.dt = clamp(S.dt + d * PI / 12, -2 * PI, 2 * PI); redraw(); return; }
       if (S.tab === 'fn' || (S.tab === 'inv' && S.prop === 'comp')) {
@@ -1615,7 +2029,7 @@ var TRIG = (function () {
   }
 
   var hash = (location.hash || '').slice(1);
-  if (hash === 'fn' || hash === 'inv' || hash === 'eq' || hash === 'id' || hash === 'der') S.tab = hash;
+  if (hash === 'fn' || hash === 'inv' || hash === 'eq' || hash === 'id' || hash === 'der' || hash === 'sel') S.tab = hash;
   drawAll();
 })();
 </script>
