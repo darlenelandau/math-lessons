@@ -1,0 +1,1066 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Векторная лаборатория</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f7f9fb; --paper: #fff; --grid: #e6edf3; --ink: #17232d; --muted: #5d6d79; --line: #d5dee6; --faint: #c3ced7;
+  --accent: #1f6f8b; --accent-soft: #e3f0f5;
+  --va: #d0532e; --vb: #1f63c9; --vc: #2f8a46; --vr: #7a4fc4; --q: #c4880a;
+  --ok: #2f7d4f; --ok-soft: #e4f3ea; --no: #b5452f; --no-soft: #fbe9e4; --warn: #b8730a; --warn-soft: #fff4dd;
+  --hint: #7a5cc4; --hint-soft: #efeafb;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; padding: 24px 16px 60px; color: var(--ink); background: var(--bg);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px; font: 16px/1.55 "Golos Text", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.wrap { max-width: 1280px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+h1 { margin: 0; font-size: clamp(1.5rem, 4vw, 2.1rem); line-height: 1.2; }
+h2 { margin: 0; font-size: 1.25rem; line-height: 1.3; }
+.lead { margin: 0; color: var(--muted); max-width: 80ch; }
+.tabs, .topics { display: flex; flex-wrap: wrap; gap: 6px; }
+.tab { font: 600 .95rem "Golos Text", sans-serif; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--paper); color: var(--ink); cursor: pointer; }
+.tab:hover, .tab:focus-visible { border-color: var(--accent); outline: none; }
+.tab[aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.tp { font: 600 .86rem "Golos Text", sans-serif; padding: 6px 11px; border-radius: 7px; border: 1px solid var(--line); background: var(--paper); color: var(--accent); cursor: pointer; }
+.tp:hover { border-color: var(--accent); }
+.tp.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.tp.done { border-color: var(--ok); color: var(--ok); background: var(--ok-soft); }
+.tp.on.done { background: var(--ok); color: #fff; }
+.sheet { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: clamp(14px, 3vw, 22px);
+  display: grid; grid-template-columns: minmax(0, 470px) minmax(0, 1fr); gap: 22px; align-items: start; }
+@media (max-width: 900px) { .sheet { grid-template-columns: minmax(0, 1fr); } }
+.colL { position: sticky; top: 12px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+@media (max-width: 900px) { .colL { position: static; } }
+.colR { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+svg.plane { width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 8px; background: #fff; touch-action: none; user-select: none; -webkit-user-select: none; }
+svg.plane.grab { cursor: grab; } svg.plane.dragging { cursor: grabbing; }
+.ctl { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.ctl label { display: inline-flex; gap: 8px; align-items: center; font-size: .92rem; color: var(--muted); }
+.ctl input[type="range"] { width: 180px; accent-color: var(--accent); }
+.btn { font: 600 .9rem "Golos Text", sans-serif; padding: 7px 13px; border-radius: 7px; border: 1px solid var(--accent); background: var(--paper); color: var(--accent); cursor: pointer; }
+.btn:hover, .btn:focus-visible { background: var(--accent-soft); outline: none; }
+.btn.main { background: var(--accent); color: #fff; }
+.btn.help { border-color: var(--hint); color: var(--hint); }
+.btn.help:hover { background: var(--hint-soft); }
+.btn.minor { border-color: var(--line); color: var(--ink); }
+.box { border-radius: 8px; padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
+.exp { border: 1.5px solid var(--q); background: #fffaf0; }
+.exp > b:first-child { color: var(--q); font-size: .8rem; letter-spacing: .05em; text-transform: uppercase; }
+.read { border: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.ok { background: var(--ok-soft); border-left: 3px solid var(--ok); }
+.no { background: var(--no-soft); border-left: 3px solid var(--no); }
+.warn { background: var(--warn-soft); border-left: 3px solid var(--warn); }
+.info { background: var(--accent-soft); border-left: 3px solid var(--accent); }
+.sum { border: 1.5px solid var(--ok); background: var(--ok-soft); }
+.sum > b:first-child { color: var(--ok); font-size: .8rem; letter-spacing: .05em; text-transform: uppercase; }
+ol.steps { margin: 0; padding-left: 1.4em; display: flex; flex-direction: column; gap: 8px; }
+ol.steps li.new { animation: appear .4s ease-out; }
+@keyframes appear { from { opacity: 0; transform: translateY(4px); } }
+@media (prefers-reduced-motion: reduce) { ol.steps li.new { animation: none; } }
+.m { font-family: "Times New Roman", Times, serif; font-size: 1.12em; white-space: nowrap; }
+.m i { font-style: italic; }
+.vec { position: relative; display: inline-block; font-style: italic; padding-top: .28em; line-height: 1; }
+.vec::before { content: ''; position: absolute; left: 6%; right: 2%; top: .08em; border-top: 1.4px solid currentColor; }
+.vec::after { content: ''; position: absolute; right: 0; top: -.08em; border: .17em solid transparent; border-left: .32em solid currentColor; border-right: 0; }
+.formula { font-family: "Times New Roman", Times, serif; font-size: 1.22em; padding: 6px 0; }
+.ans { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.ans input { width: 7.5em; font: 500 1.05rem "Golos Text", sans-serif; padding: 6px 9px; border: 1px solid var(--line); border-radius: 6px; }
+.ans input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.ans input.right { border-color: var(--ok); background: var(--ok-soft); }
+.ans input.wrong { border-color: var(--no); background: var(--no-soft); }
+.cond { font-size: 1.07rem; }
+.types { display: flex; flex-wrap: wrap; gap: 5px; }
+.types button { font: 500 .8rem "Golos Text", sans-serif; padding: 4px 9px; border-radius: 12px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer; }
+.types button.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+.stat { color: var(--muted); font-size: .88rem; }
+.hint { color: var(--muted); font-size: .88rem; margin: 0; }
+.plan { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 6px; }
+.lbl { font: italic 19px "Times New Roman", Times, serif; paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round; }
+.num { font: 12px "Golos Text", sans-serif; fill: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header style="display:flex;flex-direction:column;gap:10px">
+    <h1>Векторная лаборатория</h1>
+    <div class="tabs" role="tablist" id="parts"></div>
+    <div class="topics" id="topics"></div>
+  </header>
+  <section class="sheet">
+    <div class="colL">
+      <svg class="plane" id="plane" viewBox="0 0 456 456" role="img" aria-label="Координатная плоскость"></svg>
+      <p class="hint" id="planeHint"></p>
+      <div class="ctl" id="planeCtl"></div>
+    </div>
+    <div class="colR" id="right"></div>
+  </section>
+</div>
+
+<script>
+/*LOGIC-START*/
+var VEC = (function () {
+  /* ---------- числа ---------- */
+  function minus(s) { return String(s).replace(/-/g, '−'); }
+  function round(v, d) { var p = Math.pow(10, d || 6); return Math.round(v * p) / p; }
+  function fmt(v) { return minus(String(round(v, 6)).replace('.', ',')); }
+  function nice(v, d) { var p = Math.pow(10, d); return Math.abs(v * p - Math.round(v * p)) < 1e-7; }
+  function isSq(n) { var r = Math.round(Math.sqrt(n)); return r * r === n; }
+  /* √n в упрощённом виде: 2√13 */
+  function sqrtTxt(n) {
+    if (isSq(n)) return String(Math.round(Math.sqrt(n)));
+    var k = 1, m = n;
+    for (var d = 2; d * d <= m; d++) while (m % (d * d) === 0) { m /= d * d; k *= d; }
+    return (k > 1 ? k : '') + '√' + m;
+  }
+  /* разбор ответа: «−6,6», «1/2», «2√13», «√26» */
+  function parse(s) {
+    if (s == null) return NaN;
+    s = String(s).trim().replace(/\s+/g, '').replace(/−/g, '-').replace(/,/g, '.');
+    if (!s) return NaN;
+    var m = /^(-?)(\d*(?:\.\d+)?)?(?:√|sqrt)\(?(\d+(?:\.\d+)?)\)?$/.exec(s);
+    if (m) { var k = m[2] === undefined || m[2] === '' ? 1 : parseFloat(m[2]); return (m[1] ? -1 : 1) * k * Math.sqrt(parseFloat(m[3])); }
+    m = /^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/.exec(s);
+    if (m) return parseFloat(m[1]) / parseFloat(m[2]);
+    return /^-?\d*\.?\d+$/.test(s) ? parseFloat(s) : NaN;
+  }
+  function same(a, b) { return Math.abs(a - b) < 1e-6 * Math.max(1, Math.abs(b)); }
+
+  /* ---------- случайности ---------- */
+  var rnd = Math.random;
+  function setRnd(f) { rnd = f; }
+  function ri(a, b) { return a + Math.floor(rnd() * (b - a + 1)); }
+  function pick(arr) { return arr[Math.floor(rnd() * arr.length)]; }
+  function sg() { return rnd() < 0.5 ? -1 : 1; }
+  var TRIPLES = [[3, 4, 5], [6, 8, 10], [5, 12, 13], [8, 15, 17], [7, 24, 25], [9, 12, 15], [12, 16, 20], [20, 21, 29], [10, 24, 26], [9, 40, 41], [15, 20, 25], [12, 35, 37]];
+  function tripleVec(maxLeg) {
+    var t = pick(TRIPLES.filter(function (t) { return t[1] <= maxLeg; }));
+    var v = rnd() < 0.5 ? [t[0], t[1]] : [t[1], t[0]];
+    return { v: [v[0] * sg(), v[1] * sg()], len: t[2] };
+  }
+  function randVec(m) { var v; do { v = [ri(-m, m), ri(-m, m)]; } while (!v[0] && !v[1]); return v; }
+
+  /* ---------- запись ---------- */
+  function V(n) { return '<span class="vec">' + n + '</span>'; }
+  function co(v) { return '(' + fmt(v[0]) + '; ' + fmt(v[1]) + ')'; }
+  function M(s) { return '<span class="m">' + s + '</span>'; }
+  function P(n, p) { return '<i>' + n + '</i>' + co(p); }
+  function par(x) { return x < 0 ? '(' + fmt(x) + ')' : fmt(x); }
+  /* линейная комбинация: [[0.8,'a'],[-2.3,'b']] → «0,8a − 2,3b» */
+  function comb(terms) {
+    return terms.map(function (t, i) {
+      var c = t[0], s = c < 0 ? (i ? ' − ' : '−') : (i ? ' + ' : '');
+      var a = Math.abs(c);
+      return s + (a === 1 ? '' : fmt(a)) + V(t[1]);
+    }).join('');
+  }
+  function lin(terms, vecs) {
+    var x = 0, y = 0;
+    terms.forEach(function (t) { x += t[0] * vecs[t[1]][0]; y += t[0] * vecs[t[1]][1]; });
+    return [round(x, 6), round(y, 6)];
+  }
+  function dot(a, b) { return round(a[0] * b[0] + a[1] * b[1], 6); }
+  function len2(a) { return round(a[0] * a[0] + a[1] * a[1], 6); }
+  /* расстановка векторов рисунка: целые начала, всё помещается в [−8; 8], начала не совпадают */
+  function place(vecs) {
+    for (var tries = 0; tries < 400; tries++) {
+      var res = {}, ok = true, used = [];
+      Object.keys(vecs).forEach(function (k) {
+        var v = vecs[k], x0 = Math.max(-8, -8 - v[0]), x1 = Math.min(8, 8 - v[0]), y0 = Math.max(-8, -8 - v[1]), y1 = Math.min(8, 8 - v[1]);
+        if (x0 > x1 || y0 > y1) { ok = false; return; }
+        var s = [ri(x0, x1), ri(y0, y1)];
+        if (used.some(function (u) { return Math.abs(u[0] - s[0]) + Math.abs(u[1] - s[1]) < 3; })) ok = false;
+        used.push(s, [s[0] + v[0], s[1] + v[1]]);
+        res[k] = { s: s, v: v };
+      });
+      if (ok) return res;
+    }
+    return null;
+  }
+
+  /* =================== генераторы задач =================== */
+  var GEN = {};
+  GEN.len = { part: 1, name: 'длина по координатам', make: function () {
+    var t = rnd() < 0.12 ? { v: [sg() * ri(2, 15), 0], len: 0 } : tripleVec(24);
+    if (!t.len) { t.len = Math.abs(t.v[0]); if (rnd() < 0.5) t.v = [0, t.v[0]]; }
+    var a = t.v;
+    return { text: 'Найдите длину вектора ' + M(V('a') + co(a)) + '.', ans: t.len,
+      hint: 'Длина вектора: ' + M('|' + V('a') + '| = √(<i>x</i>² + <i>y</i>²)') + '.',
+      sol: [M('|' + V('a') + '| = √(' + par(a[0]) + '² + ' + par(a[1]) + '²) = √' + len2(a) + ' = ' + t.len)] };
+  } };
+  GEN.ABc = { part: 1, name: 'координаты вектора по точкам', make: function () {
+    var A = [ri(-9, 9), ri(-9, 9)], B;
+    do { B = [ri(-9, 9), ri(-9, 9)]; } while (B[0] === A[0] && B[1] === A[1]);
+    var v = [B[0] - A[0], B[1] - A[1]];
+    return { text: 'Найдите координаты вектора ' + M(V('AB')) + ', где ' + M(P('A', A)) + ' и ' + M(P('B', B)) + '.', pair: v,
+      hint: 'Из координат конца вычитаем координаты начала.',
+      sol: [M(V('AB') + ' = (<i>x<sub>B</sub></i> − <i>x<sub>A</sub></i>; <i>y<sub>B</sub></i> − <i>y<sub>A</sub></i>) = (' + fmt(B[0]) + ' − ' + par(A[0]) + '; ' + fmt(B[1]) + ' − ' + par(A[1]) + ') = ' + co(v))] };
+  } };
+  GEN.ABl = { part: 1, name: 'длина вектора по точкам', make: function () {
+    var t = tripleVec(12), A, B;
+    do { A = [ri(-9, 9), ri(-9, 9)]; B = [A[0] + t.v[0], A[1] + t.v[1]]; } while (Math.abs(B[0]) > 12 || Math.abs(B[1]) > 12);
+    return { text: 'Найдите длину вектора ' + M(V('AB')) + ', где ' + M(P('A', A)) + ' и ' + M(P('B', B)) + '.', ans: t.len,
+      hint: 'Сначала найдите координаты вектора: конец минус начало. Потом длину по Пифагору.',
+      sol: [M(V('AB') + ' = ' + co(t.v)), M('|' + V('AB') + '| = √(' + par(t.v[0]) + '² + ' + par(t.v[1]) + '²) = √' + len2(t.v) + ' = ' + t.len)] };
+  } };
+  function picVecs(names, maker) {
+    for (var i = 0; i < 300; i++) {
+      var vs = {}; names.forEach(function (n) { vs[n] = maker(n); });
+      var pl = place(vs);
+      if (pl) return pl;
+    }
+    return null;
+  }
+  GEN.picC = { part: 1, name: 'координаты по рисунку', pic: true, make: function () {
+    var pl = picVecs(['a', 'b'], function () { return randVec(6); }), k = pick(['a', 'b']), v = pl[k].v;
+    return { text: 'На координатной плоскости изображены векторы ' + M(V('a')) + ' и ' + M(V('b')) + '. Найдите координаты вектора ' + M(V(k)) + '.', pair: v, pic: pl,
+      hint: 'Посчитайте клетки от начала стрелки до её конца: сколько вправо (или влево, со знаком минус) и сколько вверх (или вниз).',
+      sol: ['Начало ' + M(V(k)) + ' в точке ' + M(co(pl[k].s)) + ', конец в точке ' + M(co([pl[k].s[0] + v[0], pl[k].s[1] + v[1]])) + '.', 'Конец минус начало: ' + M(V(k) + ' = ' + co(v)) + '.'] };
+  } };
+  GEN.picL = { part: 1, name: 'длина по рисунку', pic: true, make: function () {
+    var k = pick(['a', 'b']), t;
+    var pl = picVecs(['a', 'b'], function (n) { if (n === k) { t = rnd() < 0.15 ? { v: [0, sg() * ri(3, 8)], len: 0 } : tripleVec(8); if (!t.len) t.len = Math.abs(t.v[1]); return t.v; } return randVec(6); });
+    var v = pl[k].v;
+    return { text: 'На координатной плоскости изображены векторы ' + M(V('a')) + ' и ' + M(V('b')) + '. Найдите длину вектора ' + M(V(k)) + '.', ans: t.len, pic: pl,
+      hint: 'Найдите координаты по клеткам, потом длину по Пифагору.',
+      sol: [M(V(k) + ' = ' + co(v)), M('|' + V(k) + '| = √(' + par(v[0]) + '² + ' + par(v[1]) + '²) = ' + t.len)] };
+  } };
+  GEN.param = { part: 1, name: 'неизвестная координата по длине', make: function () {
+    for (var i = 0; i < 500; i++) {
+      var a = [ri(-6, 6), ri(-6, 6)], k = pick([1.5, 2, 2.5, 3, 0.5]), m = ri(-9, 9);
+      if (!a[0] || !a[1]) continue;
+      var b2 = k * k * len2(a) - m * m;
+      if (b2 <= 0) continue;
+      var b0 = Math.sqrt(b2);
+      if (!nice(b0 * 2, 0) || b0 < 0.5) continue;
+      b0 = round(b0, 6);
+      return { text: 'Даны векторы ' + M(V('a') + co(a)) + ' и ' + M(V('b') + '(<i>b</i><sub>0</sub>; ' + fmt(m) + ')') + '. Найдите ' + M('<i>b</i><sub>0</sub>') + ', если ' + M('|' + V('b') + '| = ' + fmt(k) + '|' + V('a') + '|') + '. Если таких значений несколько, в ответ запишите большее из них.', ans: b0,
+        hint: 'Возведите условие в квадрат: ' + M('|' + V('b') + '|² = ' + fmt(k * k) + '|' + V('a') + '|²') + '.',
+        sol: [M('|' + V('a') + '|² = ' + par(a[0]) + '² + ' + par(a[1]) + '² = ' + len2(a)), M('|' + V('b') + '|² = ' + fmt(k) + '² · ' + len2(a) + ' = ' + fmt(k * k * len2(a))),
+          M('<i>b</i><sub>0</sub>² + ' + par(m) + '² = ' + fmt(k * k * len2(a))) + ', ' + M('<i>b</i><sub>0</sub>² = ' + fmt(b2)) + ', ' + M('<i>b</i><sub>0</sub> = ±' + fmt(b0)) + '.', 'Большее значение: ' + M(fmt(b0)) + '.'] };
+    }
+  } };
+  var COEF = [2, 3, -2, -3, 0.5, -0.5, 0.2, -0.2, 2.5, 1.5, 4, -5, 6, -1, 1];
+  GEN.comb = { part: 1, name: 'сумма координат комбинации', make: function () {
+    for (var i = 0; i < 500; i++) {
+      var f = [ri(-12, 12) * pick([1, 0.5]), ri(-12, 12) * pick([1, 0.5])], e = [ri(-15, 15), ri(-15, 15)];
+      var al = pick(COEF), be = pick(COEF), g = lin([[al, 'f'], [be, 'e']], { f: f, e: e });
+      if (!nice(g[0], 2) || !nice(g[1], 2) || Math.abs(g[0] + g[1]) > 200) continue;
+      var k = rnd() < 0.3 ? pick([3, 2, 0.5]) : 1;
+      var sumv = round((g[0] + g[1]) * (k === 1 ? 1 : 1), 6);
+      var lhs = k === 1 ? V('g') : (k === 0.5 ? '2' : '1/' + k) + V('g');
+      var gg = k === 1 ? g : [round(g[0] * (k === 0.5 ? 0.5 : k), 6), round(g[1] * (k === 0.5 ? 0.5 : k), 6)];
+      if (k !== 1 && (!nice(gg[0], 2) || !nice(gg[1], 2))) continue;
+      sumv = round(gg[0] + gg[1], 6);
+      var sol = [M(comb([[al, 'f'], [be, 'e']]) + ' = (' + fmt(al) + ' · ' + par(f[0]) + ' + ' + par(be) + ' · ' + par(e[0]) + '; ' + fmt(al) + ' · ' + par(f[1]) + ' + ' + par(be) + ' · ' + par(e[1]) + ') = ' + co(g))];
+      if (k !== 1) sol.push('Тогда ' + M(V('g') + ' = ' + (k === 0.5 ? '½' : k) + ' · ' + co(g) + ' = ' + co(gg)) + '.');
+      sol.push('Сумма координат: ' + M(fmt(gg[0]) + ' + ' + par(gg[1]) + ' = ' + fmt(sumv)) + '.');
+      return { text: 'Даны векторы ' + M(V('f') + co(f)) + ' и ' + M(V('e') + co(e)) + '. Найдите координаты вектора ' + M(V('g')) + ', если ' + M(lhs + ' = ' + comb([[al, 'f'], [be, 'e']])) + '. В ответ запишите сумму координат вектора ' + M(V('g')) + '.', ans: sumv,
+        hint: 'Умножаем на число — каждую координату; складываем векторы — координаты по отдельности.', sol: sol };
+    }
+  } };
+  function combLenTask(pic) {
+    for (var i = 0; i < 3000; i++) {
+      var names = rnd() < 0.5 ? ['a', 'b'] : ['a', 'b', 'c'];
+      var vs = {}; names.forEach(function (n) { vs[n] = pic ? randVec(6) : [ri(-14, 14), ri(-14, 14)]; });
+      var terms = names.map(function (n) { return [pic ? pick([1, -1, 2, -2, 1, 1]) : pick([1, -1, 2, -2, 0.8, -2.3, 3, 1, -1]), n]; });
+      var r = lin(terms, vs), L2 = len2(r);
+      if (!L2 || !nice(Math.sqrt(L2), 1) || r[0] === 0 || r[1] === 0) continue;
+      var L = round(Math.sqrt(L2), 6);
+      var pl = pic ? place(vs) : null;
+      if (pic && !pl) continue;
+      var given = pic ? 'На координатной плоскости изображены векторы ' + names.map(function (n) { return M(V(n)); }).join(', ').replace(/, ([^,]*)$/, ' и $1') + '.' :
+        'Даны векторы ' + names.map(function (n) { return M(V(n) + co(vs[n])); }).join(', ').replace(/, ([^,]*)$/, ' и $1') + '.';
+      var sol = [];
+      if (pic) sol.push('По клеткам: ' + names.map(function (n) { return M(V(n) + ' = ' + co(vs[n])); }).join(', ') + '.');
+      sol.push(M(comb(terms) + ' = ' + co(r)));
+      sol.push(M('|' + comb(terms) + '| = √(' + par(r[0]) + '² + ' + par(r[1]) + '²) = √' + fmt(L2) + ' = ' + fmt(L)));
+      return { text: given + ' Найдите длину вектора ' + M(comb(terms)) + '.', ans: L, pic: pl,
+        hint: 'Сначала найдите координаты вектора ' + M(comb(terms)) + ', потом его длину.', sol: sol };
+    }
+  }
+  GEN.combLen = { part: 1, name: 'длина комбинации', make: function () { return combLenTask(false); } };
+  GEN.picCombLen = { part: 1, name: 'длина комбинации по рисунку', pic: true, make: function () { return combLenTask(true); } };
+
+  /* ---- часть 2 ---- */
+  GEN.dot = { part: 2, name: 'скалярное по координатам', make: function () {
+    var a = [ri(-15, 15), ri(-15, 15)], b = [ri(-15, 15), ri(-15, 15)];
+    return { text: 'Даны векторы ' + M(V('a') + co(a)) + ' и ' + M(V('b') + co(b)) + '. Найдите скалярное произведение ' + M(V('a') + ' · ' + V('b')) + '.', ans: dot(a, b),
+      hint: M(V('a') + ' · ' + V('b') + ' = <i>x</i><sub>1</sub><i>x</i><sub>2</sub> + <i>y</i><sub>1</sub><i>y</i><sub>2</sub>'),
+      sol: [M(V('a') + ' · ' + V('b') + ' = ' + par(a[0]) + ' · ' + par(b[0]) + ' + ' + par(a[1]) + ' · ' + par(b[1]) + ' = ' + fmt(dot(a, b)))] };
+  } };
+  GEN.dotPic = { part: 2, name: 'скалярное по рисунку', pic: true, make: function () {
+    var pl = picVecs(['a', 'b'], function () { return randVec(7); }), a = pl.a.v, b = pl.b.v;
+    return { text: 'На координатной плоскости изображены векторы ' + M(V('a')) + ' и ' + M(V('b')) + '. Найдите скалярное произведение ' + M(V('a') + ' · ' + V('b')) + '.', ans: dot(a, b), pic: pl,
+      hint: 'Найдите координаты векторов по клеткам, потом перемножьте соответствующие координаты и сложите.',
+      sol: ['По клеткам: ' + M(V('a') + ' = ' + co(a)) + ', ' + M(V('b') + ' = ' + co(b)) + '.', M(V('a') + ' · ' + V('b') + ' = ' + par(a[0]) + ' · ' + par(b[0]) + ' + ' + par(a[1]) + ' · ' + par(b[1]) + ' = ' + fmt(dot(a, b)))] };
+  } };
+  GEN.dotScaled = { part: 2, name: 'скалярное: 3a и 4b', make: function () {
+    for (var i = 0; i < 300; i++) {
+      var a = [ri(-30, 30) / 10, ri(-8, 8)], b = [ri(-20, 20) / 4, ri(-6, 6)], p = pick([2, 3, 4, 5]), q = pick([2, 3, 4, 5]);
+      var d = round(p * q * dot(a, b), 6);
+      if (!nice(d, 1) || !d) continue;
+      return { text: 'Даны векторы ' + M(V('a') + ' ' + co(a)) + ' и ' + M(V('b') + ' ' + co(b)) + '. Найдите скалярное произведение векторов ' + M(p + V('a')) + ' и ' + M(q + V('b')) + '.', ans: d,
+        hint: 'Множители можно вынести: ' + M('(' + p + V('a') + ') · (' + q + V('b') + ') = ' + p * q + ' · (' + V('a') + ' · ' + V('b') + ')') + '.',
+        sol: [M(V('a') + ' · ' + V('b') + ' = ' + par(a[0]) + ' · ' + par(b[0]) + ' + ' + par(a[1]) + ' · ' + par(b[1]) + ' = ' + fmt(dot(a, b))), M('(' + p + V('a') + ') · (' + q + V('b') + ') = ' + p * q + ' · ' + par(dot(a, b)) + ' = ' + fmt(d))] };
+    }
+  } };
+  function exprTask(pic) {
+    var forms = [['(', 'a', '−', 'b', ')', 'c'], ['(', 'a', '+', 'b', ')', 'c'], ['a', '(', 'b', '+', 'c', ')'], ['(', 'b', '−', 'a', ')', 'c']];
+    var f = pick(forms), vs = {}, pl = null;
+    if (pic) { pl = picVecs(['a', 'b', 'c'], function () { return randVec(6); }); ['a', 'b', 'c'].forEach(function (n) { vs[n] = pl[n].v; }); }
+    else ['a', 'b', 'c'].forEach(function (n) { vs[n] = [ri(-9, 9), ri(-9, 9)]; });
+    var inner, outer, txt;
+    if (f[0] === 'a') { inner = lin([[1, 'b'], [1, 'c']], vs); outer = vs.a; txt = V('a') + ' · (' + V('b') + ' + ' + V('c') + ')'; }
+    else { var s1 = f[2] === '−' ? -1 : 1; inner = lin([[1, f[1]], [s1, f[3]]], vs); outer = vs.c; txt = '(' + V(f[1]) + ' ' + f[2] + ' ' + V(f[3]) + ') · ' + V('c'); }
+    var d = dot(inner, outer);
+    var sol = [];
+    if (pic) sol.push('По клеткам: ' + ['a', 'b', 'c'].map(function (n) { return M(V(n) + ' = ' + co(vs[n])); }).join(', ') + '.');
+    sol.push('Вектор в скобках: ' + M(co(inner)) + '.');
+    sol.push(M(txt + ' = ' + par(inner[0]) + ' · ' + par(outer[0]) + ' + ' + par(inner[1]) + ' · ' + par(outer[1]) + ' = ' + fmt(d)));
+    return { text: (pic ? 'На координатной плоскости изображены векторы ' + M(V('a')) + ', ' + M(V('b')) + ' и ' + M(V('c')) + '.' : 'Даны векторы ' + M(V('a') + co(vs.a)) + ', ' + M(V('b') + co(vs.b)) + ' и ' + M(V('c') + co(vs.c)) + '.') + ' Найдите скалярное произведение ' + M(txt) + '.', ans: d, pic: pl,
+      hint: 'Сначала найдите координаты вектора в скобках, потом скалярное произведение.', sol: sol };
+  }
+  GEN.dotExpr = { part: 2, name: 'скалярное со скобками', make: function () { return exprTask(false); } };
+  GEN.dotExprPic = { part: 2, name: 'скалярное со скобками по рисунку', pic: true, make: function () { return exprTask(true); } };
+  GEN.dot4 = { part: 2, name: '(m ± n) · (k + p)', make: function () {
+    var vs = { m: [ri(-9, 9), ri(-9, 9)], n: [ri(-9, 9), ri(-9, 9)], k: [ri(-11, 11), ri(-9, 9)], p: [ri(-9, 9), ri(-9, 9)] }, s = sg();
+    var u = lin([[1, 'm'], [s, 'n']], vs), w = lin([[1, 'k'], [1, 'p']], vs), d = dot(u, w);
+    var t1 = '(' + V('m') + (s > 0 ? ' + ' : ' − ') + V('n') + ')', t2 = '(' + V('k') + ' + ' + V('p') + ')';
+    return { text: 'Даны векторы ' + M(V('m') + co(vs.m)) + ', ' + M(V('n') + co(vs.n)) + ', ' + M(V('k') + co(vs.k)) + ' и ' + M(V('p') + co(vs.p)) + '. Найдите скалярное произведение ' + M(t1 + ' · ' + t2) + '.', ans: d,
+      hint: 'Найдите координаты каждой скобки отдельно.',
+      sol: [M(t1 + ' = ' + co(u)) + ', ' + M(t2 + ' = ' + co(w)) + '.', M(par(u[0]) + ' · ' + par(w[0]) + ' + ' + par(u[1]) + ' · ' + par(w[1]) + ' = ' + fmt(d))] };
+  } };
+  GEN.perp = { part: 2, name: 'неизвестная координата: скалярное = 0', make: function () {
+    for (var i = 0; i < 500; i++) {
+      var vs = { m: [ri(-8, 8), ri(-8, 8)], n: [ri(-8, 8), ri(-8, 8)] }, s = sg(), u = lin([[1, 'm'], [s, 'n']], vs);
+      var askX = rnd() < 0.6, known = ri(-6, 6);
+      if (!known) continue;
+      var c0 = askX ? -u[1] * known / u[0] : -u[0] * known / u[1];
+      if (!isFinite(c0) || !nice(c0, 2) || Math.abs(c0) > 30) continue;
+      c0 = round(c0, 6);
+      var kk = askX ? '(<i>x</i>; ' + fmt(known) + ')' : '(' + fmt(known) + '; <i>y</i>)', un = askX ? '<i>x</i>' : '<i>y</i>';
+      var t1 = '(' + V('m') + (s > 0 ? ' + ' : ' − ') + V('n') + ')';
+      return { text: 'Даны векторы ' + M(V('m') + co(vs.m)) + ', ' + M(V('n') + co(vs.n)) + ' и ' + M(V('k') + kk) + '. Найдите ' + M(un) + ', если ' + M(t1 + ' · ' + V('k') + ' = 0') + '.', ans: c0,
+        hint: 'Найдите координаты скобки, запишите скалярное произведение через ' + M(un) + ' и приравняйте к нулю.',
+        sol: [M(t1 + ' = ' + co(u)), askX ? M(par(u[0]) + '<i>x</i> + ' + par(u[1]) + ' · ' + par(known) + ' = 0') : M(par(u[0]) + ' · ' + par(known) + ' + ' + par(u[1]) + '<i>y</i> = 0'), M(un + ' = ' + fmt(c0))] };
+    }
+  } };
+  GEN.angLen = { part: 2, name: 'скалярное через длины и угол', make: function () {
+    var ang = pick([60, 120, 45, 135, 30, 150]), p = ri(2, 9), q = ri(2, 9), A, Atxt, d, cs;
+    if (ang === 60 || ang === 120) { A = p; Atxt = String(p); d = p * q / 2 * (ang === 60 ? 1 : -1); cs = ang === 60 ? '1/2' : '−1/2'; }
+    else if (ang === 45 || ang === 135) { Atxt = p + '√2'; d = p * q * (ang === 45 ? 1 : -1); cs = ang === 45 ? '√2/2' : '−√2/2'; }
+    else { Atxt = p + '√3'; d = 1.5 * p * q * (ang === 30 ? 1 : -1); cs = ang === 30 ? '√3/2' : '−√3/2'; }
+    return { text: 'Длины векторов ' + M(V('a')) + ' и ' + M(V('b')) + ' равны ' + M(Atxt) + ' и ' + M(q) + ', а угол между ними равен ' + M(ang + '°') + '. Найдите скалярное произведение ' + M(V('a') + ' · ' + V('b')) + '.', ans: d,
+      hint: M(V('a') + ' · ' + V('b') + ' = |' + V('a') + '| · |' + V('b') + '| · cos φ'),
+      sol: ['cos ' + ang + '° = ' + M(cs) + '.', M(V('a') + ' · ' + V('b') + ' = ' + Atxt + ' · ' + q + ' · ' + (cs[0] === '−' ? '(' + cs + ')' : cs) + ' = ' + fmt(d))] };
+  } };
+  GEN.lenFromDot = { part: 2, name: 'длина по скалярному и углу', make: function () {
+    var ang = pick([45, 60, 30]), p = ri(2, 6), q = ri(2, 12), Atxt, d, cs;
+    if (ang === 45) { Atxt = p + '√2'; d = p * q; cs = '√2/2'; }
+    else if (ang === 60) { Atxt = String(p); d = p * q / 2; cs = '1/2'; }
+    else { Atxt = p + '√3'; d = 1.5 * p * q; cs = '√3/2'; }
+    return { text: 'Длина вектора ' + M(V('a')) + ' равна ' + M(Atxt) + ', угол между векторами ' + M(V('a')) + ' и ' + M(V('b')) + ' равен ' + M(ang + '°') + ', а скалярное произведение ' + M(V('a') + ' · ' + V('b')) + ' равно ' + M(fmt(d)) + '. Найдите длину вектора ' + M(V('b')) + '.', ans: q,
+      hint: 'Подставьте всё известное в ' + M(V('a') + ' · ' + V('b') + ' = |' + V('a') + '| · |' + V('b') + '| · cos φ') + ' и выразите ' + M('|' + V('b') + '|') + '.',
+      sol: [M(fmt(d) + ' = ' + Atxt + ' · |' + V('b') + '| · ' + cs), M('|' + V('b') + '| = ' + fmt(d) + ' : (' + Atxt + ' · ' + cs + ') = ' + q)] };
+  } };
+  function cosTask(pic) {
+    for (var i = 0; i < 2000; i++) {
+      var t1 = tripleVec(pic ? 8 : 60), t2 = tripleVec(pic ? 8 : 60);
+      if (!pic && rnd() < 0.3) { var s = sg() * ri(1, 12); t2 = rnd() < 0.5 ? { v: [0, s], len: Math.abs(s) } : { v: [s, 0], len: Math.abs(s) }; }
+      var d = dot(t1.v, t2.v), c = d / (t1.len * t2.len);
+      if (!nice(c, 2) || Math.abs(c) > 0.995 || !c) continue;
+      var vs = { p: t1.v, q: t2.v }, pl = null;
+      if (pic) { pl = place({ a: t1.v, b: t2.v }); if (!pl) continue; }
+      var nA = pic ? 'a' : 'p', nB = pic ? 'b' : 'q';
+      var sol = [];
+      if (pic) sol.push('По клеткам: ' + M(V('a') + ' = ' + co(t1.v)) + ', ' + M(V('b') + ' = ' + co(t2.v)) + '.');
+      sol.push(M(V(nA) + ' · ' + V(nB) + ' = ' + par(t1.v[0]) + ' · ' + par(t2.v[0]) + ' + ' + par(t1.v[1]) + ' · ' + par(t2.v[1]) + ' = ' + fmt(d)));
+      sol.push(M('|' + V(nA) + '| = ' + t1.len) + ', ' + M('|' + V(nB) + '| = ' + t2.len) + '.');
+      sol.push(M('cos φ = ' + fmt(d) + ' / (' + t1.len + ' · ' + t2.len + ') = ' + fmt(round(c, 6))));
+      return { text: pic ? 'На координатной плоскости изображены векторы ' + M(V('a')) + ' и ' + M(V('b')) + '. Найдите ' + M('cos α') + ', где ' + M('α') + ' — угол между векторами ' + M(V('a')) + ' и ' + M(V('b')) + '.' :
+        'Найдите косинус угла между векторами ' + M(V('p')) + ' и ' + M(V('q')) + ', если ' + M(V('p') + co(t1.v)) + ' и ' + M(V('q') + co(t2.v)) + '.', ans: round(c, 6), pic: pl,
+        hint: M('cos φ = (' + V(nA) + ' · ' + V(nB) + ') / (|' + V(nA) + '| · |' + V(nB) + '|)'), sol: sol };
+    }
+  }
+  GEN.cos = { part: 2, name: 'косинус угла по координатам', make: function () { return cosTask(false); } };
+  GEN.cosPic = { part: 2, name: 'косинус угла по рисунку', pic: true, make: function () { return cosTask(true); } };
+  GEN.combLen2 = { part: 2, name: 'длина комбинации через скалярный квадрат', make: function () {
+    var FR = [[1, '1'], [2, '2'], [3, '3'], [0.5, '1/2'], [1 / 3, '1/3'], [0.25, '1/4']];
+    for (var i = 0; i < 3000; i++) {
+      var A = ri(2, 16), B = ri(2, 16) * pick([1, 1, 3, 4, 6]), al = pick([[1, '1'], [2, '2'], [3, '3']]), be = pick(FR);
+      var S = ri(2, 90), D = (S * S - al[0] * al[0] * A * A - be[0] * be[0] * B * B) / (2 * al[0] * be[0]);
+      if (!nice(D, 0) || !D || Math.abs(D) >= 0.95 * A * B) continue;
+      D = Math.round(D);
+      var cT = (al[0] === 1 ? '' : al[1]) + V('a') + ' + ' + (be[0] === 1 ? '' : be[1]) + V('b');
+      return { text: 'Длины векторов ' + M(V('a')) + ' и ' + M(V('b')) + ' равны соответственно ' + M(A) + ' и ' + M(B) + ', а их скалярное произведение равно ' + M(fmt(D)) + '. Найдите длину вектора ' + M(V('c')) + ', если ' + M(V('c') + ' = ' + cT) + '.', ans: S,
+        hint: 'Скалярный квадрат: ' + M('|' + V('c') + '|² = ' + V('c') + ' · ' + V('c')) + '. Раскройте скобки, как при возведении суммы в квадрат.',
+        sol: [M('|' + V('c') + '|² = (' + cT + ')² = ' + (al[0] === 1 ? '' : fmt(al[0] * al[0]) + '·') + '|' + V('a') + '|² + 2 · ' + fmt(round(al[0] * be[0], 6)) + ' · ' + V('a') + ' · ' + V('b') + ' + ' + (be[0] === 1 ? '' : be[1] + '² · ') + '|' + V('b') + '|²'),
+          M('= ' + fmt(al[0] * al[0] * A * A) + ' + ' + par(round(2 * al[0] * be[0] * D, 6)) + ' + ' + fmt(round(be[0] * be[0] * B * B, 6)) + ' = ' + S * S), M('|' + V('c') + '| = ' + S)] };
+    }
+  } };
+  GEN.tri = { part: 2, name: 'векторы в треугольнике', make: function () {
+    var kind = ri(1, 4);
+    if (kind === 1) {
+      var h, n, m;
+      do { h = ri(5, 17); n = ri(2, h - 1); m = h * h - n * n; } while (isSq(m));
+      return { text: 'В прямоугольном треугольнике ' + M('<i>ABC</i>') + ' с прямым углом ' + M('<i>C</i>') + ' известно, что ' + M('<i>AC</i> = ' + sqrtTxt(m)) + ', ' + M('<i>CB</i> = ' + n) + '. Найдите длину разности векторов ' + M(V('CA')) + ' и ' + M(V('CB')) + '.', ans: h,
+        hint: 'Разность векторов с общим началом идёт из конца вычитаемого в конец уменьшаемого.',
+        sol: [M(V('CA') + ' − ' + V('CB') + ' = ' + V('BA')) + ', поэтому нужна длина ' + M('<i>AB</i>') + '.', M('<i>AB</i> = √(<i>AC</i>² + <i>CB</i>²) = √(' + m + ' + ' + n * n + ') = ' + h)] };
+    }
+    if (kind === 2) {
+      var s = ri(3, 15) * pick([1, 2]);
+      return { text: 'В треугольнике ' + M('<i>ABC</i>') + ' известно, что стороны ' + M('<i>AB</i>') + ' и ' + M('<i>BC</i>') + ' равны ' + M(s) + ', а угол ' + M('<i>BAC</i>') + ' равен ' + M('30°') + '. Найдите длину суммы векторов ' + M(V('BA')) + ' и ' + M(V('BC')) + '.', ans: s,
+        hint: 'Сумма векторов с общим началом — диагональ параллелограмма, она вдвое длиннее медианы ' + M('<i>BM</i>') + '.',
+        sol: [M(V('BA') + ' + ' + V('BC') + ' = 2' + V('BM')) + ', где ' + M('<i>M</i>') + ' — середина ' + M('<i>AC</i>') + '.', 'Треугольник равнобедренный, ' + M('<i>BM</i>') + ' — высота: ' + M('<i>BM</i> = <i>AB</i> · sin 30° = ' + fmt(s / 2)) + '.', 'Ответ: ' + M('2 · ' + fmt(s / 2) + ' = ' + s) + '.'] };
+    }
+    if (kind === 3) {
+      var p = ri(2, 9), r3 = rnd() < 0.6, side = r3 ? p + '√3' : String(p), d = r3 ? 1.5 * p * p : p * p / 2;
+      return { text: 'Сторона равностороннего треугольника ' + M('<i>ABC</i>') + ' равна ' + M(side) + '. Найдите скалярное произведение векторов ' + M(V('AB')) + ' и ' + M(V('AC')) + '.', ans: d,
+        hint: 'Угол между векторами с общим началом ' + M('<i>A</i>') + ' — это угол треугольника.',
+        sol: ['Угол между ' + M(V('AB')) + ' и ' + M(V('AC')) + ' равен ' + M('60°') + '.', M(V('AB') + ' · ' + V('AC') + ' = ' + side + ' · ' + side + ' · 1/2 = ' + fmt(d))] };
+    }
+    var k = ri(2, 10), neg = rnd() < 0.5;
+    return { text: 'В равнобедренном прямоугольном треугольнике ' + M('<i>ABC</i>') + ' с прямым углом ' + M('<i>C</i>') + ' известно, что ' + M('<i>AB</i> = ' + k + '√2') + '. Найдите скалярное произведение векторов ' + M(V('AB')) + ' и ' + M(V(neg ? 'CA' : 'AC')) + '.', ans: neg ? -k * k : k * k,
+      hint: neg ? 'Векторы ' + M(V('AB')) + ' и ' + M(V('CA')) + ' выходят не из одной точки. Отложите их от одной точки: какой получится угол?' : 'Угол между ' + M(V('AB')) + ' и ' + M(V('AC')) + ' — это угол ' + M('<i>A</i>') + ' треугольника.',
+      sol: ['Катеты: ' + M('<i>AC</i> = <i>BC</i> = ' + k) + ', угол ' + M('<i>A</i> = 45°') + '.', neg ? 'Угол между ' + M(V('AB')) + ' и ' + M(V('CA')) + ' равен ' + M('180° − 45° = 135°') + '.' : 'Угол между векторами ' + M('45°') + '.',
+        M(V('AB') + ' · ' + V(neg ? 'CA' : 'AC') + ' = ' + k + '√2 · ' + k + ' · ' + (neg ? '(−√2/2)' : '√2/2') + ' = ' + (neg ? '−' : '') + k * k)] };
+  } };
+
+  return { GEN: GEN, parse: parse, same: same, fmt: fmt, co: co, V: V, M: M, sqrtTxt: sqrtTxt, setRnd: setRnd, dot: dot, len2: len2, round: round, minus: minus };
+})();
+/*LOGIC-END*/
+
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var NS = 'http://www.w3.org/2000/svg', svg = $('plane'), W = 456, SC = 24, O = 228;
+  var V = VEC.V, M = VEC.M, co = VEC.co, fmt = VEC.fmt;
+  var C = { a: 'var(--va)', b: 'var(--vb)', c: 'var(--vc)', r: 'var(--vr)', q: 'var(--q)', ink: 'var(--ink)', muted: 'var(--muted)', ok: 'var(--ok)', no: 'var(--no)' };
+
+  var S = { part: 1, topic: { 1: '1.1', 2: '2.1', 3: '3.0' }, st: {}, step: {}, expOk: {}, types: { 1: 'all', 2: 'all' }, solved: {} };
+  try { var sv = JSON.parse(localStorage.getItem('vector-lab') || 'null'); if (sv) for (var k in sv) if (k in S) S[k] = sv[k]; } catch (e) {}
+  function save() { try { localStorage.setItem('vector-lab', JSON.stringify(S)); } catch (e) {} }
+
+  /* ---------- плоскость ---------- */
+  function sp(p) { return [O + p[0] * SC, O - p[1] * SC]; }
+  function el(tag, at, parent, text) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in at) e.setAttribute(k, at[k]);
+    if (text != null) e.textContent = text;
+    (parent || svg).appendChild(e);
+    return e;
+  }
+  function grid() {
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    for (var i = -9; i <= 9; i++) {
+      var a = sp([i, -9.5]), b = sp([i, 9.5]), c = sp([-9.5, i]), d = sp([9.5, i]);
+      el('line', { x1: a[0], y1: a[1], x2: b[0], y2: b[1], stroke: '#e3eaf0', 'stroke-width': 1 });
+      el('line', { x1: c[0], y1: c[1], x2: d[0], y2: d[1], stroke: '#e3eaf0', 'stroke-width': 1 });
+    }
+    var x0 = sp([-9.5, 0]), x1 = sp([9.5, 0]), y0 = sp([0, -9.5]), y1 = sp([0, 9.5]);
+    el('line', { x1: x0[0], y1: x0[1], x2: x1[0], y2: x1[1], stroke: '#8a99a5', 'stroke-width': 1.3 });
+    el('line', { x1: y0[0], y1: y0[1], x2: y1[0], y2: y1[1], stroke: '#8a99a5', 'stroke-width': 1.3 });
+    for (i = -8; i <= 8; i += 2) if (i) {
+      var p = sp([i, 0]), q = sp([0, i]);
+      el('text', { x: p[0], y: p[1] + 14, 'class': 'num', 'text-anchor': 'middle' }, svg, VEC.minus(i));
+      el('text', { x: q[0] - 5, y: q[1] + 4, 'class': 'num', 'text-anchor': 'end' }, svg, VEC.minus(i));
+    }
+    var o = sp([0, 0]);
+    el('text', { x: o[0] - 5, y: o[1] + 14, 'class': 'num', 'text-anchor': 'end' }, svg, '0');
+    el('text', { x: x1[0] - 4, y: x1[1] - 6, 'class': 'lbl', 'text-anchor': 'end', fill: '#8a99a5' }, svg, 'x');
+    el('text', { x: y1[0] + 7, y: y1[1] + 14, 'class': 'lbl', fill: '#8a99a5' }, svg, 'y');
+  }
+  function arrow(p, q, col, opt) {
+    opt = opt || {};
+    var A = sp(p), B = sp(q), dx = B[0] - A[0], dy = B[1] - A[1], l = Math.hypot(dx, dy);
+    if (l < 1) return;
+    var ux = dx / l, uy = dy / l, h = opt.head || 11, w = opt.w || 2.6;
+    var at = { x1: A[0], y1: A[1], x2: B[0] - ux * h * 0.7, y2: B[1] - uy * h * 0.7, stroke: col, 'stroke-width': w, 'stroke-linecap': 'round' };
+    if (opt.dash) at['stroke-dasharray'] = '6 5';
+    if (opt.op) at.opacity = opt.op;
+    el('line', at);
+    var hd = el('path', { d: 'M' + B[0] + ' ' + B[1] + 'L' + (B[0] - ux * h - uy * h * 0.42) + ' ' + (B[1] - uy * h + ux * h * 0.42) + 'L' + (B[0] - ux * h + uy * h * 0.42) + ' ' + (B[1] - uy * h - ux * h * 0.42) + 'Z', fill: col });
+    if (opt.op) hd.setAttribute('opacity', opt.op);
+    if (opt.label) vlabel(p, q, opt.label, col, opt.side || 1, opt.plain, opt.off);
+  }
+  /* подпись вектора со стрелочкой над буквой, у середины, сбоку */
+  function vlabel(p, q, txt, col, side, plain, off) {
+    var A = sp(p), B = sp(q), mx = (A[0] + B[0]) / 2, my = (A[1] + B[1]) / 2, dx = B[0] - A[0], dy = B[1] - A[1], l = Math.hypot(dx, dy) || 1;
+    off = off || 15;
+    var x = mx + (-dy / l) * off * side, y = my + (dx / l) * off * side + 6;
+    var t = el('text', { x: x, y: y, 'class': 'lbl', 'text-anchor': 'middle', fill: col }, svg, txt);
+    if (plain) return;
+    var w = Math.max(9, txt.length * 9);
+    el('line', { x1: x - w / 2, y1: y - 17, x2: x + w / 2 - 3, y2: y - 17, stroke: col, 'stroke-width': 1.3 });
+    el('path', { d: 'M' + (x + w / 2) + ' ' + (y - 17) + 'l-5 -3v6z', fill: col });
+  }
+  function dotP(p, col, r, label, dx, dy) {
+    var A = sp(p);
+    el('circle', { cx: A[0], cy: A[1], r: r || 4.5, fill: col, stroke: '#fff', 'stroke-width': 1.5 });
+    if (label) el('text', { x: A[0] + (dx == null ? 8 : dx), y: A[1] + (dy == null ? -8 : dy), 'class': 'lbl', fill: col }, svg, label);
+  }
+  function seg(p, q, col, w, dash, op) {
+    var A = sp(p), B = sp(q), at = { x1: A[0], y1: A[1], x2: B[0], y2: B[1], stroke: col, 'stroke-width': w || 1.4 };
+    if (dash) at['stroke-dasharray'] = dash === true ? '5 4' : dash;
+    if (op) at.opacity = op;
+    el('line', at);
+  }
+  function txt(p, s, col, dx, dy, anchor, size) {
+    var A = sp(p);
+    el('text', { x: A[0] + (dx || 0), y: A[1] + (dy || 0), 'class': 'lbl', fill: col || 'var(--ink)', 'text-anchor': anchor || 'middle', style: size ? 'font-size:' + size + 'px' : '' }, svg, s);
+  }
+  function arcAng(c, a0, a1, r, col) {
+    var Cc = sp(c), d = '', n = 30;
+    for (var i = 0; i <= n; i++) { var u = a0 + (a1 - a0) * i / n; d += (i ? 'L' : 'M') + (Cc[0] + r * Math.cos(u)).toFixed(1) + ' ' + (Cc[1] - r * Math.sin(u)).toFixed(1); }
+    el('path', { d: d, stroke: col, 'stroke-width': 2, fill: 'none' });
+  }
+  /* ручки для перетаскивания */
+  var handles = [];
+  function handle(id, p, col) {
+    handles.push({ id: id, p: p });
+    var A = sp(p);
+    el('circle', { cx: A[0], cy: A[1], r: 11, fill: col, 'fill-opacity': 0.14, stroke: col, 'stroke-width': 1.6, 'stroke-dasharray': '3 2' });
+  }
+  function add(p, v) { return [p[0] + v[0], p[1] + v[1]]; }
+  function sub(p, q) { return [p[0] - q[0], p[1] - q[1]]; }
+  function mul(v, k) { return [v[0] * k, v[1] * k]; }
+  function len(v) { return Math.hypot(v[0], v[1]); }
+  function lenTxt(v) { var l2 = VEC.len2(v); return Number.isInteger(l2) ? VEC.sqrtTxt(l2) : fmt(Math.sqrt(l2)); }
+  function eqv(p, q) { return Math.abs(p[0] - q[0]) < 1e-9 && Math.abs(p[1] - q[1]) < 1e-9; }
+  function angDeg(a, b) { var c = VEC.dot(a, b) / (len(a) * len(b)); return Math.acos(Math.max(-1, Math.min(1, c))) * 180 / Math.PI; }
+  function ctlRange(label, key, min, max, step, st, onch) {
+    var l = document.createElement('label');
+    l.innerHTML = label + ' <b class="m" id="rv_' + key + '">' + fmt(st[key]) + '</b>';
+    var r = document.createElement('input');
+    r.type = 'range'; r.min = min; r.max = max; r.step = step; r.value = st[key];
+    r.oninput = function () { st[key] = +r.value; $('rv_' + key).textContent = fmt(st[key]); onch(); };
+    l.appendChild(r);
+    $('planeCtl').appendChild(l);
+  }
+  function ctlToggle(items, cur, on) {
+    var d = document.createElement('div');
+    d.className = 'types';
+    items.forEach(function (it) {
+      var b = document.createElement('button'); b.type = 'button'; b.textContent = it[1]; if (it[0] === cur) b.className = 'on';
+      b.onclick = function () { on(it[0]); };
+      d.appendChild(b);
+    });
+    $('planeCtl').appendChild(d);
+  }
+
+  /* =====================================================================
+     Темы: опыт → шаги («Дальше») → итог
+     ===================================================================== */
+  var TOPICS = {};
+  TOPICS['1.1'] = {
+    title: 'Вектор и его координаты',
+    intro: 'Вектор — это направленный отрезок: у него есть начало и конец. Его можно представлять как перемещение: «из точки A попади в точку B».',
+    init: { A: [-5, -2], B: [-1, 1] },
+    exp: 'Тяни начало A и конец B. Построй вектор с координатами (4; −3).',
+    done: function (s) { return eqv(sub(s.B, s.A), [4, -3]); },
+    draw: function (s, step) {
+      var v = sub(s.B, s.A), mid = [(s.A[0] + s.B[0]) / 2, (s.A[1] + s.B[1]) / 2];
+      if (step >= 1 || true) { seg(s.A, [s.B[0], s.A[1]], C.b, 2.4, true); seg([s.B[0], s.A[1]], s.B, C.c, 2.4, true);
+        txt([(s.A[0] + s.B[0]) / 2, s.A[1]], fmt(v[0]), C.b, 0, v[1] >= 0 ? 18 : -8, 'middle', 16);
+        txt([s.B[0], (s.A[1] + s.B[1]) / 2], fmt(v[1]), C.c, v[0] >= 0 ? 8 : -8, 5, v[0] >= 0 ? 'start' : 'end', 16); }
+      arrow(s.A, s.B, C.a, { label: 'AB', side: v[0] * v[1] > 0 ? -1 : 1, off: 28 });
+      dotP(s.A, C.ink, 4, 'A', -16, 4); dotP(s.B, C.ink, 4, 'B', 8, -6);
+      handle('A', s.A, C.ink); handle('B', s.B, C.ink); handle('M', [Math.round(mid[0]), Math.round(mid[1])], C.q);
+      return '<div class="m">' + M('<i>A</i>' + co(s.A) + ', <i>B</i>' + co(s.B)) + '</div><div class="m" style="font-size:1.2em">' + M(V('AB') + ' = (' + fmt(s.B[0]) + ' − ' + par(s.A[0]) + '; ' + fmt(s.B[1]) + ' − ' + par(s.A[1]) + ') = ' + co(v)) + '</div>';
+    },
+    drag: function (s, id, p) {
+      if (id === 'M') { var mid = [Math.round((s.A[0] + s.B[0]) / 2), Math.round((s.A[1] + s.B[1]) / 2)], d = sub(p, mid); var A2 = add(s.A, d), B2 = add(s.B, d); if (inB(A2) && inB(B2)) { s.A = A2; s.B = B2; } }
+      else s[id] = p;
+    },
+    steps: [
+      'Синий пунктир — сдвиг по оси <i>x</i>, зелёный — по оси <i>y</i>. Эти два числа и есть координаты вектора: ' + M(V('AB') + ' = (<i>x<sub>B</sub></i> − <i>x<sub>A</sub></i>; <i>y<sub>B</sub></i> − <i>y<sub>A</sub></i>)') + '. Конец минус начало.',
+      'Потяни вектор за жёлтый кружок посередине: он переезжает целиком, а координаты не меняются. Вектору всё равно, откуда начинать: важно только, куда и насколько сдвинуться.',
+      'Поэтому векторы с одинаковыми координатами считают равными: у них одинаковая длина и одинаковое направление. Буквой ' + M(V('a')) + ' обозначают вектор, не привязывая его к точкам.',
+      'Частный случай: если начало в точке ' + M('<i>O</i>(0; 0)') + ', координаты вектора совпадают с координатами его конца. Такой вектор называют радиус-вектором точки.'
+    ],
+    sum: M(V('AB') + ' = (<i>x<sub>B</sub></i> − <i>x<sub>A</sub></i>; <i>y<sub>B</sub></i> − <i>y<sub>A</sub></i>)') + ' — конец минус начало.'
+  };
+  function par(x) { return x < 0 ? '(' + fmt(x) + ')' : fmt(x); }
+  function inB(p) { return Math.abs(p[0]) <= 9 && Math.abs(p[1]) <= 9; }
+  TOPICS['1.2'] = {
+    title: 'Длина вектора',
+    intro: 'Длина вектора — это длина отрезка AB. Её обозначают ' + M('|' + V('AB') + '|') + ' или ' + M('|' + V('a') + '|') + '.',
+    init: { A: [-4, -3], B: [2, 1] },
+    exp: 'Найди вектор длины 5, который не горизонтален и не вертикален.',
+    done: function (s) { var v = sub(s.B, s.A); return VEC.len2(v) === 25 && v[0] && v[1]; },
+    draw: function (s) {
+      var v = sub(s.B, s.A), Cn = [s.B[0], s.A[1]];
+      el('path', { d: 'M' + sp(s.A).join(' ') + 'L' + sp(Cn).join(' ') + 'L' + sp(s.B).join(' ') + 'Z', fill: 'var(--va)', 'fill-opacity': 0.08 });
+      seg(s.A, Cn, C.b, 2.4); seg(Cn, s.B, C.c, 2.4);
+      if (v[0] && v[1]) { var R = sp(Cn), sx = v[0] > 0 ? -1 : 1, sy = v[1] > 0 ? -1 : 1; el('path', { d: 'M' + (R[0] + sx * 9) + ' ' + R[1] + 'v' + (sy * 9) + 'h' + (-sx * 9), stroke: C.ink, fill: 'none', 'stroke-width': 1.2 }); }
+      txt([(s.A[0] + s.B[0]) / 2, s.A[1]], '|' + fmt(v[0]) + '|', C.b, 0, v[1] >= 0 ? 18 : -8, 'middle', 16);
+      txt([s.B[0], (s.A[1] + s.B[1]) / 2], '|' + fmt(v[1]) + '|', C.c, v[0] >= 0 ? 8 : -8, 5, v[0] >= 0 ? 'start' : 'end', 16);
+      arrow(s.A, s.B, C.a, { label: 'AB', side: v[0] * v[1] > 0 ? -1 : 1 });
+      handle('A', s.A, C.ink); handle('B', s.B, C.ink);
+      return '<div class="m">' + M(V('AB') + ' = ' + co(v)) + '</div><div class="m" style="font-size:1.2em">' + M('|' + V('AB') + '| = √(' + par(v[0]) + '² + ' + par(v[1]) + '²) = √' + VEC.len2(v) + ' = ' + lenTxt(v)) + '</div>';
+    },
+    drag: function (s, id, p) { s[id] = p; },
+    steps: [
+      'Вектор — гипотенуза прямоугольного треугольника, а его координаты (по модулю) — катеты.',
+      'По теореме Пифагора ' + M('|' + V('a') + '|² = <i>x</i>² + <i>y</i>²') + ', значит ' + M('|' + V('a') + '| = √(<i>x</i>² + <i>y</i>²)') + '. Знак координаты не важен: при возведении в квадрат минус пропадает.',
+      'В задачах ЕГЭ длины обычно «красивые»: помогают пифагоровы тройки 3–4–5, 6–8–10, 5–12–13, 8–15–17, 7–24–25, 20–21–29. Например, ' + M('|(−10; 24)| = 26') + ' — это тройка 5–12–13, умноженная на 2.',
+      'Если ответ не целый, его оставляют с корнем: ' + M('|(1; 5)| = √26') + ', а ' + M('|(3; 6)| = √45 = 3√5') + '.'
+    ],
+    sum: M('|' + V('a') + '| = √(<i>x</i>² + <i>y</i>²)') + '. Для ' + M(V('AB')) + ': ' + M('|' + V('AB') + '| = √((<i>x<sub>B</sub></i> − <i>x<sub>A</sub></i>)² + (<i>y<sub>B</sub></i> − <i>y<sub>A</sub></i>)²)') + '.'
+  };
+  TOPICS['1.3'] = {
+    title: 'Сложение векторов',
+    intro: 'Сумма векторов — это два перемещения подряд: сначала на ' + M(V('a')) + ', потом на ' + M(V('b')) + '.',
+    init: { S: [-7, -4], a: [5, 2], b: [1, 4], mode: 'tri' },
+    exp: 'Сделай так, чтобы сумма ' + M(V('a') + ' + ' + V('b')) + ' была равна (6; 0), но сам ' + M(V('a')) + ' не был горизонтальным.',
+    done: function (s) { return eqv(add(s.a, s.b), [6, 0]) && s.a[1] !== 0; },
+    ctl: function (s) { ctlToggle([['tri', 'правило треугольника'], ['par', 'правило параллелограмма']], s.mode, function (v) { s.mode = v; render(); }); },
+    draw: function (s) {
+      var A = s.S, B = add(A, s.a), Cc = add(B, s.b), r = add(s.a, s.b);
+      if (s.mode === 'par') {
+        var D = add(A, s.b);
+        seg(B, Cc, C.b, 1.5, true); seg(D, Cc, C.a, 1.5, true);
+        el('path', { d: 'M' + sp(A).join(' ') + 'L' + sp(B).join(' ') + 'L' + sp(Cc).join(' ') + 'L' + sp(D).join(' ') + 'Z', fill: 'var(--vr)', 'fill-opacity': 0.07 });
+        arrow(A, B, C.a, { label: 'a', side: -1 }); arrow(A, D, C.b, { label: 'b', side: 1 });
+        handle('a', B, C.a); handle('b', D, C.b);
+      } else {
+        arrow(A, B, C.a, { label: 'a', side: 1 }); arrow(B, Cc, C.b, { label: 'b', side: 1 });
+        handle('a', B, C.a); handle('b', Cc, C.b);
+      }
+      arrow(A, Cc, C.r, { label: 'a+b', side: -1, w: 3 });
+      handle('S', A, C.ink);
+      return '<div class="m" style="font-size:1.15em">' + M(V('a') + co(s.a) + ' + ' + V('b') + co(s.b) + ' = (' + fmt(s.a[0]) + ' + ' + par(s.b[0]) + '; ' + fmt(s.a[1]) + ' + ' + par(s.b[1]) + ') = ' + co(r)) + '</div>';
+    },
+    drag: function (s, id, p) {
+      if (id === 'S') { if (inB(add(p, s.a)) && inB(add(add(p, s.a), s.b)) && inB(add(p, s.b))) s.S = p; return; }
+      if (id === 'a') { var na = sub(p, s.S); if (s.mode === 'tri' && !inB(add(p, s.b))) return; s.a = na; }
+      if (id === 'b') s.b = s.mode === 'par' ? sub(p, s.S) : sub(p, add(s.S, s.a));
+    },
+    steps: [
+      '<b>Правило треугольника:</b> приставь начало ' + M(V('b')) + ' к концу ' + M(V('a')) + '. Сумма идёт из начала ' + M(V('a')) + ' в конец ' + M(V('b')) + '.',
+      '<b>Правило параллелограмма</b> (переключатель под чертежом): отложи ' + M(V('a')) + ' и ' + M(V('b')) + ' от одной точки и дострой параллелограмм. Сумма — его диагональ из общего начала. Это тот же треугольник: верхняя сторона параллелограмма — это ' + M(V('b')) + ', приставленный к концу ' + M(V('a')) + '.',
+      'В координатах складываем по отдельности: ' + M('(<i>x</i><sub>1</sub> + <i>x</i><sub>2</sub>; <i>y</i><sub>1</sub> + <i>y</i><sub>2</sub>)') + '. Сдвиги по ' + M('<i>x</i>') + ' складываются, сдвиги по ' + M('<i>y</i>') + ' тоже.',
+      'Для трёх и более векторов приставляем их по цепочке: сумма идёт из начала первого в конец последнего (правило многоугольника). Если цепочка замкнулась, сумма равна нулевому вектору.'
+    ],
+    sum: M(V('a') + ' + ' + V('b') + ' = (<i>x</i><sub>1</sub> + <i>x</i><sub>2</sub>; <i>y</i><sub>1</sub> + <i>y</i><sub>2</sub>)') + '. Геометрически: треугольник (цепочкой) или параллелограмм (от одной точки).'
+  };
+  TOPICS['1.4'] = {
+    title: 'Разность векторов',
+    intro: 'Разность ' + M(V('a') + ' − ' + V('b')) + ' — это вектор, который нужно прибавить к ' + M(V('b')) + ', чтобы получить ' + M(V('a')) + '.',
+    init: { S: [-3, -4], a: [6, 5], b: [-2, 6], neg: false },
+    exp: 'Сделай так, чтобы ' + M(V('a') + ' − ' + V('b') + ' = (2; −5)') + '.',
+    done: function (s) { return eqv(sub(s.a, s.b), [2, -5]); },
+    ctl: function (s) { ctlToggle([[false, 'от общего начала'], [true, 'через −b']], s.neg, function (v) { s.neg = v; render(); }); },
+    draw: function (s) {
+      var A = s.S, Pa = add(A, s.a), Pb = add(A, s.b), r = sub(s.a, s.b);
+      if (s.neg) {
+        var Nb = add(Pa, mul(s.b, -1));
+        arrow(A, Pb, C.b, { label: 'b', side: 1, op: 0.35 });
+        arrow(Pa, Nb, C.b, { label: '−b', side: 1, dash: true });
+        arrow(A, Pa, C.a, { label: 'a', side: -1 });
+        arrow(A, Nb, C.r, { label: 'a−b', side: -1, w: 3 });
+      } else {
+        arrow(A, Pa, C.a, { label: 'a', side: -1 }); arrow(A, Pb, C.b, { label: 'b', side: 1 });
+        arrow(Pb, Pa, C.r, { label: 'a−b', side: 1, w: 3 });
+      }
+      handle('a', Pa, C.a); handle('b', Pb, C.b); handle('S', A, C.ink);
+      return '<div class="m" style="font-size:1.15em">' + M(V('a') + co(s.a) + ' − ' + V('b') + co(s.b) + ' = (' + fmt(s.a[0]) + ' − ' + par(s.b[0]) + '; ' + fmt(s.a[1]) + ' − ' + par(s.b[1]) + ') = ' + co(r)) + '</div>';
+    },
+    drag: function (s, id, p) {
+      if (id === 'S') { if (inB(add(p, s.a)) && inB(add(p, s.b))) s.S = p; return; }
+      s[id] = sub(p, s.S);
+    },
+    steps: [
+      'Отложим ' + M(V('a')) + ' и ' + M(V('b')) + ' от одной точки. Разность ' + M(V('a') + ' − ' + V('b')) + ' идёт <b>из конца вычитаемого в конец уменьшаемого</b>: из конца ' + M(V('b')) + ' в конец ' + M(V('a')) + '. Проверка: ' + M(V('b') + ' + (' + V('a') + ' − ' + V('b') + ') = ' + V('a')) + ' — правило треугольника.',
+      'Второй способ (переключатель «через −b»): ' + M(V('a') + ' − ' + V('b') + ' = ' + V('a') + ' + (−' + V('b') + ')') + '. Вектор ' + M('−' + V('b')) + ' той же длины, но смотрит в противоположную сторону.',
+      'В координатах вычитаем по отдельности: ' + M('(<i>x</i><sub>1</sub> − <i>x</i><sub>2</sub>; <i>y</i><sub>1</sub> − <i>y</i><sub>2</sub>)') + '.',
+      'Это то же правило «конец минус начало» из темы 1.1: ' + M(V('AB') + ' = ' + V('OB') + ' − ' + V('OA')) + '. И в треугольнике: ' + M(V('CA') + ' − ' + V('CB') + ' = ' + V('BA')) + ' — такая задача бывает в ЕГЭ.'
+    ],
+    sum: M(V('a') + ' − ' + V('b') + ' = (<i>x</i><sub>1</sub> − <i>x</i><sub>2</sub>; <i>y</i><sub>1</sub> − <i>y</i><sub>2</sub>)') + '. От общего начала: из конца вычитаемого в конец уменьшаемого.'
+  };
+  TOPICS['1.5'] = {
+    title: 'Умножение вектора на число',
+    intro: 'Вектор ' + M('<i>k</i>' + V('a')) + ' — это ' + M(V('a')) + ', растянутый (или сжатый) в ' + M('|<i>k</i>|') + ' раз.',
+    init: { S: [-2, -1], a: [3, 2], k: 1.5 },
+    exp: 'Подбери ' + M('<i>k</i>') + ' так, чтобы ' + M('<i>k</i>' + V('a')) + ' был направлен против ' + M(V('a')) + ' и был вдвое длиннее.',
+    done: function (s) { return s.k === -2; },
+    ctl: function (s) { ctlRange('<i>k</i> =', 'k', -3, 3, 0.5, s, render); },
+    draw: function (s) {
+      var A = s.S, Pa = add(A, s.a), ka = mul(s.a, s.k);
+      var off = [-s.a[1], s.a[0]], ol = len(off) || 1; off = [off[0] / ol * 0.35, off[1] / ol * 0.35];
+      if (s.k) arrow(add(A, off), add(add(A, off), ka), C.r, { label: 'ka', side: 1, w: 3 });
+      arrow(A, Pa, C.a, { label: 'a', side: -1 });
+      handle('a', Pa, C.a); handle('S', A, C.ink);
+      return '<div class="m" style="font-size:1.15em">' + M(fmt(s.k) + ' · ' + co(s.a) + ' = ' + co([VEC.round(ka[0], 6), VEC.round(ka[1], 6)])) + '</div><div class="m">' + M('|' + V('a') + '| = ' + lenTxt(s.a) + ', &nbsp; |<i>k</i>' + V('a') + '| = ' + fmt(Math.abs(s.k)) + ' · ' + lenTxt(s.a)) + '</div>';
+    },
+    drag: function (s, id, p) { if (id === 'S') { if (inB(add(p, s.a))) s.S = p; return; } s.a = sub(p, s.S); },
+    steps: [
+      'Каждую координату умножаем на ' + M('<i>k</i>') + ': ' + M('<i>k</i>' + V('a') + ' = (<i>kx</i>; <i>ky</i>)') + '.',
+      'Длина умножается на ' + M('|<i>k</i>|') + ': ' + M('|<i>k</i>' + V('a') + '| = |<i>k</i>| · |' + V('a') + '|') + '.',
+      'При ' + M('<i>k</i> > 0') + ' направление то же, при ' + M('<i>k</i> < 0') + ' — противоположное, при ' + M('<i>k</i> = 0') + ' получается нулевой вектор (точка).',
+      'Векторы ' + M(V('a')) + ' и ' + M('<i>k</i>' + V('a')) + ' лежат на параллельных прямых (или на одной): их называют <b>коллинеарными</b>. Признак в координатах: координаты пропорциональны, например ' + M('(2; −3)') + ' и ' + M('(−4; 6)') + '.'
+    ],
+    sum: M('<i>k</i>' + V('a') + ' = (<i>kx</i>; <i>ky</i>)') + ', ' + M('|<i>k</i>' + V('a') + '| = |<i>k</i>| · |' + V('a') + '|') + '; при ' + M('<i>k</i> < 0') + ' направление меняется на противоположное.'
+  };
+  TOPICS['1.6'] = {
+    title: 'Разложение по двум векторам',
+    intro: 'Из двух неколлинеарных векторов можно «собрать» любой вектор плоскости, если взять их с подходящими коэффициентами.',
+    init: { a: [2, 1], b: [-1, 2], c: [5, 5], x: 1, y: 1 },
+    exp: 'Подбери ' + M('<i>x</i>') + ' и ' + M('<i>y</i>') + ' так, чтобы ' + M('<i>x</i>' + V('a') + ' + <i>y</i>' + V('b') + ' = ' + V('c')) + '. Конец ' + M(V('c')) + ' можно передвинуть.',
+    done: function (s) { return eqv(add(mul(s.a, s.x), mul(s.b, s.y)), s.c); },
+    ctl: function (s) { ctlRange('<i>x</i> =', 'x', -4, 4, 0.5, s, render); ctlRange('<i>y</i> =', 'y', -4, 4, 0.5, s, render); },
+    draw: function (s) {
+      var Oo = [0, 0], xa = mul(s.a, s.x), yb = mul(s.b, s.y), r = add(xa, yb);
+      for (var t = -6; t <= 6; t++) { seg(add(mul(s.a, t), mul(s.b, -8)), add(mul(s.a, t), mul(s.b, 8)), '#efe7fb', 1); seg(add(mul(s.b, t), mul(s.a, -8)), add(mul(s.b, t), mul(s.a, 8)), '#efe7fb', 1); }
+      arrow(Oo, s.c, C.c, { label: 'c', side: -1, w: 3 });
+      if (s.x) arrow(Oo, xa, C.a, { label: 'xa', side: 1, op: 0.75 });
+      if (s.y) arrow(xa, r, C.b, { label: 'yb', side: 1, op: 0.75 });
+      arrow(Oo, s.a, C.a, { w: 3.4 }); arrow(Oo, s.b, C.b, { w: 3.4 });
+      vlabel(Oo, s.a, 'a', C.a, -1); vlabel(Oo, s.b, 'b', C.b, 1);
+      dotP(r, C.r, 4.5);
+      handle('c', s.c, C.c);
+      var ok = eqv(r, s.c);
+      return '<div class="m" style="font-size:1.12em">' + M(fmt(s.x) + V('a') + ' + ' + par(s.y) + V('b') + ' = ' + co([VEC.round(r[0], 6), VEC.round(r[1], 6)])) + (ok ? ' = ' : ' ≠ ') + M(V('c') + co(s.c)) + '</div>';
+    },
+    drag: function (s, id, p) { s.c = p; },
+    steps: [
+      'Сетка из сиреневых линий построена на векторах ' + M(V('a')) + ' и ' + M(V('b')) + ', как клетчатая бумага, только «косая». Числа ' + M('<i>x</i>') + ' и ' + M('<i>y</i>') + ' — это сколько шагов по ' + M(V('a')) + ' и по ' + M(V('b')) + ' нужно сделать.',
+      'Если ' + M(V('a')) + ' и ' + M(V('b')) + ' не коллинеарны, любой вектор ' + M(V('c')) + ' раскладывается единственным образом: ' + M(V('c') + ' = <i>x</i>' + V('a') + ' + <i>y</i>' + V('b')) + '.',
+      'Найти ' + M('<i>x</i>') + ' и ' + M('<i>y</i>') + ' без подбора: приравняем координаты. Для ' + M(V('a') + '(2; 1)') + ', ' + M(V('b') + '(−1; 2)') + ', ' + M(V('c') + '(5; 5)') + ': ' + M('2<i>x</i> − <i>y</i> = 5') + ' и ' + M('<i>x</i> + 2<i>y</i> = 5') + ', откуда ' + M('<i>x</i> = 3, <i>y</i> = 1') + '.',
+      'Главный частный случай: ' + M(V('i') + '(1; 0)') + ' и ' + M(V('j') + '(0; 1)') + '. Тогда ' + M(V('c') + ' = <i>x</i>' + V('i') + ' + <i>y</i>' + V('j')) + ', и числа ' + M('<i>x</i>, <i>y</i>') + ' — это и есть координаты ' + M(V('c')) + '. Координаты вектора — коэффициенты разложения по ' + M(V('i')) + ' и ' + M(V('j')) + '.'
+    ],
+    sum: M(V('c') + ' = <i>x</i>' + V('a') + ' + <i>y</i>' + V('b')) + ' — единственным образом, если ' + M(V('a')) + ' и ' + M(V('b')) + ' не коллинеарны. Коэффициенты находят из системы по координатам.'
+  };
+
+  /* ---- часть 2 ---- */
+  function projDraw(a, b) {
+    var u = len(a) ? mul(a, 1 / len(a)) : [1, 0], pr = VEC.dot(a, b) / (len(a) || 1), foot = mul(u, pr);
+    seg(mul(u, -12), mul(u, 12), '#d9e2e9', 1.2);
+    seg(b, foot, C.muted, 1.2, true);
+    var col = pr > 1e-9 ? C.ok : pr < -1e-9 ? C.no : C.muted;
+    seg([0, 0], foot, col, 6, false, 0.7);
+    return pr;
+  }
+  TOPICS['2.1'] = {
+    title: 'Скалярное произведение',
+    intro: 'Скалярное произведение двух векторов — это <b>число</b>: ' + M(V('a') + ' · ' + V('b') + ' = |' + V('a') + '| · |' + V('b') + '| · cos φ') + ', где ' + M('φ') + ' — угол между векторами, отложенными от одной точки.',
+    init: { a: [5, 1], b: [2, 4] },
+    exp: 'Поверни ' + M(V('b')) + ' так, чтобы скалярное произведение стало отрицательным. Какой при этом угол?',
+    done: function (s) { return VEC.dot(s.a, s.b) < 0; },
+    draw: function (s) {
+      var pr = projDraw(s.a, s.b), Oo = [0, 0];
+      var a0 = Math.atan2(s.a[1], s.a[0]), b0 = Math.atan2(s.b[1], s.b[0]), d = b0 - a0;
+      while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI;
+      arcAng(Oo, a0, a0 + d, 26, C.q);
+      arrow(Oo, s.a, C.a, { label: 'a', side: -1 }); arrow(Oo, s.b, C.b, { label: 'b', side: 1 });
+      handle('a', s.a, C.a); handle('b', s.b, C.b);
+      var dt = VEC.dot(s.a, s.b), ang = angDeg(s.a, s.b);
+      return '<div class="m">' + M('|' + V('a') + '| = ' + lenTxt(s.a) + ', |' + V('b') + '| = ' + lenTxt(s.b) + ', φ ≈ ' + fmt(Math.round(ang * 10) / 10) + '°, cos φ ≈ ' + fmt(VEC.round(Math.cos(ang * Math.PI / 180), 3))) + '</div>' +
+        '<div class="m" style="font-size:1.2em">' + M(V('a') + ' · ' + V('b') + ' = ' + fmt(dt)) + ' &nbsp;<span style="color:' + (dt > 0 ? 'var(--ok)' : dt < 0 ? 'var(--no)' : 'var(--muted)') + ';font-weight:600">' + (dt > 0 ? 'угол острый' : dt < 0 ? 'угол тупой' : 'угол прямой') + '</span></div>';
+    },
+    drag: function (s, id, p) { if (p[0] || p[1]) s[id] = p; },
+    steps: [
+      'Результат — число, а не вектор. Поэтому ответ в задачах ЕГЭ про скалярное произведение — просто число.',
+      'Знак зависит только от угла: острый угол — плюс, прямой — ноль, тупой — минус. Ведь ' + M('cos φ') + ' меняет знак при ' + M('φ = 90°') + '.',
+      'Смысл: ' + M('|' + V('b') + '| · cos φ') + ' — это проекция ' + M(V('b')) + ' на направление ' + M(V('a')) + ' (зелёный или красный отрезок на чертеже). Значит, ' + M(V('a') + ' · ' + V('b') + ' = |' + V('a') + '| · (проекция ' + V('b') + ' на ' + V('a') + ')') + '. Красная проекция — отрицательная.',
+      'Вектор, умноженный сам на себя: угол 0°, ' + M('cos 0° = 1') + ', поэтому ' + M(V('a') + ' · ' + V('a') + ' = |' + V('a') + '|²') + '. Это «скалярный квадрат», он пригодится для длин.'
+    ],
+    sum: M(V('a') + ' · ' + V('b') + ' = |' + V('a') + '| · |' + V('b') + '| · cos φ') + '. Острый угол — плюс, прямой — 0, тупой — минус. ' + M(V('a') + ' · ' + V('a') + ' = |' + V('a') + '|²') + '.'
+  };
+  TOPICS['2.2'] = {
+    title: 'Скалярное произведение в координатах',
+    intro: 'Если известны координаты, косинус искать не нужно: всё считается по одной формуле.',
+    init: { a: [4, 1], b: [1, 3] },
+    exp: 'Найди два вектора с ' + M(V('a') + ' · ' + V('b') + ' = 0') + ', у которых все координаты не равны нулю.',
+    done: function (s) { return VEC.dot(s.a, s.b) === 0 && s.a[0] && s.a[1] && s.b[0] && s.b[1]; },
+    draw: function (s) {
+      var Oo = [0, 0];
+      arrow(Oo, s.a, C.a, { label: 'a', side: -1 }); arrow(Oo, s.b, C.b, { label: 'b', side: 1 });
+      if (VEC.dot(s.a, s.b) === 0) { var u = mul(s.a, 0.7 / len(s.a)), w = mul(s.b, 0.7 / len(s.b)); el('path', { d: 'M' + sp(u).join(' ') + 'L' + sp(add(u, w)).join(' ') + 'L' + sp(w).join(' '), stroke: C.ok, 'stroke-width': 2, fill: 'none' }); }
+      handle('a', s.a, C.a); handle('b', s.b, C.b);
+      var d = VEC.dot(s.a, s.b);
+      return '<div class="m" style="font-size:1.15em">' + M(V('a') + co(s.a) + ' · ' + V('b') + co(s.b) + ' = ' + par(s.a[0]) + ' · ' + par(s.b[0]) + ' + ' + par(s.a[1]) + ' · ' + par(s.b[1]) + ' = ' + fmt(d)) + '</div>';
+    },
+    drag: function (s, id, p) { if (p[0] || p[1]) s[id] = p; },
+    steps: [
+      'Разложим по ' + M(V('i')) + ' и ' + M(V('j')) + ' (тема 1.6): ' + M(V('a') + ' = <i>x</i><sub>1</sub>' + V('i') + ' + <i>y</i><sub>1</sub>' + V('j')) + ', ' + M(V('b') + ' = <i>x</i><sub>2</sub>' + V('i') + ' + <i>y</i><sub>2</sub>' + V('j')) + '.',
+      'Перемножим скобки, как многочлены: ' + M(V('a') + ' · ' + V('b') + ' = <i>x</i><sub>1</sub><i>x</i><sub>2</sub>(' + V('i') + '·' + V('i') + ') + <i>x</i><sub>1</sub><i>y</i><sub>2</sub>(' + V('i') + '·' + V('j') + ') + <i>y</i><sub>1</sub><i>x</i><sub>2</sub>(' + V('j') + '·' + V('i') + ') + <i>y</i><sub>1</sub><i>y</i><sub>2</sub>(' + V('j') + '·' + V('j') + ')') + '.',
+      M(V('i') + ' · ' + V('i') + ' = ' + V('j') + ' · ' + V('j') + ' = 1') + ' (длины 1, угол 0°), а ' + M(V('i') + ' · ' + V('j') + ' = 0') + ' (угол 90°). Остаётся ' + M('<i>x</i><sub>1</sub><i>x</i><sub>2</sub> + <i>y</i><sub>1</sub><i>y</i><sub>2</sub>') + '.',
+      '<b>Перпендикулярность:</b> ' + M(V('a') + ' ⊥ ' + V('b')) + ' ⇔ ' + M('<i>x</i><sub>1</sub><i>x</i><sub>2</sub> + <i>y</i><sub>1</sub><i>y</i><sub>2</sub> = 0') + '. Быстрый способ: переставь координаты и у одной смени знак: ' + M('(3; 1) ⊥ (−1; 3)') + '.',
+      'Множители выносятся: ' + M('(3' + V('a') + ') · (4' + V('b') + ') = 12(' + V('a') + ' · ' + V('b') + ')') + ', скобки раскрываются: ' + M('(' + V('a') + ' − ' + V('b') + ') · ' + V('c') + ' = ' + V('a') + ' · ' + V('c') + ' − ' + V('b') + ' · ' + V('c')) + '. Но в задачах ЕГЭ проще сначала найти координаты скобки.'
+    ],
+    sum: M(V('a') + ' · ' + V('b') + ' = <i>x</i><sub>1</sub><i>x</i><sub>2</sub> + <i>y</i><sub>1</sub><i>y</i><sub>2</sub>') + '; ' + M(V('a') + ' ⊥ ' + V('b')) + ' ⇔ ' + M(V('a') + ' · ' + V('b') + ' = 0') + '.'
+  };
+  TOPICS['2.3'] = {
+    title: 'Угол между векторами',
+    intro: 'Две формулы скалярного произведения вместе дают косинус угла.',
+    init: { a: [4, 0], b: [3, 3] },
+    exp: 'Сделай угол между векторами равным 45°, но так, чтобы ни один вектор не лежал на оси.',
+    done: function (s) { return Math.abs(angDeg(s.a, s.b) - 45) < 1e-6 && s.a[0] && s.a[1] && s.b[0] && s.b[1]; },
+    draw: function (s) {
+      var Oo = [0, 0], a0 = Math.atan2(s.a[1], s.a[0]), b0 = Math.atan2(s.b[1], s.b[0]), d = b0 - a0;
+      while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI;
+      arcAng(Oo, a0, a0 + d, 28, C.q);
+      arrow(Oo, s.a, C.a, { label: 'a', side: -1 }); arrow(Oo, s.b, C.b, { label: 'b', side: 1 });
+      handle('a', s.a, C.a); handle('b', s.b, C.b);
+      var dt = VEC.dot(s.a, s.b), L2 = VEC.len2(s.a) * VEC.len2(s.b), cs = dt / Math.sqrt(L2);
+      return '<div class="m" style="font-size:1.12em">' + M('cos φ = ' + fmt(dt) + ' / (' + lenTxt(s.a) + ' · ' + lenTxt(s.b) + ') ≈ ' + fmt(VEC.round(cs, 4))) + '</div><div class="m">' + M('φ ≈ ' + fmt(Math.round(angDeg(s.a, s.b) * 10) / 10) + '°') + '</div>';
+    },
+    drag: function (s, id, p) { if (p[0] || p[1]) s[id] = p; },
+    steps: [
+      'Из ' + M(V('a') + ' · ' + V('b') + ' = |' + V('a') + '| · |' + V('b') + '| · cos φ') + ' выражаем ' + M('cos φ = (' + V('a') + ' · ' + V('b') + ') / (|' + V('a') + '| · |' + V('b') + '|)') + '.',
+      'Числитель считаем по координатам, знаменатель — по Пифагору. Например, ' + M('(6; −8)') + ' и ' + M('(0; 2)') + ': ' + M('cos φ = −16 / (10 · 2) = −0,8') + '.',
+      'В ЕГЭ координаты обычно подобраны так, что длины целые (пифагоровы тройки), и косинус — конечная десятичная дробь.',
+      'Если ответ получился больше 1 по модулю, где-то ошибка: косинус всегда от −1 до 1.'
+    ],
+    sum: M('cos φ = (<i>x</i><sub>1</sub><i>x</i><sub>2</sub> + <i>y</i><sub>1</sub><i>y</i><sub>2</sub>) / (√(<i>x</i><sub>1</sub>² + <i>y</i><sub>1</sub>²) · √(<i>x</i><sub>2</sub>² + <i>y</i><sub>2</sub>²))')
+  };
+  TOPICS['2.4'] = {
+    title: 'Длина суммы и разности',
+    intro: 'Когда координат нет, а есть длины и скалярное произведение, длину суммы находят через скалярный квадрат.',
+    init: { a: [5, 1], b: [1, 4] },
+    exp: 'Сделай так, чтобы ' + M('|' + V('a') + ' + ' + V('b') + '| = |' + V('a') + ' − ' + V('b') + '|') + '. Какой тогда угол между ' + M(V('a')) + ' и ' + M(V('b')) + '?',
+    done: function (s) { return VEC.len2(add(s.a, s.b)) === VEC.len2(sub(s.a, s.b)); },
+    draw: function (s) {
+      var Oo = [0, 0], P = add(s.a, s.b);
+      el('path', { d: 'M' + sp(Oo).join(' ') + 'L' + sp(s.a).join(' ') + 'L' + sp(P).join(' ') + 'L' + sp(s.b).join(' ') + 'Z', fill: 'var(--vr)', 'fill-opacity': 0.07, stroke: '#cdbff0', 'stroke-dasharray': '5 4' });
+      arrow(Oo, P, C.r, { label: 'a+b', side: -1, w: 3 });
+      arrow(s.b, s.a, C.c, { label: 'a−b', side: 1, w: 3 });
+      arrow(Oo, s.a, C.a, { label: 'a', side: -1 }); arrow(Oo, s.b, C.b, { label: 'b', side: 1 });
+      handle('a', s.a, C.a); handle('b', s.b, C.b);
+      var A2 = VEC.len2(s.a), B2 = VEC.len2(s.b), D = VEC.dot(s.a, s.b);
+      return '<div class="m">' + M('|' + V('a') + '|² = ' + A2 + ', |' + V('b') + '|² = ' + B2 + ', ' + V('a') + ' · ' + V('b') + ' = ' + fmt(D)) + '</div>' +
+        '<div class="m">' + M('|' + V('a') + ' + ' + V('b') + '|² = ' + A2 + ' + 2 · ' + par(D) + ' + ' + B2 + ' = ' + (A2 + 2 * D + B2)) + '</div>' +
+        '<div class="m">' + M('|' + V('a') + ' − ' + V('b') + '|² = ' + A2 + ' − 2 · ' + par(D) + ' + ' + B2 + ' = ' + (A2 - 2 * D + B2)) + '</div>';
+    },
+    drag: function (s, id, p) { if (p[0] || p[1]) s[id] = p; },
+    steps: [
+      'Длину считаем через скалярный квадрат: ' + M('|' + V('a') + ' + ' + V('b') + '|² = (' + V('a') + ' + ' + V('b') + ') · (' + V('a') + ' + ' + V('b') + ')') + '.',
+      'Раскрываем скобки, как ' + M('(<i>x</i> + <i>y</i>)²') + ': ' + M('|' + V('a') + ' + ' + V('b') + '|² = |' + V('a') + '|² + 2 ' + V('a') + ' · ' + V('b') + ' + |' + V('b') + '|²') + '. Для разности то же с минусом.',
+      'Если диагонали параллелограмма равны, то ' + M('2' + V('a') + '·' + V('b') + ' = −2' + V('a') + '·' + V('b')) + ', то есть ' + M(V('a') + ' · ' + V('b') + ' = 0') + ': векторы перпендикулярны, а параллелограмм — прямоугольник.',
+      'Задача из ЕГЭ: ' + M('|' + V('a') + '| = 5, |' + V('b') + '| = 8, ' + V('a') + ' · ' + V('b') + ' = 12') + ', найти ' + M('|3' + V('a') + ' + ' + V('b') + '|') + '. ' + M('|3' + V('a') + ' + ' + V('b') + '|² = 9 · 25 + 2 · 3 · 12 + 64 = 361') + ', ответ ' + M('19') + '.'
+    ],
+    sum: M('|<i>m</i>' + V('a') + ' + <i>n</i>' + V('b') + '|² = <i>m</i>²|' + V('a') + '|² + 2<i>mn</i> ' + V('a') + '·' + V('b') + ' + <i>n</i>²|' + V('b') + '|²')
+  };
+  TOPICS['2.5'] = {
+    title: 'Векторы в треугольнике',
+    intro: 'В геометрических задачах ЕГЭ векторы задают сторонами треугольника. Главное — правильно увидеть угол между ними.',
+    init: { A: [-6, -3], B: [5, -3], Cc: [-1, 5], show: 'diff' },
+    exp: 'Тяни вершины. Сделай угол ' + M('<i>C</i>') + ' прямым.',
+    done: function (s) { return VEC.dot(sub(s.A, s.Cc), sub(s.B, s.Cc)) === 0; },
+    ctl: function (s) { ctlToggle([['diff', 'CA − CB'], ['sum', 'BA + BC'], ['ang', 'AB · AC и AB · CA']], s.show, function (v) { s.show = v; render(); }); },
+    draw: function (s) {
+      el('path', { d: 'M' + sp(s.A).join(' ') + 'L' + sp(s.B).join(' ') + 'L' + sp(s.Cc).join(' ') + 'Z', fill: '#f4f7fa', stroke: '#9fb0bc', 'stroke-width': 1.4 });
+      var out = '';
+      if (s.show === 'diff') {
+        arrow(s.Cc, s.A, C.a, { label: 'CA', side: 1 }); arrow(s.Cc, s.B, C.b, { label: 'CB', side: -1 });
+        arrow(s.B, s.A, C.r, { label: 'BA', side: 1, w: 3 });
+        out = M(V('CA') + ' − ' + V('CB') + ' = ' + V('BA')) + ', ' + M('|' + V('CA') + ' − ' + V('CB') + '| = <i>AB</i> = ' + lenTxt(sub(s.A, s.B)));
+      } else if (s.show === 'sum') {
+        var Mm = [(s.A[0] + s.Cc[0]) / 2, (s.A[1] + s.Cc[1]) / 2], D = add(s.B, add(sub(s.A, s.B), sub(s.Cc, s.B)));
+        seg(s.A, D, '#cdbff0', 1.3, true); seg(s.Cc, D, '#cdbff0', 1.3, true);
+        arrow(s.B, s.A, C.a, { label: 'BA', side: 1 }); arrow(s.B, s.Cc, C.b, { label: 'BC', side: -1 });
+        arrow(s.B, D, C.r, { label: 'BA+BC', side: 1, w: 3, plain: true });
+        dotP(Mm, C.q, 4.5, 'M', 8, 14);
+        out = M(V('BA') + ' + ' + V('BC') + ' = 2' + V('BM')) + ', где ' + M('<i>M</i>') + ' — середина ' + M('<i>AC</i>') + '. Длина: ' + M(lenTxt(add(sub(s.A, s.B), sub(s.Cc, s.B)))) + '.';
+      } else {
+        var ab = sub(s.B, s.A), ac = sub(s.Cc, s.A), ca = sub(s.A, s.Cc);
+        arrow(s.A, s.B, C.a, { label: 'AB', side: -1 }); arrow(s.A, s.Cc, C.b, { label: 'AC', side: 1 });
+        arrow(s.A, add(s.A, ca), C.c, { label: 'CA', side: -1, dash: true });
+        out = M(V('AB') + ' · ' + V('AC') + ' = ' + fmt(VEC.dot(ab, ac))) + ', ' + M(V('AB') + ' · ' + V('CA') + ' = ' + fmt(VEC.dot(ab, ca))) + ' (вектор ' + M(V('CA')) + ' перенесён в точку ' + M('<i>A</i>') + ' пунктиром).';
+      }
+      dotP(s.A, C.ink, 4, 'A', -16, 4); dotP(s.B, C.ink, 4, 'B', 8, 4); dotP(s.Cc, C.ink, 4, 'C', 6, -8);
+      handle('A', s.A, C.ink); handle('B', s.B, C.ink); handle('Cc', s.Cc, C.ink);
+      return '<div>' + out + '</div><div class="m">' + M('∠<i>C</i> ≈ ' + fmt(Math.round(angDeg(sub(s.A, s.Cc), sub(s.B, s.Cc)) * 10) / 10) + '°') + '</div>';
+    },
+    drag: function (s, id, p) { s[id] = p; },
+    steps: [
+      '<b>Разность с общим началом</b> (вид «CA − CB»): идёт из конца вычитаемого в конец уменьшаемого, ' + M(V('CA') + ' − ' + V('CB') + ' = ' + V('BA')) + '. Значит, ' + M('|' + V('CA') + ' − ' + V('CB') + '| = <i>AB</i>') + ' — сторона треугольника.',
+      '<b>Сумма с общим началом</b> (вид «BA + BC»): диагональ параллелограмма, она вдвое длиннее медианы: ' + M(V('BA') + ' + ' + V('BC') + ' = 2' + V('BM')) + '.',
+      '<b>Скалярное с общим началом</b> (вид «AB · AC»): угол между векторами — угол треугольника при этой вершине. В равностороннем со стороной ' + M('<i>a</i>') + ': ' + M(V('AB') + ' · ' + V('AC') + ' = <i>a</i>² · cos 60° = <i>a</i>²/2') + '.',
+      '<b>Ловушка</b> (вид «AB · CA»): векторы выходят не из одной точки. Перенесём ' + M(V('CA')) + ' в ' + M('<i>A</i>') + ' (пунктир): угол между ними ' + M('180° − ∠<i>A</i>') + ', поэтому ' + M(V('AB') + ' · ' + V('CA') + ' = −' + V('AB') + ' · ' + V('AC')) + '.'
+    ],
+    sum: M(V('CA') + ' − ' + V('CB') + ' = ' + V('BA')) + '; ' + M(V('BA') + ' + ' + V('BC') + ' = 2' + V('BM')) + '; угол между векторами ищем, отложив их от одной точки.'
+  };
+  /* ---- тренажёры ---- */
+  TOPICS['1.T'] = { title: 'Задачи как на ЕГЭ', trainer: 1 };
+  TOPICS['2.T'] = { title: 'Задачи как на ЕГЭ', trainer: 2 };
+  TOPICS['3.0'] = { title: 'Скоро', soon: true };
+
+  var PARTS = {
+    1: { name: '1. Введение', topics: ['1.1', '1.2', '1.3', '1.4', '1.5', '1.6', '1.T'] },
+    2: { name: '2. Скалярное произведение', topics: ['2.1', '2.2', '2.3', '2.4', '2.5', '2.T'] },
+    3: { name: '3. Координатный метод', topics: ['3.0'] }
+  };
+
+  /* ---------- отрисовка ---------- */
+  function nav() {
+    var p = $('parts');
+    p.innerHTML = '';
+    Object.keys(PARTS).forEach(function (k) {
+      var b = document.createElement('button'); b.className = 'tab'; b.type = 'button'; b.textContent = PARTS[k].name;
+      b.setAttribute('aria-selected', String(+k === S.part));
+      b.onclick = function () { S.part = +k; render(); };
+      p.appendChild(b);
+    });
+    var t = $('topics');
+    t.innerHTML = '';
+    PARTS[S.part].topics.forEach(function (id) {
+      var T = TOPICS[id], b = document.createElement('button'); b.type = 'button';
+      b.className = 'tp' + (S.topic[S.part] === id ? ' on' : '') + (topicDone(id) ? ' done' : '');
+      b.textContent = T.trainer ? 'Тренажёр' : T.soon ? 'Раздел в разработке' : id + ' ' + T.title;
+      b.onclick = function () { S.topic[S.part] = id; render(); };
+      t.appendChild(b);
+    });
+  }
+  function topicDone(id) { var T = TOPICS[id]; return T.steps && (S.step[id] || 0) >= T.steps.length; }
+  function stOf(id) { if (!S.st[id]) S.st[id] = JSON.parse(JSON.stringify(TOPICS[id].init)); return S.st[id]; }
+
+  var curTask = null;
+  function render() {
+    nav();
+    var id = S.topic[S.part], T = TOPICS[id];
+    handles = [];
+    $('planeCtl').innerHTML = '';
+    grid();
+    if (T.trainer) { renderTrainer(T.trainer); save(); return; }
+    if (T.soon) { renderSoon(); save(); return; }
+    var s = stOf(id), step = S.step[id] || 0;
+    var live = T.draw(s, step);
+    if (T.ctl) T.ctl(s);
+    $('planeHint').textContent = 'Кружки с пунктиром можно тянуть мышкой или пальцем. Точки встают в узлы сетки.';
+    var ok = T.done(s);
+    if (ok) S.expOk[id] = true;
+    var h = '<h2>' + id + '. ' + T.title + '</h2><p style="margin:0">' + T.intro + '</p>';
+    h += '<div class="box exp"><b>Опыт</b><div>' + T.exp + '</div>' + (ok ? '<div class="box ok" style="padding:6px 10px">Получилось!' + (step ? '' : ' Нажми «Дальше», чтобы разобраться, что произошло.') + '</div>' : '') + '</div>';
+    h += '<div class="box read">' + live + '</div>';
+    if (step > 0) h += '<ol class="steps">' + T.steps.slice(0, step).map(function (x, i) { return '<li' + (i === step - 1 ? ' class="new"' : '') + '>' + x + '</li>'; }).join('') + '</ol>';
+    if (step >= T.steps.length) h += '<div class="box sum"><b>Итог</b><div class="formula">' + T.sum + '</div></div>';
+    h += '<div class="ctl">';
+    if (step < T.steps.length) h += '<button class="btn main" type="button" id="next">' + (step ? 'Дальше' : (S.expOk[id] ? 'Дальше' : 'Пропустить опыт и читать дальше')) + '</button>';
+    if (step) h += '<button class="btn minor" type="button" id="back">Назад</button>';
+    if (step >= T.steps.length) {
+      var list = PARTS[S.part].topics, i2 = list.indexOf(id);
+      if (list[i2 + 1]) h += '<button class="btn main" type="button" id="nextTopic">Следующая тема: ' + (TOPICS[list[i2 + 1]].trainer ? 'тренажёр' : TOPICS[list[i2 + 1]].title) + '</button>';
+    }
+    h += '<button class="btn minor" type="button" id="resetT">Вернуть чертёж</button></div>';
+    $('right').innerHTML = h;
+    if ($('next')) $('next').onclick = function () { S.step[id] = step + 1; render(); };
+    if ($('back')) $('back').onclick = function () { S.step[id] = step - 1; render(); };
+    if ($('nextTopic')) $('nextTopic').onclick = function () { var list = PARTS[S.part].topics; S.topic[S.part] = list[list.indexOf(id) + 1]; render(); };
+    $('resetT').onclick = function () { delete S.st[id]; render(); };
+    save();
+  }
+  function renderSoon() {
+    $('planeHint').textContent = '';
+    $('right').innerHTML = '<h2>3. Координатный метод</h2><p style="margin:0">Этот раздел появится позже. Он будет про векторы в пространстве и задачу 14 ЕГЭ.</p>' +
+      '<div class="box info"><b>Что будет внутри</b><ol class="plan">' +
+      '<li>Координаты в пространстве: точка, вектор, длина, середина отрезка.</li>' +
+      '<li>Как ввести систему координат в кубе, призме, пирамиде.</li>' +
+      '<li>Угол между прямыми через скалярное произведение.</li>' +
+      '<li>Уравнение плоскости и вектор нормали.</li>' +
+      '<li>Угол между прямой и плоскостью, между плоскостями.</li>' +
+      '<li>Расстояние от точки до плоскости.</li></ol></div>';
+  }
+
+  /* =====================================================================
+     Тренажёр: задачи как на ЕГЭ, свои числа каждый раз
+     ===================================================================== */
+  function renderTrainer(part) {
+    var types = Object.keys(VEC.GEN).filter(function (k) { return VEC.GEN[k].part === part; });
+    var sel = S.types[part] || 'all';
+    if (!curTask || curTask.part !== part || (sel !== 'all' && curTask.type !== sel)) newTask(part);
+    var t = curTask;
+    if (t.pic) drawPic(t.pic); else $('planeHint').textContent = '';
+    if (t.pic) $('planeHint').textContent = 'Векторы задачи. Начала и концы стрелок — в узлах сетки.';
+    var nSolved = types.reduce(function (n, k) { return n + (S.solved[k] || 0); }, 0);
+    var h = '<h2>Задачи как на ЕГЭ</h2><div class="types">' + '<button type="button" data-ty="all" class="' + (sel === 'all' ? 'on' : '') + '">все типы</button>' +
+      types.map(function (k) { return '<button type="button" data-ty="' + k + '" class="' + (sel === k ? 'on' : '') + '">' + VEC.GEN[k].name + (S.solved[k] ? ' · ' + S.solved[k] : '') + '</button>'; }).join('') + '</div>';
+    h += '<div class="stat">Решено в этой части: ' + nSolved + '</div>';
+    h += '<div class="box read"><div class="cond">' + t.text + '</div>';
+    if (t.pair) h += '<div class="ans">' + M('(') + '<input id="ax" inputmode="decimal" aria-label="первая координата">' + M(';') + '<input id="ay" inputmode="decimal" aria-label="вторая координата">' + M(')') + '</div>';
+    else h += '<div class="ans"><span>Ответ:</span><input id="a1" inputmode="decimal" aria-label="ответ"></div>';
+    h += '<div class="ctl"><button class="btn main" type="button" id="chk">Проверить</button><button class="btn help" type="button" id="hnt">Подсказка</button><button class="btn help" type="button" id="sol">Решение</button><button class="btn minor" type="button" id="nw">Новая задача</button></div>';
+    h += '<div id="fb"></div></div>';
+    h += '<p class="hint">Ответ можно вводить с запятой (−6,6), дробью (1/2) или с корнем (2√13 или 2sqrt13).</p>';
+    $('right').innerHTML = h;
+    [].forEach.call($('right').querySelectorAll('[data-ty]'), function (b) { b.onclick = function () { S.types[part] = b.dataset.ty; newTask(part); render(); }; });
+    $('nw').onclick = function () { newTask(part); render(); };
+    $('hnt').onclick = function () { fb('info', '<b>Подсказка.</b> ' + t.hint); };
+    $('sol').onclick = function () { fb('info', '<b>Решение.</b><ol class="steps" style="margin-top:6px">' + t.sol.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ol><div>Ответ: ' + M(t.pair ? co(t.pair) : fmt(t.ans)) + '</div>'); t.shown = true; };
+    var inputs = t.pair ? [$('ax'), $('ay')] : [$('a1')];
+    inputs.forEach(function (inp) { inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') $('chk').click(); }); });
+    $('chk').onclick = function () {
+      var ok;
+      if (t.pair) {
+        var x = VEC.parse($('ax').value), y = VEC.parse($('ay').value);
+        if (isNaN(x) || isNaN(y)) { fb('warn', 'Впиши обе координаты числами.'); return; }
+        var okx = VEC.same(x, t.pair[0]), oky = VEC.same(y, t.pair[1]);
+        $('ax').className = okx ? 'right' : 'wrong'; $('ay').className = oky ? 'right' : 'wrong';
+        ok = okx && oky;
+        if (!ok) { fb('no', (okx || oky ? 'Одна координата верная, другая нет. ' : 'Пока неверно. ') + (VEC.same(x, -t.pair[0]) && VEC.same(y, -t.pair[1]) ? 'Похоже, вычли начало из конца наоборот: нужно «конец минус начало».' : 'Проверь знаки и порядок: сначала x, потом y.')); return; }
+      } else {
+        var v = VEC.parse($('a1').value);
+        if (isNaN(v)) { fb('warn', 'Не получилось прочитать число. Пиши, например, 3,7 или −15 или 2√13.'); return; }
+        ok = VEC.same(v, t.ans);
+        $('a1').className = ok ? 'right' : 'wrong';
+        if (!ok) { fb('no', 'Пока неверно.' + (VEC.same(v, -t.ans) ? ' Знак не тот.' : VEC.same(v * v, t.ans) ? ' Похоже, это квадрат ответа: не забудь извлечь корень.' : VEC.same(v, t.ans * t.ans) ? ' Похоже, ты не извлёк(ла) корень.' : '') + ' Нажми «Подсказка», если нужно.'); return; }
+      }
+      if (!t.counted && !t.shown) { S.solved[t.type] = (S.solved[t.type] || 0) + 1; t.counted = true; save(); }
+      fb('ok', '<b>Верно!</b> ' + (t.shown ? '' : 'Нажми «Новая задача», чтобы закрепить.'));
+    };
+  }
+  function fb(cls, html) { $('fb').innerHTML = '<div class="box ' + cls + '" style="margin-top:6px">' + html + '</div>'; }
+  function newTask(part) {
+    var types = Object.keys(VEC.GEN).filter(function (k) { return VEC.GEN[k].part === part; });
+    var sel = S.types[part] || 'all', ty = sel === 'all' ? types[Math.floor(Math.random() * types.length)] : sel;
+    var t = VEC.GEN[ty].make();
+    t.type = ty; t.part = part;
+    curTask = t;
+  }
+  function drawPic(pl) {
+    var cols = { a: C.a, b: C.b, c: C.c };
+    Object.keys(pl).forEach(function (k) {
+      var v = pl[k], e = add(v.s, v.v);
+      arrow(v.s, e, cols[k] || C.r, { label: k, side: 1, w: 2.8 });
+    });
+  }
+
+  /* ---------- перетаскивание ручек ---------- */
+  var drag = null;
+  function svgXY(e) { var r = svg.getBoundingClientRect(); return [(e.clientX - r.left) * W / r.width, (e.clientY - r.top) * W / r.height]; }
+  function toP(xy) { return [Math.max(-9, Math.min(9, Math.round((xy[0] - O) / SC))), Math.max(-9, Math.min(9, Math.round((O - xy[1]) / SC)))]; }
+  svg.addEventListener('pointerdown', function (e) {
+    var xy = svgXY(e), best = null, bd = 18;
+    handles.forEach(function (h) { var A = sp(h.p), d = Math.hypot(A[0] - xy[0], A[1] - xy[1]); if (d < bd) { bd = d; best = h; } });
+    if (!best) return;
+    drag = best.id; svg.setPointerCapture(e.pointerId); svg.classList.add('dragging'); e.preventDefault();
+  });
+  svg.addEventListener('pointermove', function (e) {
+    var xy = svgXY(e);
+    if (!drag) { svg.classList.toggle('grab', handles.some(function (h) { var A = sp(h.p); return Math.hypot(A[0] - xy[0], A[1] - xy[1]) < 18; })); return; }
+    var id = S.topic[S.part], T = TOPICS[id], s = stOf(id), p = toP(xy);
+    var before = JSON.stringify(s);
+    T.drag(s, drag, p);
+    if (JSON.stringify(s) !== before) render();
+  });
+  function endDrag() { drag = null; svg.classList.remove('dragging'); }
+  svg.addEventListener('pointerup', endDrag);
+  svg.addEventListener('pointercancel', endDrag);
+
+  var hs = (location.hash || '').slice(1);
+  if (/^[123]$/.test(hs)) S.part = +hs;
+  render();
+})();
+</script>
+</body>
+</html>
