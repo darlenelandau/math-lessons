@@ -6,7 +6,7 @@
 <title>Векторная лаборатория</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Unbounded:wght@500;600&family=Nunito:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap">
 <style>
 :root {
   color-scheme: light;
@@ -88,64 +88,40 @@ ol.steps li.new { animation: appear .4s ease-out; }
 .plan { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 6px; }
 .lbl { font: italic 19px "Times New Roman", Times, serif; paint-order: stroke; stroke: var(--plane-bg); stroke-width: 4px; stroke-linejoin: round; }
 .num { font: 12px "Golos Text", sans-serif; fill: var(--muted); }
-/* ===== переключатель оформления ===== */
-.palsw { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: .85rem; color: var(--muted); }
-.palsw button { font: 600 .82rem inherit; font-family: inherit; padding: 4px 12px; border-radius: 99px; border: 1px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; }
-.palsw button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
-
-/* ===== Палитра 2: ретро-пастель (образец: стили/палитры_с_картинок.html#retro) ===== */
-[data-pal="retro"] {
-  --bg: #fbf5ee; --paper: #fffdf9; --paper-2: #f7efdc; --ink: #422f0e; --muted: #7c6a52; --line: #eee2cf;
-  --accent: #037f71; --accent-dark: #025c52; --accent-soft: #d6efe9;
-  --ok: #037f71; --ok-soft: #ddf2b8; --no: #d4492c; --no-soft: #fcc4c0; --warn: #9a5a00; --warn-soft: #f7e9b2;
-  --t1: #f9d4f8; --t2: #aecfd0; --t3: #ffd094; --t4: #ddf2b8;
-  --va: #ef6545; --vb: #3b8fa6; --vr: #e98a12; --vc: #ea5e86; --q: #9a5a00;
-  --hint: #037f71; --hint-soft: #d6efe9;
-  --grid: #f3e9d6;
-  --gl: var(--paper-2); --axis: var(--muted); --oblique: #f3e3f3; --pgram: #e8cfa8; --projline: var(--paper-2); --tri-line: var(--muted); --tri-fill: #fbf3e4; --plane-bg: var(--paper);
-  --head: Unbounded, system-ui, sans-serif; --font: Nunito, system-ui, sans-serif;
-  --shadow: 0 1px 2px rgba(80, 55, 20, .06), 0 6px 18px rgba(80, 55, 20, .07);
+/* ===== Оформление: тёмно-зелёная доска на фоне, бело-бежевый лист для работы =====
+   Фон доски: chalk-formulas.svg рядом со страницей (собирается claudespace/стили/формулы_мелом_генератор.py). */
+:root { --bg: #1d3329; --ink: #eef0e6; --muted: #a8b9ae; --line: #3a5649; --paper: #213a30; }
+html { background: #1c3128; }
+html body { min-height: 100vh; background-color: #1d3329;
+  background-image: radial-gradient(ellipse at 50% 40%, transparent 40%, rgba(0,0,0,.35) 100%), url("chalk-formulas.svg");
+  background-size: 100% 100%, 1200px 820px; background-repeat: no-repeat, repeat; background-attachment: fixed; }
+/* на доске: заголовок и вкладки мелом */
+html .tab, html .tp { background: transparent; color: var(--ink); border-color: var(--line); }
+html .tab[aria-selected="true"], html .tp.on { background: var(--ink); border-color: var(--ink); color: #1d3329; }
+html .tp.done { background: transparent; border-color: #9fdcb0; color: #9fdcb0; }
+html .tp.on.done { background: #9fdcb0; border-color: #9fdcb0; color: #1d3329; }
+/* лист: свои светлые цвета */
+html .sheet {
+  --bg: #f6f1e6; --paper: #fbf8f0; --paper-2: #f1eadc; --ink: #262a22; --muted: #6c6a5d; --line: #e3dbc9; --faint: #cfc6b3;
+  --accent: #24493a; --accent-dark: #1a372b; --accent-soft: #e2ebe4;
+  --ok: #2c7a4e; --ok-soft: #e3f0e5; --no: #b5492f; --no-soft: #f8e2da; --warn: #8f5d0c; --warn-soft: #f8ecd2;
+  --hint: #5d4fa8; --hint-soft: #ece8f8; --q: #a0660a;
+  --va: #d9532f; --vb: #2a74a8; --vc: #c94a7c; --vr: #c98410;
+  --gl: #ebe3d3; --axis: #8d877a; --oblique: #efe7f6; --pgram: #c9bce8; --projline: #e2dacb; --tri-line: #a39d8f; --tri-fill: #f5efe3; --plane-bg: #fffdf8;
+  color: var(--ink); background: var(--paper); border: 0; border-radius: 18px;
+  box-shadow: 0 2px 0 rgba(255,255,255,.5) inset, 0 24px 60px rgba(0,0,0,.35), 0 4px 12px rgba(0,0,0,.2);
 }
-[data-pal="retro"] body { font-family: var(--font); background: var(--bg); background-image: none; }
-[data-pal="retro"] h1 { font: 600 clamp(1.4rem, 3vw, 1.9rem)/1.2 var(--head); }
-[data-pal="retro"] h2 { font: 500 1.08rem/1.35 var(--head); }
-[data-pal="retro"] .sheet { border: 0; border-radius: 20px; box-shadow: var(--shadow); }
-[data-pal="retro"] svg.plane { border-radius: 16px; border-color: var(--line); }
-[data-pal="retro"] .tab, [data-pal="retro"] .tp, [data-pal="retro"] .btn, [data-pal="retro"] .types button, [data-pal="retro"] .palsw button { font-family: var(--font); font-weight: 700; }
-[data-pal="retro"] .tab { border-radius: 99px; background: transparent; color: var(--ink); border-color: var(--line); }
-[data-pal="retro"] .tab[aria-selected="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-[data-pal="retro"] .tp { border-radius: 10px; background: transparent; color: var(--ink); border-color: var(--line); }
-[data-pal="retro"] .tp:hover { border-color: var(--accent); }
-[data-pal="retro"] .tp.on { background: var(--accent); border-color: var(--accent); color: #fff; }
-[data-pal="retro"] .tp.done { background: var(--ok-soft); border-color: var(--ok-soft); color: var(--ink); }
-[data-pal="retro"] .tp.on.done { background: var(--accent); border-color: var(--accent); color: #fff; }
-/* одна кнопка-акцент, остальные прозрачные с рамкой */
-[data-pal="retro"] .btn { border-radius: 10px; background: transparent; border-color: var(--line); color: var(--ink); }
-[data-pal="retro"] .btn:hover, [data-pal="retro"] .btn:focus-visible { background: transparent; border-color: var(--accent); }
-[data-pal="retro"] .btn.main { background: var(--accent); border-color: var(--accent); color: #fff; }
-[data-pal="retro"] .btn.main:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
-[data-pal="retro"] .btn.help, [data-pal="retro"] .btn.minor { color: var(--ink); border-color: var(--line); }
-[data-pal="retro"] .types button { border-radius: 99px; background: transparent; color: var(--ink); }
-[data-pal="retro"] .types button.on { background: var(--ink); border-color: var(--ink); color: var(--paper); }
-[data-pal="retro"] .ans input { border-radius: 10px; border-color: var(--line); background: #fff; color: var(--ink); font-family: var(--font); }
-[data-pal="retro"] .ans input:focus-visible { outline-color: var(--accent); }
-[data-pal="retro"] .ans input.right { background: var(--ok-soft); border-color: var(--ok); }
-[data-pal="retro"] .ans input.wrong { background: var(--no-soft); border-color: var(--no); }
-[data-pal="retro"] .ctl input[type="range"] { accent-color: var(--accent); }
-/* карточки: 20px; текст везде шоколадный */
-[data-pal="retro"] .box { border-radius: 20px; padding: 12px 16px; color: var(--ink); }
-[data-pal="retro"] .exp { border: 0; background: #fff4e0; }
-[data-pal="retro"] .exp > b:first-child, [data-pal="retro"] .sum > b:first-child { color: var(--ink); font-family: var(--font); letter-spacing: .06em; }
-[data-pal="retro"] .read { border: 1px solid var(--line); background: var(--paper); }
-[data-pal="retro"] .sum { border: 0; background: var(--accent-soft); }
-[data-pal="retro"] .ok, [data-pal="retro"] .no, [data-pal="retro"] .warn, [data-pal="retro"] .info { border-radius: 10px; }
-[data-pal="retro"] .ok { background: var(--ok-soft); border-left: 4px solid var(--ok); }
-[data-pal="retro"] .no { background: var(--no-soft); border-left: 4px solid var(--no); }
-[data-pal="retro"] .warn { background: var(--warn-soft); border-left: 4px solid var(--warn); }
-[data-pal="retro"] .info { background: var(--paper-2); border-left: 4px solid var(--accent); }
-[data-pal="retro"] .readout b, [data-pal="retro"] summary { color: var(--ink); }
-[data-pal="retro"] .stat, [data-pal="retro"] .hint, [data-pal="retro"] .lead { color: var(--muted); }
-[data-pal="retro"] .num { fill: var(--muted); font-family: var(--font); }
+html svg.plane { border-color: var(--line); border-radius: 12px; }
+html .btn { background: transparent; border-color: var(--line); color: var(--ink); }
+html .btn:hover, html .btn:focus-visible { border-color: var(--accent); background: transparent; }
+html .btn.main { background: var(--accent); border-color: var(--accent); color: #fff; }
+html .btn.help { color: var(--hint); border-color: var(--line); }
+html .types button { background: transparent; color: var(--ink); }
+html .types button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+html .ans input { background: #fff; color: var(--ink); }
+html .exp { background: #fbf1dc; }
+html .info { background: var(--accent-soft); }
+html .ctl input[type="range"] { accent-color: var(--accent); }
 </style>
 </head>
 <body>
@@ -153,7 +129,6 @@ ol.steps li.new { animation: appear .4s ease-out; }
   <header style="display:flex;flex-direction:column;gap:10px">
     <div style="display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between">
       <h1>Векторная лаборатория</h1>
-      <div class="palsw" role="group" aria-label="Оформление">Оформление: <button type="button" data-pal="" aria-pressed="true">исходное</button><button type="button" data-pal="retro" aria-pressed="false">палитра 2</button></div>
     </div>
     <div class="tabs" role="tablist" id="parts"></div>
     <div class="topics" id="topics"></div>
@@ -169,19 +144,6 @@ ol.steps li.new { animation: appear .4s ease-out; }
 </div>
 
 <script>
-/* оформление: data-pal на <html>; запоминается в браузере, #retro в адресе включает палитру 2 */
-(function () {
-  var de = document.documentElement, pal = '';
-  try { pal = localStorage.getItem('vector-lab-pal') || ''; } catch (e) {}
-  if (/retro/.test(location.hash)) pal = 'retro';
-  function set(p) {
-    if (p) de.setAttribute('data-pal', p); else de.removeAttribute('data-pal');
-    [].forEach.call(document.querySelectorAll('.palsw button'), function (b) { b.setAttribute('aria-pressed', String(b.dataset.pal === p)); });
-    try { localStorage.setItem('vector-lab-pal', p); } catch (e) {}
-  }
-  [].forEach.call(document.querySelectorAll('.palsw button'), function (b) { b.onclick = function () { set(b.dataset.pal); }; });
-  set(pal);
-})();
 /*LOGIC-START*/
 var VEC = (function () {
   /* ---------- числа ---------- */
