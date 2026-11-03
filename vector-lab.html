@@ -45,6 +45,17 @@ h2 { margin: 0; font-size: 1.25rem; line-height: 1.3; }
 .colR { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 svg.plane { width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 8px; background: var(--plane-bg); touch-action: none; user-select: none; -webkit-user-select: none; }
 svg.plane.grab { cursor: grab; }
+.theory { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+.theory h3 { margin: 4px 0 0; font-size: 1.05rem; }
+.theory details { border: 1px solid var(--line); border-radius: 12px; padding: 8px 14px; background: var(--paper); }
+.theory details[open] { background: #fff; }
+.theory summary { cursor: pointer; font-weight: 700; color: var(--ink); }
+.theory details > div { padding-top: 8px; display: flex; flex-direction: column; gap: 8px; line-height: 1.6; }
+.theory ul, .theory ol { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 5px; }
+.theory .ex { border-left: 3px solid var(--accent); padding: 4px 10px; background: var(--accent-soft); border-radius: 6px; }
+.theory .warn { border-left: 3px solid var(--no); padding: 4px 10px; background: var(--no-soft); border-radius: 6px; }
+table.coords { border-collapse: collapse; font-variant-numeric: tabular-nums; }
+table.coords td { border: 1px solid var(--line); padding: 3px 10px; }
 .ctl label.rng { display: inline-flex; gap: 8px; align-items: center; }
 .ctl label.rng .m { min-width: 2.2em; color: var(--ink); }
 .rnum { width: 4.6em; flex: none; font: 600 1rem "Golos Text", sans-serif; text-align: center; padding: 4px 6px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink); }
@@ -1228,6 +1239,7 @@ var VEC = (function () {
     /* подгонка масштаба по всему, что рисуем */
     var all = [];
     if (Vb) Object.keys(Vb).forEach(function (k) { all.push(Vb[k]); });
+    if (sc.body) Object.keys(sc.body.V).forEach(function (k) { all.push(sc.body.V[k]); });
     var ax = sc.axes || (dims ? [dims[0] * 1.45 + 0.4, dims[1] * 1.45 + 0.4, dims[2] * 1.3 + 0.4] : [4, 4, 4]);
     all.push([ax[0], 0, 0], [0, ax[1], 0], [0, 0, ax[2]], [0, 0, 0]);
     if (sc.neg) all.push([-ax[0], 0, 0], [0, -ax[1], 0], [0, 0, -ax[2]]);
@@ -1279,7 +1291,8 @@ var VEC = (function () {
     /* плоскости-сечения */
     var PCOL = ['var(--vb)', 'var(--vr)'];
     (sc.planes || []).forEach(function (pl, i) {
-      var P = pl.map(function (n) { return P3of(sc, n); }), np = V3.plane3(P[0], P[1], P[2]);
+      var np;
+      if (pl.n) np = pl; else { var P = pl.map(function (n) { return P3of(sc, n); }); np = V3.plane3(P[0], P[1], P[2]); }
       if (!np || !Vb) return;
       var poly = sectionPoly(np.n, np.d, Vb);
       if (poly.length < 3) return;
@@ -1305,6 +1318,19 @@ var VEC = (function () {
         ln(p, q, 'var(--ink)', vis ? 1.9 : 1.3, vis ? false : '6 5');
       });
     }
+    /* произвольное выпуклое тело: грани → рёбра, видимость по внешним нормалям */
+    if (sc.body) {
+      var BV = sc.body.V, nm = Object.keys(BV), cen = nm.reduce(function (a, k) { return add3(a, mul3(BV[k], 1 / nm.length)); }, [0, 0, 0]);
+      var fn = sc.body.F.map(function (f) {
+        var nn = V3.cross3(sub3(BV[f[1]], BV[f[0]]), sub3(BV[f[2]], BV[f[0]]));
+        if (dot3(nn, sub3(cen, BV[f[0]])) > 0) nn = mul3(nn, -1);
+        return dot3(nn, K.v) > 1e-9;
+      });
+      var ed = {};
+      sc.body.F.forEach(function (f, fi) { f.forEach(function (a, i) { var b = f[(i + 1) % f.length], key = [a, b].sort().join('|'); (ed[key] = ed[key] || { a: a, b: b, vis: false }).vis = ed[key].vis || fn[fi]; }); });
+      Object.keys(ed).forEach(function (k) { var e = ed[k]; ln(BV[e.a], BV[e.b], 'var(--ink)', e.vis ? 1.9 : 1.3, e.vis ? false : '6 5'); });
+      sc.center = sc.center || cen;
+    }
     if (sc.custom) sc.custom(sc);
     /* отрезки-прямые */
     var SC = { a: 'var(--va)', b: 'var(--vb)', r: 'var(--vr)', c: 'var(--vc)' };
@@ -1326,6 +1352,7 @@ var VEC = (function () {
     (sc.vecs || []).forEach(function (v) { arr(v.from, v.to, SC[v.col] || v.col, 2.8); if (v.label) lab(mul3(add3(v.from, v.to), 0.5), v.label, SC[v.col] || v.col, 10, 17); });
     function dotAt(p, col, r) { var A = S3(p); el('circle', { cx: A[0], cy: A[1], r: r || 4.2, fill: col, stroke: 'var(--plane-bg)', 'stroke-width': 1.5 }); }
     if (Vb) Object.keys(Vb).forEach(function (k) { dotAt(Vb[k], 'var(--ink)', 3); lab(Vb[k], k); });
+    if (sc.body) Object.keys(sc.body.V).forEach(function (k) { dotAt(sc.body.V[k], 'var(--ink)', 3); lab(sc.body.V[k], k); });
     Object.keys(sc.pts || {}).forEach(function (k) { if (Vb && Vb[k]) { if ((sc.hl || []).indexOf(k) >= 0) dotAt(Vb[k], 'var(--vr)', 5.5); return; } dotAt(sc.pts[k], (sc.hl || []).indexOf(k) >= 0 ? 'var(--vr)' : 'var(--va)', 4.5); lab(sc.pts[k], k, 'var(--ink)'); });
     if (sc.after) sc.after(sc);
   }
@@ -1360,14 +1387,44 @@ var VEC = (function () {
   function plName(p) { return M('<i>' + p.map(V3.nm3).join('') + '</i>'); }
   var HINT3 = 'Чертёж можно вращать: тяни его мышкой или пальцем. Точки выбирай в списках под чертежом.';
 
+  var R3 = Math.sqrt(3);
+  var BODIES = {
+    cube: { name: 'куб', V: CUBE, F: [['A', 'B', 'C', 'D'], ['A1', 'B1', 'C1', 'D1'], ['A', 'B', 'B1', 'A1'], ['B', 'C', 'C1', 'B1'], ['C', 'D', 'D1', 'C1'], ['D', 'A', 'A1', 'D1']],
+      tab: [['A', '(0; 0; 0)'], ['B', '(<i>a</i>; 0; 0)'], ['C', '(<i>a</i>; <i>a</i>; 0)'], ['D', '(0; <i>a</i>; 0)'], ['A1', '(0; 0; <i>a</i>)'], ['B1', '(<i>a</i>; 0; <i>a</i>)'], ['C1', '(<i>a</i>; <i>a</i>; <i>a</i>)'], ['D1', '(0; <i>a</i>; <i>a</i>)']],
+      why: 'Из вершины ' + M('<i>A</i>') + ' выходят три взаимно перпендикулярных ребра — по ним и идут оси. Каждая координата вершины равна 0 или ' + M('<i>a</i>') + '.' },
+    prism3: { name: 'правильная треугольная призма', V: { A: [0, 0, 0], B: [2, 0, 0], C: [1, R3, 0], A1: [0, 0, 2], B1: [2, 0, 2], C1: [1, R3, 2] }, F: [['A', 'B', 'C'], ['A1', 'B1', 'C1'], ['A', 'B', 'B1', 'A1'], ['B', 'C', 'C1', 'B1'], ['C', 'A', 'A1', 'C1']],
+      tab: [['A', '(0; 0; 0)'], ['B', '(<i>a</i>; 0; 0)'], ['C', '(<i>a</i>/2; <i>a</i>√3/2; 0)'], ['A1', '(0; 0; <i>h</i>)'], ['B1', '(<i>a</i>; 0; <i>h</i>)'], ['C1', '(<i>a</i>/2; <i>a</i>√3/2; <i>h</i>)']],
+      why: 'В основании нет прямого угла, поэтому ось ' + M('<i>y</i>') + ' проводим сами: в плоскости основания, перпендикулярно ' + M('<i>AB</i>') + '. Точка ' + M('<i>C</i>') + ' стоит над серединой ' + M('<i>AB</i>') + ' на высоте правильного треугольника ' + M('<i>a</i>√3/2') + '. Ось ' + M('<i>z</i>') + ' — вдоль бокового ребра ' + M('<i>AA</i><sub>1</sub>') + '.' },
+    pyr4: { name: 'правильная четырёхугольная пирамида', V: { A: [0, 0, 0], B: [2, 0, 0], C: [2, 2, 0], D: [0, 2, 0], S: [1, 1, 2] }, F: [['A', 'B', 'C', 'D'], ['S', 'A', 'B'], ['S', 'B', 'C'], ['S', 'C', 'D'], ['S', 'D', 'A']], O: [1, 1, 0],
+      tab: [['A', '(0; 0; 0)'], ['B', '(<i>a</i>; 0; 0)'], ['C', '(<i>a</i>; <i>a</i>; 0)'], ['D', '(0; <i>a</i>; 0)'], ['S', '(<i>a</i>/2; <i>a</i>/2; <i>h</i>)']],
+      why: 'В основании квадрат, поэтому оси ' + M('<i>x</i>, <i>y</i>') + ' — по его сторонам, как в кубе. Вершина ' + M('<i>S</i>') + ' стоит над центром квадрата ' + M('<i>O</i>') + ' на высоте ' + M('<i>h</i>') + '. Часто удобнее начало в ' + M('<i>O</i>') + ': тогда ' + M('<i>S</i>(0; 0; <i>h</i>)') + ', а оси идут по диагоналям или параллельно сторонам.' },
+    pyr3: { name: 'правильная треугольная пирамида', V: { A: [0, 0, 0], B: [2, 0, 0], C: [1, R3, 0], S: [1, R3 / 3, 2] }, F: [['A', 'B', 'C'], ['S', 'A', 'B'], ['S', 'B', 'C'], ['S', 'C', 'A']], O: [1, R3 / 3, 0],
+      tab: [['A', '(0; 0; 0)'], ['B', '(<i>a</i>; 0; 0)'], ['C', '(<i>a</i>/2; <i>a</i>√3/2; 0)'], ['S', '(<i>a</i>/2; <i>a</i>√3/6; <i>h</i>)']],
+      why: 'Основание как в правильной призме. Вершина ' + M('<i>S</i>') + ' стоит над центром ' + M('<i>O</i>') + ' правильного треугольника: это точка пересечения медиан, она делит медиану в отношении ' + M('2 : 1') + ' от вершины. Поэтому ' + M('<i>O</i>') + ' на высоте ' + M('<i>a</i>√3/6') + ' (треть высоты) от стороны ' + M('<i>AB</i>') + '.' }
+  };
+  function drawBody(s) {
+    var B = BODIES[s.body];
+    s.seen = s.seen || {}; s.seen[s.body] = 1;
+    var mx = [0, 0, 0];
+    Object.keys(B.V).forEach(function (k) { for (var i = 0; i < 3; i++) mx[i] = Math.max(mx[i], B.V[k][i]); });
+    draw3({ body: { V: B.V, F: B.F }, axes: [mx[0] * 1.45 + 0.4, mx[1] * 1.45 + 0.5, mx[2] * 1.3 + 0.4],
+      after: function (sc) { if (B.O) { var S0 = B.V.S; sc.ln(S0, B.O, 'var(--vr)', 1.6, '5 4'); sc.dotAt(B.O, 'var(--vr)', 4); sc.lab(B.O, 'O', 'var(--vr)', 14, 17); } } });
+    return '<div><b>' + B.name[0].toUpperCase() + B.name.slice(1) + '</b>' + (s.body === 'cube' ? ' (ребро ' + M('<i>a</i>') + ')' : ' (сторона основания ' + M('<i>a</i>') + ', ' + (s.body === 'prism3' ? 'боковое ребро' : 'высота') + ' ' + M('<i>h</i>') + ')') + '. Начало в ' + M('<i>A</i>') + ', ' + M('<i>x</i>') + ' вдоль ' + M('<i>AB</i>') + '.</div>' +
+      '<table class="coords">' + B.tab.map(function (r) { return '<tr><td>' + M('<i>' + V3.nm3(r[0]) + '</i>') + '</td><td>' + M(r[1]) + '</td></tr>'; }).join('') + '</table><div>' + B.why + '</div>';
+  }
   TOPICS['3.1'] = {
     title: 'Прямоугольная система координат',
     intro: 'В пространстве три оси: ' + M('<i>x</i>, <i>y</i>, <i>z</i>') + '. Каждая точка получает три координаты.',
-    init: { x: 2, y: 1, z: 2 },
-    exp: 'Поставь точку ' + M('<i>P</i>(1; −2; 3)') + ' ползунками. Покрути чертёж, чтобы увидеть её со всех сторон.',
-    done: function (s) { return s.x === 1 && s.y === -2 && s.z === 3; },
-    ctl: function (s) { ctlRange('<i>x</i> =', 'x', -3, 3, 1, s, render); ctlRange('<i>y</i> =', 'y', -3, 3, 1, s, render); ctlRange('<i>z</i> =', 'z', -3, 3, 1, s, render); },
+    init: { x: 2, y: 1, z: 2, mode: 'pt', body: 'prism3', seen: {} },
+    exp: function (s) { return s.mode === 'body' ? 'Посмотри, как вводят систему в трёх разных телах (переключатель под чертежом). Для каждой вершины найди на рисунке её три «шага» вдоль осей.' : 'Поставь точку ' + M('<i>P</i>(1; −2; 3)') + ' ползунками или числами. Покрути чертёж, чтобы увидеть её со всех сторон.'; },
+    done: function (s) { return s.mode === 'body' ? Object.keys(s.seen || {}).length >= 3 : s.x === 1 && s.y === -2 && s.z === 3; },
+    ctl: function (s) {
+      ctlToggle([['pt', 'точка в пространстве'], ['body', 'система в теле']], s.mode || 'pt', function (v) { s.mode = v; render(); });
+      if (s.mode === 'body') ctlToggle(Object.keys(BODIES).map(function (k) { return [k, BODIES[k].name]; }), s.body, function (v) { s.body = v; render(); });
+      else { ctlRange('<i>x</i> =', 'x', -3, 3, 1, s, render); ctlRange('<i>y</i> =', 'y', -3, 3, 1, s, render); ctlRange('<i>z</i> =', 'z', -3, 3, 1, s, render); }
+    },
     draw: function (s) {
+      if (s.mode === 'body') return drawBody(s);
       var P = [s.x, s.y, s.z];
       draw3({ axes: [3.6, 3.6, 3.6], neg: true, ticks: true, center: [0, 0, 0], custom: function (sc) {
         var c = [[s.x, 0, 0], [0, s.y, 0], [0, 0, s.z], [s.x, s.y, 0], [s.x, 0, s.z], [0, s.y, s.z]];
@@ -1411,14 +1468,80 @@ var VEC = (function () {
     ],
     sum: M('cos φ = |<i>x</i><sub>1</sub><i>x</i><sub>2</sub> + <i>y</i><sub>1</sub><i>y</i><sub>2</sub> + <i>z</i><sub>1</sub><i>z</i><sub>2</sub>| / (√(<i>x</i><sub>1</sub>² + <i>y</i><sub>1</sub>² + <i>z</i><sub>1</sub>²) · √(<i>x</i><sub>2</sub>² + <i>y</i><sub>2</sub>² + <i>z</i><sub>2</sub>²))')
   };
+  function coefT(c, body, first) {
+    if (!c) return '';
+    var sg = c < 0 ? (first ? '−' : ' − ') : (first ? '' : ' + '), a = Math.abs(c);
+    return sg + (a === 1 ? '' : fmt(a)) + body;
+  }
+  /* x = x0 + s·t без лишних «0 +» и «1t» */
+  function paramEq(P, d) {
+    return ['<i>x</i>', '<i>y</i>', '<i>z</i>'].map(function (n, i) {
+      var p0 = VEC.round(P[i], 4), r = p0 ? fmt(p0) + coefT(d[i], '<i>t</i>', false) : (d[i] ? coefT(d[i], '<i>t</i>', true) : '0');
+      return M(n + ' = ' + r);
+    }).join(', &nbsp;');
+  }
+  /* a(x − x0) + b(y − y0) + c(z − z0) = 0 без нулевых слагаемых */
+  function pointNormalEq(n, P) {
+    var out = '', first = true;
+    ['<i>x</i>', '<i>y</i>', '<i>z</i>'].forEach(function (v, i) {
+      if (!n[i]) return;
+      var inner = P[i] ? '(' + v + (P[i] > 0 ? ' − ' + fmt(P[i]) : ' + ' + fmt(-P[i])) + ')' : v;
+      out += coefT(n[i], inner, first); first = false;
+    });
+    return out + ' = 0';
+  }
+  function normPlane(n, d) {
+    var g = V3.gcd(V3.gcd(V3.gcd(n[0], n[1]), n[2]), d) || 1, f = n[0] || n[1] || n[2];
+    if (f < 0) g = -g;
+    return { n: n.map(function (x) { return x / g; }), d: d / g };
+  }
+  function planeByMode(s) {
+    var m = s.mode || 'three';
+    if (m === 'three') return planeOf(s.p);
+    if (m === 'normal') { var n = [s.nx, s.ny, s.nz]; if (!n[0] && !n[1] && !n[2]) return null; return normPlane(n, -dot3(n, PC(s.p0))); }
+    if (m === 'axes') { if (!s.ip || !s.iq || !s.ir) return null; return normPlane([s.iq * s.ir, s.ip * s.ir, s.ip * s.iq], -s.ip * s.iq * s.ir); }
+    return V3.plane3(PC(s.l[0]), PC(s.l[1]), PC(s.q));
+  }
+  function drawPlaneMode(s) {
+    var pl = planeByMode(s), m = s.mode;
+    if (m === 'axes') {
+      var I = [[s.ip, 0, 0], [0, s.iq, 0], [0, 0, s.ir]];
+      draw3({ dims: [2, 2, 2], planes: pl ? [pl] : [], normals: true, axes: [Math.max(3.3, Math.abs(s.ip) + 1), Math.max(3.3, Math.abs(s.iq) + 1), Math.max(3.3, Math.abs(s.ir) + 1)], neg: s.ip < 0 || s.iq < 0 || s.ir < 0,
+        extraFit: I, after: function (sc) { if (!pl) return; sc.ln(I[0], I[1], 'var(--vr)', 1.6); sc.ln(I[1], I[2], 'var(--vr)', 1.6); sc.ln(I[2], I[0], 'var(--vr)', 1.6); I.forEach(function (q, i) { sc.dotAt(q, 'var(--vr)', 5); sc.lab(q, ['p', 'q', 'r'][i], 'var(--vr)', 12, 17); }); } });
+      if (!pl) return 'Отрезок на оси не может быть нулевым: плоскость через начало координат «в отрезках» не записать.';
+      return '<div class="m" style="font-size:1.12em">' + M('<i>x</i>/' + par(s.ip) + ' + <i>y</i>/' + par(s.iq) + ' + <i>z</i>/' + par(s.ir) + ' = 1') + '</div><div>Умножаем на ' + M(Math.abs(s.ip * s.iq * s.ir)) + ' и сокращаем: ' + M(V3.planeTxt(pl)) + ', нормаль ' + M(V('n') + V3.co3(pl.n)) + '. Оранжевый треугольник — часть плоскости между осями.</div>';
+    }
+    if (m === 'normal') {
+      var P0 = PC(s.p0);
+      draw3({ dims: [2, 2, 2], pts: extraPts([s.p0]), planes: pl ? [pl] : [], hl: [s.p0],
+        after: function (sc) { if (!pl) return; var n = [s.nx, s.ny, s.nz], L = Math.sqrt(dot3(n, n)); sc.arr(P0, add3(P0, mul3(n, 1.4 / L)), 'var(--vr)', 3); sc.lab(add3(P0, mul3(n, 1.6 / L)), 'n', 'var(--vr)', 4, 17); } });
+      if (!pl) return 'Нормаль не может быть нулевым вектором.';
+      return '<div class="m" style="font-size:1.12em">' + M(pointNormalEq([s.nx, s.ny, s.nz], P0)) + '</div><div>Раскрываем скобки: ' + M(V3.planeTxt(pl)) + '. Нормаль отложена от точки ' + nmH(s.p0) + ': плоскость — все точки ' + M('<i>X</i>') + ', для которых ' + M(V(V3.nm3(s.p0) + 'X') + ' ⊥ ' + V('n')) + '.</div>';
+    }
+    var A = PC(s.l[0]), Bp = PC(s.l[1]), Q = PC(s.q);
+    draw3({ dims: [2, 2, 2], pts: extraPts(s.l.concat([s.q])), planes: pl ? [[s.l[0], s.l[1], s.q]] : [], normals: true, segs: [[s.l[0], s.l[1], 'a', 1]], hl: [s.q] });
+    if (!pl) return 'Точка лежит на прямой (или прямая из одной точки): плоскость не определена.';
+    var u = sub3(Bp, A), w = sub3(Q, A);
+    return '<div>Направляющий прямой ' + M(V('u') + ' = ' + V3.co3(u)) + ', вектор в точку ' + M(V('w') + ' = ' + V(V3.nm3(s.l[0]) + V3.nm3(s.q)) + ' = ' + V3.co3(w)) + '.</div><div>Нормаль перпендикулярна обоим: ' + M(V('n') + '·' + V('u') + ' = 0, ' + V('n') + '·' + V('w') + ' = 0') + ' → ' + M(V('n') + V3.co3(pl.n)) + '; плоскость ' + M(V3.planeTxt(pl)) + '.</div>';
+  }
   TOPICS['3.3'] = {
     title: 'Уравнение плоскости',
     intro: 'Плоскость задаётся уравнением ' + M('<i>ax</i> + <i>by</i> + <i>cz</i> + <i>d</i> = 0') + '. Числа ' + M('(<i>a</i>; <i>b</i>; <i>c</i>)') + ' — координаты вектора нормали, перпендикулярного плоскости.',
-    init: { p: ['A', 'B', 'C1'] },
-    exp: 'Выбери три точки так, чтобы плоскость имела уравнение ' + M('<i>x</i> + <i>y</i> + <i>z</i> − 2 = 0') + '.',
-    done: function (s) { var pl = planeOf(s.p); return pl && pl.n.join() === '1,1,1' && pl.d === -2; },
-    ctl: function (s) { ctlPt('Точки:', s, 'p', 0); ctlPt('', s, 'p', 1); ctlPt('', s, 'p', 2); },
+    init: { p: ['A', 'B', 'C1'], mode: 'three', p0: 'A', nx: 1, ny: 0, nz: 0, ip: 2, iq: 3, ir: 4, l: ['B', 'D'], q: 'A' },
+    exp: function (s) {
+      var how = { three: 'Выбери три точки', normal: 'Выбери точку и подбери координаты нормали', axes: 'Подбери отрезки на осях', line: 'Выбери прямую и точку вне её' }[s.mode || 'three'];
+      return how + ' так, чтобы получилась плоскость ' + M('<i>x</i> + <i>y</i> + <i>z</i> − 2 = 0') + '. Это одна и та же плоскость ' + plName(['A1', 'B', 'D']) + ', заданная разными способами.';
+    },
+    done: function (s) { var pl = planeByMode(s); return pl && pl.n.join() === '1,1,1' && pl.d === -2; },
+    ctl: function (s) {
+      ctlToggle([['three', 'три точки'], ['normal', 'точка и нормаль'], ['axes', 'отрезки на осях'], ['line', 'прямая и точка']], s.mode || 'three', function (v) { s.mode = v; render(); });
+      if (s.mode === 'normal') { ctlPt('Точка:', s, 'p0'); ctlRange(M('<i>n</i><sub><i>x</i></sub>') + ' =', 'nx', -3, 3, 1, s, render); ctlRange(M('<i>n</i><sub><i>y</i></sub>') + ' =', 'ny', -3, 3, 1, s, render); ctlRange(M('<i>n</i><sub><i>z</i></sub>') + ' =', 'nz', -3, 3, 1, s, render); }
+      else if (s.mode === 'axes') { ctlRange('<i>p</i> =', 'ip', -4, 4, 1, s, render); ctlRange('<i>q</i> =', 'iq', -4, 4, 1, s, render); ctlRange('<i>r</i> =', 'ir', -4, 4, 1, s, render); }
+      else if (s.mode === 'line') { ctlPt('Прямая:', s, 'l', 0); ctlPt('', s, 'l', 1); ctlPt('Точка:', s, 'q'); }
+      else { ctlPt('Точки:', s, 'p', 0); ctlPt('', s, 'p', 1); ctlPt('', s, 'p', 2); }
+    },
     draw: function (s) {
+      if (s.mode && s.mode !== 'three') return drawPlaneMode(s);
       var pl = planeOf(s.p);
       draw3({ dims: [2, 2, 2], pts: extraPts(s.p), planes: pl ? [s.p] : [], normals: true, hl: s.p });
       if (!pl) return 'Три точки лежат на одной прямой: плоскость не определена. Выбери другие.';
@@ -1483,20 +1606,77 @@ var VEC = (function () {
     ],
     sum: M('ρ = |<i>ax</i><sub>0</sub> + <i>by</i><sub>0</sub> + <i>cz</i><sub>0</sub> + <i>d</i>| / √(<i>a</i>² + <i>b</i>² + <i>c</i>²)')
   };
+  var PLANE_LIST = [['A', 'B', 'C'], ['A1', 'B1', 'C1'], ['A', 'B', 'B1'], ['B', 'C', 'C1'], ['A', 'C', 'C1'], ['A', 'B', 'C1'], ['A', 'D', 'C1'], ['B', 'D', 'D1'], ['A1', 'B', 'D'], ['A', 'B1', 'D1'], ['C', 'B1', 'D1'], ['A', 'D', 'D1']];
+  function ctlPlane(label, st, key) {
+    var l = document.createElement('label');
+    l.textContent = label + ' ';
+    var sl = document.createElement('select');
+    PLANE_LIST.forEach(function (p, i) { var o = document.createElement('option'); o.value = i; o.textContent = p.map(uni).join(''); sl.appendChild(o); });
+    sl.value = st[key];
+    sl.style.cssText = 'font:inherit;padding:4px 6px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink)';
+    sl.onchange = function () { st[key] = +sl.value; render(); };
+    l.appendChild(sl);
+    $('planeCtl').appendChild(l);
+  }
+  /* прямая: {P, d} — точка и направляющий; для двух плоскостей d = n1 × n2, точка — из системы, одна координата = 0 */
+  function lineByMode(s) {
+    if (s.mode === 'dir') { var d = [s.sx, s.sy, s.sz]; return d[0] || d[1] || d[2] ? { P: PC(s.p0), d: d } : null; }
+    if (s.mode === 'planes') {
+      var p1 = planeOf(PLANE_LIST[s.pa]), p2 = planeOf(PLANE_LIST[s.pb]), dd = V3.cross3(p1.n, p2.n);
+      if (!dd[0] && !dd[1] && !dd[2]) return { par: true, p1: p1, p2: p2 };
+      for (var k = 2; k >= 0; k--) {
+        var i = (k + 1) % 3, j = (k + 2) % 3, det = p1.n[i] * p2.n[j] - p1.n[j] * p2.n[i];
+        if (Math.abs(det) < 1e-12) continue;
+        var P = [0, 0, 0];
+        P[i] = (-p1.d * p2.n[j] + p2.d * p1.n[j]) / det;
+        P[j] = (-p2.d * p1.n[i] + p1.d * p2.n[i]) / det;
+        return { P: P, d: dd, p1: p1, p2: p2, fixed: k };
+      }
+    }
+    return null;
+  }
+  function drawLineMode(s) {
+    var L = lineByMode(s), planes = s.mode === 'planes' ? [PLANE_LIST[s.pa], PLANE_LIST[s.pb]] : [];
+    var ext = L && L.d ? [add3(L.P, mul3(L.d, -3 / Math.sqrt(dot3(L.d, L.d)))), add3(L.P, mul3(L.d, 3 / Math.sqrt(dot3(L.d, L.d))))] : [];
+    draw3({ dims: [2, 2, 2], pts: s.mode === 'dir' ? extraPts([s.p0]) : {}, planes: planes, normals: s.mode === 'planes', extraFit: [],
+      after: function (sc) { if (!L || !L.d) return; sc.ln(ext[0], ext[1], 'var(--va)', 2.6); if (s.mode === 'dir') { var u = mul3(L.d, 1.3 / Math.sqrt(dot3(L.d, L.d))); sc.arr(L.P, add3(L.P, u), 'var(--vr)', 3); sc.lab(add3(L.P, mul3(u, 1.15)), 's', 'var(--vr)', 6, 17); } } });
+    if (!L) return 'Направляющий вектор не может быть нулевым.';
+    if (L.par) return 'Эти плоскости параллельны (или совпадают): прямой пересечения нет.';
+    var xs = ['<i>x</i>', '<i>y</i>', '<i>z</i>'], g = V3.gcd(V3.gcd(L.d[0], L.d[1]), L.d[2]) || 1, dn = L.d.map(function (x) { return x / g; });
+    var eq = paramEq(L.P, dn);
+    if (s.mode === 'dir') return '<div>Точка ' + nmH(s.p0) + co3h(L.P) + ', ' + M(V('s') + V3.co3(L.d)) + '</div><div class="m">' + eq + '</div>';
+    return '<div>' + plName(PLANE_LIST[s.pa]) + ': ' + M(V3.planeTxt(L.p1)) + '; &nbsp;' + plName(PLANE_LIST[s.pb]) + ': ' + M(V3.planeTxt(L.p2)) + '</div>' +
+      '<div>Направляющий перпендикулярен обеим нормалям: ' + M(V('s') + V3.co3(dn)) + '. Точку прямой нашли из системы двух уравнений, положив ' + M(xs[L.fixed] + ' = 0') + ': ' + co3h(L.P.map(function (v) { return VEC.round(v, 4); })) + '.</div><div class="m">' + eq + '</div>';
+  }
   TOPICS['3.6'] = {
     title: 'Уравнение прямой в пространстве',
     intro: 'Прямую задают точкой и направляющим вектором. Уравнение в пространстве — это не одно равенство, а три (или система из двух).',
-    init: { l: ['A', 'C1'], t: 0 },
-    exp: 'Подбери параметр ' + M('<i>t</i>') + ' так, чтобы точка ' + M('<i>X</i>') + ' попала в середину выбранного отрезка.',
-    done: function (s) { return s.t === 0.5; },
-    ctl: function (s) { ctlPt('Прямая:', s, 'l', 0); ctlPt('', s, 'l', 1); ctlRange('<i>t</i> =', 't', -1, 2, 0.25, s, render); },
+    init: { l: ['A', 'C1'], t: 0, mode: 'two', p0: 'A', sx: 1, sy: 0, sz: 1, pa: 0, pb: 4 },
+    exp: function (s) {
+      if (s.mode === 'dir') return 'Пусть прямая проходит через ' + nmH('A') + '. Подбери направляющий вектор так, чтобы она прошла через ' + nmH('C1') + '.';
+      if (s.mode === 'planes') return 'Подбери две плоскости, которые пересекаются по диагонали куба ' + segH('A', 'C1') + '.';
+      return 'Подбери параметр ' + M('<i>t</i>') + ' так, чтобы точка ' + M('<i>X</i>') + ' попала в середину выбранного отрезка.';
+    },
+    done: function (s) {
+      if (s.mode === 'two' || !s.mode) return s.t === 0.5;
+      var L = lineByMode(s); if (!L) return false;
+      var on = function (P) { var c = V3.cross3(sub3(P, L.P), L.d); return !c[0] && !c[1] && !c[2]; };
+      return on(CUBE.A) && on(CUBE.C1);
+    },
+    ctl: function (s) {
+      ctlToggle([['two', 'две точки'], ['dir', 'точка и направляющий вектор'], ['planes', 'пересечение двух плоскостей']], s.mode || 'two', function (v) { s.mode = v; render(); });
+      if (s.mode === 'dir') { ctlPt('Точка:', s, 'p0'); ctlRange(M('<i>s</i><sub>1</sub>') + ' =', 'sx', -3, 3, 1, s, render); ctlRange(M('<i>s</i><sub>2</sub>') + ' =', 'sy', -3, 3, 1, s, render); ctlRange(M('<i>s</i><sub>3</sub>') + ' =', 'sz', -3, 3, 1, s, render); }
+      else if (s.mode === 'planes') { ctlPlane('Плоскость 1:', s, 'pa'); ctlPlane('Плоскость 2:', s, 'pb'); }
+      else { ctlPt('Прямая:', s, 'l', 0); ctlPt('', s, 'l', 1); ctlRange('<i>t</i> =', 't', -1, 2, 0.25, s, render); }
+    },
     draw: function (s) {
+      if (s.mode === 'dir' || s.mode === 'planes') return drawLineMode(s);
       var P = PC(s.l[0]), Q = PC(s.l[1]), d = sub3(Q, P), X = add3(P, mul3(d, s.t));
       draw3({ dims: [2, 2, 2], pts: extraPts(s.l), segs: [[s.l[0], s.l[1], 'b', 1]], extraFit: [add3(P, mul3(d, -1)), add3(P, mul3(d, 2))],
         after: function (sc) { sc.ln(add3(P, mul3(d, -1)), add3(P, mul3(d, 2)), 'var(--vb)', 1.1, '3 4'); sc.arr(P, Q, 'var(--vb)', 3); sc.dotAt(X, 'var(--vr)', 6); sc.lab(X, 'X', 'var(--vr)', 16); } });
       if (!dot3(d, d)) return 'Выбери две разные точки.';
       var xs = ['<i>x</i>', '<i>y</i>', '<i>z</i>'];
-      return '<div>' + M('<i>P</i> = ' + V3.nm3(s.l[0]) + V3.co3(P)) + ', направляющий ' + vecH(s.l[0], s.l[1]) + '</div><div class="m">' + xs.map(function (n, i) { return M(n + ' = ' + fmt(P[i]) + (d[i] ? ' + ' + par(d[i]) + '<i>t</i>' : '')); }).join(', &nbsp;') + '</div><div class="m" style="font-size:1.12em">' + M('<i>t</i> = ' + fmt(s.t) + ': <i>X</i>' + V3.co3(X.map(function (v) { return VEC.round(v, 6); }))) + '</div>';
+      return '<div>' + M('<i>P</i> = ' + V3.nm3(s.l[0]) + V3.co3(P)) + ', направляющий ' + vecH(s.l[0], s.l[1]) + '</div><div class="m">' + paramEq(P, d) + '</div><div class="m" style="font-size:1.12em">' + M('<i>t</i> = ' + fmt(s.t) + ': <i>X</i>' + V3.co3(X.map(function (v) { return VEC.round(v, 6); }))) + '</div>';
     },
     steps: [
       'Любая точка прямой: ' + M('<i>X</i> = <i>P</i> + <i>t</i> · ' + V('s')) + ', где ' + M('<i>P</i>') + ' — точка прямой, ' + M(V('s')) + ' — направляющий вектор, ' + M('<i>t</i>') + ' — любое число. По координатам это три равенства: ' + M('<i>x</i> = <i>x</i><sub>0</sub> + <i>s</i><sub>1</sub><i>t</i>, <i>y</i> = <i>y</i><sub>0</sub> + <i>s</i><sub>2</sub><i>t</i>, <i>z</i> = <i>z</i><sub>0</sub> + <i>s</i><sub>3</sub><i>t</i>') + '.',
@@ -1590,6 +1770,68 @@ var VEC = (function () {
     ],
     sum: M(V('n') + ' ⊥ ' + V('s') + '<sub>1</sub>, ' + V('n') + ' ⊥ ' + V('s') + '<sub>2</sub>') + '; ' + M('ρ = |' + V('P<sub>1</sub>P<sub>2</sub>') + ' · ' + V('n') + '| / |' + V('n') + '|')
   };
+  /* =================== теория части 3: раскрывающиеся блоки под каждой темой =================== */
+  var i_ = function (s) { return '<i>' + s + '</i>'; };
+  var X0 = M('(<i>x</i><sub>0</sub>; <i>y</i><sub>0</sub>; <i>z</i><sub>0</sub>)'), NV = M(V('n') + '(<i>a</i>; <i>b</i>; <i>c</i>)'), PLANE = M('<i>ax</i> + <i>by</i> + <i>cz</i> + <i>d</i> = 0');
+  TOPICS['3.1'].theory = [
+    ['Система координат и базис', '<p>Три попарно перпендикулярные оси с общим началом ' + M('<i>O</i>') + ' и единицей длины. Вдоль осей — единичные векторы ' + M(V('i') + ', ' + V('j') + ', ' + V('k')) + '. Любой вектор раскладывается по ним: ' + M(V('a') + ' = <i>x</i>' + V('i') + ' + <i>y</i>' + V('j') + ' + <i>z</i>' + V('k')) + ', и числа ' + M('(<i>x</i>; <i>y</i>; <i>z</i>)') + ' — его координаты. Это то же разложение по базису, что в теме 1.6, только векторов три.</p><p>Оси обычно направляют «по правой руке»: если ' + M('<i>x</i>') + ' — большой палец, ' + M('<i>y</i>') + ' — указательный, то ' + M('<i>z</i>') + ' — средний. Для задач ЕГЭ важно лишь, чтобы оси были перпендикулярны.</p>'],
+    ['Основные формулы', '<ul><li>Вектор по двум точкам: ' + M(V('AB') + ' = (<i>x<sub>B</sub></i> − <i>x<sub>A</sub></i>; <i>y<sub>B</sub></i> − <i>y<sub>A</sub></i>; <i>z<sub>B</sub></i> − <i>z<sub>A</sub></i>)') + '.</li><li>Длина вектора и расстояние между точками: ' + M('√(<i>x</i>² + <i>y</i>² + <i>z</i>²)') + '.</li><li>Середина отрезка — полусумма координат концов.</li><li>Точка, делящая ' + M('<i>AB</i>') + ' в отношении ' + M('<i>m</i> : <i>n</i>') + ' от ' + M('<i>A</i>') + ': ' + M('<i>M</i> = (<i>n</i>·<i>A</i> + <i>m</i>·<i>B</i>) / (<i>m</i> + <i>n</i>)') + ' (покоординатно). Например, ' + M('<i>AM</i> : <i>MB</i> = 1 : 2') + ' даёт ' + M('<i>M</i> = (2<i>A</i> + <i>B</i>)/3') + '.</li><li>Точка пересечения медиан треугольника — среднее арифметическое трёх вершин.</li></ul>'],
+    ['Как выбрать начало и оси', '<ol><li>Ищите вершину, из которой выходят три взаимно перпендикулярных ребра (куб, прямоугольный параллелепипед, прямая призма с прямым углом в основании). Её — в начало, оси — по рёбрам.</li><li>Если прямого угла в основании нет (правильная треугольная призма или пирамида), ось ' + M('<i>x</i>') + ' кладут по стороне, ось ' + M('<i>y</i>') + ' проводят в основании перпендикулярно ей, ось ' + M('<i>z</i>') + ' — вверх.</li><li>В правильной пирамиде часто удобнее начало в центре основания ' + M('<i>O</i>') + ': вершина тогда ' + M('(0; 0; <i>h</i>)') + '.</li><li>Цель — чтобы у нужных точек было побольше нулей и поменьше корней.</li></ol><p>Переключатель «система в теле» под чертежом показывает это для призмы и пирамид.</p>'],
+    ['Полезные длины в правильном треугольнике', '<p>Сторона ' + M('<i>a</i>') + ': высота ' + M('<i>a</i>√3/2') + '; центр (точка пересечения медиан, высот, биссектрис) — на ' + M('1/3') + ' высоты от стороны, то есть ' + M('<i>a</i>√3/6') + ' от стороны и ' + M('<i>a</i>√3/3') + ' от вершины (радиус описанной окружности).</p>'],
+    ['Типичные ошибки', '<div class="warn">Перепутан порядок координат: всегда ' + M('(<i>x</i>; <i>y</i>; <i>z</i>)') + '. Ось ' + M('<i>y</i>') + ' на рисунке идёт «вглубь» — точки на ней легко принять за точки на ' + M('<i>x</i>') + '. Не путайте высоту пирамиды ' + M('<i>h</i>') + ' и апофему, боковое ребро призмы и высоту основания.</div>']
+  ];
+  TOPICS['3.2'].theory = [
+    ['Направляющий вектор', '<p>Любой ненулевой вектор, параллельный прямой. Он не единственный: ' + M('(2; 4; −6)') + ', ' + M('(1; 2; −3)') + ' и ' + M('(−1; −2; 3)') + ' задают одно направление. Поэтому координаты можно сокращать на общий множитель и менять знак — угол не изменится, а считать станет проще.</p>'],
+    ['Угол между прямыми', '<p>' + M('cos φ = |' + V('a') + '·' + V('b') + '| / (|' + V('a') + '|·|' + V('b') + '|)') + ', где ' + M(V('a') + ', ' + V('b')) + ' — направляющие. Модуль нужен, потому что угол между прямыми от ' + M('0°') + ' до ' + M('90°') + ', а угол между векторами может быть тупым.</p><p>Для скрещивающихся прямых угол определяют, перенеся одну прямую параллельно до пересечения с другой. Направления при переносе не меняются, поэтому формула та же.</p>'],
+    ['Взаимное расположение по векторам', '<ul><li>Параллельны (или совпадают) ⇔ направляющие коллинеарны, координаты пропорциональны.</li><li>Перпендикулярны ⇔ ' + M(V('a') + '·' + V('b') + ' = 0') + ' (могут быть и скрещивающимися).</li><li>Пересекаются или скрещиваются — это уже по точкам: см. тему 3.9.</li></ul>'],
+    ['Как то же решают без координат', '<p>Переносят одну из прямых так, чтобы она прошла через точку другой, и находят угол в получившемся треугольнике по теореме косинусов. Координатный метод заменяет поиск удобного треугольника вычислением. На ЕГЭ годится любой способ, но координаты почти не требуют догадки.</p>'],
+    ['Как записать ответ', '<p>Табличный косинус — сразу угол: ' + M('1/2 → 60°') + ', ' + M('√2/2 → 45°') + ', ' + M('0 → 90°') + '. Иначе ' + M('φ = arccos(√6/3)') + '. Иногда просят тангенс или синус: ' + M('sin φ = √(1 − cos²φ)') + ', ' + M('tg φ = sin φ / cos φ') + '.</p>']
+  ];
+  TOPICS['3.3'].theory = [
+    ['Что такое нормаль', '<p><b>Нормаль</b> к плоскости — ненулевой вектор, перпендикулярный плоскости, то есть перпендикулярный <b>любой</b> прямой в ней. Достаточно проверить перпендикулярность двум непараллельным векторам плоскости.</p><ul><li>Нормаль не единственна: ' + M('<i>k</i>' + V('n')) + ' при любом ' + M('<i>k</i> ≠ 0') + ' тоже нормаль. Поэтому уравнение плоскости можно умножать на число.</li><li>В уравнении ' + PLANE + ' коэффициенты при ' + M('<i>x</i>, <i>y</i>, <i>z</i>') + ' — это и есть координаты нормали ' + NV + '. Свободный член ' + M('<i>d</i>') + ' на нормаль не влияет: он «сдвигает» плоскость.</li><li>У параллельных плоскостей общая нормаль; уравнения отличаются только ' + M('<i>d</i>') + '.</li></ul>'],
+    ['Способы задать плоскость', '<ol><li><b>Три точки</b>, не лежащие на одной прямой. Подставляем в ' + PLANE + ' и решаем систему.</li><li><b>Точка и нормаль:</b> ' + M('<i>a</i>(<i>x</i> − <i>x</i><sub>0</sub>) + <i>b</i>(<i>y</i> − <i>y</i><sub>0</sub>) + <i>c</i>(<i>z</i> − <i>z</i><sub>0</sub>) = 0') + '. Это самый «прямой» способ: условие ' + M(V('M<sub>0</sub>X') + ' · ' + V('n') + ' = 0') + ', записанное в координатах.</li><li><b>Отрезки на осях:</b> ' + M('<i>x</i>/<i>p</i> + <i>y</i>/<i>q</i> + <i>z</i>/<i>r</i> = 1') + ', если плоскость пересекает оси в ' + M('(<i>p</i>; 0; 0), (0; <i>q</i>; 0), (0; 0; <i>r</i>)') + '.</li><li><b>Прямая и точка вне её</b> — берём две точки прямой и данную точку, сводится к п. 1.</li><li><b>Две пересекающиеся прямые</b> — нормаль перпендикулярна обоим направляющим.</li><li><b>Две параллельные прямые</b> — вектор между их точками и общий направляющий.</li><li><b>Точка и два неколлинеарных вектора</b>, параллельных плоскости — нормаль перпендикулярна обоим.</li><li><b>Точка и параллельная плоскость</b> — нормаль та же, ' + M('<i>d</i>') + ' находим подстановкой точки.</li></ol><p>Пункты 1–4 можно пощупать переключателем под чертежом: все они дают одну плоскость ' + plName(['A1', 'B', 'D']) + '.</p>'],
+    ['Как найти нормаль по двум векторам', '<p>Пусть ' + M(V('u') + ' = (1; 0; −1)') + ' и ' + M(V('w') + ' = (0; 1; −1)') + ' лежат в плоскости. Ищем ' + M(V('n') + '(<i>a</i>; <i>b</i>; <i>c</i>)') + ': ' + M('<i>a</i> − <i>c</i> = 0') + ', ' + M('<i>b</i> − <i>c</i> = 0') + '. Неизвестных три, уравнений два — одну берём сами: ' + M('<i>c</i> = 1') + ', тогда ' + M(V('n') + '(1; 1; 1)') + '. Если получились дроби, умножьте на знаменатель.</p>'],
+    ['Частные случаи уравнения', '<ul><li>' + M('<i>d</i> = 0') + ' — плоскость проходит через начало координат.</li><li>Нет переменной (например, ' + M('<i>z</i>') + '): плоскость параллельна этой оси. ' + M('<i>x</i> + <i>y</i> − 2 = 0') + ' — «вертикальная» плоскость ' + plName(['B', 'D', 'D1']) + '.</li><li>Осталась одна переменная: плоскость параллельна координатной. ' + M('<i>z</i> = 2') + ' — верхняя грань, ' + M('<i>x</i> = 0') + ' — грань ' + M('<i>ADD</i><sub>1</sub>') + '.</li><li>Координатные плоскости: ' + M('<i>x</i> = 0') + ' (это ' + M('<i>yOz</i>') + '), ' + M('<i>y</i> = 0') + ', ' + M('<i>z</i> = 0') + '.</li></ul>'],
+    ['Проверка и типичные ошибки', '<div class="ex">Подставьте все точки, через которые должна пройти плоскость: каждая обязана дать 0. Это ловит почти все ошибки в системе.</div><div class="warn">Взяли три точки на одной прямой — плоскость не определена. Нашли нормаль (0; 0; 0) — значит, ошиблись в системе. Путают нормаль с вектором, лежащим в плоскости.</div>']
+  ];
+  TOPICS['3.4'].theory = [
+    ['Определение', '<p>Две пересекающиеся плоскости образуют двугранные углы. Угол между плоскостями — меньший из них, от ' + M('0°') + ' до ' + M('90°') + '. Классически его измеряют <b>линейным углом</b>: в точке линии пересечения проводят в каждой плоскости перпендикуляр к этой линии.</p>'],
+    ['Через нормали', '<p>Нормали перпендикулярны плоскостям, поэтому угол между нормалями равен углу между плоскостями или дополняет его до ' + M('180°') + '. Отсюда ' + M('cos φ = |' + V('n') + '<sub>1</sub>·' + V('n') + '<sub>2</sub>| / (|' + V('n') + '<sub>1</sub>|·|' + V('n') + '<sub>2</sub>|)') + ' — модуль убирает тупой случай.</p>'],
+    ['Частные случаи', '<ul><li>Одна плоскость — основание ' + M('<i>z</i> = 0') + ' с нормалью ' + M('(0; 0; 1)') + ': ' + M('cos φ = |<i>c</i>| / √(<i>a</i>² + <i>b</i>² + <i>c</i>²)') + '.</li><li>Перпендикулярны ⇔ ' + M(V('n') + '<sub>1</sub>·' + V('n') + '<sub>2</sub> = 0') + '; параллельны ⇔ нормали коллинеарны.</li></ul>'],
+    ['Другие способы', '<ul><li><b>Площадь проекции:</b> ' + M('cos φ = <i>S</i><sub>пр</sub> / <i>S</i>') + ' — удобно, когда фигура проецируется на основание.</li><li><b>Линейный угол</b> в треугольнике — классический путь без координат.</li></ul>'],
+    ['Типичные ошибки', '<div class="warn">Забыли модуль и получили отрицательный косинус. Взяли для одной плоскости не нормаль, а вектор в плоскости.</div>']
+  ];
+  TOPICS['3.5'].theory = [
+    ['Формула и откуда она', '<p>' + M('ρ = |<i>ax</i><sub>0</sub> + <i>by</i><sub>0</sub> + <i>cz</i><sub>0</sub> + <i>d</i>| / √(<i>a</i>² + <i>b</i>² + <i>c</i>²)') + '. Перпендикуляр из точки идёт вдоль нормали: основание ' + M('<i>H</i> = <i>P</i> + <i>t</i>' + V('n')) + '. Подставляя ' + M('<i>H</i>') + ' в уравнение, находим ' + M('<i>t</i>') + ', длина перпендикуляра ' + M('|<i>t</i>|·|' + V('n') + '|') + ' — это и есть формула.</p>'],
+    ['Частные случаи', '<ul><li>Плоскость ' + M('<i>z</i> = <i>c</i>') + ': расстояние ' + M('|<i>z</i><sub>0</sub> − <i>c</i>|') + ', считать формулу не нужно.</li><li>Расстояние между параллельными плоскостями ' + M('<i>ax</i> + <i>by</i> + <i>cz</i> + <i>d</i><sub>1</sub> = 0') + ' и ' + M('… + <i>d</i><sub>2</sub> = 0') + ': ' + M('|<i>d</i><sub>1</sub> − <i>d</i><sub>2</sub>| / √(<i>a</i>² + <i>b</i>² + <i>c</i>²)') + '.</li><li>Расстояние от прямой, параллельной плоскости, — от любой её точки.</li></ul>'],
+    ['Другие способы', '<ul><li><b>Метод объёмов:</b> объём пирамиды ' + M('<i>V</i> = ⅓·<i>S</i>·<i>h</i>') + ' считают двумя способами, искомое расстояние — высота.</li><li><b>Построение перпендикуляра</b> и вычисление в прямоугольном треугольнике — классика без координат.</li></ul>'],
+    ['Типичные ошибки', '<div class="warn">Забыли модуль. Забыли ' + M('<i>d</i>') + ' в числителе. В знаменателе написали ' + M('<i>a</i> + <i>b</i> + <i>c</i>') + ' вместо корня из суммы квадратов.</div>']
+  ];
+  TOPICS['3.6'].theory = [
+    ['Способы задать прямую', '<ol><li><b>Две точки</b> ' + M('<i>A</i>, <i>B</i>') + ': направляющий ' + M(V('AB')) + '.</li><li><b>Точка и направляющий вектор</b> — основная форма, к ней сводятся остальные.</li><li><b>Пересечение двух плоскостей:</b> направляющий перпендикулярен обеим нормалям (решаем систему ' + M(V('s') + '·' + V('n') + '<sub>1</sub> = 0, ' + V('s') + '·' + V('n') + '<sub>2</sub> = 0') + '), точку находим, положив одну координату равной 0.</li><li><b>Точка и параллельная прямая</b> — направляющий берём у той прямой.</li><li><b>Точка и перпендикулярная плоскость</b> — направляющий равен нормали.</li></ol><p>Пункты 1–3 есть в переключателе под чертежом.</p>'],
+    ['Параметрические и канонические уравнения', '<p>' + M('<i>x</i> = <i>x</i><sub>0</sub> + <i>s</i><sub>1</sub><i>t</i>, <i>y</i> = <i>y</i><sub>0</sub> + <i>s</i><sub>2</sub><i>t</i>, <i>z</i> = <i>z</i><sub>0</sub> + <i>s</i><sub>3</sub><i>t</i>') + ' — каждая точка прямой отвечает своему ' + M('<i>t</i>') + '. Канонические: ' + M('(<i>x</i> − <i>x</i><sub>0</sub>)/<i>s</i><sub>1</sub> = (<i>y</i> − <i>y</i><sub>0</sub>)/<i>s</i><sub>2</sub> = (<i>z</i> − <i>z</i><sub>0</sub>)/<i>s</i><sub>3</sub>') + '. Ноль в знаменателе — формальная запись: соответствующий числитель тоже равен нулю, координата постоянна.</p>'],
+    ['Пересечение прямой и плоскости', '<p>Подставьте ' + M('<i>x</i>, <i>y</i>, <i>z</i>') + ' через ' + M('<i>t</i>') + ' в уравнение плоскости — получится линейное уравнение на ' + M('<i>t</i>') + '. Одно решение — точка пересечения; «0 = 0» — прямая лежит в плоскости; «0 = 5» — параллельна.</p>'],
+    ['Взаимное расположение двух прямых', '<ul><li>Направляющие коллинеарны → параллельны или совпадают (проверить одну точку).</li><li>Не коллинеарны → пересекаются или скрещиваются. Приравняйте параметрические уравнения: есть решение — пересекаются, нет — скрещиваются.</li></ul>']
+  ];
+  TOPICS['3.7'].theory = [
+    ['Определение', '<p>Угол между прямой и плоскостью — угол между прямой и её проекцией на плоскость (от ' + M('0°') + ' до ' + M('90°') + '). Если прямая перпендикулярна плоскости, угол ' + M('90°') + ', если параллельна — ' + M('0°') + '.</p>'],
+    ['Почему синус', '<p>Нормаль перпендикулярна плоскости, поэтому угол ' + M('ψ') + ' между прямой и нормалью и искомый угол ' + M('φ') + ' в сумме дают ' + M('90°') + '. Значит, ' + M('sin φ = |cos ψ| = |' + V('s') + '·' + V('n') + '| / (|' + V('s') + '|·|' + V('n') + '|)') + '.</p>'],
+    ['Частные случаи и связи', '<ul><li>' + M(V('s') + '·' + V('n') + ' = 0') + ' — прямая параллельна плоскости или лежит в ней.</li><li>' + M(V('s') + ' ∥ ' + V('n')) + ' — перпендикулярна.</li><li>Плоскость — основание ' + M('<i>z</i> = 0') + ': ' + M('sin φ = |<i>s</i><sub>3</sub>| / |' + V('s') + '|') + '.</li><li>Из синуса: ' + M('tg φ = sin φ / √(1 − sin²φ)') + '.</li></ul>'],
+    ['Другой способ', '<p>Найти точку пересечения прямой с плоскостью и основание перпендикуляра из другой точки прямой — получится прямоугольный треугольник, где искомый угол виден напрямую.</p>'],
+    ['Типичные ошибки', '<div class="warn">Написали косинус вместо синуса — самая частая ошибка в №14. Взяли не нормаль плоскости, а вектор в ней.</div>']
+  ];
+  TOPICS['3.8'].theory = [
+    ['Метод параметра (основной)', '<p>Точка прямой ' + M('<i>H</i> = <i>A</i> + <i>t</i>' + V('s')) + '. Условие ' + M(V('PH') + '·' + V('s') + ' = 0') + ' — линейное уравнение, из него ' + M('<i>t</i> = ' + V('AP') + '·' + V('s') + ' / |' + V('s') + '|²') + '. Затем ' + M('ρ = |' + V('PH') + '|') + '.</p><p>Тот же ' + M('<i>t</i>') + ' получится, если искать минимум ' + M('|<i>P</i> − (<i>A</i> + <i>t</i>' + V('s') + ')|²') + ' — это квадратный трёхчлен, вершина параболы.</p>'],
+    ['Через площадь треугольника', '<p>Возьмите на прямой две точки ' + M('<i>A</i>, <i>B</i>') + '. Тогда ' + M('ρ = 2<i>S</i><sub><i>PAB</i></sub> / <i>AB</i>') + '. Площадь: ' + M('<i>S</i> = ½·<i>AP</i>·<i>AB</i>·sin <i>A</i>') + ', где ' + M('cos <i>A</i>') + ' — из скалярного произведения ' + M(V('AP') + '·' + V('AB')) + '.</p>'],
+    ['Частные случаи', '<ul><li>Прямая — ось или ребро вдоль оси: расстояние от точки до оси ' + M('<i>z</i>') + ' равно ' + M('√(<i>x</i>² + <i>y</i>²)') + '.</li><li>Точка на прямой: ' + M('ρ = 0') + ' (и ' + M(V('AP')) + ' коллинеарен ' + M(V('s')) + ').</li></ul>']
+  ];
+  TOPICS['3.9'].theory = [
+    ['Скрещивающиеся прямые', '<p>Не пересекаются и не параллельны, то есть не лежат в одной плоскости. Признак в координатах: направляющие не коллинеарны и вектор между точками прямых не лежит в одной плоскости с ними — в формуле ниже числитель не равен нулю.</p>'],
+    ['Способ 1: плоскость, параллельная второй прямой', '<p>Найдите ' + M(V('n')) + ' с ' + M(V('n') + '·' + V('s') + '<sub>1</sub> = 0') + ' и ' + M(V('n') + '·' + V('s') + '<sub>2</sub> = 0') + '. Плоскость через первую прямую с этой нормалью параллельна второй. Расстояние — от любой точки второй прямой до этой плоскости (тема 3.5). Короче: ' + M('ρ = |' + V('P<sub>1</sub>P<sub>2</sub>') + '·' + V('n') + '| / |' + V('n') + '|') + '.</p>'],
+    ['Способ 2: общий перпендикуляр', '<p>Точки ' + M('<i>H</i><sub>1</sub> = <i>P</i><sub>1</sub> + <i>t</i>' + V('s') + '<sub>1</sub>') + ', ' + M('<i>H</i><sub>2</sub> = <i>P</i><sub>2</sub> + <i>u</i>' + V('s') + '<sub>2</sub>') + '; вектор ' + M(V('H<sub>1</sub>H<sub>2</sub>')) + ' перпендикулярен обеим прямым — два линейных уравнения на ' + M('<i>t</i>, <i>u</i>') + '. Получаем сам перпендикуляр (оранжевый пунктир на чертеже) и его длину.</p>'],
+    ['Способ 3: без координат', '<ul><li><b>Проекция</b> на плоскость, перпендикулярную одной из прямых: она станет точкой, расстояние — от точки до проекции второй прямой.</li><li><b>Объём тетраэдра</b> с рёбрами на этих прямых: ' + M('<i>V</i> = ⅙·<i>AB</i>·<i>CD</i>·ρ·sin φ') + '.</li></ul>'],
+    ['Пример', '<div class="ex">Куб с ребром 2, прямые ' + segH('A', 'B') + ' и ' + segH('B1', 'D') + '. ' + M(V('s') + '<sub>1</sub>(2; 0; 0)') + ', ' + M(V('s') + '<sub>2</sub>(−2; 2; −2)') + '. Нормаль: ' + M('2<i>a</i> = 0') + ', ' + M('−2<i>a</i> + 2<i>b</i> − 2<i>c</i> = 0') + ' → ' + M(V('n') + '(0; 1; 1)') + '. ' + M(V('AB<sub>1</sub>') + '(2; 0; 2)') + ', ' + M('ρ = |0 + 0 + 2| / √2 = √2') + '.</div>']
+  ];
   TOPICS['3.T'] = { title: 'Задачи как на ЕГЭ', trainer: 3 };
 
 
@@ -1642,7 +1884,7 @@ var VEC = (function () {
     var ok = T.done(s);
     if (ok) S.expOk[id] = true;
     var h = '<h2>' + id + '. ' + T.title + '</h2><p style="margin:0">' + T.intro + '</p>';
-    h += '<div class="box exp"><b>Опыт</b><div>' + T.exp + '</div>' + (ok ? '<div class="box ok" style="padding:6px 10px">Получилось!' + (step ? '' : ' Нажми «Дальше», чтобы разобраться, что произошло.') + '</div>' : '') + '</div>';
+    h += '<div class="box exp"><b>Опыт</b><div>' + (typeof T.exp === 'function' ? T.exp(s) : T.exp) + '</div>' + (ok ? '<div class="box ok" style="padding:6px 10px">Получилось!' + (step ? '' : ' Нажми «Дальше», чтобы разобраться, что произошло.') + '</div>' : '') + '</div>';
     h += '<div class="box read">' + live + '</div>';
     if (step > 0) h += '<ol class="steps">' + T.steps.slice(0, step).map(function (x, i) { return '<li' + (i === step - 1 ? ' class="new"' : '') + '>' + x + '</li>'; }).join('') + '</ol>';
     if (step >= T.steps.length) h += '<div class="box sum"><b>Итог</b><div class="formula">' + T.sum + '</div></div>';
@@ -1654,11 +1896,13 @@ var VEC = (function () {
       if (list[i2 + 1]) h += '<button class="btn main" type="button" id="nextTopic">Следующая тема: ' + (TOPICS[list[i2 + 1]].trainer ? 'тренажёр' : TOPICS[list[i2 + 1]].title) + '</button>';
     }
     h += '<button class="btn minor" type="button" id="resetT">Вернуть чертёж</button></div>';
+    if (T.theory) h += '<div class="theory"><h3>Теория</h3>' + T.theory.map(function (t, i) { return '<details' + (S.thOpen && S.thOpen[id + ':' + i] ? ' open' : '') + ' data-th="' + id + ':' + i + '"><summary>' + t[0] + '</summary><div>' + t[1] + '</div></details>'; }).join('') + '</div>';
     $('right').innerHTML = h;
     if ($('next')) $('next').onclick = function () { S.step[id] = step + 1; render(); };
     if ($('back')) $('back').onclick = function () { S.step[id] = step - 1; render(); };
     if ($('nextTopic')) $('nextTopic').onclick = function () { var list = PARTS[S.part].topics; S.topic[S.part] = list[list.indexOf(id) + 1]; render(); };
     $('resetT').onclick = function () { delete S.st[id]; render(); };
+    [].forEach.call($('right').querySelectorAll('details[data-th]'), function (d) { d.ontoggle = function () { S.thOpen = S.thOpen || {}; S.thOpen[d.dataset.th] = d.open; save(); }; });
     save();
   }
   function renderSoon() {
