@@ -88,28 +88,29 @@ ol.steps li.new { animation: appear .4s ease-out; }
 .plan { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 6px; }
 .lbl { font: italic 19px "Times New Roman", Times, serif; paint-order: stroke; stroke: var(--plane-bg); stroke-width: 4px; stroke-linejoin: round; }
 .num { font: 12px "Golos Text", sans-serif; fill: var(--muted); }
-/* ===== Оформление: тёмно-зелёная доска на фоне, бело-бежевый лист для работы =====
+/* ===== Оформление: тёмно-зелёная доска на фоне, светлый лист для работы (холодный контрастный тон) =====
    Фон доски: chalk-formulas.svg рядом со страницей (собирается claudespace/стили/формулы_мелом_генератор.py). */
-:root { --bg: #1d3329; --ink: #eef0e6; --muted: #a8b9ae; --line: #3a5649; --paper: #213a30; }
-html { background: #1c3128; }
-html body { min-height: 100vh; background-color: #1d3329;
-  background-image: radial-gradient(ellipse at 50% 40%, transparent 40%, rgba(0,0,0,.35) 100%), url("chalk-formulas.svg");
+:root { --bg: #122826; --ink: #f6f9f8; --muted: #b9c9c6; --line: #46635f; --paper: #183330; }
+html { background: #0f2422; }
+html body { min-height: 100vh; background-color: #122826;
+  background-image: radial-gradient(ellipse at 50% 40%, transparent 35%, rgba(0,0,0,.45) 100%), url("chalk-formulas.svg");
   background-size: 100% 100%, 1200px 820px; background-repeat: no-repeat, repeat; background-attachment: fixed; }
 /* на доске: заголовок и вкладки мелом */
 html .tab, html .tp { background: transparent; color: var(--ink); border-color: var(--line); }
-html .tab[aria-selected="true"], html .tp.on { background: var(--ink); border-color: var(--ink); color: #1d3329; }
-html .tp.done { background: transparent; border-color: #9fdcb0; color: #9fdcb0; }
-html .tp.on.done { background: #9fdcb0; border-color: #9fdcb0; color: #1d3329; }
+html .tab[aria-selected="true"], html .tp.on { background: var(--ink); border-color: var(--ink); color: #122826; }
+html .tp.done { background: transparent; border-color: #8fe0c0; color: #8fe0c0; }
+html .tp.on.done { background: #8fe0c0; border-color: #8fe0c0; color: #122826; }
 /* лист: свои светлые цвета */
 html .sheet {
-  --bg: #f6f1e6; --paper: #fbf8f0; --paper-2: #f1eadc; --ink: #262a22; --muted: #6c6a5d; --line: #e3dbc9; --faint: #cfc6b3;
-  --accent: #24493a; --accent-dark: #1a372b; --accent-soft: #e2ebe4;
-  --ok: #2c7a4e; --ok-soft: #e3f0e5; --no: #b5492f; --no-soft: #f8e2da; --warn: #8f5d0c; --warn-soft: #f8ecd2;
-  --hint: #5d4fa8; --hint-soft: #ece8f8; --q: #a0660a;
-  --va: #d9532f; --vb: #2a74a8; --vc: #c94a7c; --vr: #c98410;
-  --gl: #ebe3d3; --axis: #8d877a; --oblique: #efe7f6; --pgram: #c9bce8; --projline: #e2dacb; --tri-line: #a39d8f; --tri-fill: #f5efe3; --plane-bg: #fffdf8;
+  --bg: #f1f3f1; --paper: #f8f9f7; --paper-2: #eceeeb; --ink: #141c1a; --muted: #545e5b; --line: #d6dcd9; --faint: #bfc7c4;
+  --accent: #134a40; --accent-dark: #0d362f; --accent-soft: #dcebe6;
+  --ok: #1d7650; --ok-soft: #dcefe5; --no: #b13a22; --no-soft: #f8dfd7; --warn: #855300; --warn-soft: #f7ead0;
+  --hint: #4c3fa3; --hint-soft: #e8e5f7; --q: #935800;
+  /* векторы: набор «закат» */
+  --va: #ec3d8b; --vb: #6c34d6; --vr: #f2711c; --vc: #16968c;
+  --gl: #e1e6e4; --axis: #6f7975; --oblique: #ebe6f6; --pgram: #b9abe6; --projline: #d5dbd8; --tri-line: #8b9490; --tri-fill: #eff2f0; --plane-bg: #ffffff;
   color: var(--ink); background: var(--paper); border: 0; border-radius: 18px;
-  box-shadow: 0 2px 0 rgba(255,255,255,.5) inset, 0 24px 60px rgba(0,0,0,.35), 0 4px 12px rgba(0,0,0,.2);
+  box-shadow: 0 2px 0 rgba(255,255,255,.6) inset, 0 26px 64px rgba(0,0,0,.5), 0 4px 14px rgba(0,0,0,.3);
 }
 html svg.plane { border-color: var(--line); border-radius: 12px; }
 html .btn { background: transparent; border-color: var(--line); color: var(--ink); }
@@ -119,7 +120,7 @@ html .btn.help { color: var(--hint); border-color: var(--line); }
 html .types button { background: transparent; color: var(--ink); }
 html .types button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
 html .ans input { background: #fff; color: var(--ink); }
-html .exp { background: #fbf1dc; }
+html .exp { background: #fdf2db; }
 html .info { background: var(--accent-soft); }
 html .ctl input[type="range"] { accent-color: var(--accent); }
 </style>
