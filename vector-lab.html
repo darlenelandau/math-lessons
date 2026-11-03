@@ -1884,6 +1884,11 @@ var VEC = (function () {
     var ok = T.done(s);
     if (ok) S.expOk[id] = true;
     var h = '<h2>' + id + '. ' + T.title + '</h2><p style="margin:0">' + T.intro + '</p>';
+    /* теория идёт первой, до опыта; первый блок открыт, пока его не закрыли */
+    if (T.theory) h += '<div class="theory"><h3>Теория</h3>' + T.theory.map(function (t, i) {
+      var key = id + ':' + i, open = S.thOpen && key in S.thOpen ? S.thOpen[key] : i === 0;
+      return '<details' + (open ? ' open' : '') + ' data-th="' + key + '"><summary>' + t[0] + '</summary><div>' + t[1] + '</div></details>';
+    }).join('') + '</div>';
     h += '<div class="box exp"><b>Опыт</b><div>' + (typeof T.exp === 'function' ? T.exp(s) : T.exp) + '</div>' + (ok ? '<div class="box ok" style="padding:6px 10px">Получилось!' + (step ? '' : ' Нажми «Дальше», чтобы разобраться, что произошло.') + '</div>' : '') + '</div>';
     h += '<div class="box read">' + live + '</div>';
     if (step > 0) h += '<ol class="steps">' + T.steps.slice(0, step).map(function (x, i) { return '<li' + (i === step - 1 ? ' class="new"' : '') + '>' + x + '</li>'; }).join('') + '</ol>';
@@ -1896,7 +1901,6 @@ var VEC = (function () {
       if (list[i2 + 1]) h += '<button class="btn main" type="button" id="nextTopic">Следующая тема: ' + (TOPICS[list[i2 + 1]].trainer ? 'тренажёр' : TOPICS[list[i2 + 1]].title) + '</button>';
     }
     h += '<button class="btn minor" type="button" id="resetT">Вернуть чертёж</button></div>';
-    if (T.theory) h += '<div class="theory"><h3>Теория</h3>' + T.theory.map(function (t, i) { return '<details' + (S.thOpen && S.thOpen[id + ':' + i] ? ' open' : '') + ' data-th="' + id + ':' + i + '"><summary>' + t[0] + '</summary><div>' + t[1] + '</div></details>'; }).join('') + '</div>';
     $('right').innerHTML = h;
     if ($('next')) $('next').onclick = function () { S.step[id] = step + 1; render(); };
     if ($('back')) $('back').onclick = function () { S.step[id] = step - 1; render(); };
