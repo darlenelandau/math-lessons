@@ -165,7 +165,11 @@ var VEC = (function () {
     if (s == null) return NaN;
     s = String(s).trim().replace(/\s+/g, '').replace(/−/g, '-').replace(/,/g, '.');
     if (!s) return NaN;
-    var m = /^(-?)(\d*(?:\.\d+)?)?(?:√|sqrt)\(?(\d+(?:\.\d+)?)\)?$/.exec(s);
+    var m = /^(-?)(\d*(?:\.\d+)?)?(?:√|sqrt)\(?(\d+(?:\.\d+)?)\)?\/(\d+(?:\.\d+)?)$/.exec(s);
+    if (m) { var k0 = m[2] === undefined || m[2] === '' ? 1 : parseFloat(m[2]); return (m[1] ? -1 : 1) * k0 * Math.sqrt(parseFloat(m[3])) / parseFloat(m[4]); }
+    m = /^(-?\d+(?:\.\d+)?)\/(?:√|sqrt)\(?(\d+(?:\.\d+)?)\)?$/.exec(s);
+    if (m) return parseFloat(m[1]) / Math.sqrt(parseFloat(m[2]));
+    m = /^(-?)(\d*(?:\.\d+)?)?(?:√|sqrt)\(?(\d+(?:\.\d+)?)\)?$/.exec(s);
     if (m) { var k = m[2] === undefined || m[2] === '' ? 1 : parseFloat(m[2]); return (m[1] ? -1 : 1) * k * Math.sqrt(parseFloat(m[3])); }
     m = /^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/.exec(s);
     if (m) return parseFloat(m[1]) / parseFloat(m[2]);
@@ -474,7 +478,231 @@ var VEC = (function () {
         M(V('AB') + ' · ' + V(neg ? 'CA' : 'AC') + ' = ' + k + '√2 · ' + k + ' · ' + (neg ? '(−√2/2)' : '√2/2') + ' = ' + (neg ? '−' : '') + k * k)] };
   } };
 
-  return { GEN: GEN, parse: parse, same: same, fmt: fmt, co: co, V: V, M: M, sqrtTxt: sqrtTxt, setRnd: setRnd, dot: dot, len2: len2, round: round, minus: minus };
+  /* =================== часть 3: координаты в пространстве (точные ответы с корнями) =================== */
+  function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { var t = a % b; a = b; b = t; } return a; }
+  /* p / √N в упрощённом виде (p ≥ 0, N > 0 целые): «√6/3», «2√3/3», «1/2», «2» */
+  function radRatio(p, N) {
+    if (!p) return '0';
+    var k = 1, m = N;
+    for (var d = 2; d * d <= m; d++) while (m % (d * d) === 0) { m /= d * d; k *= d; }
+    var num = p, den = k * m, g = gcd(num, den);
+    num /= g; den /= g;
+    var top = m > 1 ? (num === 1 ? '' : num) + '√' + m : String(num);
+    return den === 1 ? top : top + '/' + den;
+  }
+  /* √(X/Y) в упрощённом виде */
+  function sqrtFrac(X, Y) {
+    if (!X) return '0';
+    var g0 = gcd(X, Y); X /= g0; Y /= g0;
+    var P = X * Y, k = 1, m = P;
+    for (var d = 2; d * d <= m; d++) while (m % (d * d) === 0) { m /= d * d; k *= d; }
+    var g = gcd(k, Y), num = k / g, den = Y / g;
+    var top = m > 1 ? (num === 1 ? '' : num) + '√' + m : String(num);
+    return den === 1 ? top : top + '/' + den;
+  }
+  function sub3(a, b) { return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]; }
+  function add3(a, b) { return [a[0] + b[0], a[1] + b[1], a[2] + b[2]]; }
+  function dot3(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
+  function cross3(a, b) { return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]; }
+  function co3(v) { return '(' + fmt(v[0]) + '; ' + fmt(v[1]) + '; ' + fmt(v[2]) + ')'; }
+  /* нормаль плоскости через три точки, сокращённая, первый ненулевой коэффициент положительный; d — свободный член */
+  function plane3(P, Q, R) {
+    var n = cross3(sub3(Q, P), sub3(R, P));
+    if (!n[0] && !n[1] && !n[2]) return null;
+    var g = gcd(gcd(n[0], n[1]), n[2]);
+    n = n.map(function (x) { return x / g; });
+    var f = n[0] || n[1] || n[2];
+    if (f < 0) n = n.map(function (x) { return -x; });
+    return { n: n, d: -dot3(n, P) };
+  }
+  function planeTxt(pl, scale) {
+    var parts = [], names = ['<i>x</i>', '<i>y</i>', '<i>z</i>'];
+    pl.n.forEach(function (c, i) {
+      if (!c) return;
+      var s = c < 0 ? (parts.length ? ' − ' : '−') : (parts.length ? ' + ' : ''), a = Math.abs(c);
+      parts.push(s + (a === 1 ? '' : a) + names[i]);
+    });
+    var d = pl.d / (scale || 1);
+    if (d) parts.push((d < 0 ? ' − ' : ' + ') + fmt(Math.abs(d)));
+    return parts.join('') + ' = 0';
+  }
+  function nm3(n) { return String(n).replace(/^([A-Z])(\d)$/, '$1<sub>$2</sub>'); }
+  function seg3(a, b) { return nm3(a) + nm3(b); }
+
+  /* --- тело для задач: прямоугольный параллелепипед ABCDA1B1C1D1 (часто куб); координаты удвоены, чтобы середины были целыми --- */
+  var VNAMES = ['A', 'B', 'C', 'D', 'A1', 'B1', 'C1', 'D1'];
+  var EDGES = [['A', 'B'], ['B', 'C'], ['C', 'D'], ['A', 'D'], ['A1', 'B1'], ['B1', 'C1'], ['C1', 'D1'], ['A1', 'D1'], ['A', 'A1'], ['B', 'B1'], ['C', 'C1'], ['D', 'D1']];
+  function boxVerts(a, b, c) {
+    return { A: [0, 0, 0], B: [a, 0, 0], C: [a, b, 0], D: [0, b, 0], A1: [0, 0, c], B1: [a, 0, c], C1: [a, b, c], D1: [0, b, c] };
+  }
+  function makeBody() {
+    var cube = rnd() < 0.7, a = pick([1, 2, 3, 4, 6]), b = a, c = a;
+    if (!cube) { a = ri(1, 6); b = ri(1, 6); c = ri(1, 6); if (a === b && b === c) c = a + 1; }
+    var V2 = boxVerts(2 * a, 2 * b, 2 * c);
+    return { cube: a === b && b === c, a: a, b: b, c: c, V2: V2 };
+  }
+  function bodyTxt(B) {
+    return B.cube ? 'Дан куб ' + M('<i>ABCDA</i><sub>1</sub><i>B</i><sub>1</sub><i>C</i><sub>1</sub><i>D</i><sub>1</sub>') + ' с ребром ' + M(B.a) :
+      'Дан прямоугольный параллелепипед ' + M('<i>ABCDA</i><sub>1</sub><i>B</i><sub>1</sub><i>C</i><sub>1</sub><i>D</i><sub>1</sub>') + ', у которого ' + M('<i>AB</i> = ' + B.a + ', <i>AD</i> = ' + B.b + ', <i>AA</i><sub>1</sub> = ' + B.c);
+  }
+  var SYS = 'Введём систему координат: начало в точке ' + M('<i>A</i>') + ', ось ' + M('<i>x</i>') + ' вдоль ' + M('<i>AB</i>') + ', ось ' + M('<i>y</i>') + ' вдоль ' + M('<i>AD</i>') + ', ось ' + M('<i>z</i>') + ' вдоль ' + M('<i>AA</i><sub>1</sub>') + '.';
+  /* точки задачи: вершины или середины рёбер (им даём буквы M, N, K, P) */
+  function pickPoints(B, n, opts) {
+    opts = opts || {};
+    var letters = ['M', 'N', 'K', 'P'], used = {}, res = [], li = 0;
+    while (res.length < n) {
+      var p;
+      if (rnd() < (opts.mid == null ? 0.4 : opts.mid)) {
+        var e = pick(EDGES), q = B.V2[e[0]], r = B.V2[e[1]];
+        p = { c: [(q[0] + r[0]) / 2, (q[1] + r[1]) / 2, (q[2] + r[2]) / 2], name: letters[li], desc: M('<i>' + letters[li] + '</i>') + ' — середина ребра ' + M('<i>' + seg3(e[0], e[1]) + '</i>'), mid: e };
+      } else { var v = pick(VNAMES); p = { c: B.V2[v], name: v }; }
+      var key = p.c.join(',');
+      if (used[key]) continue;
+      used[key] = 1; res.push(p); if (p.mid) li++;
+    }
+    return res;
+  }
+  function ptsDesc(ps) { var d = ps.filter(function (p) { return p.desc; }).map(function (p) { return p.desc; }); return d.length ? ' Точка ' + d.join(', точка ') + '.' : ''; }
+  function N3(p) { return M('<i>' + nm3(p.name) + '</i>'); }
+  function C3(p) { return M('<i>' + nm3(p.name) + '</i>' + co3(p.c.map(function (x) { return x / 2; }))); }
+  function vecT(p, q) { return M(V(nm3(p.name) + nm3(q.name)) + ' = ' + co3(sub3(q.c, p.c).map(function (x) { return x / 2; }))); }
+  function pic3(B, ps, extra) { var o = { dims: [B.a, B.b, B.c], pts: {} }; ps.forEach(function (p) { o.pts[p.name] = p.c.map(function (x) { return x / 2; }); }); for (var k in extra) o[k] = extra[k]; return o; }
+  function nameOf(p) { return p.name; }
+
+  GEN.c3coord = { part: 3, name: 'координаты точки', make: function () {
+    var B = makeBody(), p = pickPoints(B, 1, { mid: 0.6 })[0];
+    return { text: bodyTxt(B) + '.' + ptsDesc([p]) + ' ' + SYS + ' Найдите координаты точки ' + N3(p) + '.', triple: p.c.map(function (x) { return x / 2; }),
+      hint: 'Координаты вершины — это сдвиги из ' + M('<i>A</i>') + ' вдоль трёх рёбер. Середина отрезка — среднее арифметическое координат концов.',
+      sol: [p.mid ? 'Концы ребра: ' + M('<i>' + nm3(p.mid[0]) + '</i>' + co3(B.V2[p.mid[0]].map(function (x) { return x / 2; }))) + ', ' + M('<i>' + nm3(p.mid[1]) + '</i>' + co3(B.V2[p.mid[1]].map(function (x) { return x / 2; }))) + '; середина — полусумма.' : 'Вершина: идём от ' + M('<i>A</i>') + ' по рёбрам.', C3(p)],
+      p3: pic3(B, [p], { hl: [p.name] }) };
+  } };
+  GEN.c3len = { part: 3, name: 'длина отрезка', make: function () {
+    var B = makeBody(), ps = pickPoints(B, 2), v = sub3(ps[1].c, ps[0].c), L2 = dot3(v, v);
+    return { text: bodyTxt(B) + '.' + ptsDesc(ps) + ' Найдите длину отрезка ' + M('<i>' + nm3(ps[0].name) + nm3(ps[1].name) + '</i>') + '.', ans: Math.sqrt(L2) / 2, ansTxt: sqrtFrac(L2, 4),
+      hint: SYS + ' Длина: ' + M('√(<i>x</i>² + <i>y</i>² + <i>z</i>²)') + ' для координат вектора.',
+      sol: [SYS, C3(ps[0]) + ', ' + C3(ps[1]) + '.', vecT(ps[0], ps[1]) + '.', 'Длина: ' + M('√(' + v.map(function (x) { return x / 2; }).map(par).join('² + ') + '²) = ' + sqrtFrac(L2, 4))],
+      p3: pic3(B, ps, { segs: [[ps[0].name, ps[1].name, 'r']] }) };
+  } };
+  GEN.c3angLL = { part: 3, name: 'угол между прямыми', make: function () {
+    for (var i = 0; i < 300; i++) {
+      var B = makeBody(), ps = pickPoints(B, 4), s1 = sub3(ps[1].c, ps[0].c), s2 = sub3(ps[3].c, ps[2].c);
+      var cr = cross3(s1, s2); if (!cr[0] && !cr[1] && !cr[2]) continue;
+      var d = Math.abs(dot3(s1, s2)), L = dot3(s1, s1) * dot3(s2, s2);
+      if (!d) continue;
+      var txt = radRatio(d, L);
+      if (txt.length > 9) continue;
+      return { text: bodyTxt(B) + '.' + ptsDesc(ps) + ' Найдите косинус угла между прямыми ' + M('<i>' + nm3(ps[0].name) + nm3(ps[1].name) + '</i>') + ' и ' + M('<i>' + nm3(ps[2].name) + nm3(ps[3].name) + '</i>') + '.', ans: d / Math.sqrt(L), ansTxt: txt,
+        hint: 'Направляющие векторы прямых — это ' + M(V(nm3(ps[0].name) + nm3(ps[1].name))) + ' и ' + M(V(nm3(ps[2].name) + nm3(ps[3].name))) + '. Косинус угла между прямыми — по модулю: ' + M('cos φ = |' + V('a') + '·' + V('b') + '| / (|' + V('a') + '|·|' + V('b') + '|)') + '.',
+        sol: [SYS, vecT(ps[0], ps[1]) + ', ' + vecT(ps[2], ps[3]) + '.', 'Скалярное произведение: ' + M(fmt(dot3(s1, s2) / 4)) + '; длины: ' + M(sqrtFrac(dot3(s1, s1), 4)) + ' и ' + M(sqrtFrac(dot3(s2, s2), 4)) + '.', M('cos φ = ' + fmt(d / 4) + ' / (' + sqrtFrac(dot3(s1, s1), 4) + ' · ' + sqrtFrac(dot3(s2, s2), 4) + ') = ' + txt)],
+        p3: pic3(B, ps, { segs: [[ps[0].name, ps[1].name, 'a', 1], [ps[2].name, ps[3].name, 'b', 1]] }) };
+    }
+  } };
+  function planeTask(B, ps) { return plane3(ps[0].c, ps[1].c, ps[2].c); }
+  GEN.c3plane = { part: 3, name: 'уравнение плоскости', make: function () {
+    for (var i = 0; i < 500; i++) {
+      var B = makeBody(), ps = pickPoints(B, 3), pl = planeTask(B, ps);
+      if (!pl || !pl.n[0]) continue;
+      /* уравнение x + by + cz + d = 0: делим на a; в удвоенных координатах свободный член вдвое больше */
+      var a = pl.n[0], b = pl.n[1] / a, c = pl.n[2] / a, d = pl.d / 2 / a;
+      if (!nice(b, 2) || !nice(c, 2) || !nice(d, 2)) continue;
+      var sum = round(b + c + d, 6);
+      var plN = { n: [1, round(b, 6), round(c, 6)], d: round(d, 6) };
+      return { text: bodyTxt(B) + '.' + ptsDesc(ps) + ' Уравнение плоскости ' + M('<i>' + ps.map(nameOf).map(nm3).join('') + '</i>') + ' записали в виде ' + M('<i>x</i> + <i>by</i> + <i>cz</i> + <i>d</i> = 0') + '. Найдите ' + M('<i>b</i> + <i>c</i> + <i>d</i>') + '.', ans: sum,
+        hint: 'Подставьте координаты трёх точек в ' + M('<i>x</i> + <i>by</i> + <i>cz</i> + <i>d</i> = 0') + ' и решите систему относительно ' + M('<i>b</i>, <i>c</i>, <i>d</i>') + '.',
+        sol: [SYS, ps.map(C3).join(', ') + '.', 'Подставляем точки и решаем систему. Получаем ' + M(planeTxt(plN)) + '.', M('<i>b</i> + <i>c</i> + <i>d</i> = ' + fmt(sum))],
+        p3: pic3(B, ps, { planes: [ps.map(nameOf)] }) };
+    }
+  } };
+  GEN.c3angPP = { part: 3, name: 'угол между плоскостями', make: function () {
+    for (var i = 0; i < 500; i++) {
+      var B = makeBody(), ps = pickPoints(B, 3), qs = pickPoints(B, 3, { mid: 0.2 }), p1 = planeTask(B, ps), p2 = planeTask(B, qs);
+      if (!p1 || !p2) continue;
+      var d = Math.abs(dot3(p1.n, p2.n)), L = dot3(p1.n, p1.n) * dot3(p2.n, p2.n), cr = cross3(p1.n, p2.n);
+      if (!cr[0] && !cr[1] && !cr[2]) continue;
+      var txt = radRatio(d, L);
+      if (txt.length > 9) continue;
+      var n1 = M('<i>' + ps.map(nameOf).map(nm3).join('') + '</i>'), n2 = M('<i>' + qs.map(nameOf).map(nm3).join('') + '</i>');
+      var all = ps.concat(qs.filter(function (q) { return !ps.some(function (p) { return p.name === q.name; }); }));
+      return { text: bodyTxt(B) + '.' + ptsDesc(all) + ' Найдите косинус угла между плоскостями ' + n1 + ' и ' + n2 + '.', ans: d / Math.sqrt(L), ansTxt: txt,
+        hint: 'Найдите нормали обеих плоскостей. Угол между плоскостями — это угол между нормалями, косинус берём по модулю.',
+        sol: [SYS, 'Плоскость ' + n1 + ': ' + M(planeTxt(p1, 2)) + ', нормаль ' + M(co3(p1.n)) + '.', 'Плоскость ' + n2 + ': ' + M(planeTxt(p2, 2)) + ', нормаль ' + M(co3(p2.n)) + '.', M('cos φ = |' + dot3(p1.n, p2.n) + '| / (√' + dot3(p1.n, p1.n) + ' · √' + dot3(p2.n, p2.n) + ') = ' + txt)],
+        p3: pic3(B, all, { planes: [ps.map(nameOf), qs.map(nameOf)] }) };
+    }
+  } };
+  GEN.c3distPP = { part: 3, name: 'расстояние от точки до плоскости', make: function () {
+    for (var i = 0; i < 500; i++) {
+      var B = makeBody(), ps = pickPoints(B, 4), pl = plane3(ps[1].c, ps[2].c, ps[3].c);
+      if (!pl) continue;
+      var num = Math.abs(dot3(pl.n, ps[0].c) + pl.d), L = dot3(pl.n, pl.n);
+      if (!num) continue;
+      var txt = radRatio(num, 4 * L);
+      if (txt.length > 9) continue;
+      var pn = M('<i>' + ps.slice(1).map(nameOf).map(nm3).join('') + '</i>');
+      return { text: bodyTxt(B) + '.' + ptsDesc(ps) + ' Найдите расстояние от точки ' + N3(ps[0]) + ' до плоскости ' + pn + '.', ans: num / 2 / Math.sqrt(L), ansTxt: txt,
+        hint: 'Запишите уравнение плоскости ' + M('<i>ax</i> + <i>by</i> + <i>cz</i> + <i>d</i> = 0') + ' и примените ' + M('ρ = |<i>ax</i><sub>0</sub> + <i>by</i><sub>0</sub> + <i>cz</i><sub>0</sub> + <i>d</i>| / √(<i>a</i>² + <i>b</i>² + <i>c</i>²)') + '.',
+        sol: [SYS, 'Плоскость ' + pn + ': ' + M(planeTxt(pl, 2)) + '.', C3(ps[0]) + '.', M('ρ = |' + fmt((dot3(pl.n, ps[0].c) + pl.d) / 2) + '| / √' + L + ' = ' + txt)],
+        p3: pic3(B, ps, { planes: [ps.slice(1).map(nameOf)], hl: [ps[0].name], perp: [ps[0].name, ps.slice(1).map(nameOf)] }) };
+    }
+  } };
+  GEN.c3line = { part: 3, name: 'точка на прямой', make: function () {
+    for (var i = 0; i < 500; i++) {
+      var B = makeBody(), ps = pickPoints(B, 2), s = sub3(ps[1].c, ps[0].c);
+      if (!s[0] || (!s[1] && !s[2])) continue;
+      var x = pick([-1, 2, 3, -2, 0.5, 1.5]) * (ps[1].c[0] - ps[0].c[0]) / 2 + ps[0].c[0] / 2;
+      if (!nice(x, 2)) continue;
+      var t = (2 * x - ps[0].c[0]) / s[0], ask = s[2] ? 2 : 1, val = (ps[0].c[ask] + t * s[ask]) / 2;
+      if (!nice(val, 2) || Math.abs(t) < 1e-9 || Math.abs(t - 1) < 1e-9) continue;
+      var an = ask === 2 ? '<i>z</i>' : '<i>y</i>';
+      return { text: bodyTxt(B) + '.' + ptsDesc(ps) + ' ' + SYS + ' На прямой ' + M('<i>' + seg3(ps[0].name, ps[1].name) + '</i>') + ' взята точка с абсциссой ' + M('<i>x</i> = ' + fmt(round(x, 6))) + '. Найдите её координату ' + M(an) + '.', ans: round(val, 6),
+        hint: 'Параметрическое уравнение прямой: ' + M('(<i>x</i>; <i>y</i>; <i>z</i>) = ' + nm3(ps[0].name) + ' + <i>t</i> · ' + V(seg3(ps[0].name, ps[1].name))) + '. Найдите ' + M('<i>t</i>') + ' по ' + M('<i>x</i>') + '.',
+        sol: [C3(ps[0]) + ', ' + vecT(ps[0], ps[1]) + '.', 'Прямая: ' + M('<i>x</i> = ' + fmt(ps[0].c[0] / 2) + ' + ' + par(s[0] / 2) + '<i>t</i>, <i>y</i> = ' + fmt(ps[0].c[1] / 2) + ' + ' + par(s[1] / 2) + '<i>t</i>, <i>z</i> = ' + fmt(ps[0].c[2] / 2) + ' + ' + par(s[2] / 2) + '<i>t</i>') + '.', 'Из ' + M('<i>x</i> = ' + fmt(round(x, 6))) + ': ' + M('<i>t</i> = ' + fmt(round(t, 6))) + '.', M(an + ' = ' + fmt(round(val, 6)))],
+        p3: pic3(B, ps, { segs: [[ps[0].name, ps[1].name, 'r', 1]] }) };
+    }
+  } };
+  GEN.c3angLP = { part: 3, name: 'угол между прямой и плоскостью', make: function () {
+    for (var i = 0; i < 500; i++) {
+      var B = makeBody(), ps = pickPoints(B, 5), s = sub3(ps[1].c, ps[0].c), pl = plane3(ps[2].c, ps[3].c, ps[4].c);
+      if (!pl) continue;
+      var d = Math.abs(dot3(s, pl.n)), L = dot3(s, s) * dot3(pl.n, pl.n);
+      if (!d) continue;
+      var txt = radRatio(d, L);
+      if (txt.length > 9) continue;
+      var pn = M('<i>' + ps.slice(2).map(nameOf).map(nm3).join('') + '</i>');
+      return { text: bodyTxt(B) + '.' + ptsDesc(ps) + ' Найдите синус угла между прямой ' + M('<i>' + seg3(ps[0].name, ps[1].name) + '</i>') + ' и плоскостью ' + pn + '.', ans: d / Math.sqrt(L), ansTxt: txt,
+        hint: 'Синус угла между прямой и плоскостью — это модуль косинуса угла между направляющим вектором прямой и нормалью плоскости.',
+        sol: [SYS, vecT(ps[0], ps[1]) + '.', 'Плоскость ' + pn + ': ' + M(planeTxt(pl, 2)) + ', нормаль ' + M(co3(pl.n)) + '.', M('sin φ = |' + fmt(dot3(s, pl.n) / 2) + '| / (' + sqrtFrac(dot3(s, s), 4) + ' · √' + dot3(pl.n, pl.n) + ') = ' + txt)],
+        p3: pic3(B, ps, { segs: [[ps[0].name, ps[1].name, 'a', 1]], planes: [ps.slice(2).map(nameOf)] }) };
+    }
+  } };
+  GEN.c3distPL = { part: 3, name: 'расстояние от точки до прямой', make: function () {
+    for (var i = 0; i < 500; i++) {
+      var B = makeBody(), ps = pickPoints(B, 3), s = sub3(ps[2].c, ps[1].c), w = sub3(ps[0].c, ps[1].c), cr = cross3(w, s);
+      var X = dot3(cr, cr), Y = dot3(s, s);
+      if (!X) continue;
+      var txt = sqrtFrac(X, 4 * Y);
+      if (txt.length > 9) continue;
+      return { text: bodyTxt(B) + '.' + ptsDesc(ps) + ' Найдите расстояние от точки ' + N3(ps[0]) + ' до прямой ' + M('<i>' + seg3(ps[1].name, ps[2].name) + '</i>') + '.', ans: Math.sqrt(X / Y) / 2, ansTxt: txt,
+        hint: 'Найдите на прямой точку ' + M('<i>H</i>') + ' с ' + M(V(nm3(ps[0].name) + 'H') + ' ⊥ ' + V(seg3(ps[1].name, ps[2].name))) + ' (через параметр ' + M('<i>t</i>') + '), потом длину ' + M('<i>' + nm3(ps[0].name) + 'H</i>') + '. Или площадь треугольника, делённая на половину основания.',
+        sol: [SYS, C3(ps[0]) + ', ' + C3(ps[1]) + ', ' + vecT(ps[1], ps[2]) + '.', 'Точка прямой: ' + M('<i>H</i> = ' + nm3(ps[1].name) + ' + <i>t</i>' + V(seg3(ps[1].name, ps[2].name))) + '. Условие ' + M(V(nm3(ps[0].name) + 'H') + ' · ' + V(seg3(ps[1].name, ps[2].name)) + ' = 0') + ' даёт ' + M('<i>t</i> = ' + fmt(round(dot3(w, s) / Y, 6))) + '.', 'Расстояние: ' + M(txt)],
+        p3: pic3(B, ps, { segs: [[ps[1].name, ps[2].name, 'b', 1]], hl: [ps[0].name], foot: [ps[0].name, ps[1].name, ps[2].name] }) };
+    }
+  } };
+  GEN.c3distLL = { part: 3, name: 'расстояние между скрещивающимися прямыми', make: function () {
+    for (var i = 0; i < 800; i++) {
+      var B = makeBody(), ps = pickPoints(B, 4), s1 = sub3(ps[1].c, ps[0].c), s2 = sub3(ps[3].c, ps[2].c), n = cross3(s1, s2);
+      var mix = Math.abs(dot3(sub3(ps[2].c, ps[0].c), n)), L = dot3(n, n);
+      if (!L || !mix) continue;
+      var txt = radRatio(mix, 4 * L);
+      if (txt.length > 9) continue;
+      var g = gcd(gcd(n[0], n[1]), n[2]), nn = n.map(function (x) { return x / g; });
+      return { text: bodyTxt(B) + '.' + ptsDesc(ps) + ' Найдите расстояние между прямыми ' + M('<i>' + seg3(ps[0].name, ps[1].name) + '</i>') + ' и ' + M('<i>' + seg3(ps[2].name, ps[3].name) + '</i>') + '.', ans: mix / 2 / Math.sqrt(L), ansTxt: txt,
+        hint: 'Проведите через одну прямую плоскость, параллельную другой: её нормаль перпендикулярна обеим прямым. Искомое расстояние — от любой точки второй прямой до этой плоскости.',
+        sol: [SYS, vecT(ps[0], ps[1]) + ', ' + vecT(ps[2], ps[3]) + '.', 'Нормаль, перпендикулярная обоим: ' + M(co3(nn)) + ' (решаем ' + M(V('n') + '·' + V('s') + '<sub>1</sub> = 0, ' + V('n') + '·' + V('s') + '<sub>2</sub> = 0') + ').', 'Плоскость через ' + M('<i>' + seg3(ps[0].name, ps[1].name) + '</i>') + ' с этой нормалью, расстояние до неё от ' + N3(ps[2]) + ': ' + M(txt)],
+        p3: pic3(B, ps, { segs: [[ps[0].name, ps[1].name, 'a', 1], [ps[2].name, ps[3].name, 'b', 1]] }) };
+    }
+  } };
+  return { radRatio: radRatio, sqrtFrac: sqrtFrac, plane3: plane3, planeTxt: planeTxt, cross3: cross3, dot3: dot3, sub3: sub3, add3: add3, co3: co3, nm3: nm3, boxVerts: boxVerts, EDGES: EDGES, gcd: gcd,
+    GEN: GEN, parse: parse, same: same, fmt: fmt, co: co, V: V, M: M, sqrtTxt: sqrtTxt, setRnd: setRnd, dot: dot, len2: len2, round: round, minus: minus };
 })();
 /*LOGIC-END*/
 
@@ -484,7 +712,7 @@ var VEC = (function () {
   var V = VEC.V, M = VEC.M, co = VEC.co, fmt = VEC.fmt;
   var C = { a: 'var(--va)', b: 'var(--vb)', c: 'var(--vc)', r: 'var(--vr)', q: 'var(--q)', ink: 'var(--ink)', muted: 'var(--muted)', ok: 'var(--ok)', no: 'var(--no)' };
 
-  var S = { part: 1, topic: { 1: '1.1', 2: '2.1', 3: '3.0' }, st: {}, step: {}, expOk: {}, types: { 1: 'all', 2: 'all' }, solved: {} };
+  var S = { part: 1, topic: { 1: '1.1', 2: '2.1', 3: '3.1' }, cam: { az: -1.2, el: 0.35 }, st: {}, step: {}, expOk: {}, types: { 1: 'all', 2: 'all' }, solved: {} };
   try { var sv = JSON.parse(localStorage.getItem('vector-lab') || 'null'); if (sv) for (var k in sv) if (k in S) S[k] = sv[k]; } catch (e) {}
   function save() { try { localStorage.setItem('vector-lab', JSON.stringify(S)); } catch (e) {} }
 
@@ -932,12 +1160,412 @@ var VEC = (function () {
   /* ---- тренажёры ---- */
   TOPICS['1.T'] = { title: 'Задачи как на ЕГЭ', trainer: 1 };
   TOPICS['2.T'] = { title: 'Задачи как на ЕГЭ', trainer: 2 };
-  TOPICS['3.0'] = { title: 'Скоро', soon: true };
+  /* =====================================================================
+     Часть 3. Координатный метод: 3D-чертёж (ортогональная проекция, поворот мышкой)
+     Оси: x вдоль AB (вправо), y вдоль AD (вглубь), z вдоль AA1 (вверх). Невидимые рёбра — пунктиром.
+     ===================================================================== */
+  var V3 = VEC;
+  function cam() {
+    var az = S.cam.az, el = S.cam.el;
+    return { r: [-Math.sin(az), Math.cos(az), 0], u: [-Math.sin(el) * Math.cos(az), -Math.sin(el) * Math.sin(az), Math.cos(el)], v: [Math.cos(el) * Math.cos(az), Math.cos(el) * Math.sin(az), Math.sin(el)] };
+  }
+  var lastScene = null;
+  /* точки чертежа по имени: вершины коробки, точки сцены */
+  function P3of(sc, n) { return Array.isArray(n) ? n : (sc.pts && sc.pts[n]) || (sc.V && sc.V[n]); }
+  function sub3(a, b) { return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]; }
+  function add3(a, b) { return [a[0] + b[0], a[1] + b[1], a[2] + b[2]]; }
+  function mul3(a, k) { return [a[0] * k, a[1] * k, a[2] * k]; }
+  function dot3(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
+  function sectionPoly(n, d, Vb) {
+    var out = [];
+    V3.EDGES.forEach(function (e) {
+      var p = Vb[e[0]], q = Vb[e[1]], fp = dot3(n, p) + d, fq = dot3(n, q) + d;
+      var cand = [];
+      if (Math.abs(fp) < 1e-9) cand.push(p);
+      if (Math.abs(fq) < 1e-9) cand.push(q);
+      if (fp * fq < 0) cand.push(add3(p, mul3(sub3(q, p), fp / (fp - fq))));
+      cand.forEach(function (c) { if (!out.some(function (o) { return Math.abs(o[0] - c[0]) + Math.abs(o[1] - c[1]) + Math.abs(o[2] - c[2]) < 1e-9; })) out.push(c); });
+    });
+    return out;
+  }
+  function draw3(sc) {
+    lastScene = sc;
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    var K = cam(), dims = sc.dims, Vb = dims ? V3.boxVerts(dims[0], dims[1], dims[2]) : null;
+    sc.V = Vb;
+    var pr0 = function (p) { return [dot3(p, K.r), -dot3(p, K.u)]; };
+    /* подгонка масштаба по всему, что рисуем */
+    var all = [];
+    if (Vb) Object.keys(Vb).forEach(function (k) { all.push(Vb[k]); });
+    var ax = sc.axes || (dims ? [dims[0] * 1.45 + 0.4, dims[1] * 1.45 + 0.4, dims[2] * 1.3 + 0.4] : [4, 4, 4]);
+    all.push([ax[0], 0, 0], [0, ax[1], 0], [0, 0, ax[2]], [0, 0, 0]);
+    if (sc.neg) all.push([-ax[0], 0, 0], [0, -ax[1], 0], [0, 0, -ax[2]]);
+    (sc.extraFit || []).forEach(function (p) { all.push(p); });
+    var xs = all.map(function (p) { return pr0(p)[0]; }), ys = all.map(function (p) { return pr0(p)[1]; });
+    var minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs), minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
+    var sc0 = Math.min((W - 70) / (maxX - minX || 1), (W - 70) / (maxY - minY || 1));
+    var cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+    var S3 = function (p) { var q = pr0(p); return [W / 2 + (q[0] - cx) * sc0, W / 2 + (q[1] - cy) * sc0]; };
+    sc.S3 = S3;
+    function ln(p, q, col, w, dash, op) {
+      var A = S3(p), B = S3(q), at = { x1: A[0].toFixed(1), y1: A[1].toFixed(1), x2: B[0].toFixed(1), y2: B[1].toFixed(1), stroke: col, 'stroke-width': w || 1.5, 'stroke-linecap': 'round' };
+      if (dash) at['stroke-dasharray'] = dash === true ? '6 5' : dash;
+      if (op) at.opacity = op;
+      return el('line', at);
+    }
+    function arr(p, q, col, w) {
+      var A = S3(p), B = S3(q), dx = B[0] - A[0], dy = B[1] - A[1], l = Math.hypot(dx, dy);
+      if (l < 2) return;
+      var ux = dx / l, uy = dy / l, h = 10;
+      el('line', { x1: A[0], y1: A[1], x2: B[0] - ux * h * 0.7, y2: B[1] - uy * h * 0.7, stroke: col, 'stroke-width': w || 2.4, 'stroke-linecap': 'round' });
+      el('path', { d: 'M' + B[0] + ' ' + B[1] + 'L' + (B[0] - ux * h - uy * h * 0.42) + ' ' + (B[1] - uy * h + ux * h * 0.42) + 'L' + (B[0] - ux * h + uy * h * 0.42) + ' ' + (B[1] - uy * h - ux * h * 0.42) + 'Z', fill: col });
+    }
+    function lab(p, txt, col, away, size) {
+      var A = S3(p), c = S3(sc.center || (Vb ? mul3(Vb.C1, 0.5) : [0, 0, 0])), dx = A[0] - c[0], dy = A[1] - c[1], l = Math.hypot(dx, dy) || 1;
+      var off = away == null ? 15 : away, x = A[0] + dx / l * off, y = A[1] + dy / l * off + 6;
+      var t = el('text', { x: x.toFixed(1), y: y.toFixed(1), 'class': 'lbl', 'text-anchor': 'middle', fill: col || 'var(--ink)', style: size ? 'font-size:' + size + 'px' : '' });
+      var m = /^([A-Z])(\d)$/.exec(txt);
+      if (m) { t.appendChild(document.createTextNode(m[1])); var ts = el('tspan', { dy: '5', 'font-size': '14', 'font-style': 'normal' }, t); ts.textContent = m[2]; }
+      else t.textContent = txt;
+    }
+    sc.ln = ln; sc.arr = arr; sc.lab = lab; sc.dotAt = dotAt;
+    /* оси */
+    var o = [0, 0, 0], names = ['x', 'y', 'z'];
+    [0, 1, 2].forEach(function (i) {
+      var e = [0, 0, 0]; e[i] = ax[i];
+      var s0 = [0, 0, 0]; if (sc.neg) s0[i] = -ax[i];
+      ln(s0, e, 'var(--axis)', 1.3);
+      arr(mul3(e, 0.97), e, 'var(--axis)', 1.3);
+      var Le = S3(e);
+      el('text', { x: Le[0] + 8, y: Le[1] - 6, 'class': 'lbl', fill: 'var(--axis)' }, svg, names[i]);
+      if (sc.ticks) for (var k = -Math.floor(ax[i]) + (sc.neg ? 0 : Math.floor(ax[i])); k < ax[i]; k++) if (k) {
+        var p = [0, 0, 0]; p[i] = k; var q = S3(p);
+        el('circle', { cx: q[0], cy: q[1], r: 2, fill: 'var(--axis)' });
+        el('text', { x: q[0] + 4, y: q[1] + 13, 'class': 'num' }, svg, VEC.minus(k));
+      }
+    });
+    if (!Vb) { var Oq = S3(o); el('text', { x: Oq[0] - 14, y: Oq[1] + 14, 'class': 'lbl', fill: 'var(--axis)' }, svg, 'O'); }
+    /* плоскости-сечения */
+    var PCOL = ['var(--vb)', 'var(--vr)'];
+    (sc.planes || []).forEach(function (pl, i) {
+      var P = pl.map(function (n) { return P3of(sc, n); }), np = V3.plane3(P[0], P[1], P[2]);
+      if (!np || !Vb) return;
+      var poly = sectionPoly(np.n, np.d, Vb);
+      if (poly.length < 3) return;
+      var sp2 = poly.map(S3), c2 = sp2.reduce(function (a, b) { return [a[0] + b[0] / sp2.length, a[1] + b[1] / sp2.length]; }, [0, 0]);
+      sp2.sort(function (a, b) { return Math.atan2(a[1] - c2[1], a[0] - c2[0]) - Math.atan2(b[1] - c2[1], b[0] - c2[0]); });
+      el('polygon', { points: sp2.map(function (q) { return q[0].toFixed(1) + ',' + q[1].toFixed(1); }).join(' '), fill: PCOL[i % 2], 'fill-opacity': 0.16, stroke: PCOL[i % 2], 'stroke-width': 1.4, 'stroke-opacity': 0.7 });
+      if (sc.normals) {
+        var c3 = poly.reduce(function (a, b) { return add3(a, mul3(b, 1 / poly.length)); }, [0, 0, 0]), ln2 = Math.sqrt(dot3(np.n, np.n));
+        arr(c3, add3(c3, mul3(np.n, 1.3 / ln2)), PCOL[i % 2], 2.6);
+        lab(add3(c3, mul3(np.n, 1.45 / ln2)), 'n' + (sc.planes.length > 1 ? i + 1 : ''), PCOL[i % 2], 4, 17);
+      }
+    });
+    /* рёбра коробки: видимое, если хоть одна соседняя грань смотрит на зрителя */
+    if (Vb) {
+      var mid = mul3(Vb.C1, 0.5);
+      V3.EDGES.forEach(function (e) {
+        var p = Vb[e[0]], q = Vb[e[1]], m = mul3(add3(p, q), 0.5), vis = false;
+        [0, 1, 2].forEach(function (i) {
+          if (Math.abs(p[i] - q[i]) > 1e-9) return;
+          var nrm = [0, 0, 0]; nrm[i] = p[i] > mid[i] ? 1 : -1;
+          if (dot3(nrm, K.v) > 1e-9) vis = true;
+        });
+        ln(p, q, 'var(--ink)', vis ? 1.9 : 1.3, vis ? false : '6 5');
+      });
+    }
+    if (sc.custom) sc.custom(sc);
+    /* отрезки-прямые */
+    var SC = { a: 'var(--va)', b: 'var(--vb)', r: 'var(--vr)', c: 'var(--vc)' };
+    (sc.segs || []).forEach(function (s) {
+      var p = P3of(sc, s[0]), q = P3of(sc, s[1]), col = SC[s[2]] || s[2];
+      if (s[3]) { var d = sub3(q, p); ln(add3(p, mul3(d, -0.35)), add3(q, mul3(d, 0.35)), col, 1.2, false, 0.8); }
+      ln(p, q, col, 3);
+    });
+    /* перпендикуляр к плоскости */
+    if (sc.perp) {
+      var P0 = P3of(sc, sc.perp[0]), PP = sc.perp[1].map(function (n) { return P3of(sc, n); }), np2 = V3.plane3(PP[0], PP[1], PP[2]);
+      if (np2) { var t2 = -(dot3(np2.n, P0) + np2.d) / dot3(np2.n, np2.n), H = add3(P0, mul3(np2.n, t2)); ln(P0, H, 'var(--vr)', 2.4, '5 4'); dotAt(H, 'var(--vr)'); lab(H, 'H', 'var(--vr)', 14, 17); }
+    }
+    /* перпендикуляр к прямой */
+    if (sc.foot) {
+      var Q0 = P3of(sc, sc.foot[0]), L1 = P3of(sc, sc.foot[1]), L2 = P3of(sc, sc.foot[2]), dv = sub3(L2, L1), t3 = dot3(sub3(Q0, L1), dv) / dot3(dv, dv), H2 = add3(L1, mul3(dv, t3));
+      ln(Q0, H2, 'var(--vr)', 2.4, '5 4'); dotAt(H2, 'var(--vr)'); lab(H2, 'H', 'var(--vr)', 14, 17);
+    }
+    (sc.vecs || []).forEach(function (v) { arr(v.from, v.to, SC[v.col] || v.col, 2.8); if (v.label) lab(mul3(add3(v.from, v.to), 0.5), v.label, SC[v.col] || v.col, 10, 17); });
+    function dotAt(p, col, r) { var A = S3(p); el('circle', { cx: A[0], cy: A[1], r: r || 4.2, fill: col, stroke: 'var(--plane-bg)', 'stroke-width': 1.5 }); }
+    if (Vb) Object.keys(Vb).forEach(function (k) { dotAt(Vb[k], 'var(--ink)', 3); lab(Vb[k], k); });
+    Object.keys(sc.pts || {}).forEach(function (k) { if (Vb && Vb[k]) { if ((sc.hl || []).indexOf(k) >= 0) dotAt(Vb[k], 'var(--vr)', 5.5); return; } dotAt(sc.pts[k], (sc.hl || []).indexOf(k) >= 0 ? 'var(--vr)' : 'var(--va)', 4.5); lab(sc.pts[k], k, 'var(--ink)'); });
+    if (sc.after) sc.after(sc);
+  }
+  function redraw3() { if (lastScene) draw3(lastScene); }
+
+  /* ---------- темы части 3: куб с ребром 2, точки для выбора ---------- */
+  var CUBE = V3.boxVerts(2, 2, 2);
+  var PX = { K: [1, 0, 2], L: [2, 1, 0], M: [2, 2, 1], N: [0, 1, 0], O: [1, 1, 1] };
+  var PX_DESC = { K: 'середина A₁B₁', L: 'середина BC', M: 'середина CC₁', N: 'середина AD', O: 'центр куба' };
+  var PNAMES = ['A', 'B', 'C', 'D', 'A1', 'B1', 'C1', 'D1', 'K', 'L', 'M', 'N', 'O'];
+  function PC(n) { return CUBE[n] || PX[n]; }
+  function uni(n) { return n.replace(/1$/, '₁'); }
+  function nmH(n) { return M('<i>' + V3.nm3(n) + '</i>'); }
+  function segH(a, b) { return M('<i>' + V3.nm3(a) + V3.nm3(b) + '</i>'); }
+  function co3h(v) { return M(V3.co3(v)); }
+  function ctlPt(label, st, key, idx) {
+    var l = document.createElement('label');
+    l.textContent = label + ' ';
+    var s = document.createElement('select');
+    PNAMES.forEach(function (n) { var o = document.createElement('option'); o.value = n; o.textContent = uni(n) + (PX_DESC[n] ? ' (' + PX_DESC[n] + ')' : ''); s.appendChild(o); });
+    s.value = idx == null ? st[key] : st[key][idx];
+    s.style.cssText = 'font:inherit;padding:4px 6px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink)';
+    s.onchange = function () { if (idx == null) st[key] = s.value; else st[key][idx] = s.value; render(); };
+    l.appendChild(s);
+    $('planeCtl').appendChild(l);
+  }
+  function extraPts(list) { var o = {}; list.forEach(function (n) { if (PX[n]) o[n] = PX[n]; }); return o; }
+  function cosTxt(a, b) { var d = Math.abs(dot3(a, b)), L = dot3(a, a) * dot3(b, b); return { txt: V3.radRatio(d, L), val: d / Math.sqrt(L), deg: Math.acos(Math.min(1, d / Math.sqrt(L))) * 180 / Math.PI }; }
+  function degTxt(x) { return fmt(Math.round(x * 10) / 10) + '°'; }
+  function vecH(a, b) { return M(V(V3.nm3(a) + V3.nm3(b)) + ' = ' + V3.co3(sub3(PC(b), PC(a)))); }
+  function planeOf(p) { return V3.plane3(PC(p[0]), PC(p[1]), PC(p[2])); }
+  function plName(p) { return M('<i>' + p.map(V3.nm3).join('') + '</i>'); }
+  var HINT3 = 'Чертёж можно вращать: тяни его мышкой или пальцем. Точки выбирай в списках под чертежом.';
+
+  TOPICS['3.1'] = {
+    title: 'Прямоугольная система координат',
+    intro: 'В пространстве три оси: ' + M('<i>x</i>, <i>y</i>, <i>z</i>') + '. Каждая точка получает три координаты.',
+    init: { x: 2, y: 1, z: 2 },
+    exp: 'Поставь точку ' + M('<i>P</i>(1; −2; 3)') + ' ползунками. Покрути чертёж, чтобы увидеть её со всех сторон.',
+    done: function (s) { return s.x === 1 && s.y === -2 && s.z === 3; },
+    ctl: function (s) { ctlRange('<i>x</i> =', 'x', -3, 3, 1, s, render); ctlRange('<i>y</i> =', 'y', -3, 3, 1, s, render); ctlRange('<i>z</i> =', 'z', -3, 3, 1, s, render); },
+    draw: function (s) {
+      var P = [s.x, s.y, s.z];
+      draw3({ axes: [3.6, 3.6, 3.6], neg: true, ticks: true, center: [0, 0, 0], custom: function (sc) {
+        var c = [[s.x, 0, 0], [0, s.y, 0], [0, 0, s.z], [s.x, s.y, 0], [s.x, 0, s.z], [0, s.y, s.z]];
+        var E = [[[0, 0, 0], c[0]], [[0, 0, 0], c[1]], [[0, 0, 0], c[2]], [c[0], c[3]], [c[1], c[3]], [c[0], c[4]], [c[2], c[4]], [c[1], c[5]], [c[2], c[5]], [c[3], P], [c[4], P], [c[5], P]];
+        E.forEach(function (e) { sc.ln(e[0], e[1], 'var(--muted)', 1.2, '4 4'); });
+        sc.arr([0, 0, 0], P, 'var(--vr)', 2.8);
+        sc.dotAt(P, 'var(--va)', 5.5); sc.lab(P, 'P', 'var(--ink)', 14);
+        [c[0], c[1], c[2]].forEach(function (q) { if (q[0] || q[1] || q[2]) sc.dotAt(q, 'var(--vb)', 3.5); });
+      } });
+      var L2 = s.x * s.x + s.y * s.y + s.z * s.z;
+      return '<div class="m" style="font-size:1.15em">' + M('<i>P</i>(' + fmt(s.x) + '; ' + fmt(s.y) + '; ' + fmt(s.z) + '), &nbsp; ' + V('OP') + ' = (' + fmt(s.x) + '; ' + fmt(s.y) + '; ' + fmt(s.z) + ')') + '</div><div class="m">' + M('|' + V('OP') + '| = √(' + par(s.x) + '² + ' + par(s.y) + '² + ' + par(s.z) + '²) = ' + V3.sqrtFrac(L2, 1)) + '</div>';
+    },
+    steps: [
+      'Три оси попарно перпендикулярны и пересекаются в начале координат ' + M('<i>O</i>') + '. Координаты точки — её «адрес»: сколько пройти вдоль ' + M('<i>x</i>') + ', потом вдоль ' + M('<i>y</i>') + ', потом вверх по ' + M('<i>z</i>') + '. Синие точки на осях — эти три шага.',
+      'Пунктир — «коробка» со сторонами ' + M('|<i>x</i>|, |<i>y</i>|, |<i>z</i>|') + ': точка ' + M('<i>P</i>') + ' — её дальняя вершина. Покрути чертёж: на плоской картинке легко ошибиться, где точка.',
+      'Векторы в пространстве такие же, как на плоскости, только координат три: ' + M(V('AB') + ' = (<i>x<sub>B</sub></i> − <i>x<sub>A</sub></i>; <i>y<sub>B</sub></i> − <i>y<sub>A</sub></i>; <i>z<sub>B</sub></i> − <i>z<sub>A</sub></i>)') + '. Сложение, умножение на число, скалярное произведение — по тем же правилам.',
+      'Длина — диагональ коробки, теорема Пифагора дважды: ' + M('|' + V('a') + '| = √(<i>x</i>² + <i>y</i>² + <i>z</i>²)') + '. Середина отрезка — среднее арифметическое координат концов.',
+      'Как ввести систему в кубе или параллелепипеде: начало в вершине ' + M('<i>A</i>') + ', оси вдоль трёх рёбер, выходящих из ' + M('<i>A</i>') + '. Тогда координаты всех вершин видны сразу, а середины рёбер — полусуммы. Дальше в темах так и делаем.'
+    ],
+    sum: M('|' + V('a') + '| = √(<i>x</i>² + <i>y</i>² + <i>z</i>²)') + '; середина отрезка — ' + M('((<i>x</i><sub>1</sub> + <i>x</i><sub>2</sub>)/2; (<i>y</i><sub>1</sub> + <i>y</i><sub>2</sub>)/2; (<i>z</i><sub>1</sub> + <i>z</i><sub>2</sub>)/2)')
+  };
+  TOPICS['3.2'] = {
+    title: 'Скалярное произведение. Угол между прямыми',
+    intro: 'Угол между прямыми находим через их направляющие векторы. Куб с ребром 2, начало координат в ' + M('<i>A</i>') + '.',
+    init: { l1: ['A', 'C1'], l2: ['B', 'D'] },
+    exp: 'Выбери две <b>диагонали граней</b> куба, угол между которыми ' + M('60°') + '.',
+    done: function (s) { var a = sub3(PC(s.l1[1]), PC(s.l1[0])), b = sub3(PC(s.l2[1]), PC(s.l2[0])); return dot3(a, a) === 8 && dot3(b, b) === 8 && CUBE[s.l1[0]] && CUBE[s.l1[1]] && CUBE[s.l2[0]] && CUBE[s.l2[1]] && Math.abs(cosTxt(a, b).deg - 60) < 1e-6; },
+    ctl: function (s) { ctlPt('Прямая 1:', s, 'l1', 0); ctlPt('', s, 'l1', 1); ctlPt('Прямая 2:', s, 'l2', 0); ctlPt('', s, 'l2', 1); },
+    draw: function (s) {
+      var a = sub3(PC(s.l1[1]), PC(s.l1[0])), b = sub3(PC(s.l2[1]), PC(s.l2[0]));
+      draw3({ dims: [2, 2, 2], pts: extraPts(s.l1.concat(s.l2)), segs: [[s.l1[0], s.l1[1], 'a', 1], [s.l2[0], s.l2[1], 'b', 1]] });
+      if (!dot3(a, a) || !dot3(b, b)) return 'Точки прямой должны быть разными.';
+      var c = cosTxt(a, b);
+      return '<div>' + vecH(s.l1[0], s.l1[1]) + ', &nbsp;' + vecH(s.l2[0], s.l2[1]) + '</div><div class="m" style="font-size:1.12em">' + M('cos φ = |' + fmt(dot3(a, b)) + '| / (' + V3.sqrtFrac(dot3(a, a), 1) + ' · ' + V3.sqrtFrac(dot3(b, b), 1) + ') = ' + c.txt) + ', &nbsp; ' + M('φ ≈ ' + degTxt(c.deg)) + '</div>';
+    },
+    steps: [
+      'Скалярное произведение в пространстве: ' + M(V('a') + ' · ' + V('b') + ' = <i>x</i><sub>1</sub><i>x</i><sub>2</sub> + <i>y</i><sub>1</sub><i>y</i><sub>2</sub> + <i>z</i><sub>1</sub><i>z</i><sub>2</sub>') + ' — та же формула, что на плоскости, плюс третье слагаемое.',
+      'Направляющий вектор прямой ' + segH('P', 'Q') + ' — это ' + M(V('PQ')) + ': конец минус начало. Любой вектор, параллельный прямой, тоже подходит.',
+      'Угол между прямыми не больше ' + M('90°') + ', поэтому косинус берут <b>по модулю</b>: ' + M('cos φ = |' + V('a') + ' · ' + V('b') + '| / (|' + V('a') + '| · |' + V('b') + '|)') + '. Это работает и для скрещивающихся прямых: их направления сравниваются так же.',
+      'Алгоритм для ЕГЭ: ввести систему координат → выписать координаты нужных точек → направляющие векторы → формула. Если косинус не табличный, ответ пишут через арккосинус: ' + M('φ = arccos(√6/3)') + '.'
+    ],
+    sum: M('cos φ = |<i>x</i><sub>1</sub><i>x</i><sub>2</sub> + <i>y</i><sub>1</sub><i>y</i><sub>2</sub> + <i>z</i><sub>1</sub><i>z</i><sub>2</sub>| / (√(<i>x</i><sub>1</sub>² + <i>y</i><sub>1</sub>² + <i>z</i><sub>1</sub>²) · √(<i>x</i><sub>2</sub>² + <i>y</i><sub>2</sub>² + <i>z</i><sub>2</sub>²))')
+  };
+  TOPICS['3.3'] = {
+    title: 'Уравнение плоскости',
+    intro: 'Плоскость задаётся уравнением ' + M('<i>ax</i> + <i>by</i> + <i>cz</i> + <i>d</i> = 0') + '. Числа ' + M('(<i>a</i>; <i>b</i>; <i>c</i>)') + ' — координаты вектора нормали, перпендикулярного плоскости.',
+    init: { p: ['A', 'B', 'C1'] },
+    exp: 'Выбери три точки так, чтобы плоскость имела уравнение ' + M('<i>x</i> + <i>y</i> + <i>z</i> − 2 = 0') + '.',
+    done: function (s) { var pl = planeOf(s.p); return pl && pl.n.join() === '1,1,1' && pl.d === -2; },
+    ctl: function (s) { ctlPt('Точки:', s, 'p', 0); ctlPt('', s, 'p', 1); ctlPt('', s, 'p', 2); },
+    draw: function (s) {
+      var pl = planeOf(s.p);
+      draw3({ dims: [2, 2, 2], pts: extraPts(s.p), planes: pl ? [s.p] : [], normals: true, hl: s.p });
+      if (!pl) return 'Три точки лежат на одной прямой: плоскость не определена. Выбери другие.';
+      return '<div class="m" style="font-size:1.15em">' + 'Плоскость ' + plName(s.p) + ': ' + M(V3.planeTxt(pl)) + '</div><div>' + 'Нормаль ' + M(V('n') + ' = ' + V3.co3(pl.n)) + '. Проверка: подставь любую из трёх точек, получится 0.</div>';
+    },
+    steps: [
+      'Точка ' + M('<i>X</i>(<i>x</i>; <i>y</i>; <i>z</i>)') + ' лежит в плоскости, если вектор из точки плоскости в ' + M('<i>X</i>') + ' перпендикулярен нормали: скалярное произведение равно нулю. Раскрываем — получается ' + M('<i>ax</i> + <i>by</i> + <i>cz</i> + <i>d</i> = 0') + '.',
+      'Через три точки: подставляем их координаты в уравнение и решаем систему. Неизвестных четыре, уравнений три — одно из чисел можно выбрать удобным (например, ' + M('<i>d</i> = −2') + ' или ' + M('<i>a</i> = 1') + '): уравнение плоскости определено с точностью до множителя.',
+      'Удобный приём «в отрезках»: если плоскость пересекает оси в точках ' + M('<i>p</i>, <i>q</i>, <i>r</i>') + ', то её уравнение ' + M('<i>x</i>/<i>p</i> + <i>y</i>/<i>q</i> + <i>z</i>/<i>r</i> = 1') + '. Для ' + plName(['A1', 'B', 'D']) + ': ' + M('<i>x</i>/2 + <i>y</i>/2 + <i>z</i>/2 = 1') + ', то есть ' + M('<i>x</i> + <i>y</i> + <i>z</i> − 2 = 0') + '.',
+      'Если плоскость параллельна оси, соответствующей переменной в уравнении нет. Например, грань ' + M('<i>ABB</i><sub>1</sub>') + ' — это ' + M('<i>y</i> = 0') + ', а диагональная плоскость ' + plName(['B', 'D', 'D1']) + ' — это ' + M('<i>x</i> + <i>y</i> − 2 = 0') + ' (без ' + M('<i>z</i>') + ').'
+    ],
+    sum: M('<i>ax</i> + <i>by</i> + <i>cz</i> + <i>d</i> = 0') + ', нормаль ' + M(V('n') + '(<i>a</i>; <i>b</i>; <i>c</i>)') + '; в отрезках: ' + M('<i>x</i>/<i>p</i> + <i>y</i>/<i>q</i> + <i>z</i>/<i>r</i> = 1')
+  };
+  TOPICS['3.4'] = {
+    title: 'Угол между плоскостями',
+    intro: 'Угол между плоскостями равен углу между их нормалями (или дополняет его до ' + M('180°') + ').',
+    init: { p1: ['A', 'B', 'C'], p2: ['A', 'B', 'C1'] },
+    exp: 'Найди две <b>перпендикулярные</b> плоскости, ни одна из которых не грань куба и не параллельна грани.',
+    done: function (s) {
+      var a = planeOf(s.p1), b = planeOf(s.p2);
+      if (!a || !b) return false;
+      var nz = function (n) { return n.filter(function (x) { return x; }).length >= 2; };
+      return dot3(a.n, b.n) === 0 && nz(a.n) && nz(b.n);
+    },
+    ctl: function (s) { ctlPt('Плоскость 1:', s, 'p1', 0); ctlPt('', s, 'p1', 1); ctlPt('', s, 'p1', 2); ctlPt('Плоскость 2:', s, 'p2', 0); ctlPt('', s, 'p2', 1); ctlPt('', s, 'p2', 2); },
+    draw: function (s) {
+      var a = planeOf(s.p1), b = planeOf(s.p2);
+      draw3({ dims: [2, 2, 2], pts: extraPts(s.p1.concat(s.p2)), planes: [s.p1, s.p2].filter(function (p) { return planeOf(p); }), normals: true });
+      if (!a || !b) return 'Одна из плоскостей не определена: три точки на одной прямой.';
+      var c = cosTxt(a.n, b.n);
+      return '<div>' + plName(s.p1) + ': ' + M(V3.planeTxt(a)) + '; &nbsp;' + plName(s.p2) + ': ' + M(V3.planeTxt(b)) + '</div><div class="m" style="font-size:1.12em">' + M('cos φ = |' + dot3(a.n, b.n) + '| / (√' + dot3(a.n, a.n) + ' · √' + dot3(b.n, b.n) + ') = ' + c.txt) + ', &nbsp;' + M('φ ≈ ' + degTxt(c.deg)) + '</div>';
+    },
+    steps: [
+      'Нормаль перпендикулярна своей плоскости. Повернём одну плоскость к другой — нормаль повернётся на тот же угол. Значит, угол между плоскостями — это угол между нормалями.',
+      'Угол между плоскостями не больше ' + M('90°') + ', поэтому снова модуль: ' + M('cos φ = |' + V('n') + '<sub>1</sub> · ' + V('n') + '<sub>2</sub>| / (|' + V('n') + '<sub>1</sub>| · |' + V('n') + '<sub>2</sub>|)') + '.',
+      'Нормали граней куба писать не нужно: у основания ' + M('<i>ABC</i>') + ' это ' + M('(0; 0; 1)') + ', у боковых граней — ' + M('(1; 0; 0)') + ' и ' + M('(0; 1; 0)') + '.',
+      'Плоскости перпендикулярны, когда ' + M(V('n') + '<sub>1</sub> · ' + V('n') + '<sub>2</sub> = 0') + ', и параллельны, когда нормали коллинеарны.'
+    ],
+    sum: M('cos φ = |<i>a</i><sub>1</sub><i>a</i><sub>2</sub> + <i>b</i><sub>1</sub><i>b</i><sub>2</sub> + <i>c</i><sub>1</sub><i>c</i><sub>2</sub>| / (√(<i>a</i><sub>1</sub>² + <i>b</i><sub>1</sub>² + <i>c</i><sub>1</sub>²) · √(<i>a</i><sub>2</sub>² + <i>b</i><sub>2</sub>² + <i>c</i><sub>2</sub>²))')
+  };
+  function distPP(pt, p) { var pl = planeOf(p); if (!pl) return null; var num = Math.abs(dot3(pl.n, PC(pt)) + pl.d), L = dot3(pl.n, pl.n); return { pl: pl, num: num, L: L, val: num / Math.sqrt(L), txt: V3.radRatio(num, L) }; }
+  TOPICS['3.5'] = {
+    title: 'Расстояние от точки до плоскости',
+    intro: 'Если известно уравнение плоскости, расстояние до неё считается по одной формуле, без построений.',
+    init: { pl: ['A1', 'B', 'D'], pt: 'A' },
+    exp: 'Найди среди точек списка ту, что дальше всех от выбранной плоскости.',
+    done: function (s) { var d = distPP(s.pt, s.pl); if (!d) return false; var mx = Math.max.apply(null, PNAMES.map(function (n) { return distPP(n, s.pl).val; })); return Math.abs(d.val - mx) < 1e-9; },
+    ctl: function (s) { ctlPt('Точка:', s, 'pt'); ctlPt('Плоскость:', s, 'pl', 0); ctlPt('', s, 'pl', 1); ctlPt('', s, 'pl', 2); },
+    draw: function (s) {
+      var d = distPP(s.pt, s.pl);
+      var pts = extraPts(s.pl.concat([s.pt]));
+      draw3({ dims: [2, 2, 2], pts: pts, planes: d ? [s.pl] : [], perp: d && d.num ? [s.pt, s.pl] : null, hl: [s.pt], pts2: 1 });
+      if (!d) return 'Плоскость не определена.';
+      var P = PC(s.pt);
+      return '<div>' + plName(s.pl) + ': ' + M(V3.planeTxt(d.pl)) + '; &nbsp;' + M('<i>' + V3.nm3(s.pt) + '</i>' + V3.co3(P)) + '</div><div class="m" style="font-size:1.12em">' + M('ρ = |' + d.pl.n.map(function (c, i) { return c + '·' + par(P[i]); }).join(' + ') + ' + ' + par(d.pl.d) + '| / √' + d.L + ' = ' + d.txt) + ' ≈ ' + fmt(VEC.round(d.val, 3)) + '</div>';
+    },
+    steps: [
+      'Формула: для плоскости ' + M('<i>ax</i> + <i>by</i> + <i>cz</i> + <i>d</i> = 0') + ' и точки ' + M('(<i>x</i><sub>0</sub>; <i>y</i><sub>0</sub>; <i>z</i><sub>0</sub>)') + ' расстояние ' + M('ρ = |<i>ax</i><sub>0</sub> + <i>by</i><sub>0</sub> + <i>cz</i><sub>0</sub> + <i>d</i>| / √(<i>a</i>² + <i>b</i>² + <i>c</i>²)') + '.',
+      'Откуда она: пунктир ' + M('<i>PH</i>') + ' идёт вдоль нормали. Значит, ' + M(V('PH')) + ' = ' + M('<i>t</i>' + V('n')) + ', а точка ' + M('<i>H</i>') + ' лежит в плоскости — из этого находим ' + M('<i>t</i>') + ' и длину ' + M('|<i>t</i>| · |' + V('n') + '|') + '. После упрощения получается формула выше.',
+      'Числитель — это просто «подставить точку в левую часть уравнения». Если получился 0, точка лежит в плоскости. Знак показывает, с какой стороны плоскости точка.',
+      'В кубе с ребром ' + M('<i>a</i>') + ' расстояние от ' + M('<i>A</i>') + ' до ' + plName(['A1', 'B', 'D']) + ' равно ' + M('<i>a</i>√3/3') + ', а от ' + M('<i>C</i><sub>1</sub>') + ' — вдвое больше: плоскость делит диагональ ' + segH('A', 'C1') + ' в отношении ' + M('1 : 2') + '.'
+    ],
+    sum: M('ρ = |<i>ax</i><sub>0</sub> + <i>by</i><sub>0</sub> + <i>cz</i><sub>0</sub> + <i>d</i>| / √(<i>a</i>² + <i>b</i>² + <i>c</i>²)')
+  };
+  TOPICS['3.6'] = {
+    title: 'Уравнение прямой в пространстве',
+    intro: 'Прямую задают точкой и направляющим вектором. Уравнение в пространстве — это не одно равенство, а три (или система из двух).',
+    init: { l: ['A', 'C1'], t: 0 },
+    exp: 'Подбери параметр ' + M('<i>t</i>') + ' так, чтобы точка ' + M('<i>X</i>') + ' попала в середину отрезка ' + M('<i>PQ</i>') + '.',
+    done: function (s) { return s.t === 0.5; },
+    ctl: function (s) { ctlPt('Прямая:', s, 'l', 0); ctlPt('', s, 'l', 1); ctlRange('<i>t</i> =', 't', -1, 2, 0.25, s, render); },
+    draw: function (s) {
+      var P = PC(s.l[0]), Q = PC(s.l[1]), d = sub3(Q, P), X = add3(P, mul3(d, s.t));
+      draw3({ dims: [2, 2, 2], pts: extraPts(s.l), segs: [[s.l[0], s.l[1], 'b', 1]], extraFit: [add3(P, mul3(d, -1)), add3(P, mul3(d, 2))],
+        after: function (sc) { sc.ln(add3(P, mul3(d, -1)), add3(P, mul3(d, 2)), 'var(--vb)', 1.1, '3 4'); sc.arr(P, Q, 'var(--vb)', 3); sc.dotAt(X, 'var(--vr)', 6); sc.lab(X, 'X', 'var(--vr)', 16); } });
+      if (!dot3(d, d)) return 'Выбери две разные точки.';
+      var xs = ['<i>x</i>', '<i>y</i>', '<i>z</i>'];
+      return '<div>' + M('<i>P</i> = ' + V3.nm3(s.l[0]) + V3.co3(P)) + ', направляющий ' + vecH(s.l[0], s.l[1]) + '</div><div class="m">' + xs.map(function (n, i) { return M(n + ' = ' + fmt(P[i]) + (d[i] ? ' + ' + par(d[i]) + '<i>t</i>' : '')); }).join(', &nbsp;') + '</div><div class="m" style="font-size:1.12em">' + M('<i>t</i> = ' + fmt(s.t) + ': <i>X</i>' + V3.co3(X.map(function (v) { return VEC.round(v, 6); }))) + '</div>';
+    },
+    steps: [
+      'Любая точка прямой: ' + M('<i>X</i> = <i>P</i> + <i>t</i> · ' + V('s')) + ', где ' + M('<i>P</i>') + ' — точка прямой, ' + M(V('s')) + ' — направляющий вектор, ' + M('<i>t</i>') + ' — любое число. По координатам это три равенства: ' + M('<i>x</i> = <i>x</i><sub>0</sub> + <i>s</i><sub>1</sub><i>t</i>, <i>y</i> = <i>y</i><sub>0</sub> + <i>s</i><sub>2</sub><i>t</i>, <i>z</i> = <i>z</i><sub>0</sub> + <i>s</i><sub>3</sub><i>t</i>') + '.',
+      'При ' + M('<i>t</i> = 0') + ' получаем ' + M('<i>P</i>') + ', при ' + M('<i>t</i> = 1') + ' — конец вектора, при ' + M('<i>t</i> = 0,5') + ' — середину, при отрицательных ' + M('<i>t</i>') + ' — точки «за» ' + M('<i>P</i>') + '.',
+      'Исключив ' + M('<i>t</i>') + ', получаем канонические уравнения: ' + M('(<i>x</i> − <i>x</i><sub>0</sub>)/<i>s</i><sub>1</sub> = (<i>y</i> − <i>y</i><sub>0</sub>)/<i>s</i><sub>2</sub> = (<i>z</i> − <i>z</i><sub>0</sub>)/<i>s</i><sub>3</sub>') + '. Если какая-то координата ' + M(V('s')) + ' равна нулю, соответствующая координата точки постоянна.',
+      'Зачем это в №14: найти точку пересечения прямой с плоскостью (подставить ' + M('<i>x</i>, <i>y</i>, <i>z</i>') + ' через ' + M('<i>t</i>') + ' в уравнение плоскости), найти основание перпендикуляра, проверить, лежит ли точка на прямой.'
+    ],
+    sum: M('<i>x</i> = <i>x</i><sub>0</sub> + <i>s</i><sub>1</sub><i>t</i>, <i>y</i> = <i>y</i><sub>0</sub> + <i>s</i><sub>2</sub><i>t</i>, <i>z</i> = <i>z</i><sub>0</sub> + <i>s</i><sub>3</sub><i>t</i>') + ' или ' + M('(<i>x</i> − <i>x</i><sub>0</sub>)/<i>s</i><sub>1</sub> = (<i>y</i> − <i>y</i><sub>0</sub>)/<i>s</i><sub>2</sub> = (<i>z</i> − <i>z</i><sub>0</sub>)/<i>s</i><sub>3</sub>')
+  };
+  TOPICS['3.7'] = {
+    title: 'Угол между прямой и плоскостью',
+    intro: 'Угол между прямой и плоскостью — это угол между прямой и её проекцией на плоскость. Через нормаль он считается проще.',
+    init: { l: ['A', 'B1'], pl: ['A1', 'B', 'D'] },
+    exp: 'Найди прямую, перпендикулярную выбранной плоскости (угол ' + M('90°') + ').',
+    done: function (s) { var pl = planeOf(s.pl), d = sub3(PC(s.l[1]), PC(s.l[0])); return pl && dot3(d, d) && Math.abs(cosTxt(d, pl.n).val - 1) < 1e-9; },
+    ctl: function (s) { ctlPt('Прямая:', s, 'l', 0); ctlPt('', s, 'l', 1); ctlPt('Плоскость:', s, 'pl', 0); ctlPt('', s, 'pl', 1); ctlPt('', s, 'pl', 2); },
+    draw: function (s) {
+      var pl = planeOf(s.pl), d = sub3(PC(s.l[1]), PC(s.l[0]));
+      draw3({ dims: [2, 2, 2], pts: extraPts(s.l.concat(s.pl)), planes: pl ? [s.pl] : [], normals: true, segs: [[s.l[0], s.l[1], 'a', 1]] });
+      if (!pl || !dot3(d, d)) return 'Выбери прямую из двух разных точек и плоскость из трёх точек не на одной прямой.';
+      var c = cosTxt(d, pl.n);
+      return '<div>' + vecH(s.l[0], s.l[1]) + '; ' + plName(s.pl) + ': ' + M(V3.planeTxt(pl)) + ', ' + M(V('n') + V3.co3(pl.n)) + '</div><div class="m" style="font-size:1.12em">' + M('sin φ = |' + dot3(d, pl.n) + '| / (' + V3.sqrtFrac(dot3(d, d), 1) + ' · √' + dot3(pl.n, pl.n) + ') = ' + c.txt) + ', &nbsp;' + M('φ ≈ ' + degTxt(90 - c.deg)) + '</div>';
+    },
+    steps: [
+      'Нормаль перпендикулярна плоскости. Угол между прямой и нормалью и угол между прямой и плоскостью в сумме дают ' + M('90°') + '.',
+      'Поэтому то, что для нормали было косинусом, для плоскости становится синусом: ' + M('sin φ = |' + V('s') + ' · ' + V('n') + '| / (|' + V('s') + '| · |' + V('n') + '|)') + '. Самая частая ошибка в №14 — написать косинус.',
+      'Если ' + M(V('s') + ' · ' + V('n') + ' = 0') + ', прямая параллельна плоскости или лежит в ней. Если ' + M(V('s')) + ' коллинеарен ' + M(V('n')) + ', прямая перпендикулярна плоскости.',
+      'Ответ в ЕГЭ часто пишут через арксинус или через тангенс: при ' + M('sin φ = 1/3') + ' будет ' + M('φ = arcsin(1/3)') + ', или ' + M('tg φ = √2/4') + '.'
+    ],
+    sum: M('sin φ = |<i>s</i><sub>1</sub><i>a</i> + <i>s</i><sub>2</sub><i>b</i> + <i>s</i><sub>3</sub><i>c</i>| / (|' + V('s') + '| · √(<i>a</i>² + <i>b</i>² + <i>c</i>²))')
+  };
+  function distPL(pt, l) {
+    var A = PC(l[0]), d = sub3(PC(l[1]), A), w = sub3(PC(pt), A), cr = V3.cross3(w, d), X = dot3(cr, cr), Y = dot3(d, d);
+    return Y ? { X: X, Y: Y, t: dot3(w, d) / Y, val: Math.sqrt(X / Y), txt: V3.sqrtFrac(X, Y) } : null;
+  }
+  TOPICS['3.8'] = {
+    title: 'Расстояние от точки до прямой',
+    intro: 'Опускаем перпендикуляр на прямую: основание ' + M('<i>H</i>') + ' находим через параметр прямой.',
+    init: { pt: 'B', l: ['A', 'C1'], seen: {} },
+    exp: 'Измерь расстояние от трёх разных вершин куба до диагонали ' + segH('A', 'C1') + '. Что замечаешь?',
+    done: function (s) { return Object.keys(s.seen || {}).length >= 3; },
+    ctl: function (s) { ctlPt('Точка:', s, 'pt'); ctlPt('Прямая:', s, 'l', 0); ctlPt('', s, 'l', 1); },
+    draw: function (s) {
+      var d = distPL(s.pt, s.l);
+      if (d && d.X && CUBE[s.pt] && s.l.join() === 'A,C1') { s.seen = s.seen || {}; s.seen[s.pt] = 1; }
+      draw3({ dims: [2, 2, 2], pts: extraPts(s.l.concat([s.pt])), segs: [[s.l[0], s.l[1], 'b', 1]], foot: d && d.X ? [s.pt, s.l[0], s.l[1]] : null, hl: [s.pt] });
+      if (!d) return 'Выбери две разные точки прямой.';
+      var H = add3(PC(s.l[0]), mul3(sub3(PC(s.l[1]), PC(s.l[0])), d.t));
+      return '<div>' + M('<i>H</i> = ' + V3.nm3(s.l[0]) + ' + <i>t</i>' + V(V3.nm3(s.l[0]) + V3.nm3(s.l[1]))) + ', из ' + M(V(V3.nm3(s.pt) + 'H') + ' · ' + V(V3.nm3(s.l[0]) + V3.nm3(s.l[1])) + ' = 0') + ': ' + M('<i>t</i> = ' + fmt(VEC.round(d.t, 4))) + ', ' + M('<i>H</i>' + V3.co3(H.map(function (v) { return VEC.round(v, 3); }))) + '</div><div class="m" style="font-size:1.12em">' + M('ρ = <i>' + V3.nm3(s.pt) + 'H</i> = ' + d.txt) + ' ≈ ' + fmt(VEC.round(d.val, 3)) + (s.l.join() === 'A,C1' ? ' &nbsp;<span class="stat">измерено вершин: ' + Object.keys(s.seen || {}).length + '</span>' : '') + '</div>';
+    },
+    steps: [
+      'Основание перпендикуляра ' + M('<i>H</i>') + ' лежит на прямой: ' + M('<i>H</i> = <i>A</i> + <i>t</i>' + V('s')) + '. Условие перпендикулярности ' + M(V('PH') + ' · ' + V('s') + ' = 0') + ' — одно линейное уравнение на ' + M('<i>t</i>') + '.',
+      'Нашли ' + M('<i>t</i>') + ' → координаты ' + M('<i>H</i>') + ' → длина ' + M('<i>PH</i>') + '. Это и есть расстояние.',
+      'Твоё наблюдение: все шесть вершин, не лежащих на диагонали ' + segH('A', 'C1') + ', находятся от неё на одном расстоянии ' + M('<i>a</i>√6/3') + '. Куб симметричен относительно своей диагонали: поворот на ' + M('120°') + ' вокруг неё переводит куб в себя.',
+      'Другой способ без координат ' + M('<i>H</i>') + ': расстояние = удвоенная площадь треугольника ' + M('<i>PAB</i>') + ', делённая на ' + M('<i>AB</i>') + '. Площадь можно найти по формуле ' + M('½ · |<i>PA</i>| · |<i>AB</i>| · sin ∠<i>A</i>') + ', где косинус угла — из скалярного произведения.'
+    ],
+    sum: M('<i>t</i> = (' + V('AP') + ' · ' + V('s') + ') / |' + V('s') + '|²') + ', ' + M('<i>H</i> = <i>A</i> + <i>t</i>' + V('s')) + ', ' + M('ρ = |' + V('PH') + '|')
+  };
+  function distLL(l1, l2) {
+    var P1 = PC(l1[0]), s1 = sub3(PC(l1[1]), P1), P2 = PC(l2[0]), s2 = sub3(PC(l2[1]), P2), n = V3.cross3(s1, s2), L = dot3(n, n);
+    if (!dot3(s1, s1) || !dot3(s2, s2)) return null;
+    if (!L) return { par: true };
+    var mix = dot3(sub3(P2, P1), n);
+    /* общий перпендикуляр: ближайшие точки */
+    var a = dot3(s1, s1), b = dot3(s1, s2), c = dot3(s2, s2), w = sub3(P2, P1), e = dot3(w, s1), f = dot3(w, s2), den = a * c - b * b;
+    var t = (e * c - b * f) / den, u = (b * e - a * f) / den;
+    var g = V3.gcd(V3.gcd(n[0], n[1]), n[2]);
+    return { n: n.map(function (x) { return x / g; }), mix: mix, L: L, val: Math.abs(mix) / Math.sqrt(L), txt: V3.radRatio(Math.abs(mix), L), H1: add3(P1, mul3(s1, t)), H2: add3(P2, mul3(s2, u)) };
+  }
+  TOPICS['3.9'] = {
+    title: 'Расстояние между скрещивающимися прямыми',
+    intro: 'Скрещивающиеся прямые не пересекаются и не параллельны. Расстояние между ними — длина общего перпендикуляра.',
+    init: { l1: ['A', 'B'], l2: ['B1', 'D'] },
+    exp: 'Найди две скрещивающиеся прямые, расстояние между которыми равно ребру куба (2).',
+    done: function (s) { var d = distLL(s.l1, s.l2); return d && !d.par && d.mix && Math.abs(d.val - 2) < 1e-9; },
+    ctl: function (s) { ctlPt('Прямая 1:', s, 'l1', 0); ctlPt('', s, 'l1', 1); ctlPt('Прямая 2:', s, 'l2', 0); ctlPt('', s, 'l2', 1); },
+    draw: function (s) {
+      var d = distLL(s.l1, s.l2);
+      draw3({ dims: [2, 2, 2], pts: extraPts(s.l1.concat(s.l2)), segs: [[s.l1[0], s.l1[1], 'a', 1], [s.l2[0], s.l2[1], 'b', 1]],
+        after: function (sc) { if (d && !d.par && d.mix) { sc.ln(d.H1, d.H2, 'var(--vr)', 2.6, '5 4'); sc.dotAt(d.H1, 'var(--vr)'); sc.dotAt(d.H2, 'var(--vr)'); } } });
+      if (!d) return 'Выбери у каждой прямой две разные точки.';
+      if (d.par) return 'Прямые параллельны (или совпадают): это не скрещивающиеся прямые.';
+      if (!d.mix) return 'Прямые пересекаются (лежат в одной плоскости): расстояние 0. Скрещивающиеся — это когда не пересекаются и не параллельны.';
+      return '<div>' + vecH(s.l1[0], s.l1[1]) + ', ' + vecH(s.l2[0], s.l2[1]) + '; общая нормаль ' + M(V('n') + V3.co3(d.n)) + '</div><div class="m" style="font-size:1.12em">' + M('ρ = ' + d.txt) + ' ≈ ' + fmt(VEC.round(d.val, 3)) + ' &nbsp;<span class="stat">оранжевый пунктир — общий перпендикуляр</span></div>';
+    },
+    steps: [
+      'Найдём вектор ' + M(V('n')) + ', перпендикулярный обеим прямым: ' + M(V('n') + ' · ' + V('s') + '<sub>1</sub> = 0') + ' и ' + M(V('n') + ' · ' + V('s') + '<sub>2</sub> = 0') + ' — система из двух уравнений, одну координату ' + M(V('n')) + ' выбираем сами.',
+      'Проведём через первую прямую плоскость с нормалью ' + M(V('n')) + ': она параллельна второй прямой. Все точки второй прямой на одном расстоянии от этой плоскости.',
+      'Значит, искомое расстояние — расстояние от любой точки второй прямой до этой плоскости: формула из темы 3.5. Так задача сводится к уже известной.',
+      'Короткая формула: ' + M('ρ = |' + V('P') + '<sub>1</sub>' + V('P') + '<sub>2</sub> · ' + V('n') + '| / |' + V('n') + '|') + ', где ' + M('<i>P</i><sub>1</sub>, <i>P</i><sub>2</sub>') + ' — точки на прямых. Если числитель равен 0, прямые пересекаются.'
+    ],
+    sum: M(V('n') + ' ⊥ ' + V('s') + '<sub>1</sub>, ' + V('n') + ' ⊥ ' + V('s') + '<sub>2</sub>') + '; ' + M('ρ = |' + V('P<sub>1</sub>P<sub>2</sub>') + ' · ' + V('n') + '| / |' + V('n') + '|')
+  };
+  TOPICS['3.T'] = { title: 'Задачи как на ЕГЭ', trainer: 3 };
+
 
   var PARTS = {
     1: { name: '1. Введение', topics: ['1.1', '1.2', '1.3', '1.4', '1.5', '1.6', '1.T'] },
     2: { name: '2. Скалярное произведение', topics: ['2.1', '2.2', '2.3', '2.4', '2.5', '2.T'] },
-    3: { name: '3. Координатный метод', topics: ['3.0'] }
+    3: { name: '3. Координатный метод', topics: ['3.1', '3.2', '3.3', '3.4', '3.5', '3.6', '3.7', '3.8', '3.9', '3.T'] }
   };
 
   /* ---------- отрисовка ---------- */
@@ -966,16 +1594,19 @@ var VEC = (function () {
   var curTask = null;
   function render() {
     nav();
+    if (!TOPICS[S.topic[S.part]]) S.topic[S.part] = PARTS[S.part].topics[0];
+    if (!S.cam) S.cam = { az: -1.2, el: 0.35 };
     var id = S.topic[S.part], T = TOPICS[id];
     handles = [];
     $('planeCtl').innerHTML = '';
+    lastScene = null;
     grid();
     if (T.trainer) { renderTrainer(T.trainer); save(); return; }
     if (T.soon) { renderSoon(); save(); return; }
     var s = stOf(id), step = S.step[id] || 0;
     var live = T.draw(s, step);
     if (T.ctl) T.ctl(s);
-    $('planeHint').textContent = 'Кружки с пунктиром можно тянуть мышкой или пальцем. Точки встают в узлы сетки.';
+    $('planeHint').textContent = S.part === 3 ? HINT3 : 'Кружки с пунктиром можно тянуть мышкой или пальцем. Точки встают в узлы сетки.';
     var ok = T.done(s);
     if (ok) S.expOk[id] = true;
     var h = '<h2>' + id + '. ' + T.title + '</h2><p style="margin:0">' + T.intro + '</p>';
@@ -1018,28 +1649,36 @@ var VEC = (function () {
     var sel = S.types[part] || 'all';
     if (!curTask || curTask.part !== part || (sel !== 'all' && curTask.type !== sel)) newTask(part);
     var t = curTask;
-    if (t.pic) drawPic(t.pic); else $('planeHint').textContent = '';
-    if (t.pic) $('planeHint').textContent = 'Векторы задачи. Начала и концы стрелок — в узлах сетки.';
+    if (t.p3) { draw3(t.p3); $('planeHint').textContent = 'Чертёж к задаче. Его можно вращать мышкой или пальцем.'; }
+    else if (t.pic) { drawPic(t.pic); $('planeHint').textContent = 'Векторы задачи. Начала и концы стрелок — в узлах сетки.'; }
+    else $('planeHint').textContent = '';
     var nSolved = types.reduce(function (n, k) { return n + (S.solved[k] || 0); }, 0);
     var h = '<h2>Задачи как на ЕГЭ</h2><div class="types">' + '<button type="button" data-ty="all" class="' + (sel === 'all' ? 'on' : '') + '">все типы</button>' +
       types.map(function (k) { return '<button type="button" data-ty="' + k + '" class="' + (sel === k ? 'on' : '') + '">' + VEC.GEN[k].name + (S.solved[k] ? ' · ' + S.solved[k] : '') + '</button>'; }).join('') + '</div>';
     h += '<div class="stat">Решено в этой части: ' + nSolved + '</div>';
     h += '<div class="box read"><div class="cond">' + t.text + '</div>';
-    if (t.pair) h += '<div class="ans">' + M('(') + '<input id="ax" inputmode="decimal" aria-label="первая координата">' + M(';') + '<input id="ay" inputmode="decimal" aria-label="вторая координата">' + M(')') + '</div>';
+    if (t.triple) h += '<div class="ans">' + M('(') + '<input id="ax" inputmode="decimal" aria-label="x">' + M(';') + '<input id="ay" inputmode="decimal" aria-label="y">' + M(';') + '<input id="az" inputmode="decimal" aria-label="z">' + M(')') + '</div>';
+    else if (t.pair) h += '<div class="ans">' + M('(') + '<input id="ax" inputmode="decimal" aria-label="первая координата">' + M(';') + '<input id="ay" inputmode="decimal" aria-label="вторая координата">' + M(')') + '</div>';
     else h += '<div class="ans"><span>Ответ:</span><input id="a1" inputmode="decimal" aria-label="ответ"></div>';
     h += '<div class="ctl"><button class="btn main" type="button" id="chk">Проверить</button><button class="btn help" type="button" id="hnt">Подсказка</button><button class="btn help" type="button" id="sol">Решение</button><button class="btn minor" type="button" id="nw">Новая задача</button></div>';
     h += '<div id="fb"></div></div>';
-    h += '<p class="hint">Ответ можно вводить с запятой (−6,6), дробью (1/2) или с корнем (2√13 или 2sqrt13).</p>';
+    h += '<p class="hint">Ответ можно вводить с запятой (−6,6), дробью (1/2) или с корнем: 2√13, √6/3, 2√3/3 (или 2sqrt13).</p>';
     $('right').innerHTML = h;
     [].forEach.call($('right').querySelectorAll('[data-ty]'), function (b) { b.onclick = function () { S.types[part] = b.dataset.ty; newTask(part); render(); }; });
     $('nw').onclick = function () { newTask(part); render(); };
     $('hnt').onclick = function () { fb('info', '<b>Подсказка.</b> ' + t.hint); };
-    $('sol').onclick = function () { fb('info', '<b>Решение.</b><ol class="steps" style="margin-top:6px">' + t.sol.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ol><div>Ответ: ' + M(t.pair ? co(t.pair) : fmt(t.ans)) + '</div>'); t.shown = true; };
-    var inputs = t.pair ? [$('ax'), $('ay')] : [$('a1')];
+    $('sol').onclick = function () { fb('info', '<b>Решение.</b><ol class="steps" style="margin-top:6px">' + t.sol.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ol><div>Ответ: ' + M(t.triple ? V3.co3(t.triple) : t.pair ? co(t.pair) : (t.ansTxt || fmt(t.ans))) + (t.ansTxt && /[√\/]/.test(t.ansTxt) ? ' ≈ ' + fmt(VEC.round(t.ans, 4)) : '') + '</div>'); t.shown = true; };
+    var inputs = t.triple ? [$('ax'), $('ay'), $('az')] : t.pair ? [$('ax'), $('ay')] : [$('a1')];
     inputs.forEach(function (inp) { inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') $('chk').click(); }); });
     $('chk').onclick = function () {
       var ok;
-      if (t.pair) {
+      if (t.triple) {
+        var vals = inputs.map(function (inp) { return VEC.parse(inp.value); });
+        if (vals.some(isNaN)) { fb('warn', 'Впиши все три координаты числами.'); return; }
+        var oks = vals.map(function (v, i) { inputs[i].className = VEC.same(v, t.triple[i]) ? 'right' : 'wrong'; return VEC.same(v, t.triple[i]); });
+        ok = oks.every(Boolean);
+        if (!ok) { fb('no', 'Неверных координат: ' + oks.filter(function (x) { return !x; }).length + '. Порядок: ' + M('(<i>x</i>; <i>y</i>; <i>z</i>)') + ', ось ' + M('<i>x</i>') + ' вдоль ' + M('<i>AB</i>') + ', ' + M('<i>y</i>') + ' вдоль ' + M('<i>AD</i>') + ', ' + M('<i>z</i>') + ' вдоль ' + M('<i>AA</i><sub>1</sub>') + '.'); return; }
+      } else if (t.pair) {
         var x = VEC.parse($('ax').value), y = VEC.parse($('ay').value);
         if (isNaN(x) || isNaN(y)) { fb('warn', 'Впиши обе координаты числами.'); return; }
         var okx = VEC.same(x, t.pair[0]), oky = VEC.same(y, t.pair[1]);
@@ -1074,24 +1713,35 @@ var VEC = (function () {
   }
 
   /* ---------- перетаскивание ручек ---------- */
-  var drag = null;
+  var drag = null, rot0 = null;
   function svgXY(e) { var r = svg.getBoundingClientRect(); return [(e.clientX - r.left) * W / r.width, (e.clientY - r.top) * W / r.height]; }
   function toP(xy) { return [Math.max(-9, Math.min(9, Math.round((xy[0] - O) / SC))), Math.max(-9, Math.min(9, Math.round((O - xy[1]) / SC)))]; }
   svg.addEventListener('pointerdown', function (e) {
     var xy = svgXY(e), best = null, bd = 18;
     handles.forEach(function (h) { var A = sp(h.p), d = Math.hypot(A[0] - xy[0], A[1] - xy[1]); if (d < bd) { bd = d; best = h; } });
-    if (!best) return;
+    if (!best) {
+      if (S.part !== 3 || !lastScene) return;
+      drag = '__rot'; rot0 = { x: e.clientX, y: e.clientY, az: S.cam.az, el: S.cam.el };
+      svg.setPointerCapture(e.pointerId); svg.classList.add('dragging'); e.preventDefault();
+      return;
+    }
     drag = best.id; svg.setPointerCapture(e.pointerId); svg.classList.add('dragging'); e.preventDefault();
   });
   svg.addEventListener('pointermove', function (e) {
     var xy = svgXY(e);
+    if (drag === '__rot') {
+      S.cam.az = rot0.az - (e.clientX - rot0.x) * 0.01;
+      S.cam.el = Math.max(-1.3, Math.min(1.3, rot0.el + (e.clientY - rot0.y) * 0.01));
+      redraw3();
+      return;
+    }
     if (!drag) { svg.classList.toggle('grab', handles.some(function (h) { var A = sp(h.p); return Math.hypot(A[0] - xy[0], A[1] - xy[1]) < 18; })); return; }
     var id = S.topic[S.part], T = TOPICS[id], s = stOf(id), p = toP(xy);
     var before = JSON.stringify(s);
     T.drag(s, drag, p);
     if (JSON.stringify(s) !== before) render();
   });
-  function endDrag() { drag = null; svg.classList.remove('dragging'); }
+  function endDrag() { if (drag === '__rot') save(); drag = null; svg.classList.remove('dragging'); }
   svg.addEventListener('pointerup', endDrag);
   svg.addEventListener('pointercancel', endDrag);
 
