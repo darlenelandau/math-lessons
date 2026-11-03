@@ -44,7 +44,12 @@ h2 { margin: 0; font-size: 1.25rem; line-height: 1.3; }
 @media (max-width: 900px) { .colL { position: static; } }
 .colR { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 svg.plane { width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 8px; background: var(--plane-bg); touch-action: none; user-select: none; -webkit-user-select: none; }
-svg.plane.grab { cursor: grab; } svg.plane.dragging { cursor: grabbing; }
+svg.plane.grab { cursor: grab; }
+.ctl label.rng { display: inline-flex; gap: 8px; align-items: center; }
+.ctl label.rng .m { min-width: 2.2em; color: var(--ink); }
+.rnum { width: 4.6em; flex: none; font: 600 1rem "Golos Text", sans-serif; text-align: center; padding: 4px 6px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink); }
+.rnum:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.rnum.bad { border-color: var(--no); background: var(--no-soft); } svg.plane.dragging { cursor: grabbing; }
 .ctl { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
 .ctl label { display: inline-flex; gap: 8px; align-items: center; font-size: .92rem; color: var(--muted); }
 .ctl input[type="range"] { width: 180px; accent-color: var(--accent); }
@@ -803,12 +808,38 @@ var VEC = (function () {
   function lenTxt(v) { var l2 = VEC.len2(v); return Number.isInteger(l2) ? VEC.sqrtTxt(l2) : fmt(Math.sqrt(l2)); }
   function eqv(p, q) { return Math.abs(p[0] - q[0]) < 1e-9 && Math.abs(p[1] - q[1]) < 1e-9; }
   function angDeg(a, b) { var c = VEC.dot(a, b) / (len(a) * len(b)); return Math.acos(Math.max(-1, Math.min(1, c))) * 180 / Math.PI; }
+  /* ползунок и поле для числа рядом: поле фиксированной ширины, шкала не сдвигается; число можно ввести с запятой.
+     При изменении перерисовываем чертёж и панель, но не сами элементы управления (иначе ползунок «отпускается»). */
   function ctlRange(label, key, min, max, step, st, onch) {
     var l = document.createElement('label');
-    l.innerHTML = label + ' <b class="m" id="rv_' + key + '">' + fmt(st[key]) + '</b>';
+    l.className = 'rng';
+    l.innerHTML = '<span class="m">' + label + '</span>';
+    var num = document.createElement('input');
+    num.type = 'text'; num.inputMode = 'decimal'; num.className = 'rnum'; num.value = fmt(st[key]);
+    num.setAttribute('aria-label', label.replace(/<[^>]+>/g, '') + ' число');
     var r = document.createElement('input');
     r.type = 'range'; r.min = min; r.max = max; r.step = step; r.value = st[key];
-    r.oninput = function () { st[key] = +r.value; $('rv_' + key).textContent = fmt(st[key]); onch(); };
+    r.setAttribute('aria-label', label.replace(/<[^>]+>/g, '') + ' ползунок');
+    function setV(v, from) {
+      v = Math.max(min, Math.min(max, Math.round((v - min) / step) * step + min));
+      v = VEC.round(v, 6);
+      st[key] = v;
+      if (from !== 'range') r.value = v;
+      num.value = fmt(v);
+      num.classList.remove('bad');
+      onch(true);
+    }
+    r.oninput = function () { setV(+r.value, 'range'); };
+    num.onchange = function () {
+      var v = VEC.parse(num.value);
+      if (isNaN(v)) { num.classList.add('bad'); return; }
+      setV(v, 'num');
+    };
+    num.onkeydown = function (e) {
+      if (e.key === 'Enter') { num.onchange(); num.select(); }
+      else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') { e.preventDefault(); setV(st[key] + (e.key === 'ArrowUp' ? step : -step), 'key'); num.select(); }
+    };
+    l.appendChild(num);
     l.appendChild(r);
     $('planeCtl').appendChild(l);
   }
@@ -1456,7 +1487,7 @@ var VEC = (function () {
     title: 'Уравнение прямой в пространстве',
     intro: 'Прямую задают точкой и направляющим вектором. Уравнение в пространстве — это не одно равенство, а три (или система из двух).',
     init: { l: ['A', 'C1'], t: 0 },
-    exp: 'Подбери параметр ' + M('<i>t</i>') + ' так, чтобы точка ' + M('<i>X</i>') + ' попала в середину отрезка ' + M('<i>PQ</i>') + '.',
+    exp: 'Подбери параметр ' + M('<i>t</i>') + ' так, чтобы точка ' + M('<i>X</i>') + ' попала в середину выбранного отрезка.',
     done: function (s) { return s.t === 0.5; },
     ctl: function (s) { ctlPt('Прямая:', s, 'l', 0); ctlPt('', s, 'l', 1); ctlRange('<i>t</i> =', 't', -1, 2, 0.25, s, render); },
     draw: function (s) {
@@ -1592,20 +1623,21 @@ var VEC = (function () {
   function stOf(id) { if (!S.st[id]) S.st[id] = JSON.parse(JSON.stringify(TOPICS[id].init)); return S.st[id]; }
 
   var curTask = null;
-  function render() {
+  function render(keepCtl) {
+    keepCtl = keepCtl === true;
     nav();
     if (!TOPICS[S.topic[S.part]]) S.topic[S.part] = PARTS[S.part].topics[0];
     if (!S.cam) S.cam = { az: -1.2, el: 0.35 };
     var id = S.topic[S.part], T = TOPICS[id];
     handles = [];
-    $('planeCtl').innerHTML = '';
+    if (!keepCtl) $('planeCtl').innerHTML = '';
     lastScene = null;
     grid();
     if (T.trainer) { renderTrainer(T.trainer); save(); return; }
     if (T.soon) { renderSoon(); save(); return; }
     var s = stOf(id), step = S.step[id] || 0;
     var live = T.draw(s, step);
-    if (T.ctl) T.ctl(s);
+    if (T.ctl && !keepCtl) T.ctl(s);
     $('planeHint').textContent = S.part === 3 ? HINT3 : 'Кружки с пунктиром можно тянуть мышкой или пальцем. Точки встают в узлы сетки.';
     var ok = T.done(s);
     if (ok) S.expOk[id] = true;
