@@ -748,8 +748,10 @@ var VEC = (function () {
     (parent || svg).appendChild(e);
     return e;
   }
+  var hLayer = null;
   function grid() {
     while (svg.firstChild) svg.removeChild(svg.firstChild);
+    hLayer = null;
     for (var i = -9; i <= 9; i++) {
       var a = sp([i, -9.5]), b = sp([i, 9.5]), c = sp([-9.5, i]), d = sp([9.5, i]);
       el('line', { x1: a[0], y1: a[1], x2: b[0], y2: b[1], stroke: 'var(--gl)', 'stroke-width': 1 });
@@ -767,18 +769,20 @@ var VEC = (function () {
     el('text', { x: o[0] - 5, y: o[1] + 14, 'class': 'num', 'text-anchor': 'end' }, svg, '0');
     el('text', { x: x1[0] - 4, y: x1[1] - 6, 'class': 'lbl', 'text-anchor': 'end', fill: 'var(--axis)' }, svg, 'x');
     el('text', { x: y1[0] + 7, y: y1[1] + 14, 'class': 'lbl', fill: 'var(--axis)' }, svg, 'y');
+    hLayer = el('g', { 'class': 'handles' });
   }
   function arrow(p, q, col, opt) {
     opt = opt || {};
     var A = sp(p), B = sp(q), dx = B[0] - A[0], dy = B[1] - A[1], l = Math.hypot(dx, dy);
     if (l < 1) return;
-    var ux = dx / l, uy = dy / l, h = opt.head || 11, w = opt.w || 2.6;
+    var w = opt.w || 2.6, ux = dx / l, uy = dy / l, h = opt.head || Math.max(17, w * 3.2);
+    h = Math.min(h, l * 0.6);
     var at = { x1: A[0], y1: A[1], x2: B[0] - ux * h * 0.7, y2: B[1] - uy * h * 0.7, stroke: col, 'stroke-width': w, 'stroke-linecap': 'round' };
     if (opt.dash) at['stroke-dasharray'] = '6 5';
-    if (opt.op) at.opacity = opt.op;
-    el('line', at);
-    var hd = el('path', { d: 'M' + B[0] + ' ' + B[1] + 'L' + (B[0] - ux * h - uy * h * 0.42) + ' ' + (B[1] - uy * h + ux * h * 0.42) + 'L' + (B[0] - ux * h + uy * h * 0.42) + ' ' + (B[1] - uy * h - ux * h * 0.42) + 'Z', fill: col });
-    if (opt.op) hd.setAttribute('opacity', opt.op);
+    /* прозрачность — на всю стрелку сразу, чтобы линия и наконечник не давали тёмного пятна там, где перекрываются */
+    var grp = opt.op ? el('g', { opacity: opt.op }) : svg;
+    el('line', at, grp);
+    var hw = 0.46, hd = el('path', { d: 'M' + B[0] + ' ' + B[1] + 'L' + (B[0] - ux * h - uy * h * hw) + ' ' + (B[1] - uy * h + ux * h * hw) + 'L' + (B[0] - ux * h + uy * h * hw) + ' ' + (B[1] - uy * h - ux * h * hw) + 'Z', fill: col }, grp);
     if (opt.label) vlabel(p, q, opt.label, col, opt.side || 1, opt.plain, opt.off);
   }
   /* подпись вектора со стрелочкой над буквой, у середины, сбоку */
@@ -817,7 +821,7 @@ var VEC = (function () {
   function handle(id, p, col) {
     handles.push({ id: id, p: p });
     var A = sp(p);
-    el('circle', { cx: A[0], cy: A[1], r: 11, fill: col, 'fill-opacity': 0.14, stroke: col, 'stroke-width': 1.6, 'stroke-dasharray': '3 2' });
+    el('circle', { cx: A[0], cy: A[1], r: 7, fill: col, 'fill-opacity': 0.07, stroke: col, 'stroke-opacity': 0.45, 'stroke-width': 1.2, 'stroke-dasharray': '3 2' }, hLayer && hLayer.parentNode ? hLayer : svg);
   }
   function add(p, v) { return [p[0] + v[0], p[1] + v[1]]; }
   function sub(p, q) { return [p[0] - q[0], p[1] - q[1]]; }
@@ -1011,8 +1015,8 @@ var VEC = (function () {
     ctl: function (s) { ctlRange('<i>k</i> =', 'k', -3, 3, 0.5, s, render); },
     draw: function (s) {
       var A = s.S, Pa = add(A, s.a), ka = mul(s.a, s.k);
-      var off = [-s.a[1], s.a[0]], ol = len(off) || 1; off = [off[0] / ol * 0.35, off[1] / ol * 0.35];
-      if (s.k) arrow(add(A, off), add(add(A, off), ka), C.r, { label: 'ka', side: 1, w: 3 });
+      /* k·a из той же точки: широкий полупрозрачный, лежит под исходным a */
+      if (s.k) arrow(A, add(A, ka), C.r, { label: 'ka', side: 1, w: 9, op: 0.4, off: 22 });
       arrow(A, Pa, C.a, { label: 'a', side: -1 });
       handle('a', Pa, C.a); handle('S', A, C.ink);
       return '<div class="m" style="font-size:1.15em">' + M(fmt(s.k) + ' · ' + co(s.a) + ' = ' + co([VEC.round(ka[0], 6), VEC.round(ka[1], 6)])) + '</div><div class="m">' + M('|' + V('a') + '| = ' + lenTxt(s.a) + ', &nbsp; |<i>k</i>' + V('a') + '| = ' + fmt(Math.abs(s.k)) + ' · ' + lenTxt(s.a)) + '</div>';
@@ -1266,7 +1270,7 @@ var VEC = (function () {
     function arr(p, q, col, w) {
       var A = S3(p), B = S3(q), dx = B[0] - A[0], dy = B[1] - A[1], l = Math.hypot(dx, dy);
       if (l < 2) return;
-      var ux = dx / l, uy = dy / l, h = 10;
+      var ux = dx / l, uy = dy / l, h = Math.min(15, l * 0.6);
       el('line', { x1: A[0], y1: A[1], x2: B[0] - ux * h * 0.7, y2: B[1] - uy * h * 0.7, stroke: col, 'stroke-width': w || 2.4, 'stroke-linecap': 'round' });
       el('path', { d: 'M' + B[0] + ' ' + B[1] + 'L' + (B[0] - ux * h - uy * h * 0.42) + ' ' + (B[1] - uy * h + ux * h * 0.42) + 'L' + (B[0] - ux * h + uy * h * 0.42) + ' ' + (B[1] - uy * h - ux * h * 0.42) + 'Z', fill: col });
     }
