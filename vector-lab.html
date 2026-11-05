@@ -53,6 +53,9 @@ dl.ww dt { font-weight: 600; } dl.ww dd { margin: 0; }
 .cp { color: var(--vb); font-weight: 700; } .cd { color: var(--vr); font-weight: 700; }
 .lf { margin: 2px 0; }
 .mainf { background: #fff; border: 2px solid var(--accent); border-radius: 14px; padding: 12px 16px 12px; text-align: center; display: flex; flex-direction: column; gap: 4px; }
+.frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; margin: 0 .15em; line-height: 1.25; }
+.frac > span { padding: .05em .25em; white-space: nowrap; }
+.frac > span + span { border-top: 1.5px solid currentColor; }
 .mainf-h { font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
 .mainf > div { font-family: "Times New Roman", Times, serif; font-size: 1.45rem; line-height: 1.5; overflow-x: auto; }
 .mainf > div .m { white-space: normal; font-size: 1em; }
@@ -1921,6 +1924,8 @@ var VEC = (function () {
     var EX = function (t) { return '<div class="ex">' + t + '</div>'; };
     var WR = function (t) { return '<div class="warn">' + t + '</div>'; };
     var a = V('a'), b = V('b'), c = V('c'), x1 = '<i>x</i><sub>1</sub>', x2 = '<i>x</i><sub>2</sub>', y1 = '<i>y</i><sub>1</sub>', y2 = '<i>y</i><sub>2</sub>';
+    /* дробь с горизонтальной чертой: числитель над знаменателем */
+    var FR = function (n, d) { return '<span class="frac"><span>' + n + '</span><span>' + d + '</span></span>'; };
     var MAIN = {
       '1.1': M(V('AB') + ' = (<i>x<sub>B</sub></i> − <i>x<sub>A</sub></i>; &nbsp;<i>y<sub>B</sub></i> − <i>y<sub>A</sub></i>)') + '<div class="mcap">координаты вектора: конец минус начало</div>',
       '1.2': M('|' + a + '| = √(<i>x</i>² + <i>y</i>²)') + '<div class="mcap">длина вектора ' + M(a + '(<i>x</i>; <i>y</i>)') + '</div>',
@@ -1930,18 +1935,18 @@ var VEC = (function () {
       '1.6': M(c + ' = <i>x</i>' + a + ' + <i>y</i>' + b) + '<div class="mcap">разложение по двум неколлинеарным векторам</div>',
       '2.1': M(a + ' · ' + b + ' = |' + a + '| · |' + b + '| · cos φ') + '<div class="mcap">скалярное произведение — число</div>',
       '2.2': M(a + ' · ' + b + ' = ' + x1 + x2 + ' + ' + y1 + y2) + '<div class="mcap">в координатах; ' + M(a + ' ⊥ ' + b + ' ⇔ ' + a + ' · ' + b + ' = 0') + '</div>',
-      '2.3': M('cos φ = (' + x1 + x2 + ' + ' + y1 + y2 + ') / (√(' + x1 + '² + ' + y1 + '²) · √(' + x2 + '² + ' + y2 + '²))') + '<div class="mcap">косинус угла между векторами</div>',
+      '2.3': M('cos φ = ' + FR(x1 + x2 + ' + ' + y1 + y2, '√(' + x1 + '² + ' + y1 + '²) · √(' + x2 + '² + ' + y2 + '²)')) + '<div class="mcap">косинус угла между векторами</div>',
       '2.4': M('|<i>m</i>' + a + ' + <i>n</i>' + b + '|² = <i>m</i>²|' + a + '|² + 2<i>mn</i> · ' + a + '·' + b + ' + <i>n</i>²|' + b + '|²') + '<div class="mcap">длина через скалярный квадрат</div>',
       '2.5': M(V('CA') + ' − ' + V('CB') + ' = ' + V('BA') + ', &nbsp;&nbsp; ' + V('BA') + ' + ' + V('BC') + ' = 2' + V('BM')) + '<div class="mcap">разность и сумма векторов с общим началом</div>',
       '3.1': M('|' + a + '| = √(<i>x</i>² + <i>y</i>² + <i>z</i>²)') + '<div class="mcap">длина вектора в пространстве</div>',
-      '3.2': M('cos φ = |' + a + ' · ' + b + '| / (|' + a + '| · |' + b + '|)') + '<div class="mcap">угол между прямыми через направляющие векторы</div>',
+      '3.2': M('cos φ = ' + FR('|' + a + ' · ' + b + '|', '|' + a + '| · |' + b + '|')) + '<div class="mcap">угол между прямыми через направляющие векторы</div>',
       '3.3': M('<i>ax</i> + <i>by</i> + <i>cz</i> + <i>d</i> = 0, &nbsp;&nbsp; ' + V('n') + '(<i>a</i>; <i>b</i>; <i>c</i>)') + '<div class="mcap">уравнение плоскости и её нормаль</div>',
-      '3.4': M('cos φ = |' + V('n') + '<sub>1</sub> · ' + V('n') + '<sub>2</sub>| / (|' + V('n') + '<sub>1</sub>| · |' + V('n') + '<sub>2</sub>|)') + '<div class="mcap">угол между плоскостями через нормали</div>',
-      '3.5': M('ρ = |<i>ax</i><sub>0</sub> + <i>by</i><sub>0</sub> + <i>cz</i><sub>0</sub> + <i>d</i>| / √(<i>a</i>² + <i>b</i>² + <i>c</i>²)') + '<div class="mcap">расстояние от точки до плоскости</div>',
-      '3.6': M('(<i>x</i> − ' + cP('<i>x</i><sub>0</sub>') + ')/' + cD('<i>m</i>') + ' = (<i>y</i> − ' + cP('<i>y</i><sub>0</sub>') + ')/' + cD('<i>n</i>') + ' = (<i>z</i> − ' + cP('<i>z</i><sub>0</sub>') + ')/' + cD('<i>p</i>')) + '<br>' + M('<i>x</i> = ' + cP('<i>x</i><sub>0</sub>') + ' + ' + cD('<i>m</i>') + '<i>t</i>, &nbsp;<i>y</i> = ' + cP('<i>y</i><sub>0</sub>') + ' + ' + cD('<i>n</i>') + '<i>t</i>, &nbsp;<i>z</i> = ' + cP('<i>z</i><sub>0</sub>') + ' + ' + cD('<i>p</i>') + '<i>t</i>') + '<div class="mcap">канонические и параметрические уравнения: ' + cP('точка') + ' и ' + cD('направляющий вектор') + '</div>',
-      '3.7': M('sin φ = |' + V('s') + ' · ' + V('n') + '| / (|' + V('s') + '| · |' + V('n') + '|)') + '<div class="mcap">угол между прямой и плоскостью — синус!</div>',
-      '3.8': M('<i>H</i> = <i>A</i> + <i>t</i>' + V('s') + ', &nbsp; <i>t</i> = (' + V('AP') + ' · ' + V('s') + ') / |' + V('s') + '|², &nbsp; ρ = |' + V('PH') + '|') + '<div class="mcap">расстояние от точки до прямой через основание перпендикуляра</div>',
-      '3.9': M('ρ = |' + V('P<sub>1</sub>P<sub>2</sub>') + ' · ' + V('n') + '| / |' + V('n') + '|, &nbsp;&nbsp; ' + V('n') + ' ⊥ ' + V('s') + '<sub>1</sub>, ' + V('n') + ' ⊥ ' + V('s') + '<sub>2</sub>') + '<div class="mcap">расстояние между скрещивающимися прямыми</div>'
+      '3.4': M('cos φ = ' + FR('|' + V('n') + '<sub>1</sub> · ' + V('n') + '<sub>2</sub>|', '|' + V('n') + '<sub>1</sub>| · |' + V('n') + '<sub>2</sub>|')) + '<div class="mcap">угол между плоскостями через нормали</div>',
+      '3.5': M('ρ = ' + FR('|<i>ax</i><sub>0</sub> + <i>by</i><sub>0</sub> + <i>cz</i><sub>0</sub> + <i>d</i>|', '√(<i>a</i>² + <i>b</i>² + <i>c</i>²)')) + '<div class="mcap">расстояние от точки до плоскости</div>',
+      '3.6': M(FR('<i>x</i> − ' + cP('<i>x</i><sub>0</sub>'), cD('<i>m</i>')) + ' = ' + FR('<i>y</i> − ' + cP('<i>y</i><sub>0</sub>'), cD('<i>n</i>')) + ' = ' + FR('<i>z</i> − ' + cP('<i>z</i><sub>0</sub>'), cD('<i>p</i>'))) + '<br>' + M('<i>x</i> = ' + cP('<i>x</i><sub>0</sub>') + ' + ' + cD('<i>m</i>') + '<i>t</i>, &nbsp;<i>y</i> = ' + cP('<i>y</i><sub>0</sub>') + ' + ' + cD('<i>n</i>') + '<i>t</i>, &nbsp;<i>z</i> = ' + cP('<i>z</i><sub>0</sub>') + ' + ' + cD('<i>p</i>') + '<i>t</i>') + '<div class="mcap">канонические и параметрические уравнения: ' + cP('точка') + ' и ' + cD('направляющий вектор') + '</div>',
+      '3.7': M('sin φ = ' + FR('|' + V('s') + ' · ' + V('n') + '|', '|' + V('s') + '| · |' + V('n') + '|')) + '<div class="mcap">угол между прямой и плоскостью — синус!</div>',
+      '3.8': M('<i>H</i> = <i>A</i> + <i>t</i>' + V('s') + ', &nbsp; <i>t</i> = ' + FR(V('AP') + ' · ' + V('s'), '|' + V('s') + '|²') + ', &nbsp; ρ = |' + V('PH') + '|') + '<div class="mcap">расстояние от точки до прямой через основание перпендикуляра</div>',
+      '3.9': M('ρ = ' + FR('|' + V('P<sub>1</sub>P<sub>2</sub>') + ' · ' + V('n') + '|', '|' + V('n') + '|') + ', &nbsp;&nbsp; ' + V('n') + ' ⊥ ' + V('s') + '<sub>1</sub>, ' + V('n') + ' ⊥ ' + V('s') + '<sub>2</sub>') + '<div class="mcap">расстояние между скрещивающимися прямыми</div>'
     };
     Object.keys(MAIN).forEach(function (k) { if (TOPICS[k]) TOPICS[k].main = MAIN[k]; });
 
