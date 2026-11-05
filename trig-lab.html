@@ -80,6 +80,28 @@ summary { cursor: pointer; font-weight: 600; color: var(--accent); font-size: .9
 .thin { stroke-width: 1.2; fill: none; }
 .dash { stroke-dasharray: 5 4; }
 .faint { stroke: var(--faint); stroke-width: 1.6; fill: none; }
+/* ===== Оформление: тёмно-зелёная доска на фоне, светлый лист для работы (холодный контрастный тон) =====
+   Фон доски: chalk-trig.svg рядом со страницей (собирается claudespace/стили/формулы_мелом_генератор.py, тема trig). */
+:root { --bg: #122826; --ink: #f6f9f8; --muted: #b9c9c6; --line: #46635f; --paper: #183330; }
+html { background: #0f2422; }
+html body { min-height: 100vh; background-color: #122826;
+  background-image: radial-gradient(ellipse at 50% 40%, transparent 35%, rgba(0,0,0,.45) 100%), url("chalk-trig.svg");
+  background-size: 100% 100%, 1200px 820px; background-repeat: no-repeat, repeat; background-attachment: fixed; }
+/* на доске: заголовок и вкладки мелом */
+html .tab { background: transparent; color: var(--ink); border-color: var(--line); }
+html .tab:hover, html .tab:focus-visible { border-color: var(--ink); }
+html .tab[aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: #122826; }
+/* лист: свои светлые цвета */
+html .sheet {
+  --bg: #f1f3f1; --paper: #f8f9f7; --grid: #e1e6e4; --ink: #141c1a; --muted: #545e5b; --line: #d6dcd9; --faint: #bfc7c4;
+  --accent: #134a40; --accent-soft: #dcebe6;
+  --sin: #dc3f22; --cos: #1964a8; --tg: #1d8045; --ctg: #6c3fc4; --q: #b36c00;
+  --ok: #1d7650; --ok-soft: #dcefe5; --no: #b13a22; --no-soft: #f8dfd7; --sol: #d65a0a; --sol-soft: #fde9d8;
+  color: var(--ink); background: var(--paper); border: 0; border-radius: 18px;
+  box-shadow: 0 2px 0 rgba(255,255,255,.6) inset, 0 26px 64px rgba(0,0,0,.5), 0 4px 14px rgba(0,0,0,.3);
+}
+html .sheet svg.fig { background: #fff; border-color: var(--line); border-radius: 12px; }
+html .sheet select { background: #fff; }
 </style>
 </head>
 <body>
