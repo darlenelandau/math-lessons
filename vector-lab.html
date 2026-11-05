@@ -2072,7 +2072,7 @@ var VEC = (function () {
     var ok = T.done(s);
     if (ok) S.expOk[id] = true;
     var h = '<h2>' + id + '. ' + T.title + '</h2><p style="margin:0">' + T.intro + '</p>';
-    if (T.main) h += '<div class="mainf"><span class="mainf-h">Главная формула</span><div>' + T.main + '</div></div>';
+    if (T.main) h += '<div class="mainf"><span class="mainf-h">Основная формула</span><div>' + T.main + '</div></div>';
     /* теория идёт первой, до опыта; первый блок открыт, пока его не закрыли */
     if (T.theory) h += '<div class="theory"><h3>Теория</h3>' + T.theory.map(function (t, i) {
       var key = id + ':' + i, open = S.thOpen && key in S.thOpen ? S.thOpen[key] : i === 0;
