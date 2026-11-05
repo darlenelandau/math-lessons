@@ -102,12 +102,19 @@ html .sheet {
 }
 html .sheet svg.fig { background: #fff; border-color: var(--line); border-radius: 12px; }
 html .sheet select { background: #fff; }
+/* автор: строка под названием, на доске */
+.author { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; color: var(--muted); font-size: .92rem; }
+.author a { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); text-decoration: none; border: 1px solid var(--line);
+  border-radius: 99px; padding: 4px 11px 4px 8px; font-size: .86rem; font-weight: 600; }
+.author a:hover, .author a:focus-visible { border-color: var(--ink); outline: none; }
+.author svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header style="display:flex;flex-direction:column;gap:10px">
     <h1>Тригонометрическая лаборатория</h1>
+    <p class="author" style="margin-top:-4px">Олеся, репетитор по математике<a href="https://t.me/pelegrina_math" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 20.5 4.5 17.5 19.5 11 15l-3 3.5V14l9-7.5-10.5 6z"/></svg><span>Странница в математике</span></a><a href="https://taplink.cc/pelegrina_math" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg><span>все ссылки</span></a></p>
     <div class="tabs" role="tablist">
       <button class="tab" type="button" role="tab" data-tab="fn" aria-selected="true">Функции</button>
       <button class="tab" type="button" role="tab" data-tab="inv" aria-selected="false">Обратные функции</button>
