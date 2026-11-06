@@ -122,11 +122,11 @@ ol.steps li.new { animation: appear .4s ease-out; }
 .lbl { font: italic 19px "Times New Roman", Times, serif; paint-order: stroke; stroke: var(--plane-bg); stroke-width: 4px; stroke-linejoin: round; }
 .num { font: 12px "Golos Text", sans-serif; fill: var(--muted); }
 /* ===== Оформление: тёмно-зелёная доска на фоне, светлый лист для работы (холодный контрастный тон) =====
-   Фон доски: chalk-formulas.svg рядом со страницей (собирается claudespace/стили/формулы_мелом_генератор.py). */
+   Фон доски: chalk-deriv.svg рядом со страницей (собирается claudespace/стили/формулы_мелом_генератор.py, тема deriv). */
 :root { --bg: #122826; --ink: #f6f9f8; --muted: #b9c9c6; --line: #46635f; --paper: #183330; }
 html { background: #0f2422; }
 html body { min-height: 100vh; background-color: #122826;
-  background-image: radial-gradient(ellipse at 50% 40%, transparent 35%, rgba(0,0,0,.45) 100%), url("chalk-formulas.svg");
+  background-image: radial-gradient(ellipse at 50% 40%, transparent 35%, rgba(0,0,0,.45) 100%), url("chalk-deriv.svg");
   background-size: 100% 100%, 1200px 820px; background-repeat: no-repeat, repeat; background-attachment: fixed; }
 /* на доске: заголовок и вкладки мелом */
 html .tab, html .tp { background: transparent; color: var(--ink); border-color: var(--line); }
@@ -183,6 +183,7 @@ svg.plane { aspect-ratio: 480 / 420; }
     <div style="display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between">
       <h1>Лаборатория производной</h1>
     </div>
+    <p class="author" style="margin-top:-4px">Олеся, репетитор по математике<a class="ico" href="https://t.me/pelegrina_math" target="_blank" rel="noopener" title="Telegram-канал" aria-label="Telegram-канал"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 20.5 4.5 17.5 19.5 11 15l-3 3.5V14l9-7.5-10.5 6z"/></svg></a><a class="ico" href="https://taplink.cc/pelegrina_math" target="_blank" rel="noopener" title="Контакты" aria-label="Контакты"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></a></p>
     <div class="tabs" role="tablist" id="parts"></div>
     <div class="topics" id="topics"></div>
   </header>
