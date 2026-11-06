@@ -174,6 +174,7 @@ svg.plane { aspect-ratio: 480 / 420; }
 .types button sup, .types button i { font-family: "Times New Roman", Times, serif; font-size: 1.05em; }
 .rng .m { min-width: 2.6em; }
 .ans input { width: 9em; }
+.ans .sqrtb { font: 700 1.15rem "Times New Roman", Times, serif; padding: 4px 11px; line-height: 1.2; }
 @media (max-width: 900px) { .colL { position: static; } }
 </style>
 </head>
@@ -210,6 +211,10 @@ var DER = (function () {
     if (!s) return NaN;
     var m = /^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/.exec(s);
     if (m) return parseFloat(m[1]) / parseFloat(m[2]);
+    m = /^(-?)(\d*(?:\.\d+)?)?(?:√|sqrt)\(?(\d+(?:\.\d+)?)\)?\/(\d+(?:\.\d+)?)$/.exec(s);
+    if (m) { var k0 = m[2] === undefined || m[2] === '' ? 1 : parseFloat(m[2]); return (m[1] ? -1 : 1) * k0 * Math.sqrt(parseFloat(m[3])) / parseFloat(m[4]); }
+    m = /^(-?\d+(?:\.\d+)?)\/(?:√|sqrt)\(?(\d+(?:\.\d+)?)\)?$/.exec(s);
+    if (m) return parseFloat(m[1]) / Math.sqrt(parseFloat(m[2]));
     m = /^(-?)(\d*(?:\.\d+)?)?(?:√|sqrt)\(?(\d+(?:\.\d+)?)\)?$/.exec(s);
     if (m) { var k = m[2] === undefined || m[2] === '' ? 1 : parseFloat(m[2]); return (m[1] ? -1 : 1) * k * Math.sqrt(parseFloat(m[3])); }
     if (/^-?(pi|π)$/.test(s)) return (s[0] === '-' ? -1 : 1) * Math.PI;
@@ -1566,7 +1571,7 @@ var DER = (function () {
   function makeTask(key) { var t = DER.GEN[key].make(); t.type = key; t.part = DER.GEN[key].part; return t; }
   function taskBox(t, idPrefix) {
     var h = '<div class="box read"><div class="cond">' + t.text + '</div>';
-    h += '<div class="ans"><span>Ответ:</span><input id="' + idPrefix + 'a" inputmode="decimal" aria-label="ответ"></div>';
+    h += '<div class="ans"><span>Ответ:</span><input id="' + idPrefix + 'a" inputmode="decimal" aria-label="ответ"><button class="btn minor sqrtb" type="button" id="' + idPrefix + 'sq" title="Вставить знак корня">√</button></div>';
     h += '<div class="ctl"><button class="btn main" type="button" id="' + idPrefix + 'chk">Проверить</button><button class="btn help" type="button" id="' + idPrefix + 'hnt">Подсказка</button><button class="btn help" type="button" id="' + idPrefix + 'sol">Решение</button><button class="btn minor" type="button" id="' + idPrefix + 'nw">Новая задача</button></div>';
     h += '<div id="' + idPrefix + 'fb">' + (t.fbHtml || '') + '</div></div>';
     return h;
@@ -1576,6 +1581,8 @@ var DER = (function () {
     if (t.last != null) { inp.value = t.last; inp.className = t.ok ? 'right' : (t.checked ? 'wrong' : ''); }
     function fb(cls, html) { t.fbHtml = '<div class="box ' + cls + '" style="margin-top:6px">' + html + '</div>'; $(p + 'fb').innerHTML = t.fbHtml; }
     inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') $(p + 'chk').click(); });
+    /* кнопка √: вставляет знак в место курсора и возвращает фокус в поле */
+    $(p + 'sq').onclick = function () { var a = inp.selectionStart == null ? inp.value.length : inp.selectionStart, b = inp.selectionEnd == null ? a : inp.selectionEnd; inp.value = inp.value.slice(0, a) + '√' + inp.value.slice(b); inp.focus(); inp.setSelectionRange(a + 1, a + 1); };
     $(p + 'nw').onclick = onNew;
     $(p + 'hnt').onclick = function () { fb('info', '<b>Подсказка.</b> ' + t.hint); };
     $(p + 'sol').onclick = function () { t.revealed = true; t.shown = true; fb('info', '<b>Решение.</b><ol class="steps" style="margin-top:6px">' + t.sol.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ol><div>Ответ: ' + M(fmt(t.ans)) + '</div>'); drawScene(t.scene, true); };
@@ -1655,7 +1662,7 @@ var DER = (function () {
     $('planeHint').textContent = 'Чертёж к задаче. После проверки на нём отмечается решение.';
     var n = types.reduce(function (a, k) { return a + (S.solved[k] || 0); }, 0);
     var h = '<h2>' + (part === 2 ? 'Тренажёр: вычисление производных' : 'Тренажёр: задачи ЕГЭ') + '</h2><div class="types"><button type="button" data-ty="all" class="' + (sel === 'all' ? 'on' : '') + '">все типы</button>' + types.map(function (k) { return '<button type="button" data-ty="' + k + '" class="' + (sel === k ? 'on' : '') + '">' + DER.GEN[k].name + (S.solved[k] ? ' · ' + S.solved[k] : '') + '</button>'; }).join('') + '</div><div class="stat">Решено в этой части: ' + n + '</div>';
-    h += taskBox(t, 't') + '<p class="hint">Ответ — число: с запятой (−6,5), дробью (1/4) или с корнем (√2). Как в бланке ЕГЭ.</p>';
+    h += taskBox(t, 't') + '<p class="hint">Ответ — число: с запятой (−6,5), дробью (1/4) или с корнем: √2, 2√13, √6/3 (кнопка √ рядом с полем). В бланке ЕГЭ дроби и корни не принимают, там нужна десятичная запись.</p>';
     $('right').innerHTML = h;
     [].forEach.call($('right').querySelectorAll('[data-ty]'), function (b) { b.onclick = function () { S.types[part] = b.dataset.ty; curTask = null; render(); }; });
     bindTask(t, 't', function () { curTask = null; render(); });
