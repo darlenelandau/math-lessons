@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Градусы и радианы</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f7f9fb; --paper: #fff; --grid: #e6edf3; --ink: #17232d; --muted: #5d6d79; --line: #d5dee6; --faint: #c3ced7;
+  --accent: #1f6f8b; --accent-soft: #e3f0f5;
+  --sin: #d0532e; --cos: #1f63c9;
+  --ok: #2f7d4f; --ok-soft: #e4f3ea; --no: #b5452f; --no-soft: #fbe9e4; --sol: #e8590c; --sol-soft: #ffe8d9;
+}
+* { box-sizing: border-box; }
+body { margin: 0; padding: 24px 16px 60px; color: var(--ink); background: var(--bg);
+  font: 16px/1.55 "Golos Text", system-ui, -apple-system, "Segoe UI", sans-serif; }
+.wrap { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+h1 { margin: 0; font-size: clamp(1.5rem, 4vw, 2.1rem); line-height: 1.2; }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.tab { font: 600 .95rem "Golos Text", sans-serif; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--paper); color: var(--ink); cursor: pointer; }
+.tab:hover, .tab:focus-visible { border-color: var(--accent); outline: none; }
+.tab[aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.tab[disabled] { opacity: .45; cursor: default; }
+.tab .tick { color: #7fd6a8; }
+.sheet { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: clamp(16px, 3vw, 26px);
+  display: flex; flex-direction: column; gap: 14px; }
+.lvl { font-size: .88rem; color: var(--muted); display: flex; justify-content: space-between; gap: 10px; }
+.bar { height: 7px; background: var(--grid); border-radius: 6px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--accent); width: 0; transition: width .25s; }
+.theory { border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: 0 10px 10px 0; padding: 14px 18px; }
+.theory h2 { margin: 0 0 6px; font-size: 1.05rem; }
+.theory p { margin: 7px 0; }
+.theory .fx { font-family: "Times New Roman", Times, serif; font-size: 1.2em; }
+.q { font-size: 1.15rem; }
+.q .fx { font-family: "Times New Roman", Times, serif; font-size: 1.25em; }
+.opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 520px) { .opts { grid-template-columns: minmax(0, 1fr); } }
+.opt { padding: 12px 14px; border: 1px solid var(--line); border-radius: 9px; background: var(--paper); color: var(--ink);
+  cursor: pointer; font: 500 1.05rem "Golos Text", sans-serif; text-align: center; }
+.opt .fx { font-family: "Times New Roman", Times, serif; font-size: 1.2em; }
+.opt:hover { border-color: var(--accent); }
+.opt[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.frac { display: flex; align-items: center; gap: 10px; font-size: 1.15rem; }
+.frac .col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.frac .top { display: flex; align-items: center; gap: 7px; }
+.frac input { width: 74px; font: 600 1.15rem "Golos Text", sans-serif; padding: 8px; text-align: center;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--paper); color: var(--ink); }
+.frac .rule { width: 116px; height: 2px; background: var(--ink); }
+.frac .pi { font-family: "Times New Roman", Times, serif; font-size: 1.5em; }
+.one { display: flex; align-items: center; gap: 10px; }
+.one input { width: 130px; font: 600 1.15rem "Golos Text", sans-serif; padding: 9px 12px;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--paper); color: var(--ink); }
+.go { align-self: flex-start; font: 600 1rem "Golos Text", sans-serif; padding: 11px 22px; border: 0; border-radius: 9px;
+  background: var(--accent); color: #fff; cursor: pointer; }
+.go[disabled] { background: var(--faint); cursor: default; }
+.chk { border-radius: 8px; padding: 11px 15px; }
+.chk.ok { background: var(--ok-soft); border-left: 3px solid var(--ok); }
+.chk.no { background: var(--no-soft); border-left: 3px solid var(--no); }
+.chk .hint { color: var(--muted); font-size: .92rem; margin: 5px 0 0; }
+.done { text-align: center; padding: 10px 0; }
+.done .big { font-size: 2.6rem; font-weight: 700; color: var(--accent); }
+.tableT { border-collapse: collapse; font-size: .98rem; }
+.tableT td, .tableT th { border: 1px solid var(--line); padding: 5px 10px; text-align: center; }
+.tableT th { background: var(--accent-soft); font-weight: 600; }
+/* ===== Оформление: тёмно-зелёная доска на фоне, светлый лист для работы (холодный контрастный тон) =====
+   Фон доски: chalk-trig.svg рядом со страницей (собирается claudespace/стили/формулы_мелом_генератор.py, тема trig). */
+:root { --bg: #122826; --ink: #f6f9f8; --muted: #b9c9c6; --line: #46635f; --paper: #183330; }
+html { background: #0f2422; }
+html body { min-height: 100vh; background-color: #122826;
+  background-image: radial-gradient(ellipse at 50% 40%, transparent 35%, rgba(0,0,0,.45) 100%), url("chalk-trig.svg");
+  background-size: 100% 100%, 1200px 820px; background-repeat: no-repeat, repeat; background-attachment: fixed; }
+html .tab { background: transparent; color: var(--ink); border-color: var(--line); }
+html .tab:hover, html .tab:focus-visible { border-color: var(--ink); }
+html .tab[aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: #122826; }
+html .sheet {
+  --bg: #f1f3f1; --paper: #f8f9f7; --grid: #e1e6e4; --ink: #141c1a; --muted: #545e5b; --line: #d6dcd9; --faint: #bfc7c4;
+  --accent: #134a40; --accent-soft: #dcebe6;
+  --ok: #1d7650; --ok-soft: #dcefe5; --no: #b13a22; --no-soft: #f8dfd7; --sol: #d65a0a; --sol-soft: #fde9d8;
+  color: var(--ink); background: var(--paper); border: 0; border-radius: 18px;
+  box-shadow: 0 2px 0 rgba(255,255,255,.6) inset, 0 26px 64px rgba(0,0,0,.5), 0 4px 14px rgba(0,0,0,.3);
+}
+html .sheet input { background: #fff; }
+.author { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; color: var(--muted); font-size: .92rem; }
+.author a { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); text-decoration: none; border: 1px solid var(--line);
+  border-radius: 99px; padding: 4px 11px 4px 8px; font-size: .86rem; font-weight: 600; }
+.author a:hover, .author a:focus-visible { border-color: var(--ink); outline: none; }
+.author svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.author a.ico { width: 30px; height: 30px; padding: 0; justify-content: center; border-radius: 50%; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header style="display:flex;flex-direction:column;gap:10px">
+    <h1>Градусы и радианы</h1>
+    <p class="author" style="margin-top:-4px">Олеся, репетитор по математике<a class="ico" href="https://t.me/pelegrina_math" target="_blank" rel="noopener" title="Telegram-канал" aria-label="Telegram-канал"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 20.5 4.5 17.5 19.5 11 15l-3 3.5V14l9-7.5-10.5 6z"/></svg></a><a class="ico" href="https://taplink.cc/pelegrina_math" target="_blank" rel="noopener" title="Контакты" aria-label="Контакты"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></a></p>
+    <div class="tabs" role="tablist" id="tabs"></div>
+  </header>
+  <div class="sheet" id="sheet"></div>
+</div>
+
+<script>
+/* LOGIC-START */
+// Пять уровней. В каждом короткая теория и задачи одного вида.
+var LEVELS = [
+  {
+    name: 'Опора',
+    title: 'Половина оборота',
+    theory: [
+      'Радианы это просто другая единица для углов, как километры и мили для расстояния.',
+      'Полный оборот по окружности радиуса 1 равен длине этой окружности, то есть <span class="fx">2π</span>. Половина оборота вдвое меньше:',
+      '<p style="text-align:center"><b class="fx">180° = π</b></p>',
+      'Из этой строчки получается всё остальное. Например, четверть оборота это <span class="fx">90°</span>, то есть половина от <span class="fx">π</span>, значит <span class="fx">π/2</span>.'
+    ],
+    tasks: [
+      { k:'pick', q:'Сколько радиан в <b class="fx">180°</b>?', a:'π', w:['2π','π/2','180π'] },
+      { k:'pick', q:'Сколько радиан в <b class="fx">360°</b>?', a:'2π', w:['π','π/2','4π'] },
+      { k:'pick', q:'Сколько радиан в <b class="fx">90°</b>?', a:'π/2', w:['π','2π','π/4'] },
+      { k:'pick', q:'Сколько радиан в <b class="fx">270°</b>?', a:'3π/2', w:['2π/3','π/3','3π'] },
+      { k:'deg',  q:'Сколько градусов в <b class="fx">π</b>?', a:180 },
+      { k:'deg',  q:'Сколько градусов в <b class="fx">π/2</b>?', a:90 }
+    ]
+  },
+  {
+    name: 'В радианы',
+    title: 'Из градусов в радианы',
+    theory: [
+      'Раз <span class="fx">180° = π</span>, то один градус это <span class="fx">π/180</span>. Значит, чтобы перевести градусы в радианы, надо <b>умножить на <span class="fx">π/180</span></b> и сократить дробь.',
+      'Пример: <span class="fx">60° = 60 · π/180 = π/3</span>.',
+      'Короче: <b>запиши градусы дробью к 180 и сократи</b>. Для <span class="fx">135°</span> получится <span class="fx">135/180 = 3/4</span>, то есть <span class="fx">3π/4</span>.'
+    ],
+    tasks: [
+      { k:'frac', q:'Переведи в радианы: <b class="fx">30°</b>', n:1, d:6 },
+      { k:'frac', q:'Переведи в радианы: <b class="fx">60°</b>', n:1, d:3 },
+      { k:'frac', q:'Переведи в радианы: <b class="fx">135°</b>', n:3, d:4 },
+      { k:'frac', q:'Переведи в радианы: <b class="fx">150°</b>', n:5, d:6 },
+      { k:'frac', q:'Переведи в радианы: <b class="fx">225°</b>', n:5, d:4 },
+      { k:'frac', q:'Переведи в радианы: <b class="fx">300°</b>', n:5, d:3 }
+    ]
+  },
+  {
+    name: 'В градусы',
+    title: 'Из радианов в градусы',
+    theory: [
+      'В обратную сторону проще. Вместо <span class="fx">π</span> подставь <span class="fx">180°</span> и посчитай.',
+      'Пример: <span class="fx">3π/4 = 3 · 180 : 4 = 135°</span>.',
+      'Удобный порядок: <b>сначала раздели 180 на знаменатель, потом умножь на числитель</b>. Так числа остаются маленькими.',
+      'Проверка: <span class="fx">π/6</span> это <span class="fx">180 : 6 = 30°</span>.'
+    ],
+    tasks: [
+      { k:'deg', q:'Переведи в градусы: <b class="fx">π/6</b>', a:30 },
+      { k:'deg', q:'Переведи в градусы: <b class="fx">π/3</b>', a:60 },
+      { k:'deg', q:'Переведи в градусы: <b class="fx">3π/4</b>', a:135 },
+      { k:'deg', q:'Переведи в градусы: <b class="fx">5π/6</b>', a:150 },
+      { k:'deg', q:'Переведи в градусы: <b class="fx">4π/3</b>', a:240 },
+      { k:'deg', q:'Переведи в градусы: <b class="fx">11π/6</b>', a:330 }
+    ]
+  },
+  {
+    name: 'Вместе',
+    title: 'В обе стороны и четверти',
+    theory: [
+      'Теперь то и другое вперемешку, плюс четверти.',
+      'Чтобы понять четверть, переведи угол в градусы и вспомни окружность: до <span class="fx">90°</span> первая четверть, до <span class="fx">180°</span> вторая, до <span class="fx">270°</span> третья, дальше четвёртая.',
+      'Полезно помнить опорные точки в радианах: <span class="fx">π/2</span> это <span class="fx">90°</span>, <span class="fx">π</span> это <span class="fx">180°</span>, <span class="fx">3π/2</span> это <span class="fx">270°</span>.'
+    ],
+    tasks: [
+      { k:'frac', q:'Переведи в радианы: <b class="fx">240°</b>', n:4, d:3 },
+      { k:'deg',  q:'Переведи в градусы: <b class="fx">5π/4</b>', a:225 },
+      { k:'frac', q:'Переведи в радианы: <b class="fx">330°</b>', n:11, d:6 },
+      { k:'pick', q:'В какой четверти лежит угол <b class="fx">2π/3</b>?', a:'вторая', w:['первая','третья','четвёртая'] },
+      { k:'pick', q:'В какой четверти лежит угол <b class="fx">7π/6</b>?', a:'третья', w:['первая','вторая','четвёртая'] },
+      { k:'pick', q:'В какой четверти лежит угол <b class="fx">11π/6</b>?', a:'четвёртая', w:['первая','вторая','третья'] }
+    ]
+  },
+  {
+    name: 'Значения',
+    title: 'Синус и косинус в первой четверти',
+    theory: [
+      'Синус и косинус это координаты точки на единичной окружности: <b>косинус это икс, синус это игрек</b>.',
+      'Значения для <span class="fx">π/6</span>, <span class="fx">π/4</span>, <span class="fx">π/3</span> достаются из двух школьных треугольников: половины равностороннего и половины квадрата.',
+      'TABLE',
+      'Подсказка: синусы идут как <span class="fx">√1/2</span>, <span class="fx">√2/2</span>, <span class="fx">√3/2</span>, а косинусы те же числа в обратном порядке.'
+    ],
+    tasks: [
+      { k:'pick', q:'Чему равен <b class="fx">sin π/6</b>?', a:'1/2', w:['√2/2','√3/2','1'] },
+      { k:'pick', q:'Чему равен <b class="fx">cos π/6</b>?', a:'√3/2', w:['1/2','√2/2','0'] },
+      { k:'pick', q:'Чему равен <b class="fx">sin π/4</b>?', a:'√2/2', w:['1/2','√3/2','1'] },
+      { k:'pick', q:'Чему равен <b class="fx">cos π/3</b>?', a:'1/2', w:['√3/2','√2/2','0'] },
+      { k:'pick', q:'Чему равен <b class="fx">sin π/3</b>?', a:'√3/2', w:['1/2','√2/2','1'] },
+      { k:'pick', q:'Чему равен <b class="fx">cos 0</b>?', a:'1', w:['0','1/2','√3/2'] },
+      { k:'pick', q:'Чему равен <b class="fx">sin π/2</b>?', a:'1', w:['0','1/2','√2/2'] },
+      { k:'pick', q:'Чему равен <b class="fx">cos π/2</b>?', a:'0', w:['1','1/2','√3/2'] }
+    ]
+  }
+];
+
+function num(s) {
+  s = String(s == null ? '' : s).trim().replace(',', '.').replace(/\s+/g, '');
+  if (!/^[-+]?\d+(\.\d+)?$/.test(s)) return null;
+  var n = Number(s);
+  return isFinite(n) ? n : null;
+}
+// Дробь принимается и несокращённой: 2/12 это тоже пи/6
+function sameFrac(n, d, tn, td) {
+  if (n === null || d === null || d === 0) return false;
+  return Math.abs(n * td - tn * d) < 1e-9 && n * d > 0 === tn * td > 0;
+}
+function checkTask(task, ans) {
+  if (task.k === 'pick') return ans.v === task.a;
+  if (task.k === 'deg')  { var v = num(ans.v); return v !== null && Math.abs(v - task.a) < 1e-9; }
+  if (task.k === 'frac') return sameFrac(num(ans.n), num(ans.d), task.n, task.d);
+  return false;
+}
+// Варианты ответа: верный плюс три неверных, порядок зависит от номера задачи
+function options(task, seed) {
+  var list = [task.a].concat(task.w);
+  for (var i = list.length - 1; i > 0; i--) {
+    var j = (seed * 7 + i * 3 + 1) % (i + 1);
+    var t = list[i]; list[i] = list[j]; list[j] = t;
+  }
+  return list;
+}
+/* LOGIC-END */
+
+var TABLE = '<table class="tableT"><tr><th>угол</th><th>0</th><th>π/6</th><th>π/4</th><th>π/3</th><th>π/2</th></tr>' +
+  '<tr><th>sin</th><td>0</td><td>1/2</td><td>√2/2</td><td>√3/2</td><td>1</td></tr>' +
+  '<tr><th>cos</th><td>1</td><td>√3/2</td><td>√2/2</td><td>1/2</td><td>0</td></tr></table>';
+
+var lv = 0, ti = 0, phase = 'theory', unlocked = 1, firstTry = [0,0,0,0,0], tried = false, chosen = null;
+
+function tabs() {
+  var h = '';
+  for (var i = 0; i < LEVELS.length; i++) {
+    var done = firstTry[i] >= 0 && i < unlocked - 1;
+    h += '<button class="tab" type="button" role="tab" data-l="' + i + '"' +
+         (i === lv ? ' aria-selected="true"' : '') + (i >= unlocked ? ' disabled' : '') + '>' +
+         (i + 1) + '. ' + LEVELS[i].name + (done ? ' <span class="tick">✓</span>' : '') + '</button>';
+  }
+  document.getElementById('tabs').innerHTML = h;
+  document.querySelectorAll('#tabs .tab').forEach(function (el) {
+    el.onclick = function () { if (el.disabled) return; lv = +el.dataset.l; ti = 0; phase = 'theory'; render(); };
+  });
+}
+
+function render() {
+  tabs();
+  var L = LEVELS[lv], s = document.getElementById('sheet');
+  if (phase === 'theory') {
+    var body = L.theory.map(function (p) { return p === 'TABLE' ? '<div style="overflow-x:auto">' + TABLE + '</div>' : (p.indexOf('<p') === 0 ? p : '<p>' + p + '</p>'); }).join('');
+    s.innerHTML = '<div class="lvl"><span>Уровень ' + (lv + 1) + ' из ' + LEVELS.length + '</span><span>' + L.tasks.length + ' задач</span></div>' +
+      '<div class="theory"><h2>' + L.title + '</h2>' + body + '</div>' +
+      '<button class="go" id="go">Начать</button>';
+    document.getElementById('go').onclick = function () { phase = 'task'; ti = 0; render(); };
+    return;
+  }
+  if (phase === 'done') {
+    var all = firstTry[lv], tot = L.tasks.length;
+    var last = lv === LEVELS.length - 1;
+    s.innerHTML = '<div class="done"><p>Уровень пройден</p><div class="big">' + all + ' из ' + tot + '</div>' +
+      '<p style="color:var(--muted)">решено с первой попытки</p></div>' +
+      '<button class="go" id="go">' + (last ? 'Пройти ещё раз' : 'Следующий уровень') + '</button>';
+    document.getElementById('go').onclick = function () {
+      if (last) { lv = 0; firstTry = [0,0,0,0,0]; unlocked = 1; }
+      else { lv++; if (unlocked < lv + 1) unlocked = lv + 1; }
+      ti = 0; phase = 'theory'; render();
+    };
+    return;
+  }
+
+  var t = L.tasks[ti];
+  tried = false; chosen = null;
+  var h = '<div class="lvl"><span>Уровень ' + (lv + 1) + ': ' + L.title + '</span><span>Задача ' + (ti + 1) + ' из ' + L.tasks.length + '</span></div>' +
+          '<div class="bar"><i style="width:' + (ti / L.tasks.length * 100) + '%"></i></div>' +
+          '<div class="q">' + t.q + '</div>';
+  if (t.k === 'pick') {
+    h += '<div class="opts">' + options(t, ti + lv * 10).map(function (o) {
+      return '<button class="opt" type="button" data-v="' + o + '"><span class="fx">' + o + '</span></button>';
+    }).join('') + '</div>';
+  } else if (t.k === 'deg') {
+    h += '<div class="one"><input type="text" id="iv" inputmode="numeric" autocomplete="off" placeholder="число"><span>градусов</span></div>';
+  } else {
+    h += '<div class="frac"><div class="col">' +
+         '<div class="top"><input type="text" id="in" inputmode="numeric" autocomplete="off" placeholder="?"><span class="pi">π</span></div>' +
+         '<div class="rule"></div><input type="text" id="id" inputmode="numeric" autocomplete="off" placeholder="?"></div>' +
+         '<span style="color:var(--muted);font-size:.92rem">сверху множитель перед π, снизу знаменатель.<br>Если множителя нет, пиши 1</span></div>';
+  }
+  h += '<button class="go" id="go">Проверить</button><div id="fb"></div>';
+  s.innerHTML = h;
+
+  s.querySelectorAll('.opt').forEach(function (el) {
+    el.onclick = function () {
+      s.querySelectorAll('.opt').forEach(function (o) { o.setAttribute('aria-pressed', 'false'); });
+      el.setAttribute('aria-pressed', 'true'); chosen = el.dataset.v;
+    };
+  });
+  document.getElementById('go').onclick = submit;
+}
+
+function answer(t) {
+  if (t.k === 'pick') return { v: chosen };
+  if (t.k === 'deg')  return { v: document.getElementById('iv').value };
+  return { n: document.getElementById('in').value, d: document.getElementById('id').value };
+}
+
+function why(t) {
+  if (t.k === 'frac') return 'Запиши градусы дробью к 180 и сократи. Сверху то, что осталось рядом с π, снизу знаменатель.';
+  if (t.k === 'deg')  return 'Подставь вместо π число 180 и посчитай: сначала раздели 180 на знаменатель, потом умножь на числитель.';
+  return 'Посмотри на окружность ещё раз.';
+}
+
+function submit() {
+  var L = LEVELS[lv], t = L.tasks[ti], fb = document.getElementById('fb'), go = document.getElementById('go');
+  if (checkTask(t, answer(t))) {
+    if (!tried) firstTry[lv]++;
+    fb.innerHTML = '<div class="chk ok"><b>Верно.</b></div>';
+    go.textContent = ti === L.tasks.length - 1 ? 'Итог уровня' : 'Дальше';
+    go.onclick = function () {
+      if (ti === L.tasks.length - 1) { phase = 'done'; if (unlocked < lv + 2) unlocked = lv + 2; }
+      else ti++;
+      render();
+    };
+  } else {
+    tried = true;
+    fb.innerHTML = '<div class="chk no"><b>Пока не сходится.</b><p class="hint">' + why(t) + '</p></div>';
+  }
+}
+
+render();
+</script>
+</body>
+</html>
