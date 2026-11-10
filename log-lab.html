@@ -345,24 +345,30 @@ function order(n, seed) {
 /* LOGIC-END */
 
 var KEY = 'log-lab-v1';
-var st = { unlocked: 1, codes: {}, first: {} };
-try { var saved = JSON.parse(localStorage.getItem(KEY) || 'null'); if (saved && saved.unlocked) st = saved; } catch (e) {}
+// Что сохраняется: пройденные уровни (codes), место внутри недопройденного уровня (pos), последний открытый уровень (last).
+var st = { codes: {}, pos: {}, last: 0 };
+try {
+  var saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+  if (saved && typeof saved === 'object') { st.codes = saved.codes || {}; st.pos = saved.pos || {}; st.last = saved.last || 0; }
+} catch (e) {}
 function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
 
-var lv = Math.min(st.unlocked, LEVELS.length) - 1, ti = 0, si = 0, phase = 'theory', tried = false, chosen = null, firstTry = 0, path = [];
+var lv = st.last, ti = 0, si = 0, phase = 'theory', tried = false, chosen = null, firstTry = 0, path = [];
 var hashLv = parseInt((location.hash || '').slice(1), 10);
-if (hashLv >= 1 && hashLv <= st.unlocked) lv = hashLv - 1;
+if (hashLv >= 1 && hashLv <= LEVELS.length) lv = hashLv - 1;
+if (!(lv >= 0 && lv < LEVELS.length)) lv = 0;
 
 function tabs() {
   var h = '';
   for (var i = 0; i < LEVELS.length; i++) {
     h += '<button class="tab" type="button" role="tab" data-l="' + i + '"' +
-         (i === lv ? ' aria-selected="true"' : '') + (i >= st.unlocked ? ' disabled' : '') + '>' +
-         (i + 1) + '. ' + LEVELS[i].name + (st.codes[i] ? ' <span class="tick">✓</span>' : '') + '</button>';
+         (i === lv ? ' aria-selected="true"' : '') + '>' +
+         (i + 1) + '. ' + LEVELS[i].name + (st.codes[i] ? ' <span class="tick">✓</span>' :
+           (st.pos[i] ? ' <span style="opacity:.7;font-weight:500">' + st.pos[i].ti + '/' + LEVELS[i].tasks.length + '</span>' : '')) + '</button>';
   }
   document.getElementById('tabs').innerHTML = h;
   document.querySelectorAll('#tabs .tab').forEach(function (el) {
-    el.onclick = function () { if (el.disabled) return; lv = +el.dataset.l; ti = 0; phase = 'theory'; render(); };
+    el.onclick = function () { lv = +el.dataset.l; ti = 0; phase = 'theory'; st.last = lv; save(); render(); };
   });
 }
 
@@ -380,8 +386,13 @@ function render() {
     var body = L0.theory.map(function (p) { return /^<(div|p)/.test(p) ? p : '<p>' + p + '</p>'; }).join('');
     s.innerHTML = '<div class="lvl"><span>Уровень ' + (lv + 1) + ' из ' + LEVELS.length + '</span><span>' + L0.tasks.length + ' задач</span></div>' +
       '<div class="theory"><h2>' + L0.title + '</h2>' + body + '</div>' +
-      '<button class="go" id="go">Начать</button>';
-    document.getElementById('go').onclick = function () { phase = 'task'; ti = 0; si = 0; firstTry = 0; path = []; render(); };
+      (st.codes[lv] ? '<div class="chk ok"><b>Уровень уже пройден.</b> Кодовое слово: <b>' + L0.code + '</b></div>' : '') +
+      (st.pos[lv] ? '<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="go" id="cont">Продолжить с задачи ' + (st.pos[lv].ti + 1) + '</button>' +
+         '<button class="go" id="go" style="background:transparent;color:var(--accent);border:1px solid var(--line)">Начать сначала</button></div>'
+       : '<button class="go" id="go">' + (st.codes[lv] ? 'Пройти ещё раз' : 'Начать') + '</button>');
+    document.getElementById('go').onclick = function () { phase = 'task'; ti = 0; si = 0; firstTry = 0; path = []; delete st.pos[lv]; save(); render(); };
+    var cont = document.getElementById('cont');
+    if (cont) cont.onclick = function () { phase = 'task'; ti = st.pos[lv].ti; firstTry = st.pos[lv].first || 0; si = 0; path = []; render(); };
     return;
   }
   if (phase === 'done') {
@@ -391,7 +402,7 @@ function render() {
       '<p style="margin-bottom:0">Кодовое слово для платформы:</p><div class="code">' + L0.code + '</div></div>' +
       '<button class="go" id="go">' + (last ? 'К первому уровню' : 'Следующий уровень') + '</button>';
     document.getElementById('go').onclick = function () {
-      lv = last ? 0 : lv + 1; ti = 0; phase = 'theory'; render();
+      lv = last ? 0 : lv + 1; ti = 0; phase = 'theory'; st.last = lv; save(); render();
     };
     return;
   }
@@ -458,8 +469,8 @@ function submit() {
     go.onclick = function () {
       t._miss = false;
       if (ti === L0.tasks.length - 1) {
-        phase = 'done'; st.codes[lv] = 1; if (st.unlocked < lv + 2) st.unlocked = Math.min(lv + 2, LEVELS.length); save();
-      } else { ti++; si = 0; path = []; }
+        phase = 'done'; st.codes[lv] = 1; delete st.pos[lv]; save();
+      } else { ti++; si = 0; path = []; st.pos[lv] = { ti: ti, first: firstTry }; save(); }
       render();
     };
   } else {
