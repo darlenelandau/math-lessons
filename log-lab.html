@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тренажёр свойств логарифмов</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f7f9fb; --paper: #fff; --grid: #e6edf3; --ink: #17232d; --muted: #5d6d79; --line: #d5dee6; --faint: #c3ced7;
+  --accent: #1f6f8b; --accent-soft: #e3f0f5;
+  --ok: #2f7d4f; --ok-soft: #e4f3ea; --no: #b5452f; --no-soft: #fbe9e4;
+}
+* { box-sizing: border-box; }
+body { margin: 0; padding: 24px 16px 60px; color: var(--ink); background: var(--bg);
+  font: 16px/1.55 "Golos Text", system-ui, -apple-system, "Segoe UI", sans-serif; }
+.wrap { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+h1 { margin: 0; font-size: clamp(1.5rem, 4vw, 2.1rem); line-height: 1.2; }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.tab { font: 600 .92rem "Golos Text", sans-serif; padding: 7px 12px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--paper); color: var(--ink); cursor: pointer; }
+.tab:hover, .tab:focus-visible { border-color: var(--accent); outline: none; }
+.tab[aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.tab[disabled] { opacity: .45; cursor: default; }
+.tab .tick { color: #7fd6a8; }
+.sheet { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: clamp(16px, 3vw, 26px);
+  display: flex; flex-direction: column; gap: 14px; }
+.lvl { font-size: .88rem; color: var(--muted); display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.bar { height: 7px; background: var(--grid); border-radius: 6px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--accent); width: 0; transition: width .25s; }
+.theory { border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: 0 10px 10px 0; padding: 14px 18px; }
+.theory h2 { margin: 0 0 6px; font-size: 1.05rem; }
+.theory p { margin: 8px 0; }
+.box { background: var(--paper); border: 1px solid var(--line); border-radius: 9px; padding: 10px 14px; margin: 10px 0;
+  text-align: center; font-size: 1.15rem; }
+.trap { border-left: 3px solid var(--no); background: var(--no-soft); border-radius: 0 8px 8px 0; padding: 8px 12px; margin: 10px 0; }
+.fx, .q .fx, .opt .fx, .chain .fx { font-family: "Times New Roman", Times, serif; }
+.fx { font-size: 1.12em; white-space: nowrap; }
+.q { font-size: 1.12rem; }
+.q .big { display: block; text-align: center; font-size: 1.5rem; margin: 8px 0 2px; }
+.fr { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; font-size: .9em; line-height: 1.15; margin: 0 2px; }
+.fr > span:first-child { border-bottom: 1.2px solid currentColor; padding: 0 3px 1px; }
+.fr > span:last-child { padding: 1px 3px 0; }
+sub { font-size: .68em; vertical-align: -.35em; line-height: 0; }
+sup { font-size: .68em; vertical-align: .6em; line-height: 0; }
+sup sub { vertical-align: -.25em; }
+.opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 560px) { .opts { grid-template-columns: minmax(0, 1fr); } }
+.opt { padding: 12px 14px; border: 1px solid var(--line); border-radius: 9px; background: var(--paper); color: var(--ink);
+  cursor: pointer; font: 500 1.02rem "Golos Text", sans-serif; text-align: center; }
+.opt .fx { font-size: 1.22em; }
+.opt:hover { border-color: var(--accent); }
+.opt[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.opt.wrong { border-color: var(--no); background: var(--no-soft); color: var(--ink); }
+.opts.names .opt { font-size: .98rem; }
+.one { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.one input { width: 150px; font: 600 1.15rem "Golos Text", sans-serif; padding: 9px 12px;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--paper); color: var(--ink); }
+.chain { display: flex; flex-direction: column; gap: 4px; font-size: 1.25rem; padding: 6px 4px; }
+.chain .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.chain .eqs { color: var(--muted); width: 1em; text-align: center; }
+.chain .now { color: var(--accent); }
+.go { align-self: flex-start; font: 600 1rem "Golos Text", sans-serif; padding: 11px 22px; border: 0; border-radius: 9px;
+  background: var(--accent); color: #fff; cursor: pointer; }
+.go[disabled] { background: var(--faint); cursor: default; }
+.chk { border-radius: 8px; padding: 11px 15px; }
+.chk.ok { background: var(--ok-soft); border-left: 3px solid var(--ok); }
+.chk.no { background: var(--no-soft); border-left: 3px solid var(--no); }
+.chk .hint { color: var(--muted); font-size: .95rem; margin: 5px 0 0; }
+.chk.ok .hint { color: var(--ink); }
+.done { text-align: center; padding: 10px 0; }
+.done .big { font-size: 2.6rem; font-weight: 700; color: var(--accent); }
+.code { display: inline-block; margin-top: 8px; padding: 8px 18px; border: 2px dashed var(--accent); border-radius: 10px;
+  font: 700 1.3rem "Golos Text", sans-serif; letter-spacing: .5px; color: var(--accent); }
+/* ===== Оформление: тёмно-зелёная доска на фоне, светлый лист для работы (холодный контрастный тон) =====
+   Фон доски: chalk-log.svg рядом со страницей (собирается claudespace/стили/формулы_мелом_генератор.py, тема log). */
+:root { --bg: #122826; --ink: #f6f9f8; --muted: #b9c9c6; --line: #46635f; --paper: #183330; }
+html { background: #0f2422; }
+html body { min-height: 100vh; background-color: #122826;
+  background-image: radial-gradient(ellipse at 50% 40%, transparent 35%, rgba(0,0,0,.45) 100%), url("chalk-log.svg");
+  background-size: 100% 100%, 1200px 820px; background-repeat: no-repeat, repeat; background-attachment: fixed; }
+html .tab { background: transparent; color: var(--ink); border-color: var(--line); }
+html .tab:hover, html .tab:focus-visible { border-color: var(--ink); }
+html .tab[aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: #122826; }
+html .sheet {
+  --bg: #f1f3f1; --paper: #f8f9f7; --grid: #e1e6e4; --ink: #141c1a; --muted: #545e5b; --line: #d6dcd9; --faint: #bfc7c4;
+  --accent: #134a40; --accent-soft: #dcebe6;
+  --ok: #1d7650; --ok-soft: #dcefe5; --no: #b13a22; --no-soft: #f8dfd7;
+  color: var(--ink); background: var(--paper); border: 0; border-radius: 18px;
+  box-shadow: 0 2px 0 rgba(255,255,255,.6) inset, 0 26px 64px rgba(0,0,0,.5), 0 4px 14px rgba(0,0,0,.3);
+}
+html .sheet input, html .sheet .box { background: #fff; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header style="display:flex;flex-direction:column;gap:10px">
+    <h1>Тренажёр свойств логарифмов</h1>
+    <div class="tabs" role="tablist" id="tabs"></div>
+  </header>
+  <div class="sheet" id="sheet"></div>
+</div>
+
+<script>
+/* LOGIC-START */
+// Запись формул: L(основание, число) это логарифм, F(a, b) дробь, P(a, b) степень.
+function L(b, x) { return 'log<sub>' + b + '</sub>&#8201;' + x; }
+function LG(x) { return 'lg&#8201;' + x; }
+function F(a, b) { return '<span class="fr"><span>' + a + '</span><span>' + b + '</span></span>'; }
+function P(a, b) { return a + '<sup>' + b + '</sup>'; }
+function M(s) { return '<span class="fx">' + s + '</span>'; }
+var SQ3 = '<span style="white-space:nowrap">√3</span>';
+
+// Варианты ответа в «Различаем»: всегда одни и те же и в одном порядке.
+var NAMES = ['логарифм произведения', 'логарифм частного', 'степень в числе под логарифмом',
+             'степень в основании', 'переход к другому основанию', 'так нельзя, это ошибка'];
+
+// Типы задач:
+//  pick: выбрать верный вариант (a верный, w неверные, e пояснения к неверным по их порядку в w)
+//  num: ввести число
+//  tf: верно ли равенство (a: true/false)
+//  name: какое свойство применено (a: индекс в NAMES)
+//  chain: решение по шагам, каждый шаг как pick
+var LEVELS = [
+  {
+    name: 'Вспомним', title: 'Определение и основное тождество', code: 'основание',
+    theory: [
+      '<b>Логарифм это показатель степени.</b> ' + M(L('a', 'b')) + ' отвечает на вопрос: в какую степень нужно возвести ' + M('a') + ', чтобы получить ' + M('b') + '?',
+      '<div class="box">' + M(L('a', 'b') + ' = c &nbsp;⇔&nbsp; ' + P('a', 'c') + ' = b') + '</div>',
+      'Отсюда сразу: ' + M(L('a', 'a') + ' = 1') + ', потому что ' + M(P('a', '1') + ' = a') + '; ' + M(L('a', '1') + ' = 0') + ', потому что ' + M(P('a', '0') + ' = 1') + '.',
+      '<b>Основное тождество.</b> Если возвести ' + M('a') + ' ровно в ту степень, которая даёт ' + M('b') + ', получится ' + M('b') + ':',
+      '<div class="box">' + M(P('a', L('a', 'b')) + ' = b') + '</div>',
+      'Условия: основание ' + M('a > 0') + ', ' + M('a ≠ 1') + ', число под логарифмом ' + M('b > 0') + '. ' + M('lg') + ' это логарифм по основанию 10.'
+    ],
+    tasks: [
+      { k: 'num', q: 'Вычислите ' + M(L(3, 81)), a: 4, h: 'Три в какой степени дают 81? 3, 9, 27, 81.' },
+      { k: 'num', q: 'Вычислите ' + M(L(2, F(1, 8))), a: -3, h: 'Дробь с единицей в числителе это отрицательная степень: ' + M(F(1, 8) + ' = ' + P(2, '−3')) + '.' },
+      { k: 'num', q: 'Вычислите ' + M(L(F(1, 2), 4)), a: -2, h: M(F(1, 2) + ' = ' + P(2, '−1')) + ', а ' + M('4 = ' + P(2, 2)) + '. Какая степень числа ' + M(F(1, 2)) + ' даёт 4?' },
+      { k: 'pick', q: 'Чему равно ' + M(P(7, L(7, 3))) + '?', a: M('3'), w: [M('7'), M(L(7, 3)), M('21')],
+        e: ['Основания совпадают: семь в степени «логарифм тройки по основанию семь» это просто 3.', 'Это показатель, а спрашивают значение всей степени.', 'Здесь нет умножения: тождество даёт число под логарифмом.'] },
+      { k: 'tf', q: 'Верно ли, что ' + M(L(5, 1) + ' = 1') + '?', a: false, h: M(P(5, 0) + ' = 1') + ', значит ' + M(L(5, 1) + ' = 0') + '. Единице равен ' + M(L(5, 5)) + '.' },
+      { k: 'num', q: 'Вычислите ' + M(P(10, LG(7))), a: 7, h: M('lg') + ' это логарифм по основанию 10, основания совпадают.' },
+      { k: 'num', q: 'Вычислите ' + M(P(2, L(2, 9)) + ' − 4'), a: 5, h: 'Сначала тождество: ' + M(P(2, L(2, 9)) + ' = 9') + '.' }
+    ]
+  },
+  {
+    name: 'Сумма и разность', title: 'Логарифм произведения и частного', code: 'аргумент',
+    theory: [
+      'При умножении степеней показатели складываются. Логарифм это показатель, поэтому:',
+      '<div class="box">' + M(L('a', 'b') + ' + ' + L('a', 'c') + ' = ' + L('a', '(bc)')) + '<br>' + M(L('a', 'b') + ' − ' + L('a', 'c') + ' = ' + L('a', F('b', 'c'))) + '</div>',
+      '<b>Сумма логарифмов это логарифм произведения, разность это логарифм частного.</b> Работает только при <b>одинаковых основаниях</b>.',
+      'Формулу читают и справа налево: ' + M(L(2, 12) + ' = ' + L(2, '(4·3)') + ' = 2 + ' + L(2, 3)) + '.',
+      '<div class="trap">Формулы для ' + M(L('a', '(b + c)')) + ' нет. Логарифм суммы <b>не</b> равен сумме логарифмов.</div>'
+    ],
+    tasks: [
+      { k: 'pick', q: 'Чему равно ' + M(L(3, 6) + ' + ' + L(3, 2)) + '?', a: M(L(3, 12)), w: [M(L(3, 8)), M(L(9, 12)), M(L(6, 12))],
+        e: ['Числа под логарифмами не складывают, а перемножают: сумма логарифмов это логарифм произведения.', 'Основание не меняется, оно у обоих логарифмов одно и то же.', 'Основание не меняется, оно у обоих логарифмов одно и то же.'] },
+      { k: 'pick', q: 'Чему равно ' + M(L(2, 20) + ' − ' + L(2, 5)) + '?', a: M(L(2, 4)), w: [M(L(2, 15)), M(F(L(2, 20), L(2, 5))), M(L(2, 100))],
+        e: ['Разность логарифмов это логарифм частного, числа под логарифмами делят, а не вычитают.', 'Дробь из логарифмов это совсем другая формула. Разность логарифмов это логарифм дроби, а не дробь логарифмов.', 'Это произведение. Для суммы было бы так, а у нас разность.'] },
+      { k: 'tf', q: 'Верно ли, что ' + M(L(2, '(8 + 8)') + ' = ' + L(2, 8) + ' + ' + L(2, 8)) + '?', a: false,
+        h: 'Посчитайте обе части: ' + M(L(2, 16) + ' = 4') + ', а ' + M('3 + 3 = 6') + '. Формулы для логарифма суммы нет.' },
+      { k: 'tf', q: 'Верно ли, что ' + M(LG(2) + ' + ' + LG(5) + ' = 1') + '?', a: true, h: M(LG(2) + ' + ' + LG(5) + ' = ' + LG(10) + ' = 1') + '.' },
+      { k: 'num', q: 'Вычислите ' + M(L(6, 3) + ' + ' + L(6, 12)), a: 2, h: 'Перемножьте числа под логарифмами: ' + M('3 · 12 = 36') + '.' },
+      { k: 'num', q: 'Вычислите ' + M(L(2, 56) + ' − ' + L(2, 7)), a: 3, h: 'Разделите: ' + M('56 : 7 = 8') + '.' },
+      { k: 'num', q: 'Вычислите ' + M(LG('0,4') + ' + ' + LG(250)), a: 2, h: M('0,4 · 250 = 100') + ', а ' + M(LG(100)) + ' это показатель, в который возводят 10.' },
+      { k: 'pick', q: 'Какое равенство верно?', a: M(L(5, 50) + ' = 2 + ' + L(5, 2)), w: [M(L(5, 50) + ' = 25 + ' + L(5, 2)), M(L(5, 50) + ' = 2 · ' + L(5, 2)), M(L(5, 50) + ' = ' + L(5, 25) + ' · ' + L(5, 2))],
+        e: [M('50 = 25 · 2') + ', это так, но от 25 тоже надо взять логарифм: ' + M(L(5, 25) + ' = 2') + '.', 'Произведение под логарифмом превращается в сумму, а не в произведение.', 'Произведение под логарифмом превращается в сумму логарифмов, а не в их произведение.'] }
+    ]
+  },
+  {
+    name: 'Степени', title: 'Степень в числе и в основании', code: 'показатель',
+    theory: [
+      'Показатель степени из числа под логарифмом выносится вперёд множителем:',
+      '<div class="box">' + M(L('a', P('b', 'k')) + ' = k · ' + L('a', 'b')) + '</div>',
+      'И обратно, множитель перед логарифмом можно внести в показатель: ' + M('3 · ' + L(2, 5) + ' = ' + L(2, P(5, 3)) + ' = ' + L(2, 125)) + '. Так делают перед тем, как складывать и вычитать.',
+      'Показатель из <b>основания</b> выносится тоже, но <b>перевёрнутым</b>:',
+      '<div class="box">' + M(L(P('a', 'k'), 'b') + ' = ' + F(1, 'k') + ' · ' + L('a', 'b')) + '</div>',
+      'Вместе: ' + M(L(P(5, 2), P(5, 3)) + ' = ' + F(3, 2)) + ', то есть ' + M(L(25, 125) + ' = 1,5') + '.',
+      '<div class="trap">' + M(L('a', P('b', 'k'))) + ' и ' + M(P('(' + L('a', 'b') + ')', 'k')) + ' это разные вещи. Во втором случае в степень возводится весь логарифм, и выносить показатель нельзя.</div>'
+    ],
+    tasks: [
+      { k: 'pick', q: 'Чему равно ' + M(L(3, P('x', 4))) + ' при ' + M('x > 0') + '?', a: M('4 · ' + L(3, 'x')), w: [M(P('(' + L(3, 'x') + ')', 4)), M(L(3, '4x')), M(L(12, 'x'))],
+        e: ['В степень возводится только ' + M('x') + ', а не весь логарифм.', M(P('x', 4)) + ' это ' + M('x · x · x · x') + ', а не ' + M('4x') + '.', 'Основание не трогаем: показатель выносится вперёд множителем.'] },
+      { k: 'pick', q: 'Чему равно ' + M('3 · ' + L(2, 5)) + '?', a: M(L(2, 125)), w: [M(L(2, 15)), M(L(6, 5)), M(L(8, 5))],
+        e: ['Множитель вносится показателем степени: ' + M(P(5, 3)) + ', а не ' + M('5 · 3') + '.', 'Основание не трогаем, множитель уходит в показатель числа.', 'Если внести тройку в основание, получится ' + M(L(8, 5) + ' = ' + F(1, 3) + ' · ' + L(2, 5)) + ', а не утроенный логарифм.'] },
+      { k: 'num', q: 'Вычислите ' + M(L(25, 125)), a: 1.5, h: M('25 = ' + P(5, 2)) + ', ' + M('125 = ' + P(5, 3)) + '. Показатель числа делим на показатель основания.' },
+      { k: 'num', q: 'Вычислите ' + M(L('√3', 27)), a: 6, h: M('√3 = ' + P(3, F(1, 2))) + ', ' + M('27 = ' + P(3, 3)) + '. Получается ' + M('3 : ' + F(1, 2)) + '.' },
+      { k: 'num', q: 'Вычислите ' + M('2 · ' + L(6, 3) + ' + ' + L(6, 4)), a: 2, h: 'Сначала внесите двойку: ' + M('2 · ' + L(6, 3) + ' = ' + L(6, 9)) + ', потом сумма.' },
+      { k: 'tf', q: 'Верно ли, что ' + M(P('(' + L(2, 8) + ')', 2) + ' = 2 · ' + L(2, 8)) + '?', a: false,
+        h: M(L(2, 8) + ' = 3') + ', слева ' + M(P(3, 2) + ' = 9') + ', справа ' + M('2 · 3 = 6') + '. Выносить можно только показатель числа под логарифмом.' },
+      { k: 'num', q: 'Вычислите ' + M(L('0,5', 16)), a: -4, h: M('0,5 = ' + P(2, '−1')) + ', ' + M('16 = ' + P(2, 4)) + '.' },
+      { k: 'pick', q: 'Чему равно ' + M(L(9, 5)) + '?', a: M(F(1, 2) + ' · ' + L(3, 5)), w: [M('2 · ' + L(3, 5)), M(L(3, F(5, 9))), M(L(3, '2,5')),],
+        e: ['Показатель из основания выносится перевёрнутым: ' + M(F(1, 2)) + ', а не 2.', 'Основание нельзя переносить под логарифм.', 'Основание не делит число под логарифмом.'] }
+    ]
+  },
+  {
+    name: 'Переход', title: 'Переход к другому основанию', code: 'переход',
+    theory: [
+      'Любой логарифм можно записать через логарифмы с другим, удобным основанием ' + M('c') + ':',
+      '<div class="box">' + M(L('a', 'b') + ' = ' + F(L('c', 'b'), L('c', 'a'))) + '</div>',
+      'Сверху число, снизу основание. Из этой формулы два следствия, они встречаются чаще самой формулы:',
+      '<div class="box">' + M(L('a', 'b') + ' · ' + L('b', 'a') + ' = 1') + ' &nbsp;&nbsp; ' + M(L('a', 'b') + ' · ' + L('b', 'c') + ' = ' + L('a', 'c')) + '</div>',
+      'Второе похоже на цепочку: ' + M('a → b → c') + ', средние ' + M('b') + ' «сокращаются».',
+      '<div class="trap">Дробь из двух логарифмов это не логарифм дроби и не разность: ' + M(F(L(5, 7), L(5, 2)) + ' ≠ ' + L(5, F(7, 2))) + '.</div>'
+    ],
+    tasks: [
+      { k: 'pick', q: 'Чему равно ' + M(F(L(5, 7), L(5, 2))) + '?', a: M(L(2, 7)), w: [M(L(5, '3,5')), M(L(5, 7) + ' − ' + L(5, 2)), M(L(7, 2))],
+        e: ['Это была бы разность логарифмов. Здесь дробь, это формула перехода.', 'Дробь логарифмов не превращается в разность.', 'Число сверху становится числом под логарифмом, число снизу основанием, не наоборот.'] },
+      { k: 'num', q: 'Вычислите ' + M(F(L(7, 81), L(7, 3))), a: 4, h: 'По формуле перехода это ' + M(L(3, 81)) + '.' },
+      { k: 'num', q: 'Вычислите ' + M(L(3, 5) + ' · ' + L(5, 27)), a: 3, h: 'Цепочка ' + M('3 → 5 → 27') + ': пятёрки сокращаются, остаётся ' + M(L(3, 27)) + '.' },
+      { k: 'num', q: 'Вычислите ' + M(L(2, 7) + ' · ' + L(7, 16)), a: 4, h: 'Цепочка ' + M('2 → 7 → 16') + ', остаётся ' + M(L(2, 16)) + '.' },
+      { k: 'pick', q: 'Чему равно ' + M(F(1, L(3, 2))) + '?', a: M(L(2, 3)), w: [M(L(3, F(1, 2))), M('−' + L(3, 2)), M(L(3, 2))],
+        e: [M(L(3, F(1, 2))) + ' это ' + M('−' + L(3, 2)) + ', минус, а не единица делить.', 'Минус дала бы дробь под логарифмом, а здесь единица делится на логарифм.', 'Единица делить на число не равна этому числу.'] },
+      { k: 'tf', q: 'Верно ли, что ' + M(F(L(4, 7), L(4, 2)) + ' = ' + L(4, '3,5')) + '?', a: false, h: 'Дробь логарифмов по формуле перехода равна ' + M(L(2, 7)) + ', а не логарифму частного.' },
+      { k: 'num', q: 'Вычислите ' + M(L(2, 9) + ' · ' + L(3, 4)), a: 4, h: 'Вынесите показатели: ' + M(L(2, 9) + ' = 2 · ' + L(2, 3)) + ', ' + M(L(3, 4) + ' = 2 · ' + L(3, 2)) + '. Дальше ' + M(L(2, 3) + ' · ' + L(3, 2) + ' = 1') + '.' },
+      { k: 'num', q: 'Вычислите ' + M(F(L(5, 64), L(5, 4))), a: 3, h: 'Это ' + M(L(4, 64)) + '.' }
+    ]
+  },
+  {
+    name: 'Различаем', title: 'Какое свойство работает', code: 'свойство',
+    theory: [
+      'Теперь все свойства вместе. В каждой задаче дано равенство: надо понять, <b>каким свойством</b> его получили, или заметить, что так делать нельзя.',
+      '<div class="box" style="text-align:left;font-size:1rem;line-height:2">' +
+        '<b>логарифм произведения</b>: ' + M(L('a', 'b') + ' + ' + L('a', 'c') + ' = ' + L('a', '(bc)')) + '<br>' +
+        '<b>логарифм частного</b>: ' + M(L('a', 'b') + ' − ' + L('a', 'c') + ' = ' + L('a', F('b', 'c'))) + '<br>' +
+        '<b>степень в числе</b>: ' + M(L('a', P('b', 'k')) + ' = k · ' + L('a', 'b')) + '<br>' +
+        '<b>степень в основании</b>: ' + M(L(P('a', 'k'), 'b') + ' = ' + F(1, 'k') + ' · ' + L('a', 'b')) + '<br>' +
+        '<b>переход</b>: ' + M(L('a', 'b') + ' = ' + F(L('c', 'b'), L('c', 'a'))) + ', ' + M(L('a', 'b') + ' · ' + L('b', 'a') + ' = 1') + '</div>',
+      'Подсказка: смотрите, что изменилось. Знак между логарифмами превратился в действие под логарифмом? Множитель ушёл в показатель? Сменилось основание?'
+    ],
+    tasks: [
+      { k: 'name', q: M(L(2, 3) + ' + ' + L(2, 5) + ' = ' + L(2, 15)), a: 0 },
+      { k: 'name', q: M(L(3, 20) + ' − ' + L(3, 4) + ' = ' + L(3, 5)), a: 1 },
+      { k: 'name', q: M(L(7, P(2, 5)) + ' = 5 · ' + L(7, 2)), a: 2 },
+      { k: 'name', q: M(L(2, '(3 + 5)') + ' = ' + L(2, 3) + ' + ' + L(2, 5)), a: 5, h: 'Логарифм суммы не раскладывается. Посчитайте: слева ' + M(L(2, 8) + ' = 3') + ', справа ' + M(L(2, 15)) + ', а это больше трёх.' },
+      { k: 'name', q: M(L(16, 3) + ' = ' + F(1, 4) + ' · ' + L(2, 3)), a: 3 },
+      { k: 'name', q: M(L(6, 9) + ' · ' + L(9, 6) + ' = 1'), a: 4 },
+      { k: 'name', q: M('2 · ' + L(5, 3) + ' = ' + L(5, 9)), a: 2, h: 'Двойку внесли в показатель числа: ' + M('9 = ' + P(3, 2)) + '. Это то же свойство, прочитанное справа налево.' },
+      { k: 'name', q: M(P('(' + L(3, 7) + ')', 2) + ' = 2 · ' + L(3, 7)), a: 5, h: 'В квадрат возведён весь логарифм, а не число под ним. Выносить показатель нельзя.' },
+      { k: 'name', q: M(L(4, 12) + ' = 1 + ' + L(4, 3)), a: 0, h: M('12 = 4 · 3') + ', логарифм произведения распался на сумму, а ' + M(L(4, 4) + ' = 1') + '.' },
+      { k: 'name', q: M(F(L(2, 7), L(2, 3)) + ' = ' + L(3, 7)), a: 4 },
+      { k: 'name', q: M(F(L(2, 12), L(2, 3)) + ' = ' + L(2, 4)), a: 5, h: 'Дробь логарифмов это переход к основанию 3: ' + M(L(3, 12)) + '. А ' + M(L(2, 4)) + ' получился бы из разности, не из дроби.' }
+    ]
+  },
+  {
+    name: 'Тождество+', title: 'Основное тождество посложнее', code: 'тождество',
+    theory: [
+      M(P('a', L('a', 'b')) + ' = b') + ' работает, только когда <b>основание степени и основание логарифма совпадают</b>, а в показателе стоит <b>только</b> логарифм. Если это не так, сначала доводим до такого вида:',
+      '<b>Множитель перед логарифмом</b> вносим в число: ' + M(P(3, '2&#8201;' + L(3, 5)) + ' = ' + P(3, L(3, 25)) + ' = 25') + '.',
+      '<b>Сумма в показателе</b> это произведение степеней: ' + M(P(2, '1 + ' + L(2, 7)) + ' = ' + P(2, 1) + ' · ' + P(2, L(2, 7)) + ' = 14') + '.',
+      '<b>Основание степени это степень основания логарифма</b>: ' + M(P(16, L(4, 3)) + ' = ' + P('(' + P(4, 2) + ')', L(4, 3)) + ' = ' + P('(' + P(4, L(4, 3)) + ')', 2) + ' = 9') + '.',
+      '<b>Основание логарифма это степень основания</b>: ' + M(L(49, 16) + ' = ' + F(1, 2) + ' · ' + L(7, 16) + ' = ' + L(7, 4)) + ', поэтому ' + M(P(7, L(49, 16)) + ' = 4') + '.'
+    ],
+    tasks: [
+      { k: 'num', q: 'Вычислите ' + M(P(3, '2&#8201;' + L(3, 5))), a: 25, h: 'Внесите двойку: ' + M('2&#8201;' + L(3, 5) + ' = ' + L(3, 25)) + '.' },
+      { k: 'num', q: 'Вычислите ' + M(P(2, L(2, 7) + ' + 1')), a: 14, h: M(P(2, L(2, 7) + ' + 1') + ' = ' + P(2, L(2, 7)) + ' · ' + P(2, 1)) + '.' },
+      { k: 'num', q: 'Вычислите ' + M(P(27, L(3, 2))), a: 8, h: M('27 = ' + P(3, 3)) + ', значит это ' + M(P('(' + P(3, L(3, 2)) + ')', 3)) + '.' },
+      { k: 'pick', q: 'Чему равно ' + M(P(3, L(9, 16))) + '?', a: M('4'), w: [M('16'), M('8'), M('2')],
+        e: ['Основания разные: 3 и 9. Сначала ' + M(L(9, 16) + ' = ' + F(1, 2) + ' · ' + L(3, 16) + ' = ' + L(3, 4)) + '.', 'Половина от 16 здесь ни при чём: показатель ' + M(F(1, 2)) + ' это корень, а не деление.', 'Проверьте: ' + M(L(9, 16) + ' = ' + L(3, 4)) + ', а не ' + M(L(3, 2)) + '.'] },
+      { k: 'num', q: 'Вычислите ' + M(P(10, '1 − ' + LG(5))), a: 2, h: 'Разность в показателе это частное степеней: ' + M(P(10, 1) + ' : ' + P(10, LG(5))) + '.' },
+      { k: 'num', q: 'Вычислите ' + M(P('(' + F(1, 2) + ')', L(2, 5))), a: 0.2, h: M(F(1, 2) + ' = ' + P(2, '−1')) + ', получится ' + M(P(5, '−1')) + '. Ответ десятичной дробью.' },
+      { k: 'num', q: 'Вычислите ' + M(P(9, '0,5&#8201;' + L(3, 16))), a: 16, h: M(P(9, '0,5')) + ' это 3, поэтому всё выражение равно ' + M(P(3, L(3, 16))) + '.' },
+      { k: 'num', q: 'Вычислите ' + M(P(4, L(2, 3) + ' − 1')), a: 2.25, h: M(P(4, L(2, 3)) + ' = 9') + ', а минус единица в показателе это деление на 4.' }
+    ]
+  },
+  {
+    name: 'По шагам', title: 'Длинные выражения по шагам', code: 'цепочка',
+    theory: [
+      'В заданиях ЕГЭ свойства идут цепочкой, по два-три в одном выражении. Здесь каждое выражение нужно упростить по шагам: на каждом шаге выберите верное преобразование.',
+      'Общий порядок обычно такой: <b>вынести или внести показатели</b>, чтобы основания и числа стали удобными, потом <b>собрать сумму или разность</b> в один логарифм, потом <b>посчитать</b>.'
+    ],
+    tasks: [
+      { k: 'chain', q: M(L(2, 48) + ' − ' + L(2, 3)), steps: [
+        { a: M(L(2, 16)), w: [M(L(2, 45)), M(L(2, 48) + ' : ' + L(2, 3)), M(L(2, 144))], e: ['Разность логарифмов это частное чисел, а не разность.', 'Это уже переход к основанию 3, а здесь разность, а не дробь.', 'Это было бы для суммы.'] },
+        { a: M('4'), w: [M('8'), M('16'), M('2')], e: ['8 это ' + P(2, 3) + '.', '16 это число, а логарифм это показатель степени.', P(2, 2) + ' = 4, а не 16.'] } ] },
+      { k: 'chain', q: M('2&#8201;' + L(5, 10) + ' − ' + L(5, 4)), steps: [
+        { a: M(L(5, 100) + ' − ' + L(5, 4)), w: [M(L(5, 20) + ' − ' + L(5, 4)), M(L(25, 10) + ' − ' + L(5, 4)), M('2&#8201;' + L(5, 6))], e: ['Двойка уходит в показатель: ' + P(10, 2) + ', а не 10 · 2.', 'Множитель перед логарифмом не уходит в основание.', 'Вычитать числа под логарифмами нельзя, да и двойка ещё не внесена.'] },
+        { a: M(L(5, 25)), w: [M(L(5, 96)), M(L(5, 400)), M(F(L(5, 100), L(5, 4)))], e: ['Разность логарифмов это частное.', 'Это произведение, а у нас разность.', 'Дробь логарифмов это переход, а здесь разность.'] },
+        { a: M('2'), w: [M('5'), M('25'), M('0,5')], e: [P(5, 5) + ' это не 25.', '25 стоит под логарифмом, а ответ это показатель.', P(5, '0,5') + ' это √5.'] } ] },
+      { k: 'chain', q: M(L(3, 8) + ' · ' + L(2, 27)), steps: [
+        { a: M('3&#8201;' + L(3, 2) + ' · 3&#8201;' + L(2, 3)), w: [M(L(6, 216)), M(L(3, 216)), M(L(3, 8) + ' + ' + L(2, 27))], e: ['Произведение логарифмов не собирается в один логарифм таким способом.', 'Логарифмы с разными основаниями не перемножаются как числа под логарифмом.', 'Произведение не превращается в сумму.'] },
+        { a: M('9 · ' + L(3, 2) + ' · ' + L(2, 3)), w: [M('6 · ' + L(3, 2) + ' · ' + L(2, 3)), M('9 · ' + L(6, 6)), M(L(3, 2) + ' · ' + L(2, 3))], e: ['Множители перемножаются: 3 · 3 = 9.', 'Логарифмы с разными основаниями не складываются в один.', 'Куда делись тройки? Их надо перемножить, а не убрать.'] },
+        { a: M('9'), w: [M('6'), M('81'), M('1')], e: ['3 · 3 = 9.', 'Тройки перемножаются, а не возводятся в степень.', M(L(3, 2) + ' · ' + L(2, 3)) + ' действительно 1, но остаётся множитель 9.'] } ] },
+      { k: 'chain', q: M(P(5, '2 + ' + L(5, 3))), steps: [
+        { a: M(P(5, 2) + ' · ' + P(5, L(5, 3))), w: [M(P(5, 2) + ' + ' + P(5, L(5, 3))), M(P(5, '2&#8201;' + L(5, 3))), M('2 + 3')], e: ['Сумма в показателе это произведение степеней, а не сумма.', 'Сумма в показателе превратилась в произведение, так нельзя.', 'Двойка в показателе это не двойка в ответе.'] },
+        { a: M('75'), w: [M('28'), M('15'), M('9')], e: ['Степени перемножаются: 25 · 3.', P(5, 2) + ' это 25, а не 5.', 'Это ' + P(3, 2) + ', а нужно ' + P(5, 2) + ' · 3.'] } ] },
+      { k: 'chain', q: M(L('a', '(' + P('a', 2) + P('b', 5) + ')')) + ', если ' + M(L('a', 'b') + ' = 0,4'), steps: [
+        { a: M(L('a', P('a', 2)) + ' + ' + L('a', P('b', 5))), w: [M(L('a', P('a', 2)) + ' · ' + L('a', P('b', 5))), M('10 · ' + L('a', '(ab)')), M(L('a', P('a', 2)) + ' − ' + L('a', P('b', 5)))], e: ['Логарифм произведения это сумма логарифмов.', 'Показатели не перемножаются друг с другом.', 'Под логарифмом произведение, а не частное.'] },
+        { a: M('2 + 5&#8201;' + L('a', 'b')), w: [M('2 · 5&#8201;' + L('a', 'b')), M('2&#8201;' + L('a', 'b') + ' + 5'), M('7&#8201;' + L('a', 'b'))], e: ['Сумма остаётся суммой.', M(L('a', P('a', 2)) + ' = 2') + ', а не ' + M('2&#8201;' + L('a', 'b')) + '.', 'Показатели при разных числах под логарифмом не складываются.'] },
+        { a: M('4'), w: [M('2,4'), M('7'), M('2,8')], e: ['5 · 0,4 = 2, а не 0,4.', 'Подставьте ' + M(L('a', 'b') + ' = 0,4') + '.', 'Сначала умножение, 5 · 0,4 = 2, потом 2 + 2.'] } ] },
+      { k: 'chain', q: M('(1 − ' + L(3, 18) + ')(1 − ' + L(6, 18) + ')'), steps: [
+        { a: M('1 − ' + L(3, 18) + ' = ' + L(3, F(3, 18)) + ' = −' + L(3, 6)), w: [M('1 − ' + L(3, 18) + ' = ' + L(3, 17)), M('1 − ' + L(3, 18) + ' = ' + L(2, 18)), M('1 − ' + L(3, 18) + ' = −' + L(3, 18))], e: ['Единица это не единица под логарифмом: ' + M('1 = ' + L(3, 3)) + '.', 'Вычитать из основания нельзя.', 'Куда делась единица?'] },
+        { a: M('1 − ' + L(6, 18) + ' = −' + L(6, 3)), w: [M('1 − ' + L(6, 18) + ' = ' + L(6, 17)), M('1 − ' + L(6, 18) + ' = ' + L(6, 3)), M('1 − ' + L(6, 18) + ' = −' + L(6, 6))], e: ['Единица здесь это ' + M(L(6, 6)) + '.', M(L(6, F(6, 18)) + ' = ' + L(6, F(1, 3))) + ', это отрицательное число.', M(F(18, 6) + ' = 3') + ', а не 6.'] },
+        { a: M('1'), w: [M('−1'), M('0'), M(L(3, 6) + ' + ' + L(6, 3))], e: ['Минус на минус даёт плюс.', 'Произведение логарифмов не обнуляется.', 'Здесь произведение, а ' + M(L(3, 6) + ' · ' + L(6, 3) + ' = 1') + '.'] } ] }
+    ]
+  },
+  {
+    name: 'Как на ЕГЭ', title: 'Задачи как в задании 8', code: 'экзамен',
+    theory: [
+      'Последний уровень: задачи в том виде, в каком они бывают на экзамене. Подсказок по шагам нет, есть только ответ.',
+      'Перед каждой задачей полезно спросить себя: <b>какие основания</b> тут можно сделать одинаковыми, <b>что стоит в показателе</b>, есть ли <b>дробь из логарифмов</b>. Решение пишите в тетради.'
+    ],
+    tasks: [
+      { k: 'num', q: 'Найдите значение выражения ' + M(F(L(2, 24), '3 + ' + L(2, 3))), a: 1, h: M('3 = ' + L(2, 8)) + ', значит знаменатель это ' + M(L(2, 24)) + '.' },
+      { k: 'num', q: 'Найдите значение выражения ' + M(L('0,2', 125) + ' + ' + L(4, 32)), a: -0.5, h: 'По отдельности: ' + M(L('0,2', 125) + ' = −3') + ', ' + M(L(4, 32) + ' = 2,5') + '.' },
+      { k: 'num', q: 'Найдите значение выражения ' + M(P(25, L(5, 3)) + ' − ' + L(2, '(' + L(3, 81) + ')')), a: 7, h: 'Первое слагаемое 9, во втором сначала внутренний логарифм.' },
+      { k: 'num', q: 'Найдите значение выражения ' + M(F(L(7, 13), L(343, 13))), a: 3, h: M('343 = ' + P(7, 3)) + ', поэтому знаменатель это ' + M(F(1, 3) + ' · ' + L(7, 13)) + '.' },
+      { k: 'num', q: 'Найдите ' + M(L('a', F(P('a', 3), P('b', 2)))) + ', если ' + M(L('a', 'b') + ' = −2'), a: 7, h: M('3 − 2&#8201;' + L('a', 'b')) + ', а минус на минус даёт плюс.' },
+      { k: 'num', q: 'Найдите значение выражения ' + M(F(P(9, L(5, 75)), P(9, L(5, 3)))), a: 81, h: 'Частное степеней: показатели вычитаются, ' + M(L(5, 75) + ' − ' + L(5, 3) + ' = ' + L(5, 25)) + '.' },
+      { k: 'num', q: 'Найдите значение выражения ' + M(L('<span style="white-space:nowrap">∛5</span>', 25)), a: 6, h: M('∛5 = ' + P(5, F(1, 3))) + ', ' + M('25 = ' + P(5, 2)) + '.' },
+      { k: 'num', q: 'Найдите значение выражения ' + M(L(2, 9) + ' · ' + L(3, '√2')), a: 1, h: M('2&#8201;' + L(2, 3) + ' · ' + F(1, 2) + '&#8201;' + L(3, 2)) + '.' },
+      { k: 'num', q: 'Найдите значение выражения ' + M(P(6, L(36, 49))), a: 7, h: M(L(36, 49) + ' = ' + L(6, 7)) + ': и основание, и число это квадраты.' },
+      { k: 'num', q: 'Найдите значение выражения ' + M(L(3, 5) + ' · ' + L(5, 7) + ' · ' + L(7, 81)), a: 4, h: 'Цепочка ' + M('3 → 5 → 7 → 81') + '.' }
+    ]
+  }
+];
+
+function num(s) {
+  s = String(s == null ? '' : s).trim().replace(',', '.').replace(/[−–]/g, '-').replace(/\s+/g, '');
+  if (!/^[-+]?\d+(\.\d+)?$/.test(s)) return null;
+  var n = Number(s);
+  return isFinite(n) ? n : null;
+}
+function checkTask(task, ans, step) {
+  if (task.k === 'num') { var v = num(ans.v); return v !== null && Math.abs(v - task.a) < 1e-9; }
+  if (task.k === 'tf') return ans.v === task.a;
+  if (task.k === 'name') return ans.v === task.a;
+  if (task.k === 'pick') return ans.v === 0;
+  if (task.k === 'chain') return ans.v === 0;
+  return false;
+}
+// Варианты: индекс 0 это верный, дальше неверные; порядок показа зависит от номера задачи
+function order(n, seed) {
+  var list = [];
+  for (var i = 0; i < n; i++) list.push(i);
+  for (var j = n - 1; j > 0; j--) {
+    var k = (seed * 7 + j * 3 + 1) % (j + 1);
+    var t = list[j]; list[j] = list[k]; list[k] = t;
+  }
+  return list;
+}
+/* LOGIC-END */
+
+var KEY = 'log-lab-v1';
+var st = { unlocked: 1, codes: {}, first: {} };
+try { var saved = JSON.parse(localStorage.getItem(KEY) || 'null'); if (saved && saved.unlocked) st = saved; } catch (e) {}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
+
+var lv = Math.min(st.unlocked, LEVELS.length) - 1, ti = 0, si = 0, phase = 'theory', tried = false, chosen = null, firstTry = 0, path = [];
+var hashLv = parseInt((location.hash || '').slice(1), 10);
+if (hashLv >= 1 && hashLv <= st.unlocked) lv = hashLv - 1;
+
+function tabs() {
+  var h = '';
+  for (var i = 0; i < LEVELS.length; i++) {
+    h += '<button class="tab" type="button" role="tab" data-l="' + i + '"' +
+         (i === lv ? ' aria-selected="true"' : '') + (i >= st.unlocked ? ' disabled' : '') + '>' +
+         (i + 1) + '. ' + LEVELS[i].name + (st.codes[i] ? ' <span class="tick">✓</span>' : '') + '</button>';
+  }
+  document.getElementById('tabs').innerHTML = h;
+  document.querySelectorAll('#tabs .tab').forEach(function (el) {
+    el.onclick = function () { if (el.disabled) return; lv = +el.dataset.l; ti = 0; phase = 'theory'; render(); };
+  });
+}
+
+function optionsHtml(items, seed, cls) {
+  var idx = cls === 'names' ? items.map(function (_, i) { return i; }) : order(items.length, seed);
+  return '<div class="opts' + (cls ? ' ' + cls : '') + '">' + idx.map(function (i) {
+    return '<button class="opt" type="button" data-i="' + i + '">' + items[i] + '</button>';
+  }).join('') + '</div>';
+}
+
+function render() {
+  tabs();
+  var L0 = LEVELS[lv], s = document.getElementById('sheet');
+  if (phase === 'theory') {
+    var body = L0.theory.map(function (p) { return /^<(div|p)/.test(p) ? p : '<p>' + p + '</p>'; }).join('');
+    s.innerHTML = '<div class="lvl"><span>Уровень ' + (lv + 1) + ' из ' + LEVELS.length + '</span><span>' + L0.tasks.length + ' задач</span></div>' +
+      '<div class="theory"><h2>' + L0.title + '</h2>' + body + '</div>' +
+      '<button class="go" id="go">Начать</button>';
+    document.getElementById('go').onclick = function () { phase = 'task'; ti = 0; si = 0; firstTry = 0; path = []; render(); };
+    return;
+  }
+  if (phase === 'done') {
+    var last = lv === LEVELS.length - 1;
+    s.innerHTML = '<div class="done"><p>Уровень пройден</p><div class="big">' + firstTry + ' из ' + L0.tasks.length + '</div>' +
+      '<p style="color:var(--muted)">решено с первой попытки</p>' +
+      '<p style="margin-bottom:0">Кодовое слово для платформы:</p><div class="code">' + L0.code + '</div></div>' +
+      '<button class="go" id="go">' + (last ? 'К первому уровню' : 'Следующий уровень') + '</button>';
+    document.getElementById('go').onclick = function () {
+      lv = last ? 0 : lv + 1; ti = 0; phase = 'theory'; render();
+    };
+    return;
+  }
+
+  var t = L0.tasks[ti];
+  tried = false; chosen = null;
+  var h = '<div class="lvl"><span>Уровень ' + (lv + 1) + ': ' + L0.title + '</span><span>Задача ' + (ti + 1) + ' из ' + L0.tasks.length + '</span></div>' +
+          '<div class="bar"><i style="width:' + (ti / L0.tasks.length * 100) + '%"></i></div>';
+  if (t.k === 'name') h += '<div class="q">Каким свойством получено равенство?<span class="big">' + t.q + '</span></div>' + optionsHtml(NAMES, 0, 'names');
+  else if (t.k === 'tf') h += '<div class="q">' + t.q + '</div>' + optionsHtml(['верно', 'неверно'], 0, 'names');
+  else if (t.k === 'pick') h += '<div class="q">' + t.q + '</div>' + optionsHtml([t.a].concat(t.w), ti + lv * 10);
+  else if (t.k === 'num') h += '<div class="q">' + t.q + '</div><div class="one"><input type="text" id="iv" inputmode="decimal" autocomplete="off" placeholder="число"></div>';
+  else if (t.k === 'chain') {
+    var stp = t.steps[si];
+    h += '<div class="q">Упростите по шагам. Выберите следующий шаг.</div><div class="chain"><div class="row"><span class="eqs"></span>' + t.q + '</div>' +
+      path.map(function (p) { return '<div class="row"><span class="eqs">=</span>' + p + '</div>'; }).join('') +
+      '<div class="row now"><span class="eqs">=</span>?</div></div>' + optionsHtml([stp.a].concat(stp.w), ti * 3 + si + lv);
+  }
+  h += '<button class="go" id="go">Проверить</button><div id="fb"></div>';
+  s.innerHTML = h;
+
+  s.querySelectorAll('.opt').forEach(function (el) {
+    el.onclick = function () {
+      s.querySelectorAll('.opt').forEach(function (o) { o.setAttribute('aria-pressed', 'false'); });
+      el.setAttribute('aria-pressed', 'true'); chosen = +el.dataset.i;
+    };
+  });
+  var iv = document.getElementById('iv');
+  if (iv) { iv.focus(); iv.onkeydown = function (e) { if (e.key === 'Enter') document.getElementById('go').click(); }; }
+  document.getElementById('go').onclick = submit;
+}
+
+function answer(t) {
+  if (t.k === 'num') return { v: document.getElementById('iv').value };
+  if (t.k === 'tf') return { v: chosen === null ? null : chosen === 0 };
+  return { v: chosen };
+}
+
+function explain(t) {
+  if (t.k === 'pick' && chosen > 0 && t.e) return t.e[chosen - 1];
+  if (t.k === 'chain') { var stp = t.steps[si]; if (chosen > 0 && stp.e) return stp.e[chosen - 1]; return ''; }
+  if (t.k === 'name') return t.h || 'Сравните левую и правую часть: что изменилось?';
+  return t.h || '';
+}
+
+function submit() {
+  var L0 = LEVELS[lv], t = L0.tasks[ti], fb = document.getElementById('fb'), go = document.getElementById('go');
+  var ans = answer(t);
+  if (t.k !== 'num' && chosen === null) { fb.innerHTML = '<div class="chk no"><b>Сначала выберите вариант.</b></div>'; return; }
+  if (checkTask(t, ans)) {
+    if (t.k === 'chain' && si < t.steps.length - 1) {
+      path.push(t.steps[si].a); si++; render();
+      return;
+    }
+    if (t.k === 'chain') path.push(t.steps[si].a);
+    if (!tried && !t._miss) firstTry++;
+    var extra = (t.k === 'tf' || t.k === 'name') && t.h ? '<p class="hint">' + t.h + '</p>' : '';
+    fb.innerHTML = '<div class="chk ok"><b>Верно.</b>' + extra + '</div>';
+    if (t.k === 'chain') {
+      var ch = document.querySelector('.chain .now'); if (ch) ch.innerHTML = '<span class="eqs">=</span>' + t.steps[si].a;
+      document.querySelectorAll('.opt').forEach(function (o) { o.disabled = true; });
+    }
+    go.textContent = ti === L0.tasks.length - 1 ? 'Итог уровня' : 'Дальше';
+    go.onclick = function () {
+      t._miss = false;
+      if (ti === L0.tasks.length - 1) {
+        phase = 'done'; st.codes[lv] = 1; if (st.unlocked < lv + 2) st.unlocked = Math.min(lv + 2, LEVELS.length); save();
+      } else { ti++; si = 0; path = []; }
+      render();
+    };
+  } else {
+    tried = true; t._miss = true;
+    var el = document.querySelector('.opt[aria-pressed="true"]'); if (el) el.classList.add('wrong');
+    var why = explain(t);
+    fb.innerHTML = '<div class="chk no"><b>Пока не сходится.</b>' + (why ? '<p class="hint">' + why + '</p>' : '') + '</div>';
+  }
+}
+
+render();
+</script>
+</body>
+</html>
