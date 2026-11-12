@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Головы и ноги (2 класс)</title>
+<style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+        font-family:'Segoe UI',Arial,sans-serif;
+        background:linear-gradient(160deg,#eef4fb 0%,#fdf6ec 45%,#f3ecfb 100%);
+        background-attachment:fixed;
+        color:#1e2430;padding:22px;line-height:1.55;
+    }
+    .container{max-width:860px;margin:0 auto}
+
+    .header{border:3px solid #1d4ed8;border-radius:14px;padding:18px 24px;margin-bottom:8px;text-align:center;
+        background:linear-gradient(135deg,#eff6ff 0%,#e0f2fe 100%);box-shadow:0 3px 10px rgba(0,0,0,.10)}
+    .header .emo{font-size:2em;margin-bottom:6px;letter-spacing:4px}
+    .header h1{font-size:1.7em;color:#1e40af}
+
+    .sec{--c:#334155;--bg:#f8fafc;--grid:#dbe3ec}
+    .sec-amber {--c:#b45309;--bg:#fffbeb;--grid:#f0dcae}
+    .sec-teal  {--c:#0e7490;--bg:#ecfeff;--grid:#b8e2ea}
+    .sec-blue  {--c:#1d4ed8;--bg:#eff6ff;--grid:#c5d8f5}
+    .sec-green {--c:#15803d;--bg:#f0fdf4;--grid:#bfe3c9}
+    .sec-violet{--c:#6d28d9;--bg:#f5f3ff;--grid:#d7cdf3}
+    .sec-orange{--c:#c2410c;--bg:#fff7ed;--grid:#f5d3b4}
+    .sec-pink  {--c:#be185d;--bg:#fdf2f8;--grid:#f2cadd}
+
+    h2{font-size:1.26em;margin:26px 0 12px;padding:9px 16px;border-radius:9px;
+       background:var(--c);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.14)}
+
+    .memo{border:2px solid var(--c);border-left:8px solid var(--c);border-radius:9px;
+          padding:13px 18px;margin:12px 0;background:var(--bg)}
+    .memo p{font-size:1.02em;margin-bottom:7px}
+    .memo p:last-child{margin-bottom:0}
+
+    .task{border:2px solid var(--c);border-radius:10px;padding:15px 19px;margin:15px 0;
+          background:#fff;box-shadow:0 2px 7px rgba(0,0,0,.08)}
+    .task-num{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;
+              border-radius:50%;font-weight:800;font-size:.95em;color:#fff;background:var(--c);
+              margin-bottom:7px;padding:0 9px}
+    .task p{font-size:1.06em;margin-bottom:7px}
+    .task strong{color:var(--c)}
+    .task .star{float:right;font-size:1.1em;letter-spacing:2px}
+
+    /* поля для рисования светлые: поверх них видно аннотации Zoom */
+    .grid-space{margin-top:9px;border:2px solid var(--c);border-radius:6px;min-height:130px;background:#fff;
+        background-image:repeating-linear-gradient(0deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px),
+                         repeating-linear-gradient(90deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px);
+        background-size:24px 24px}
+    .grid-tall{min-height:170px}
+
+    .write-line{display:inline-block;border-bottom:2px solid var(--c);min-width:130px;height:1.25em;margin:0 4px}
+    .write-short{min-width:70px}
+
+    .items{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 8px;margin:10px 0 2px}
+    .item{display:flex;flex-direction:column;align-items:center;min-width:46px;border:2px solid var(--grid);
+          border-radius:10px;padding:6px 8px;background:#fff}
+    .item .e{font-size:1.6em;line-height:1.1}
+    .item .n{font-weight:800;color:var(--c);font-size:.95em}
+
+    .legend{border:2px solid var(--c);border-radius:10px;padding:14px 18px;margin:12px 0;background:#fff}
+    .legend-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px 26px;align-items:center}
+    .legend-item{display:flex;align-items:center;gap:13px;font-size:1.05em}
+    .legend-item .e{font-size:2em}
+
+    .grids{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:12px 0 2px}
+    .grids.six{gap:8px}
+    .grids figure{text-align:center;flex:0 0 auto}
+    .grids figcaption{font-size:.95em;font-weight:700;color:var(--c);margin-top:3px}
+    .field{border:2px solid var(--grid);border-radius:8px;background:#fff}
+
+    .why{border:3px solid var(--c);border-radius:12px;background:var(--bg);padding:14px 18px;margin:12px 0}
+    .why p{font-size:1.04em;margin-bottom:7px}
+    .why p:last-child{margin-bottom:0}
+    .why .big{font-size:1.2em;font-weight:800;color:var(--c);text-align:center;margin:8px 0}
+    .steps{counter-reset:s;margin:10px 0 2px}
+    .steps .s{display:flex;gap:12px;align-items:flex-start;background:#fff;border:2px solid var(--c);
+        border-radius:10px;padding:10px 14px;margin-bottom:8px}
+    .steps .s b{flex:none;width:28px;height:28px;border-radius:50%;background:var(--c);color:#fff;
+        display:flex;align-items:center;justify-content:center;font-size:.9em}
+    .steps .s span{font-size:1.02em}
+
+    table.pick{border-collapse:collapse;margin:10px auto 4px;background:#fff}
+    table.pick th,table.pick td{border:2px solid var(--c);padding:8px 16px;text-align:center;font-size:1.05em;min-width:92px}
+    table.pick th{background:var(--bg);color:var(--c)}
+    table.pick td.empty{height:40px}
+
+    .hint{font-size:.95em;color:var(--c);font-style:italic;margin-top:7px;opacity:.95}
+    .fig{text-align:center;margin:10px 0 4px}
+    .fig svg{max-width:100%;height:auto}
+
+    @page{size:A4;margin:12mm}
+    @media print{
+        body{background:#fff !important;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;zoom:.9}
+        .task,.memo,.header,.legend,.why,.grids figure,table.pick{page-break-inside:avoid;break-inside:avoid}
+        .task,.memo,.why,h2,.header,.item{box-shadow:none !important}
+        .grid-space{min-height:96px}
+        .container{padding:0 6px}
+    }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+    <div class="emo">❄️ 🐾 ⛄</div>
+    <h1>Головы и ноги</h1>
+</div>
+
+<!-- ═══════════ РАЗМИНКА ═══════════ -->
+<section class="sec sec-amber">
+<h2>🔥 Разминка</h2>
+
+<div class="task">
+    <span class="task-num">а</span>
+    <p>Сколько ног у пяти снегирей? А у трёх оленей?</p>
+    <div class="items">
+        <div class="item"><span class="e">🐦</span><span class="n">×5</span></div>
+        <div class="item"><span class="e">🦌</span><span class="n">×3</span></div>
+    </div>
+</div>
+
+<div class="task">
+    <span class="task-num">б</span>
+    <p>На кормушке сидят две вороны, а под ней — одна кошка. Сколько всего голов? Сколько всего ног?</p>
+</div>
+
+<div class="task">
+    <span class="task-num">в</span>
+    <p>Во дворе кто-то оставил следы: голов было <strong>4</strong>, а ног — <strong>8</strong>. Могла ли среди них быть кошка?</p>
+</div>
+</section>
+
+<!-- ═══════════ ОПЫТ ═══════════ -->
+<section class="sec sec-teal">
+<h2>🐈 Опыт: вороны и кошки</h2>
+
+<div class="memo">
+    <p>Во дворе сидят вороны и кошки. Всего у них <strong>7 голов</strong> и <strong>20 ног</strong>. Сколько во дворе ворон и сколько кошек?</p>
+</div>
+
+<div class="legend">
+    <div class="legend-grid">
+        <div class="legend-item"><span class="e">🐦‍⬛</span><span>у вороны <strong>2 ноги</strong></span></div>
+        <div class="legend-item"><span class="e">🐈</span><span>у кошки <strong>4 ноги</strong></span></div>
+    </div>
+</div>
+
+<p style="font-size:1.04em;margin:10px 2px 2px">Семь голов уже нарисованы. Дорисуй каждой ноги так, чтобы всего получилось 20.</p>
+
+<div class="grids six">
+    <figure>
+        <svg class="field" viewBox="0 0 330 100" width="330" role="img">
+            <circle cx="30" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="25" cy="25" r="1.8" fill="#0e7490"/><circle cx="35" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="75" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="70" cy="25" r="1.8" fill="#0e7490"/><circle cx="80" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="120" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="115" cy="25" r="1.8" fill="#0e7490"/><circle cx="125" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="165" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="160" cy="25" r="1.8" fill="#0e7490"/><circle cx="170" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="210" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="205" cy="25" r="1.8" fill="#0e7490"/><circle cx="215" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="255" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="250" cy="25" r="1.8" fill="#0e7490"/><circle cx="260" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="300" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="295" cy="25" r="1.8" fill="#0e7490"/><circle cx="305" cy="25" r="1.8" fill="#0e7490"/>
+            <line x1="8" y1="92" x2="322" y2="92" stroke="#b8e2ea" stroke-width="2"/>
+        </svg>
+        <figcaption>поле 1</figcaption>
+    </figure>
+    <figure>
+        <svg class="field" viewBox="0 0 330 100" width="330" role="img">
+            <circle cx="30" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="25" cy="25" r="1.8" fill="#0e7490"/><circle cx="35" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="75" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="70" cy="25" r="1.8" fill="#0e7490"/><circle cx="80" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="120" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="115" cy="25" r="1.8" fill="#0e7490"/><circle cx="125" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="165" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="160" cy="25" r="1.8" fill="#0e7490"/><circle cx="170" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="210" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="205" cy="25" r="1.8" fill="#0e7490"/><circle cx="215" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="255" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="250" cy="25" r="1.8" fill="#0e7490"/><circle cx="260" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="300" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="295" cy="25" r="1.8" fill="#0e7490"/><circle cx="305" cy="25" r="1.8" fill="#0e7490"/>
+            <line x1="8" y1="92" x2="322" y2="92" stroke="#b8e2ea" stroke-width="2"/>
+        </svg>
+        <figcaption>поле 2</figcaption>
+    </figure>
+    <figure>
+        <svg class="field" viewBox="0 0 330 100" width="330" role="img">
+            <circle cx="30" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="25" cy="25" r="1.8" fill="#0e7490"/><circle cx="35" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="75" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="70" cy="25" r="1.8" fill="#0e7490"/><circle cx="80" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="120" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="115" cy="25" r="1.8" fill="#0e7490"/><circle cx="125" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="165" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="160" cy="25" r="1.8" fill="#0e7490"/><circle cx="170" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="210" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="205" cy="25" r="1.8" fill="#0e7490"/><circle cx="215" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="255" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="250" cy="25" r="1.8" fill="#0e7490"/><circle cx="260" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="300" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="295" cy="25" r="1.8" fill="#0e7490"/><circle cx="305" cy="25" r="1.8" fill="#0e7490"/>
+            <line x1="8" y1="92" x2="322" y2="92" stroke="#b8e2ea" stroke-width="2"/>
+        </svg>
+        <figcaption>поле 3</figcaption>
+    </figure>
+    <figure>
+        <svg class="field" viewBox="0 0 330 100" width="330" role="img">
+            <circle cx="30" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="25" cy="25" r="1.8" fill="#0e7490"/><circle cx="35" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="75" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="70" cy="25" r="1.8" fill="#0e7490"/><circle cx="80" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="120" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="115" cy="25" r="1.8" fill="#0e7490"/><circle cx="125" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="165" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="160" cy="25" r="1.8" fill="#0e7490"/><circle cx="170" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="210" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="205" cy="25" r="1.8" fill="#0e7490"/><circle cx="215" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="255" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="250" cy="25" r="1.8" fill="#0e7490"/><circle cx="260" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="300" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="295" cy="25" r="1.8" fill="#0e7490"/><circle cx="305" cy="25" r="1.8" fill="#0e7490"/>
+            <line x1="8" y1="92" x2="322" y2="92" stroke="#b8e2ea" stroke-width="2"/>
+        </svg>
+        <figcaption>поле 4</figcaption>
+    </figure>
+    <figure>
+        <svg class="field" viewBox="0 0 330 100" width="330" role="img">
+            <circle cx="30" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="25" cy="25" r="1.8" fill="#0e7490"/><circle cx="35" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="75" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="70" cy="25" r="1.8" fill="#0e7490"/><circle cx="80" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="120" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="115" cy="25" r="1.8" fill="#0e7490"/><circle cx="125" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="165" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="160" cy="25" r="1.8" fill="#0e7490"/><circle cx="170" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="210" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="205" cy="25" r="1.8" fill="#0e7490"/><circle cx="215" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="255" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="250" cy="25" r="1.8" fill="#0e7490"/><circle cx="260" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="300" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="295" cy="25" r="1.8" fill="#0e7490"/><circle cx="305" cy="25" r="1.8" fill="#0e7490"/>
+            <line x1="8" y1="92" x2="322" y2="92" stroke="#b8e2ea" stroke-width="2"/>
+        </svg>
+        <figcaption>поле 5</figcaption>
+    </figure>
+    <figure>
+        <svg class="field" viewBox="0 0 330 100" width="330" role="img">
+            <circle cx="30" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="25" cy="25" r="1.8" fill="#0e7490"/><circle cx="35" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="75" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="70" cy="25" r="1.8" fill="#0e7490"/><circle cx="80" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="120" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="115" cy="25" r="1.8" fill="#0e7490"/><circle cx="125" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="165" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="160" cy="25" r="1.8" fill="#0e7490"/><circle cx="170" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="210" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="205" cy="25" r="1.8" fill="#0e7490"/><circle cx="215" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="255" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="250" cy="25" r="1.8" fill="#0e7490"/><circle cx="260" cy="25" r="1.8" fill="#0e7490"/>
+            <circle cx="300" cy="28" r="14" fill="#fff" stroke="#0e7490" stroke-width="2.5"/><circle cx="295" cy="25" r="1.8" fill="#0e7490"/><circle cx="305" cy="25" r="1.8" fill="#0e7490"/>
+            <line x1="8" y1="92" x2="322" y2="92" stroke="#b8e2ea" stroke-width="2"/>
+        </svg>
+        <figcaption>поле 6</figcaption>
+    </figure>
+</div>
+
+<div class="why">
+    <p class="big">Как раздать ноги без угадывания</p>
+    <div class="steps">
+        <div class="s"><b>1</b><span>Рисуем <strong>7 голов</strong>-кружков.</span></div>
+        <div class="s"><b>2</b><span>Даём каждой голове <strong>по 2 ноги</strong>. Пока все похожи на ворон. Ног получилось 14.</span></div>
+        <div class="s"><b>3</b><span>А ног должно быть 20. Осталось раздать: 20 − 14 = <strong>6 ног</strong>.</span></div>
+        <div class="s"><b>4</b><span>Раздаём по 2, то есть <strong>парами</strong>: 6 ног — это 3 пары. У кого стало 4 ноги — тот кошка!</span></div>
+    </div>
+    <p>Проверка: 3 кошки и 4 вороны, ног 4 + 4 + 4 + 2 + 2 + 2 + 2 = 20. ✔</p>
+</div>
+</section>
+
+<!-- ═══════════ ТАБЛИЦА ПОДБОРА ═══════════ -->
+<section class="sec sec-blue">
+<h2>📋 Второй способ: таблица подбора</h2>
+
+<div class="memo">
+    <p>Ту же задачу можно решить таблицей: пробуем число кошек по порядку и считаем ноги, пока не сойдётся.</p>
+</div>
+
+<table class="pick">
+    <tr><th>кошек 🐈</th><th>ворон 🐦‍⬛</th><th>считаем ноги</th><th>сошлось?</th></tr>
+    <tr><td>1</td><td>6</td><td>4 + 12 = 16</td><td>мало</td></tr>
+    <tr><td class="empty">2</td><td class="empty"></td><td class="empty"></td><td class="empty"></td></tr>
+    <tr><td class="empty">3</td><td class="empty"></td><td class="empty"></td><td class="empty"></td></tr>
+</table>
+<p class="hint">Кошек и ворон вместе всегда 7: если кошек 2, то ворон 5.</p>
+</section>
+
+<!-- ═══════════ ЗАДАЧИ ═══════════ -->
+<section class="sec sec-green">
+<h2>✏️ Задачи</h2>
+
+<div class="task">
+    <span class="star">⭐</span><span class="task-num">1</span>
+    <p>У Деда Мороза во дворе олени и эльфы. Всего <strong>6 голов</strong> и <strong>18 ног</strong>. Сколько оленей и сколько эльфов?</p>
+    <div class="items">
+        <div class="item"><span class="e">🦌</span><span class="n">4 ноги</span></div>
+        <div class="item"><span class="e">🧝</span><span class="n">2 ноги</span></div>
+    </div>
+    <div class="grid-space"></div>
+</div>
+
+<div class="task">
+    <span class="star">⭐</span><span class="task-num">2</span>
+    <p>К кормушке прибежали белки и прилетели снегири. Всего <strong>9 голов</strong> и <strong>26 ног</strong>. Сколько белок и сколько снегирей?</p>
+    <div class="items">
+        <div class="item"><span class="e">🐿️</span><span class="n">4 ноги</span></div>
+        <div class="item"><span class="e">🐦</span><span class="n">2 ноги</span></div>
+    </div>
+    <div class="grid-space"></div>
+</div>
+
+<div class="task">
+    <span class="star">⭐⭐</span><span class="task-num">3</span>
+    <p>В прокате стоят двухколёсные и трёхколёсные велосипеды — всего <strong>8 велосипедов</strong> и <strong>19 колёс</strong>. Сколько велосипедов каждого вида?</p>
+    <div class="items">
+        <div class="item"><span class="e">🚲</span><span class="n">2 колеса</span></div>
+        <div class="item"><span class="e">🛺</span><span class="n">3 колеса</span></div>
+    </div>
+    <p class="hint">Здесь лишние колёса раздаются не парами, а по одному.</p>
+    <div class="grid-space"></div>
+</div>
+
+<div class="task">
+    <span class="star">⭐⭐</span><span class="task-num">4</span>
+    <p>Дети слепили маленьких снеговиков из <strong>3 снежков</strong> и больших из <strong>4 снежков</strong>. Всего получилось <strong>10 снеговиков</strong>, а снежков ушло <strong>34</strong>. Сколько больших снеговиков во дворе?</p>
+    <div class="items">
+        <div class="item"><span class="e">⛄</span><span class="n">3 снежка</span></div>
+        <div class="item"><span class="e">☃️</span><span class="n">4 снежка</span></div>
+    </div>
+    <div class="grid-space"></div>
+</div>
+
+<div class="task">
+    <span class="star">⭐⭐</span><span class="task-num">5</span>
+    <p>В магазине мандарины пакуют по <strong>3</strong> и по <strong>5</strong> штук. Мама купила <strong>7 пакетов</strong>, и в них оказалось <strong>29 мандаринов</strong>. Сколько было больших пакетов?</p>
+    <div class="items">
+        <div class="item"><span class="e">🍊</span><span class="n">по 3</span></div>
+        <div class="item"><span class="e">🍊🍊</span><span class="n">по 5</span></div>
+    </div>
+    <div class="grid-space"></div>
+</div>
+</section>
+
+<!-- ═══════════ ВСЕ ВАРИАНТЫ ═══════════ -->
+<section class="sec sec-violet">
+<h2>🔎 Все варианты</h2>
+
+<div class="task">
+    <span class="star">⭐⭐</span><span class="task-num">6</span>
+    <p>На заборе и под забором сидят вороны и кошки, и те и другие точно есть. Всего у них <strong>18 ног</strong>, а голов никто не считал. Известно, что ворон <strong>больше</strong>, чем кошек. Сколько может быть ворон и сколько кошек? Найди <strong>все</strong> варианты.</p>
+    <div class="grid-space grid-tall"></div>
+</div>
+
+<div class="task">
+    <span class="star">⭐⭐</span><span class="task-num">7</span>
+    <p>А может ли у ворон и кошек вместе быть ровно <strong>15 ног</strong>? Почему?</p>
+    <div class="grid-space"></div>
+</div>
+</section>
+
+<!-- ═══════════ ЗАДАЧА НА ЧАСТИ ═══════════ -->
+<section class="sec sec-orange">
+<h2>🦌 Задача про упряжку</h2>
+
+<div class="task">
+    <span class="star">⭐⭐⭐</span><span class="task-num">8</span>
+    <p>Дед Мороз пересчитал ноги у своей упряжки: оленей и эльфов вместе <strong>24 ноги</strong>. Голов он не считал, но помнит, что эльфов <strong>вдвое больше</strong>, чем оленей. Сколько у него оленей и сколько эльфов?</p>
+    <p class="hint">Собери «комплект»: один олень и два его эльфа. Сколько ног в одном комплекте?</p>
+    <div class="grid-space grid-tall"></div>
+</div>
+</section>
+
+<!-- ═══════════ СО ЗВЁЗДОЧКОЙ ═══════════ -->
+<section class="sec sec-pink">
+<h2>🐉 Со звёздочкой</h2>
+
+<div class="task">
+    <span class="star">⭐⭐⭐</span><span class="task-num">9</span>
+    <p>В снежной пещере живут трёхглавые драконы и обычные ящерки. У дракона <strong>3 головы</strong> и <strong>4 лапы</strong>, у ящерки <strong>1 голова</strong> и <strong>4 лапы</strong>. Всего в пещере <strong>11 голов</strong> и <strong>20 лап</strong>. Сколько там драконов и сколько ящерок?</p>
+    <div class="items">
+        <div class="item"><span class="e">🐉</span><span class="n">3 головы, 4 лапы</span></div>
+        <div class="item"><span class="e">🦎</span><span class="n">1 голова, 4 лапы</span></div>
+    </div>
+    <p class="hint">В этой задаче всё наоборот: лапы у всех одинаковые, зато головы разные.</p>
+    <div class="grid-space grid-tall"></div>
+</div>
+</section>
+
+</div>
+</body>
+</html>
