@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Чётность и делимость (2 класс)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
+<style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+        font-family:'Nunito','Segoe UI',Arial,sans-serif;
+        color:#20304c;padding:22px;line-height:1.55;
+        background:
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cg stroke='%237aa7dd' stroke-width='1.6' stroke-linecap='round' opacity='.38'%3E%3Cg transform='translate(50 60)'%3E%3Cpath d='M0 -9 V9 M-7.8 -4.5 L7.8 4.5 M-7.8 4.5 L7.8 -4.5 M0 -9 l-3 3 M0 -9 l3 3 M0 9 l-3 -3 M0 9 l3 -3'/%3E%3C/g%3E%3Cg transform='translate(190 160) scale(.7)'%3E%3Cpath d='M0 -9 V9 M-7.8 -4.5 L7.8 4.5 M-7.8 4.5 L7.8 -4.5'/%3E%3C/g%3E%3Ccircle cx='120' cy='230' r='2.2' fill='%23ffffff' stroke='none'/%3E%3Ccircle cx='230' cy='40' r='1.8' fill='%23ffffff' stroke='none'/%3E%3Ccircle cx='20' cy='180' r='1.8' fill='%23ffffff' stroke='none'/%3E%3C/g%3E%3C/svg%3E"),
+          linear-gradient(180deg,#a8d1f5 0%,#bcdcf8 45%,#cfe3fa 100%);
+        background-attachment:fixed;
+    }
+    .container{max-width:860px;margin:0 auto}
+
+    .header{position:relative;border-radius:22px;overflow:hidden;margin-bottom:14px;
+        box-shadow:0 10px 26px rgba(30,58,138,.28);border:3px solid #27346b}
+    .header svg{display:block;width:100%;height:auto}
+
+    .sec{--c:#334155;--bg:#f8fafc;--grid:#dbe3ec;--soft:#eef2f7}
+    .sec-amber {--c:#b45309;--bg:#fff8e9;--grid:#edd9a8;--soft:#fdf1d7}
+    .sec-teal  {--c:#0e7490;--bg:#e9f7fa;--grid:#b5dfe9;--soft:#dcf1f6}
+    .sec-blue  {--c:#4f46e5;--bg:#eef1fe;--grid:#c7cff5;--soft:#e3e8fd}
+    .sec-green {--c:#15803d;--bg:#eef9f0;--grid:#bedfc7;--soft:#def2e3}
+    .sec-violet{--c:#7c3aed;--bg:#f5f1fe;--grid:#d8cbf4;--soft:#ece3fc}
+    .sec-red   {--c:#c2410c;--bg:#fff3ec;--grid:#f3cfb4;--soft:#fde7d8}
+    .sec-pink  {--c:#be185d;--bg:#fdf2f7;--grid:#f0c6da;--soft:#fae2ed}
+    .sec-sky   {--c:#0369a1;--bg:#ebf6fe;--grid:#b9dcf2;--soft:#dbeefb}
+
+    h2{display:flex;align-items:center;gap:12px;font-size:1.28em;font-weight:900;color:#fff;
+       margin:30px 0 14px;padding:8px 22px 8px 9px;border-radius:999px;width:fit-content;max-width:100%;
+       background:linear-gradient(115deg,var(--c) 0%,var(--c) 62%,color-mix(in srgb,var(--c) 72%,#1e2a4a) 100%);
+       box-shadow:0 4px 12px color-mix(in srgb,var(--c) 38%,transparent)}
+    h2 .ic{flex:none;width:40px;height:40px;border-radius:50%;background:#fff;display:flex;
+       align-items:center;justify-content:center;font-size:1.05em;box-shadow:inset 0 0 0 3px var(--soft)}
+
+    .memo{border:2.5px solid var(--c);border-radius:16px;padding:14px 20px;margin:12px 0;background:var(--bg);
+          box-shadow:0 3px 10px rgba(32,48,76,.07)}
+    .memo p{font-size:1.05em;margin-bottom:7px}
+    .memo p:last-child{margin-bottom:0}
+
+    .task{position:relative;border:2.5px solid var(--grid);border-radius:16px;padding:16px 20px;margin:16px 0;
+          background:#fff;box-shadow:0 4px 14px rgba(32,48,76,.09)}
+    .task-num{display:inline-flex;align-items:center;justify-content:center;min-width:32px;height:32px;
+              border-radius:50%;font-weight:900;font-size:.98em;color:#fff;background:var(--c);
+              margin-bottom:7px;padding:0 9px;box-shadow:0 2px 6px color-mix(in srgb,var(--c) 45%,transparent)}
+    .task p{font-size:1.07em;margin-bottom:7px}
+    .task strong{color:var(--c)}
+    .task .star{float:right;font-size:.95em;letter-spacing:1px;background:var(--soft);
+                border-radius:999px;padding:3px 11px;margin-left:8px}
+
+    .grid-space{margin-top:10px;border:2px solid var(--grid);border-radius:12px;min-height:130px;background:#fff;
+        background-image:repeating-linear-gradient(0deg,transparent,transparent 23px,var(--soft) 23px,var(--soft) 24px),
+                         repeating-linear-gradient(90deg,transparent,transparent 23px,var(--soft) 23px,var(--soft) 24px);
+        background-size:24px 24px}
+    .grid-tall{min-height:170px}
+    .grid-low{min-height:96px}
+
+    .items{display:flex;flex-wrap:wrap;justify-content:center;align-items:stretch;gap:10px;margin:12px 0 4px}
+    .item{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;min-width:86px;
+          border:2px solid var(--grid);border-radius:14px;padding:8px 12px 7px;background:var(--bg)}
+    .item svg{display:block}
+    .item .n{font-weight:800;color:var(--c);font-size:.93em;margin-top:4px;text-align:center;line-height:1.25}
+
+    .grids{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:12px 0 2px}
+    .grids figure{text-align:center;flex:0 0 auto}
+    .grids figcaption{font-size:.95em;font-weight:800;color:var(--c);margin-top:3px}
+    .field{border:2px solid var(--grid);border-radius:12px;background:#fff;display:block}
+
+    .why{border:3px solid var(--c);border-radius:18px;background:var(--bg);padding:16px 20px;margin:14px 0;
+         box-shadow:0 4px 14px rgba(32,48,76,.08)}
+    .why p{font-size:1.04em;margin-bottom:7px}
+    .why p:last-child{margin-bottom:0}
+    .why .big{font-size:1.22em;font-weight:900;color:var(--c);text-align:center;margin:4px 0 12px}
+
+    .tablewrap{display:flex;justify-content:center;flex-wrap:wrap;gap:16px}
+    table.pick{border-collapse:separate;border-spacing:0;margin:12px 0 4px;background:#fff;
+        border:2.5px solid var(--c);border-radius:14px;overflow:hidden;box-shadow:0 4px 12px rgba(32,48,76,.10)}
+    table.pick th,table.pick td{padding:9px 16px;text-align:center;font-size:1.05em;min-width:86px;
+        border-bottom:2px solid var(--soft);border-right:2px solid var(--soft)}
+    table.pick tr:last-child td{border-bottom:none}
+    table.pick th:last-child,table.pick td:last-child{border-right:none}
+    table.pick th{background:var(--c);color:#fff;font-weight:800}
+    table.pick tr:nth-child(odd) td{background:var(--bg)}
+    table.pick td b{color:var(--c)}
+
+    .qbox{display:inline-block;width:46px;height:38px;border:2.5px dashed var(--c);border-radius:10px;background:#fff;vertical-align:middle}
+    .qbox.small{width:40px;height:32px}
+    .numline{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:10px 0 4px}
+    .numline span{min-width:62px;text-align:center;font-size:1.3em;font-weight:800;background:var(--bg);
+        border:2px solid var(--grid);border-radius:12px;padding:7px 10px}
+
+    .hint{font-size:.96em;color:var(--c);font-style:italic;margin-top:7px;opacity:.95}
+    .lead{font-size:1.05em;margin:12px 2px 2px}
+    .fig{text-align:center;margin:10px 0 4px}
+    .fig svg{max-width:100%;height:auto}
+
+    @page{size:A4;margin:12mm}
+    @media print{
+        body{background:#fff !important;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;zoom:.9}
+        .task,.memo,.header,.why,.grids figure,table.pick{page-break-inside:avoid;break-inside:avoid}
+        .task,.memo,.why,h2,.header,.item,table.pick{box-shadow:none !important}
+        .grid-space{min-height:96px}
+        .container{padding:0 6px}
+    }
+</style>
+</head>
+<body>
+
+<!-- ───────── персонажи ───────── -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+    <!-- снегирь -->
+    <symbol id="snegir" viewBox="0 0 64 64">
+        <line x1="28" y1="46" x2="26" y2="57" stroke="#7a5a3a" stroke-width="2.4" stroke-linecap="round"/>
+        <line x1="26" y1="57" x2="21.5" y2="57" stroke="#7a5a3a" stroke-width="2.4" stroke-linecap="round"/>
+        <line x1="37" y1="46" x2="37" y2="57" stroke="#7a5a3a" stroke-width="2.4" stroke-linecap="round"/>
+        <line x1="37" y1="57" x2="32.5" y2="57" stroke="#7a5a3a" stroke-width="2.4" stroke-linecap="round"/>
+        <polygon points="18,38 6,32 18,44" fill="#39455a"/>
+        <circle cx="32" cy="36" r="13.5" fill="#e23d3d"/>
+        <path d="M20,30 a13.5,13.5 0 0 1 24,0 Z" fill="#8d99ae"/>
+        <circle cx="42" cy="25" r="7.5" fill="#2b3440"/>
+        <ellipse cx="25" cy="35" rx="8" ry="5.5" fill="#8d99ae"/>
+        <polygon points="48.5,23.5 56,26 48.5,28.5" fill="#5a6474"/>
+        <circle cx="44" cy="23" r="1.5" fill="#fff"/>
+    </symbol>
+    <!-- снеговик -->
+    <symbol id="snow3" viewBox="0 0 64 64">
+        <circle cx="32" cy="48" r="12" fill="#fff" stroke="#8aa8c8" stroke-width="2.4"/>
+        <circle cx="32" cy="29" r="9" fill="#fff" stroke="#8aa8c8" stroke-width="2.4"/>
+        <line x1="23.5" y1="26" x2="13" y2="19" stroke="#8a5a2a" stroke-width="2.4" stroke-linecap="round"/>
+        <line x1="40.5" y1="26" x2="51" y2="19" stroke="#8a5a2a" stroke-width="2.4" stroke-linecap="round"/>
+        <circle cx="32" cy="13.5" r="6.5" fill="#fff" stroke="#8aa8c8" stroke-width="2.4"/>
+        <circle cx="29.8" cy="12" r="1.2" fill="#2b3440"/>
+        <circle cx="34.2" cy="12" r="1.2" fill="#2b3440"/>
+        <polygon points="32,14.5 39,16 32,17.5" fill="#f08c28"/>
+        <circle cx="32" cy="27" r="1.3" fill="#2b3440"/>
+        <circle cx="32" cy="32" r="1.3" fill="#2b3440"/>
+    </symbol>
+    <!-- варежка -->
+    <symbol id="mitten" viewBox="0 0 64 64">
+        <path d="M20,38 C12,34 10,24 16,19 C21,15 28,17 30,22 L30,14 C30,7 40,7 40,14 L40,34 C40,44 34,50 27,50 L22,50 Z" fill="#d94343" transform="rotate(8 30 30)"/>
+        <path d="M22,34 q6,4 13,1" stroke="#b92f2f" stroke-width="2" fill="none" stroke-linecap="round" transform="rotate(8 30 30)"/>
+        <rect x="19" y="47" width="25" height="10" rx="5" fill="#fff" stroke="#c9d8ea" stroke-width="2" transform="rotate(8 30 52)"/>
+        <circle cx="34" cy="26" r="2" fill="#f3b3b3" transform="rotate(8 30 30)"/>
+        <circle cx="28" cy="30" r="2" fill="#f3b3b3" transform="rotate(8 30 30)"/>
+    </symbol>
+    <!-- пряник -->
+    <symbol id="gbread" viewBox="0 0 64 64">
+        <circle cx="32" cy="16" r="9.5" fill="#b5793c"/>
+        <path d="M25,24 L39,24 L46,34 L41,38 L37,33 L37,46 L43,56 L36,58 L32,49 L28,58 L21,56 L27,46 L27,33 L23,38 L18,34 Z" fill="#b5793c"/>
+        <path d="M24,16 a8,8 0 0 1 16,0" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" opacity=".9"/>
+        <circle cx="29" cy="15" r="1.4" fill="#3c2012"/>
+        <circle cx="35" cy="15" r="1.4" fill="#3c2012"/>
+        <path d="M29,19.5 q3,2.2 6,0" stroke="#3c2012" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+        <circle cx="32" cy="29" r="1.6" fill="#fff"/>
+        <circle cx="32" cy="36" r="1.6" fill="#fff"/>
+        <path d="M26,27 q-1.5,2 0,4 M38,27 q1.5,2 0,4" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round" opacity=".9"/>
+    </symbol>
+    <!-- снежок -->
+    <symbol id="snowball" viewBox="0 0 64 64">
+        <circle cx="32" cy="34" r="17" fill="#fff" stroke="#8aa8c8" stroke-width="2.4"/>
+        <path d="M22,28 q5,-4 11,-2 M25,40 q6,3 13,-1" stroke="#c9dcf2" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    </symbol>
+</defs>
+</svg>
+
+<div class="container">
+
+<!-- ═══════════ ШАПКА ═══════════ -->
+<div class="header">
+<svg viewBox="0 0 860 240" role="img" aria-label="Зимний двор ночью: снеговик и снегирь под гирляндой">
+    <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#1b2a5e"/><stop offset=".65" stop-color="#2c418c"/><stop offset="1" stop-color="#3f58a8"/>
+        </linearGradient>
+        <linearGradient id="drift" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dfeafa"/>
+        </linearGradient>
+    </defs>
+    <rect width="860" height="240" fill="url(#sky)"/>
+    <circle cx="760" cy="60" r="26" fill="#f6f0d8"/>
+    <circle cx="750" cy="54" r="26" fill="#2c418c" opacity=".55"/>
+    <g fill="#ffffff">
+        <circle cx="60" cy="60" r="2.5" opacity=".9"/><circle cx="150" cy="100" r="2" opacity=".7"/>
+        <circle cx="240" cy="56" r="2.4" opacity=".8"/><circle cx="330" cy="120" r="1.8" opacity=".6"/>
+        <circle cx="420" cy="66" r="2.2" opacity=".85"/><circle cx="505" cy="110" r="2" opacity=".65"/>
+        <circle cx="585" cy="58" r="2.4" opacity=".8"/><circle cx="660" cy="104" r="1.8" opacity=".6"/>
+        <circle cx="105" cy="146" r="2" opacity=".55"/><circle cx="370" cy="156" r="1.9" opacity=".5"/>
+        <circle cx="620" cy="154" r="2" opacity=".5"/><circle cx="820" cy="130" r="2.2" opacity=".7"/>
+    </g>
+    <!-- гирлянда -->
+    <path d="M-10,26 Q110,56 215,30 T430,32 T645,30 T870,28" fill="none" stroke="#1a2552" stroke-width="3"/>
+    <path d="M-10,24 Q110,54 215,28 T430,30 T645,28 T870,26" fill="none" stroke="#6c7fc9" stroke-width="1.6"/>
+    <g>
+        <circle cx="70" cy="44" r="6" fill="#ffd34d"/><circle cx="70" cy="44" r="10" fill="#ffd34d" opacity=".22"/>
+        <circle cx="160" cy="48" r="6" fill="#ff6b81"/><circle cx="160" cy="48" r="10" fill="#ff6b81" opacity=".22"/>
+        <circle cx="255" cy="36" r="6" fill="#6ee7a0"/><circle cx="255" cy="36" r="10" fill="#6ee7a0" opacity=".22"/>
+        <circle cx="350" cy="42" r="6" fill="#7cc4ff"/><circle cx="350" cy="42" r="10" fill="#7cc4ff" opacity=".22"/>
+        <circle cx="445" cy="40" r="6" fill="#ffd34d"/><circle cx="445" cy="40" r="10" fill="#ffd34d" opacity=".22"/>
+        <circle cx="540" cy="44" r="6" fill="#ff6b81"/><circle cx="540" cy="44" r="10" fill="#ff6b81" opacity=".22"/>
+        <circle cx="635" cy="38" r="6" fill="#6ee7a0"/><circle cx="635" cy="38" r="10" fill="#6ee7a0" opacity=".22"/>
+        <circle cx="725" cy="42" r="6" fill="#7cc4ff"/><circle cx="725" cy="42" r="10" fill="#7cc4ff" opacity=".22"/>
+        <circle cx="815" cy="40" r="6" fill="#ffd34d"/><circle cx="815" cy="40" r="10" fill="#ffd34d" opacity=".22"/>
+    </g>
+    <!-- ёлки -->
+    <g fill="#16603c">
+        <path d="M80,196 L108,130 L136,196 Z"/><path d="M86,166 L108,112 L130,166 Z"/>
+        <rect x="103" y="196" width="10" height="12" fill="#5a3a22"/>
+    </g>
+    <g fill="#1b7247">
+        <path d="M740,200 L772,124 L804,200 Z"/><path d="M747,166 L772,104 L797,166 Z"/>
+        <rect x="767" y="200" width="10" height="12" fill="#5a3a22"/>
+    </g>
+    <path d="M84,160 L108,120 L132,160 L124,158 L108,132 L92,158 Z" fill="#eaf3ff" opacity=".85"/>
+    <path d="M745,160 L772,114 L799,160 L790,157 L772,126 L754,157 Z" fill="#eaf3ff" opacity=".85"/>
+    <!-- сугробы -->
+    <path d="M0,214 C120,186 240,224 380,208 C520,192 640,226 860,198 L860,240 L0,240 Z" fill="url(#drift)"/>
+    <path d="M0,226 C180,206 420,236 620,218 C740,208 800,224 860,216 L860,240 L0,240 Z" fill="#ffffff"/>
+    <!-- герои -->
+    <use href="#snow3" x="580" y="142" width="74" height="74"/>
+    <use href="#snegir" x="195" y="152" width="58" height="58"/>
+    <!-- заголовок -->
+    <text x="430" y="104" text-anchor="middle" font-family="Nunito,'Segoe UI',Arial,sans-serif" font-size="44" font-weight="900" fill="#ffffff">Чётность и делимость</text>
+    <text x="430" y="136" text-anchor="middle" font-family="Nunito,'Segoe UI',Arial,sans-serif" font-size="17" font-weight="700" fill="#bcd0f2">зимние задачи · 2 класс</text>
+</svg>
+</div>
+
+<!-- ═══════════ РАЗМИНКА ═══════════ -->
+<section class="sec sec-amber">
+<h2><span class="ic">🔥</span>Разминка</h2>
+
+<div class="task">
+    <span class="task-num">а</span>
+    <p>Какие из этих чисел чётные? Обведи их.</p>
+    <div class="numline">
+        <span>14</span><span>27</span><span>160</span><span>303</span><span>1000</span><span>0</span>
+    </div>
+    <p class="hint">Про последнее число поспорим: чётное оно или нет?</p>
+</div>
+
+<div class="task">
+    <span class="task-num">б</span>
+    <p>В хоровод вокруг ёлки встали <strong>13 детей</strong>. Музыка заиграла танец, который танцуют парами. Смогут ли все разбиться на пары?</p>
+</div>
+
+<div class="task">
+    <span class="task-num">в</span>
+    <p>У Деда Мороза <strong>46 конфет</strong>, он раскладывает их поровну в два носка. Сколько конфет попадёт в каждый? А если бы конфет было <strong>47</strong>?</p>
+</div>
+</section>
+
+<!-- ═══════════ ОПЫТ ═══════════ -->
+<section class="sec sec-teal">
+<h2><span class="ic">🧊</span>Опыт: законы чётности</h2>
+
+<div class="memo">
+    <p>Будем складывать и вычитать не числа, а <strong>чётность</strong>: Ч — чётное, Н — нечётное. Проверь каждое правило на двух своих примерах и впиши в окошко, что получается: Ч или Н.</p>
+</div>
+
+<div class="tablewrap">
+<table class="pick">
+    <tr><th colspan="3">Сложение</th></tr>
+    <tr><td><b>Ч + Ч</b></td><td>4 + 6 = 10</td><td><span class="qbox small"></span></td></tr>
+    <tr><td><b>Н + Н</b></td><td>3 + 5 = 8</td><td><span class="qbox small"></span></td></tr>
+    <tr><td><b>Ч + Н</b></td><td>6 + 3 = 9</td><td><span class="qbox small"></span></td></tr>
+</table>
+<table class="pick">
+    <tr><th colspan="3">Вычитание</th></tr>
+    <tr><td><b>Ч − Ч</b></td><td>8 − 2 = 6</td><td><span class="qbox small"></span></td></tr>
+    <tr><td><b>Н − Н</b></td><td>9 − 3 = 6</td><td><span class="qbox small"></span></td></tr>
+    <tr><td><b>Ч − Н</b></td><td>8 − 3 = 5</td><td><span class="qbox small"></span></td></tr>
+</table>
+</div>
+
+<p class="lead">Проверь свои примеры здесь:</p>
+<div class="grid-space grid-low"></div>
+
+<div class="why">
+    <p class="big">Что заметили</p>
+    <p>Правила у сложения и вычитания <strong>одинаковые</strong>: если чётность у двух чисел одинаковая — ответ чётный, если разная — нечётный.</p>
+    <p>Так можно находить ошибки в примерах, <strong>не считая</strong>.</p>
+</div>
+</section>
+
+<!-- ═══════════ ЗАДАЧИ ═══════════ -->
+<section class="sec sec-green">
+<h2><span class="ic">✏️</span>Задачи</h2>
+
+<div class="task">
+    <span class="star">⭐</span><span class="task-num">1</span>
+    <p>На гирлянде лампочки чередуются: красная, синяя, красная, синяя… Всего <strong>25 лампочек</strong>, первая — красная. Какого цвета последняя лампочка? Каких лампочек больше и на сколько?</p>
+    <div class="fig">
+        <svg viewBox="0 0 560 60" width="560" role="img">
+            <path d="M10,22 Q150,44 290,24 T550,26" fill="none" stroke="#9db8d8" stroke-width="2.5"/>
+            <circle cx="40" cy="33" r="9" fill="#e23d3d"/><circle cx="105" cy="38" r="9" fill="#4f82d8"/>
+            <circle cx="170" cy="37" r="9" fill="#e23d3d"/><circle cx="235" cy="32" r="9" fill="#4f82d8"/>
+            <circle cx="300" cy="30" r="9" fill="#e23d3d"/><circle cx="365" cy="32" r="9" fill="#4f82d8"/>
+            <circle cx="430" cy="33" r="9" fill="#e23d3d"/>
+            <text x="490" y="40" font-size="26" font-weight="800" fill="#6b84a8" font-family="Nunito,Arial">…</text>
+        </svg>
+    </div>
+    <div class="grid-space grid-low"></div>
+</div>
+
+<div class="task">
+    <span class="star">⭐</span><span class="task-num">2</span>
+    <p>В декабре <strong>31 день</strong>. Каких чисел в календаре больше — чётных или нечётных? На сколько?</p>
+    <div class="fig">
+        <svg viewBox="0 0 390 170" width="390" role="img">
+            <rect x="2" y="2" width="386" height="166" rx="12" fill="#f4faf5" stroke="#bedfc7" stroke-width="2"/>
+            <g font-family="Nunito,Arial" font-size="15" font-weight="700" fill="#20304c" text-anchor="middle">
+                <text x="30" y="30">1</text><text x="85" y="30">2</text><text x="140" y="30">3</text><text x="195" y="30">4</text><text x="250" y="30">5</text><text x="305" y="30">6</text><text x="360" y="30">7</text>
+                <text x="30" y="62">8</text><text x="85" y="62">9</text><text x="140" y="62">10</text><text x="195" y="62">11</text><text x="250" y="62">12</text><text x="305" y="62">13</text><text x="360" y="62">14</text>
+                <text x="30" y="94">15</text><text x="85" y="94">16</text><text x="140" y="94">17</text><text x="195" y="94">18</text><text x="250" y="94">19</text><text x="305" y="94">20</text><text x="360" y="94">21</text>
+                <text x="30" y="126">22</text><text x="85" y="126">23</text><text x="140" y="126">24</text><text x="195" y="126">25</text><text x="250" y="126">26</text><text x="305" y="126">27</text><text x="360" y="126">28</text>
+                <text x="30" y="158">29</text><text x="85" y="158">30</text><text x="140" y="158">31</text>
+            </g>
+        </svg>
+    </div>
+    <p class="hint">Попробуй разбивать дни на пары: нечётный — чётный.</p>
+</div>
+
+<div class="task">
+    <span class="star">⭐⭐</span><span class="task-num">3</span>
+    <p>Петя и Вася лепили снежки. Петя слепил <strong>на 3 снежка больше</strong>, чем Вася. Могло ли у них вместе получиться <strong>16 снежков</strong>? А <strong>17</strong>?</p>
+    <div class="items">
+        <div class="item">
+            <svg width="88" height="44" viewBox="0 0 130 64"><use href="#snowball" width="44" height="44" y="10"/><use href="#snowball" x="30" width="44" height="44" y="10"/><use href="#snowball" x="60" width="44" height="44" y="10"/><use href="#snowball" x="86" width="44" height="44" y="10"/></svg>
+            <span class="n">поровну + ещё 3 Петины</span>
+        </div>
+    </div>
+    <div class="grid-space"></div>
+</div>
+
+<div class="task">
+    <span class="star">⭐⭐</span><span class="task-num">4</span>
+    <p>Карлсон посчитал: <strong>534 − 176 = 357</strong>. Малыш сразу сказал, что это неверно, хотя столбиком не считал. Как он догадался?</p>
+    <div class="grid-space grid-low"></div>
+</div>
+
+<div class="task">
+    <span class="star">⭐⭐</span><span class="task-num">5</span>
+    <p>После прогулки воспитательница собрала варежки всей группы и насчитала <strong>27 варежек</strong>. Докажи, что кто-то потерял варежку.</p>
+    <div class="items">
+        <div class="item"><svg width="50" height="50"><use href="#mitten"/></svg><span class="n">варежки ходят парами</span></div>
+    </div>
+    <div class="grid-space grid-low"></div>
+</div>
+</section>
+
+<!-- ═══════════ КАТОК ═══════════ -->
+<section class="sec sec-sky">
+<h2><span class="ic">🧊</span>Каток и ледяные кирпичики</h2>
+
+<div class="memo">
+    <p>Каток заливают <strong>ледяными кирпичиками</strong>: один кирпичик закрывает ровно <strong>две клетки</strong> рядом (лежит или стоит). Клетки нельзя оставлять пустыми, кирпичики не должны вылезать за край и накладываться.</p>
+</div>
+
+<div class="task">
+    <span class="star">⭐⭐</span><span class="task-num">6</span>
+    <p>Можно ли залить кирпичиками каток-снежинку из <strong>9 клеток</strong>? Если нельзя — объясни почему.</p>
+    <div class="fig">
+        <svg viewBox="0 0 160 160" width="160" role="img">
+            <g fill="#eaf5fd" stroke="#0369a1" stroke-width="2">
+                <rect x="66" y="10" width="28" height="28"/><rect x="66" y="38" width="28" height="28"/>
+                <rect x="10" y="66" width="28" height="28"/><rect x="38" y="66" width="28" height="28"/>
+                <rect x="66" y="66" width="28" height="28"/>
+                <rect x="94" y="66" width="28" height="28"/><rect x="122" y="66" width="28" height="28"/>
+                <rect x="66" y="94" width="28" height="28"/><rect x="66" y="122" width="28" height="28"/>
+            </g>
+        </svg>
+    </div>
+    <div class="grid-space grid-low"></div>
+</div>
+
+<div class="task">
+    <span class="star">⭐⭐</span><span class="task-num">7</span>
+    <p>А каток-ёлку из <strong>12 клеток</strong> залей сам: рисуй кирпичики прямо на своём поле.</p>
+    <div class="grids">
+        <figure>
+            <svg class="field" viewBox="0 0 190 130" width="190" role="img">
+                <g fill="#f0faf2" stroke="#15803d" stroke-width="2">
+                    <rect x="67" y="8" width="28" height="28"/><rect x="95" y="8" width="28" height="28"/>
+                    <rect x="39" y="36" width="28" height="28"/><rect x="67" y="36" width="28" height="28"/><rect x="95" y="36" width="28" height="28"/><rect x="123" y="36" width="28" height="28"/>
+                    <rect x="11" y="64" width="28" height="28"/><rect x="39" y="64" width="28" height="28"/><rect x="67" y="64" width="28" height="28"/><rect x="95" y="64" width="28" height="28"/><rect x="123" y="64" width="28" height="28"/><rect x="151" y="64" width="28" height="28"/>
+                </g>
+            </svg>
+            <figcaption>поле 1</figcaption>
+        </figure>
+        <figure>
+            <svg class="field" viewBox="0 0 190 130" width="190" role="img">
+                <g fill="#f0faf2" stroke="#15803d" stroke-width="2">
+                    <rect x="67" y="8" width="28" height="28"/><rect x="95" y="8" width="28" height="28"/>
+                    <rect x="39" y="36" width="28" height="28"/><rect x="67" y="36" width="28" height="28"/><rect x="95" y="36" width="28" height="28"/><rect x="123" y="36" width="28" height="28"/>
+                    <rect x="11" y="64" width="28" height="28"/><rect x="39" y="64" width="28" height="28"/><rect x="67" y="64" width="28" height="28"/><rect x="95" y="64" width="28" height="28"/><rect x="123" y="64" width="28" height="28"/><rect x="151" y="64" width="28" height="28"/>
+                </g>
+            </svg>
+            <figcaption>поле 2</figcaption>
+        </figure>
+        <figure>
+            <svg class="field" viewBox="0 0 190 130" width="190" role="img">
+                <g fill="#f0faf2" stroke="#15803d" stroke-width="2">
+                    <rect x="67" y="8" width="28" height="28"/><rect x="95" y="8" width="28" height="28"/>
+                    <rect x="39" y="36" width="28" height="28"/><rect x="67" y="36" width="28" height="28"/><rect x="95" y="36" width="28" height="28"/><rect x="123" y="36" width="28" height="28"/>
+                    <rect x="11" y="64" width="28" height="28"/><rect x="39" y="64" width="28" height="28"/><rect x="67" y="64" width="28" height="28"/><rect x="95" y="64" width="28" height="28"/><rect x="123" y="64" width="28" height="28"/><rect x="151" y="64" width="28" height="28"/>
+                </g>
+            </svg>
+            <figcaption>поле 3</figcaption>
+        </figure>
+        <figure>
+            <svg class="field" viewBox="0 0 190 130" width="190" role="img">
+                <g fill="#f0faf2" stroke="#15803d" stroke-width="2">
+                    <rect x="67" y="8" width="28" height="28"/><rect x="95" y="8" width="28" height="28"/>
+                    <rect x="39" y="36" width="28" height="28"/><rect x="67" y="36" width="28" height="28"/><rect x="95" y="36" width="28" height="28"/><rect x="123" y="36" width="28" height="28"/>
+                    <rect x="11" y="64" width="28" height="28"/><rect x="39" y="64" width="28" height="28"/><rect x="67" y="64" width="28" height="28"/><rect x="95" y="64" width="28" height="28"/><rect x="123" y="64" width="28" height="28"/><rect x="151" y="64" width="28" height="28"/>
+                </g>
+            </svg>
+            <figcaption>поле 4</figcaption>
+        </figure>
+        <figure>
+            <svg class="field" viewBox="0 0 190 130" width="190" role="img">
+                <g fill="#f0faf2" stroke="#15803d" stroke-width="2">
+                    <rect x="67" y="8" width="28" height="28"/><rect x="95" y="8" width="28" height="28"/>
+                    <rect x="39" y="36" width="28" height="28"/><rect x="67" y="36" width="28" height="28"/><rect x="95" y="36" width="28" height="28"/><rect x="123" y="36" width="28" height="28"/>
+                    <rect x="11" y="64" width="28" height="28"/><rect x="39" y="64" width="28" height="28"/><rect x="67" y="64" width="28" height="28"/><rect x="95" y="64" width="28" height="28"/><rect x="123" y="64" width="28" height="28"/><rect x="151" y="64" width="28" height="28"/>
+                </g>
+            </svg>
+            <figcaption>поле 5</figcaption>
+        </figure>
+        <figure>
+            <svg class="field" viewBox="0 0 190 130" width="190" role="img">
+                <g fill="#f0faf2" stroke="#15803d" stroke-width="2">
+                    <rect x="67" y="8" width="28" height="28"/><rect x="95" y="8" width="28" height="28"/>
+                    <rect x="39" y="36" width="28" height="28"/><rect x="67" y="36" width="28" height="28"/><rect x="95" y="36" width="28" height="28"/><rect x="123" y="36" width="28" height="28"/>
+                    <rect x="11" y="64" width="28" height="28"/><rect x="39" y="64" width="28" height="28"/><rect x="67" y="64" width="28" height="28"/><rect x="95" y="64" width="28" height="28"/><rect x="123" y="64" width="28" height="28"/><rect x="151" y="64" width="28" height="28"/>
+                </g>
+            </svg>
+            <figcaption>поле 6</figcaption>
+        </figure>
+    </div>
+    <p class="hint">А заранее можно было узнать, что получится? Сосчитай клетки.</p>
+</div>
+</section>
+
+<!-- ═══════════ ДЕЛИМОСТЬ ═══════════ -->
+<section class="sec sec-red">
+<h2><span class="ic">🍪</span>Пряники на три тарелки</h2>
+
+<div class="memo">
+    <p>Чётные числа — это те, что делятся поровну <strong>на двоих</strong>. А бывают числа, которые делятся поровну <strong>на троих</strong>: 3, 6, 9, 12, 15… Их удобно раскладывать по тройкам.</p>
+</div>
+
+<div class="task">
+    <span class="star">⭐⭐</span><span class="task-num">8</span>
+    <p>Снегурочка испекла <strong>36 пряников</strong> и раскладывает их поровну на <strong>3 тарелки</strong>. Сколько пряников окажется на каждой? А получилось бы поровну, если бы пряников было <strong>40</strong>?</p>
+    <div class="items">
+        <div class="item"><svg width="50" height="50"><use href="#gbread"/></svg><span class="n">36, потом 40</span></div>
+    </div>
+    <p class="hint">Раскладывай по одному на каждую тарелку: три пряника за круг.</p>
+    <div class="grid-space"></div>
+</div>
+</section>
+
+<!-- ═══════════ СО ЗВЁЗДОЧКОЙ ═══════════ -->
+<section class="sec sec-pink">
+<h2><span class="ic">⭐</span>Со звёздочкой</h2>
+
+<div class="task">
+    <span class="star">⭐⭐⭐</span><span class="task-num">9</span>
+    <p>Вовочка говорит, что сложил <strong>три подряд идущих числа</strong> (например, как 5, 6, 7) и получил ровно <strong>20</strong>. Могло ли так быть?</p>
+    <p class="hint">Попробуй разные тройки подряд идущих чисел. Что общего у всех сумм?</p>
+    <div class="grid-space grid-tall"></div>
+</div>
+</section>
+
+</div>
+</body>
+</html>
