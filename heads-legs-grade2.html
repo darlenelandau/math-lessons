@@ -13,8 +13,8 @@
         font-family:'Nunito','Segoe UI',Arial,sans-serif;
         color:#20304c;padding:22px;line-height:1.55;
         background:
-          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cg stroke='%239db8d8' stroke-width='1.6' stroke-linecap='round' opacity='.33'%3E%3Cg transform='translate(50 60)'%3E%3Cpath d='M0 -9 V9 M-7.8 -4.5 L7.8 4.5 M-7.8 4.5 L7.8 -4.5 M0 -9 l-3 3 M0 -9 l3 3 M0 9 l-3 -3 M0 9 l3 -3'/%3E%3C/g%3E%3Cg transform='translate(190 160) scale(.7)'%3E%3Cpath d='M0 -9 V9 M-7.8 -4.5 L7.8 4.5 M-7.8 4.5 L7.8 -4.5'/%3E%3C/g%3E%3Ccircle cx='120' cy='230' r='2.2' fill='%23a9c3e0' stroke='none'/%3E%3Ccircle cx='230' cy='40' r='1.8' fill='%23a9c3e0' stroke='none'/%3E%3Ccircle cx='20' cy='180' r='1.8' fill='%23a9c3e0' stroke='none'/%3E%3C/g%3E%3C/svg%3E"),
-          linear-gradient(180deg,#dcebf9 0%,#e9f1fb 40%,#f3eefb 100%);
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cg stroke='%237aa7dd' stroke-width='1.6' stroke-linecap='round' opacity='.38'%3E%3Cg transform='translate(50 60)'%3E%3Cpath d='M0 -9 V9 M-7.8 -4.5 L7.8 4.5 M-7.8 4.5 L7.8 -4.5 M0 -9 l-3 3 M0 -9 l3 3 M0 9 l-3 -3 M0 9 l3 -3'/%3E%3C/g%3E%3Cg transform='translate(190 160) scale(.7)'%3E%3Cpath d='M0 -9 V9 M-7.8 -4.5 L7.8 4.5 M-7.8 4.5 L7.8 -4.5'/%3E%3C/g%3E%3Ccircle cx='120' cy='230' r='2.2' fill='%23ffffff' stroke='none'/%3E%3Ccircle cx='230' cy='40' r='1.8' fill='%23ffffff' stroke='none'/%3E%3Ccircle cx='20' cy='180' r='1.8' fill='%23ffffff' stroke='none'/%3E%3C/g%3E%3C/svg%3E"),
+          linear-gradient(180deg,#a8d1f5 0%,#bcdcf8 45%,#cfe3fa 100%);
         background-attachment:fixed;
     }
     .container{max-width:860px;margin:0 auto}
@@ -33,6 +33,7 @@
     .sec-violet{--c:#7c3aed;--bg:#f5f1fe;--grid:#d8cbf4;--soft:#ece3fc}
     .sec-red   {--c:#c2410c;--bg:#fff3ec;--grid:#f3cfb4;--soft:#fde7d8}
     .sec-pink  {--c:#be185d;--bg:#fdf2f7;--grid:#f0c6da;--soft:#fae2ed}
+    .sec-sky   {--c:#0369a1;--bg:#ebf6fe;--grid:#b9dcf2;--soft:#dbeefb}
 
     h2{display:flex;align-items:center;gap:12px;font-size:1.28em;font-weight:900;color:#fff;
        margin:30px 0 14px;padding:8px 22px 8px 9px;border-radius:999px;width:fit-content;max-width:100%;
@@ -105,6 +106,19 @@
 
     .hint{font-size:.96em;color:var(--c);font-style:italic;margin-top:7px;opacity:.95}
     .lead{font-size:1.05em;margin:12px 2px 2px}
+
+    /* ребус с масками */
+    .eqs{display:flex;flex-direction:column;gap:10px;margin:12px 0 4px;align-items:center}
+    .eqrow{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;
+        background:var(--bg);border:2px solid var(--grid);border-radius:14px;padding:8px 18px;min-width:320px}
+    .eqrow .op{font-size:1.55em;font-weight:900;color:#20304c;padding:0 2px}
+    .eqrow .res{font-size:1.55em;font-weight:900;color:var(--c)}
+    .eqrow svg{display:block}
+    .eqrow .qbox{display:inline-block;width:46px;height:40px;border:2.5px dashed var(--c);border-radius:10px;background:#fff}
+    .who{display:flex;flex-wrap:wrap;gap:12px 26px;justify-content:center;margin:14px 0 4px}
+    .who .w{display:flex;align-items:center;gap:8px}
+    .who .w .op{font-size:1.4em;font-weight:900}
+    .who .w .qbox{display:inline-block;width:44px;height:40px;border:2.5px dashed var(--c);border-radius:10px;background:#fff}
 
     @page{size:A4;margin:12mm}
     @media print{
@@ -293,6 +307,63 @@
         <polygon points="11,11.8 13,6.5 15.6,11" fill="#f0c04a"/>
         <polygon points="30,7.8 32,2.5 34.6,7" fill="#f0c04a"/>
         <polygon points="49,11.8 51,6.5 53.6,11" fill="#f0c04a"/>
+    </symbol>
+    <!-- карнавальные маски на палочке -->
+    <symbol id="mask-deer" viewBox="0 0 64 64">
+        <line x1="43" y1="45" x2="56" y2="60" stroke="#8a5a2a" stroke-width="3.2" stroke-linecap="round"/>
+        <path d="M24,16 C22,10 23,5 20,3 M24,16 C26,10 29,8 29,3" fill="none" stroke="#6b4423" stroke-width="2.2" stroke-linecap="round"/>
+        <path d="M40,16 C38,10 39,5 36,3 M40,16 C42,10 45,8 45,3" fill="none" stroke="#6b4423" stroke-width="2.2" stroke-linecap="round"/>
+        <polygon points="14,25 7,19 15,32" fill="#9a6b43"/>
+        <polygon points="50,25 57,19 49,32" fill="#9a6b43"/>
+        <circle cx="32" cy="32" r="15.5" fill="#9a6b43"/>
+        <ellipse cx="26" cy="29" rx="3.4" ry="4" fill="#fff"/><ellipse cx="26" cy="29" rx="3.4" ry="4" fill="none" stroke="#6b4423" stroke-width="1.4"/>
+        <ellipse cx="38" cy="29" rx="3.4" ry="4" fill="#fff"/><ellipse cx="38" cy="29" rx="3.4" ry="4" fill="none" stroke="#6b4423" stroke-width="1.4"/>
+        <ellipse cx="32" cy="40" rx="7" ry="5" fill="#b4885e"/>
+        <circle cx="32" cy="38.5" r="3" fill="#d94343"/>
+    </symbol>
+    <symbol id="mask-snow" viewBox="0 0 64 64">
+        <line x1="43" y1="45" x2="56" y2="60" stroke="#6b89ad" stroke-width="3.2" stroke-linecap="round"/>
+        <path d="M24,19 L40,19 L38,9 L26,9 Z" fill="#6b89ad"/>
+        <rect x="22" y="17.5" width="20" height="3.5" rx="1.7" fill="#53719a"/>
+        <circle cx="32" cy="33" r="15" fill="#fff" stroke="#8aa8c8" stroke-width="2.4"/>
+        <ellipse cx="26" cy="30" rx="3.2" ry="3.8" fill="#dceafc"/><ellipse cx="26" cy="30" rx="3.2" ry="3.8" fill="none" stroke="#8aa8c8" stroke-width="1.4"/>
+        <ellipse cx="38" cy="30" rx="3.2" ry="3.8" fill="#dceafc"/><ellipse cx="38" cy="30" rx="3.2" ry="3.8" fill="none" stroke="#8aa8c8" stroke-width="1.4"/>
+        <polygon points="32,34 42,37 32,40" fill="#f08c28"/>
+        <path d="M26,42 q6,4 12,0" stroke="#8aa8c8" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="mask-elf" viewBox="0 0 64 64">
+        <line x1="43" y1="46" x2="56" y2="60" stroke="#8a2f1d" stroke-width="3.2" stroke-linecap="round"/>
+        <polygon points="32,2 21,20 43,20" fill="#1c8a4b"/>
+        <path d="M21,20 L43,20" stroke="#d94343" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="32" cy="3" r="3" fill="#fff"/>
+        <circle cx="32" cy="33" r="14.5" fill="#f5c89d"/>
+        <polygon points="18.5,33 13,29 18.5,38" fill="#f5c89d"/>
+        <polygon points="45.5,33 51,29 45.5,38" fill="#f5c89d"/>
+        <ellipse cx="26.5" cy="31" rx="3.1" ry="3.7" fill="#fff"/><ellipse cx="26.5" cy="31" rx="3.1" ry="3.7" fill="none" stroke="#a9713d" stroke-width="1.4"/>
+        <ellipse cx="37.5" cy="31" rx="3.1" ry="3.7" fill="#fff"/><ellipse cx="37.5" cy="31" rx="3.1" ry="3.7" fill="none" stroke="#a9713d" stroke-width="1.4"/>
+        <path d="M27,41 q5,4 10,0" stroke="#a9713d" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="mask-cat" viewBox="0 0 64 64">
+        <line x1="43" y1="45" x2="56" y2="60" stroke="#c77b3f" stroke-width="3.2" stroke-linecap="round"/>
+        <polygon points="19,23 21,8 30,19" fill="#f0a868"/>
+        <polygon points="45,23 43,8 34,19" fill="#f0a868"/>
+        <polygon points="22.5,20 23.5,12 28.5,18" fill="#e07aa2"/>
+        <polygon points="41.5,20 40.5,12 35.5,18" fill="#e07aa2"/>
+        <circle cx="32" cy="33" r="15" fill="#f0a868"/>
+        <ellipse cx="26" cy="30" rx="3.3" ry="3.9" fill="#fff"/><ellipse cx="26" cy="30" rx="3.3" ry="3.9" fill="none" stroke="#b06a2e" stroke-width="1.4"/>
+        <ellipse cx="38" cy="30" rx="3.3" ry="3.9" fill="#fff"/><ellipse cx="38" cy="30" rx="3.3" ry="3.9" fill="none" stroke="#b06a2e" stroke-width="1.4"/>
+        <circle cx="32" cy="38" r="2" fill="#b4543c"/>
+        <path d="M32,40 l-2,2 l-2.5,-1.5 M32,40 l2,2 l2.5,-1.5" stroke="#3c2a1a" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+        <path d="M18,36 l-7,-1.5 M18,39 l-6.5,1.5 M46,36 l7,-1.5 M46,39 l6.5,1.5" stroke="#b06a2e" stroke-width="1.5" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="mask-crow" viewBox="0 0 64 64">
+        <line x1="43" y1="45" x2="56" y2="60" stroke="#39455a" stroke-width="3.2" stroke-linecap="round"/>
+        <path d="M22,20 C24,12 30,9 32,9 C34,9 40,12 42,20 Z" fill="#2b3440"/>
+        <circle cx="32" cy="33" r="15" fill="#39455a"/>
+        <ellipse cx="26" cy="29" rx="3.3" ry="3.9" fill="#fff"/><ellipse cx="26" cy="29" rx="3.3" ry="3.9" fill="none" stroke="#1f2630" stroke-width="1.4"/>
+        <ellipse cx="38" cy="29" rx="3.3" ry="3.9" fill="#fff"/><ellipse cx="38" cy="29" rx="3.3" ry="3.9" fill="none" stroke="#1f2630" stroke-width="1.4"/>
+        <polygon points="26,36 38,36 32,47" fill="#e59b2a"/>
+        <line x1="27.5" y1="38.8" x2="36.5" y2="38.8" stroke="#c97f1a" stroke-width="1.4"/>
     </symbol>
     <!-- ящерка -->
     <symbol id="lizard" viewBox="0 0 64 64">
@@ -637,6 +708,45 @@
     </div>
     <p class="hint">В этой задаче всё наоборот: лапы у всех одинаковые, зато головы разные.</p>
     <div class="grid-space grid-tall"></div>
+</div>
+</section>
+
+<!-- ═══════════ ЦИФРЫ В МАСКАХ ═══════════ -->
+<section class="sec sec-sky">
+<h2><span class="ic">🎭</span>Цифры в масках</h2>
+
+<div class="memo">
+    <p>На новогоднем карнавале цифры надели маски. Одинаковые маски — одинаковые цифры, разные маски — разные.</p>
+</div>
+
+<div class="task">
+    <span class="star">⭐⭐</span><span class="task-num">10</span>
+    <div class="eqs">
+        <div class="eqrow"><svg width="46" height="46"><use href="#mask-deer"/></svg><span class="op">+</span><svg width="46" height="46"><use href="#mask-deer"/></svg><span class="op">=</span><span class="res">14</span></div>
+        <div class="eqrow"><svg width="46" height="46"><use href="#mask-deer"/></svg><span class="op">+</span><svg width="46" height="46"><use href="#mask-snow"/></svg><span class="op">+</span><svg width="46" height="46"><use href="#mask-snow"/></svg><span class="op">=</span><span class="res">13</span></div>
+        <div class="eqrow"><svg width="46" height="46"><use href="#mask-snow"/></svg><span class="op">+</span><svg width="46" height="46"><use href="#mask-elf"/></svg><span class="op">=</span><span class="res">12</span></div>
+        <div class="eqrow"><svg width="46" height="46"><use href="#mask-deer"/></svg><span class="op">+</span><svg width="46" height="46"><use href="#mask-elf"/></svg><span class="op">+</span><svg width="46" height="46"><use href="#mask-snow"/></svg><span class="op">=</span><span class="qbox"></span></div>
+    </div>
+    <div class="who">
+        <div class="w"><svg width="42" height="42"><use href="#mask-deer"/></svg><span class="op">=</span><span class="qbox"></span></div>
+        <div class="w"><svg width="42" height="42"><use href="#mask-snow"/></svg><span class="op">=</span><span class="qbox"></span></div>
+        <div class="w"><svg width="42" height="42"><use href="#mask-elf"/></svg><span class="op">=</span><span class="qbox"></span></div>
+    </div>
+    <p class="hint">Начни с той строчки, где маска только одна.</p>
+</div>
+
+<div class="task">
+    <span class="star">⭐⭐⭐</span><span class="task-num">11</span>
+    <div class="eqs">
+        <div class="eqrow"><svg width="46" height="46"><use href="#mask-cat"/></svg><span class="op">+</span><svg width="46" height="46"><use href="#mask-crow"/></svg><span class="op">=</span><span class="res">10</span></div>
+        <div class="eqrow"><svg width="46" height="46"><use href="#mask-cat"/></svg><span class="op">−</span><svg width="46" height="46"><use href="#mask-crow"/></svg><span class="op">=</span><span class="res">2</span></div>
+    </div>
+    <div class="who">
+        <div class="w"><svg width="42" height="42"><use href="#mask-cat"/></svg><span class="op">=</span><span class="qbox"></span></div>
+        <div class="w"><svg width="42" height="42"><use href="#mask-crow"/></svg><span class="op">=</span><span class="qbox"></span></div>
+    </div>
+    <p class="hint">Какие две цифры дают вместе 10, а отличаются на 2?</p>
+    <div class="grid-space"></div>
 </div>
 </section>
 
