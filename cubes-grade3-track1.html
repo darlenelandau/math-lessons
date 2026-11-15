@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Кубики и развёртки (3 класс)</title>
+<style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+        font-family:'Segoe UI',Arial,sans-serif;
+        background:linear-gradient(180deg,#e0ecff 0%,#eef0fb 55%,#f6f1e7 100%);
+        background-attachment:fixed;
+        color:#1e2430;padding:22px;line-height:1.55;
+    }
+    .container{max-width:900px;margin:0 auto}
+
+    .header{
+        position:relative;overflow:hidden;
+        border:3px solid #4338ca;border-radius:14px;padding:26px 24px 30px;margin-bottom:8px;text-align:center;
+        background:linear-gradient(160deg,#e0e7ff 0%,#ede9fe 62%,#fef3c7 100%);
+        box-shadow:0 3px 10px rgba(0,0,0,.10);
+    }
+    .header .deco{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0}
+    .header h1{position:relative;z-index:1;display:inline-block;padding:5px 22px;border-radius:14px;
+        background:rgba(255,255,255,.82);box-shadow:0 1px 4px rgba(0,0,0,.07);font-size:1.7em;color:#312e81}
+
+    .sec{--c:#44403c;--bg:#fafaf9;--grid:#e2dfdb}
+    .sec-sky   {--c:#0369a1;--bg:#f0f9ff;--grid:#c4e2f5}
+    .sec-grass {--c:#15803d;--bg:#f0fdf4;--grid:#bfe6cb}
+    .sec-earth {--c:#92400e;--bg:#fffbeb;--grid:#eed7b4}
+    .sec-indigo{--c:#4338ca;--bg:#eef2ff;--grid:#c9d0f7}
+    .sec-stone {--c:#44403c;--bg:#f6f5f4;--grid:#dcd8d4}
+
+    h2{font-size:1.26em;margin:26px 0 12px;padding:9px 16px;border-radius:9px;
+       background:var(--c);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.14)}
+
+    .memo{border:2px solid var(--c);border-left:8px solid var(--c);border-radius:9px;
+          padding:13px 18px;margin:12px 0;background:var(--bg)}
+    .memo p{font-size:1.02em;margin-bottom:7px}
+    .memo p:last-child{margin-bottom:0}
+
+    .task{border:2px solid var(--c);border-radius:10px;padding:15px 19px;margin:15px 0;
+          background:#fff;box-shadow:0 2px 7px rgba(0,0,0,.08)}
+    .task-num{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;
+              border-radius:50%;font-weight:800;font-size:.95em;color:#fff;background:var(--c);
+              margin-bottom:7px;padding:0 9px}
+    .task p{font-size:1.06em;margin-bottom:7px}
+    .task strong{color:var(--c)}
+    .task .star{float:right;font-size:1.05em;letter-spacing:2px}
+    .hint{font-size:.95em;color:var(--c);font-style:italic;margin-top:7px;opacity:.95}
+
+    .figs{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;align-items:flex-end;margin:12px 0 2px}
+    .figs figure{margin:0;text-align:center}
+    .figs figcaption{text-align:center;font-weight:800;color:var(--c);margin-top:4px}
+    .figs svg{max-width:100%;height:auto}
+
+    .ansrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:9px}
+    .ansrow label{font-weight:800;color:var(--c);font-size:1.1em}
+    .ansrow input{width:62px;padding:7px 8px;font-size:1.1em;font-weight:800;text-align:center;
+        border:2px solid #cbd5e1;border-radius:9px;font-family:inherit}
+    .ansrow input:focus{outline:none;border-color:var(--c)}
+    input.ok{border-color:#16a34a !important;background:#f0fdf4}
+    input.no{border-color:#dc2626 !important;background:#fef2f2}
+    .btn{border:2px solid var(--c);border-radius:9px;background:var(--bg);color:var(--c);
+        font-weight:800;padding:7px 13px;cursor:pointer;font-family:inherit;font-size:.98em}
+    .btn:hover{background:var(--c);color:#fff}
+    .fb{margin-top:7px;font-weight:700;min-height:1.2em}
+    .fb.ok{color:#15803d}
+    .fb.no{color:#b91c1c}
+
+    /* выбор плана */
+    .choices{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:10px 0 2px}
+    .choice{border:3px solid var(--grid);border-radius:10px;background:#fff;padding:6px 8px 4px;cursor:pointer;text-align:center}
+    .choice:hover{border-color:var(--c)}
+    .choice.ok{border-color:#16a34a;background:#f0fdf4}
+    .choice.no{border-color:#dc2626;background:#fef2f2;opacity:.75}
+    .choice b{display:block;color:var(--c)}
+
+    /* план-конструктор */
+    .builders{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:12px}
+    .builder{border:2px solid var(--c);border-radius:10px;background:var(--bg);padding:10px;text-align:center}
+    .builder .bt{font-weight:800;color:var(--c);font-size:.9em;margin-bottom:4px}
+    .builder .row2{display:flex;gap:8px;justify-content:center;align-items:flex-end;flex-wrap:wrap}
+    .plan-cell{cursor:pointer}
+    .plan-cell:hover rect{fill:#e0e7ff}
+    .builder .acts{display:flex;gap:6px;justify-content:center;margin-top:6px}
+    .builder .btn{padding:4px 10px;font-size:.88em}
+
+    /* развёртки */
+    .nets{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:12px}
+    .netbox{border:2px solid var(--c);border-radius:10px;background:#fff;padding:10px;text-align:center}
+    .netbox .nl{font-weight:800;color:var(--c);margin-bottom:6px}
+    .net{display:inline-grid;gap:0;margin:4px auto}
+    .net div{width:34px;height:34px}
+    .net div.f{border:2px solid #334155;background:#fde68a;margin:-1px;display:flex;align-items:center;justify-content:center;
+        font-weight:800;font-size:1.15em;color:#1e2430;position:relative}
+    .net.big div{width:46px;height:46px}
+    .net div.f.click{cursor:pointer}
+    .net div.f.click:hover{background:#fcd34d}
+    .net div.f.sel-ok{background:#86efac}
+    .net div.f.sel-no{background:#fca5a5}
+    .net div.f input{width:34px;height:30px;border:none;background:transparent;text-align:center;font-weight:800;font-size:1.1em;font-family:inherit}
+    .net div.f input:focus{outline:2px solid var(--c)}
+    .yn{display:flex;gap:6px;justify-content:center;margin-top:8px}
+    .yn .btn{padding:4px 9px;font-size:.88em}
+    .yn .btn.ok{background:#16a34a;border-color:#16a34a;color:#fff}
+    .yn .btn.no{background:#dc2626;border-color:#dc2626;color:#fff}
+
+    .layers{display:none}
+    .layers.show{display:flex}
+
+    @page{size:A4;margin:12mm}
+    @media print{
+        body{background:#fff;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+        .task,.memo,.header{page-break-inside:avoid}
+        .btn,.acts,.yn{display:none !important}
+    }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+    <svg class="deco" id="deco" viewBox="0 0 1200 110" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
+    <h1>Кубики и развёртки</h1>
+</div>
+
+<!-- ============ 1. Считаем кубики ============ -->
+<section class="sec sec-indigo"><h2>🧊 Считаем кубики</h2>
+<div class="memo"><p>Все постройки собраны из одинаковых кубиков. Кубики <strong>не висят в воздухе</strong>: если наверху есть кубик, под ним обязательно стоит другой.</p></div>
+
+<div class="task"><span class="task-num">1</span><span class="star">⭐</span>
+<p>Сколько кубиков в каждой постройке?</p>
+<div class="figs" id="t1figs"></div>
+<div class="ansrow"><label>А:</label><input id="a1a"><button class="btn" onclick="chkNum('a1a',6)">Проверить</button></div>
+<div class="fb" id="fb_a1a"></div>
+<div class="ansrow"><label>Б:</label><input id="a1b"><button class="btn" onclick="chkNum('a1b',5)">Проверить</button></div>
+<div class="fb" id="fb_a1b"></div>
+<div class="ansrow"><label>В:</label><input id="a1c"><button class="btn" onclick="chkNum('a1c',7)">Проверить</button></div>
+<div class="fb" id="fb_a1c"></div>
+</div>
+
+<div class="task"><span class="task-num">2</span><span class="star">⭐⭐</span>
+<p>А здесь часть кубиков <strong>спряталась</strong>. Сколько кубиков в каждой постройке?</p>
+<div class="figs" id="t2figs"></div>
+<div class="ansrow"><label>Г:</label><input id="a2a"><button class="btn" onclick="chkNum('a2a',5)">Проверить</button></div>
+<div class="fb" id="fb_a2a"></div>
+<div class="ansrow"><label>Д:</label><input id="a2b"><button class="btn" onclick="chkNum('a2b',12)">Проверить</button></div>
+<div class="fb" id="fb_a2b"></div>
+<div class="ansrow"><label>Е:</label><input id="a2c"><button class="btn" onclick="chkNum('a2c',14)">Проверить</button></div>
+<div class="fb" id="fb_a2c"></div>
+<div class="hint">Посмотри сначала на верхние кубики и спроси себя: что стоит под ними?</div>
+</div>
+</section>
+
+<!-- ============ 2. Вид сверху ============ -->
+<section class="sec sec-sky"><h2>🗺️ План постройки</h2>
+<div class="memo">
+<p>Посмотрим на постройку <strong>сверху</strong> и в каждой клетке напишем, сколько кубиков стоит в этом столбике. Это <strong>план</strong>.</p>
+<p>Нижняя строчка плана это передний ряд постройки, тот, что ближе к нам.</p>
+<div class="figs" id="memoPlan"></div>
+</div>
+
+<div class="task"><span class="task-num">3</span><span class="star">⭐</span>
+<p>Нажми на план, который подходит к постройке.</p>
+<div class="figs" id="t3fig1"></div>
+<div class="choices" id="t3ch1"></div>
+<div class="fb" id="fb_t3a"></div>
+<div class="figs" id="t3fig2" style="margin-top:18px"></div>
+<div class="choices" id="t3ch2"></div>
+<div class="fb" id="fb_t3b"></div>
+</div>
+
+<div class="task"><span class="task-num">4</span><span class="star">⭐⭐</span>
+<p>Построй такую же постройку. Нажимай на клетки плана: каждое нажатие добавляет в столбик один кубик, после четырёх столбик снова пустой.</p>
+<div class="figs" id="t4target"></div>
+<div class="builders" id="t4builders"></div>
+</div>
+
+<div class="task"><span class="task-num">5</span><span class="star">⭐⭐</span>
+<p>Сколько кубиков нужно, чтобы собрать постройку по плану?</p>
+<div class="figs" id="t5plans"></div>
+<div class="ansrow"><label>Ж:</label><input id="a5a"><button class="btn" onclick="chkNum('a5a',7)">Проверить</button></div>
+<div class="fb" id="fb_a5a"></div>
+<div class="ansrow"><label>З:</label><input id="a5b"><button class="btn" onclick="chkNum('a5b',16)">Проверить</button></div>
+<div class="fb" id="fb_a5b"></div>
+<div class="ansrow"><button class="btn" onclick="showT5()">Показать постройки</button></div>
+<div class="figs" id="t5show"></div>
+</div>
+</section>
+
+<!-- ============ 3. Достроить до куба ============ -->
+<section class="sec sec-earth"><h2>📦 Достроить до куба</h2>
+
+<div class="task"><span class="task-num">6</span><span class="star">⭐⭐</span>
+<p>Сколько кубиков нужно <strong>добавить</strong>, чтобы получился куб?</p>
+<div class="figs" id="t6figs"></div>
+<div class="ansrow"><label>И:</label><input id="a6a"><button class="btn" onclick="chkNum('a6a',3)">Проверить</button></div>
+<div class="fb" id="fb_a6a"></div>
+<div class="ansrow"><label>К:</label><input id="a6b"><button class="btn" onclick="chkNum('a6b',15)">Проверить</button></div>
+<div class="fb" id="fb_a6b"></div>
+<div class="hint">Сначала узнай, сколько кубиков в целом кубе, а потом сколько уже есть.</div>
+</div>
+
+<div class="task"><span class="task-num">7</span><span class="star">⭐⭐</span>
+<p>Сколько кубиков в бруске? Считать по одному долго. Разбери брусок на этажи.</p>
+<div class="figs" id="t7fig"></div>
+<div class="ansrow"><button class="btn" onclick="toggleLayers('t7layers')">Разобрать на этажи</button></div>
+<div class="figs layers" id="t7layers"></div>
+<div class="ansrow"><label>кубиков в одном этаже:</label><input id="a7a"><button class="btn" onclick="chkNum('a7a',12)">Проверить</button></div>
+<div class="fb" id="fb_a7a"></div>
+<div class="ansrow"><label>кубиков во всём бруске:</label><input id="a7b"><button class="btn" onclick="chkNum('a7b',24)">Проверить</button></div>
+<div class="fb" id="fb_a7b"></div>
+</div>
+</section>
+
+<!-- ============ 4. Развёртки ============ -->
+<section class="sec sec-grass"><h2>✂️ Развёртки куба</h2>
+<div class="memo">
+<p>Если разрезать коробку-кубик по рёбрам и разложить на столе, получится <strong>развёртка</strong>: шесть квадратиков, по одному на каждую грань.</p>
+<p>Но не из каждых шести квадратиков можно сложить куб.</p>
+</div>
+
+<div class="task"><span class="task-num">8</span><span class="star">⭐</span>
+<p>Сложится ли из этой фигуры куб? Для каждой нажми «да» или «нет».</p>
+<div class="nets" id="t8nets"></div>
+<div class="hint">Если сомневаешься, перерисуй фигуру на клетчатую бумагу, вырежи и попробуй сложить.</div>
+</div>
+
+<div class="task"><span class="task-num">9</span><span class="star">⭐⭐</span>
+<p>Из развёртки сложили куб так, что грань со звёздочкой оказалась сверху. Нажми на грань, которая окажется <strong>снизу</strong>.</p>
+<div class="nets" id="t9nets"></div>
+<div class="hint">Если три квадратика стоят в ряд, то крайние из них окажутся друг напротив друга.</div>
+</div>
+
+<div class="task"><span class="task-num">10</span><span class="star">⭐⭐⭐</span>
+<p>На игральном кубике числа на <strong>противоположных</strong> гранях в сумме дают 7: напротив 1 стоит 6, напротив 2 стоит 5, напротив 3 стоит 4. Впиши недостающие числа в развёртку.</p>
+<div class="nets" id="t10net"></div>
+<div class="ansrow" style="justify-content:center"><button class="btn" onclick="chkDice()">Проверить</button></div>
+<div class="fb" id="fb_dice" style="text-align:center"></div>
+</div>
+</section>
+
+<!-- ============ Доп ============ -->
+<section class="sec sec-stone"><h2>Доп</h2>
+
+<div class="task"><span class="task-num">11</span><span class="star">⭐⭐⭐</span>
+<p>Большой куб собрали из 27 маленьких кубиков и покрасили снаружи. Потом его разобрали. Сколько маленьких кубиков окажутся покрашены с трёх сторон, с двух, с одной и ни с одной?</p>
+<div class="figs" id="t11fig"></div>
+<div class="ansrow"><button class="btn" onclick="toggleLayers('t11layers')">Разобрать на этажи</button></div>
+<div class="figs layers" id="t11layers"></div>
+<div class="ansrow"><label>3 стороны:</label><input id="a11a"><button class="btn" onclick="chkNum('a11a',8)">Проверить</button></div>
+<div class="fb" id="fb_a11a"></div>
+<div class="ansrow"><label>2 стороны:</label><input id="a11b"><button class="btn" onclick="chkNum('a11b',12)">Проверить</button></div>
+<div class="fb" id="fb_a11b"></div>
+<div class="ansrow"><label>1 сторона:</label><input id="a11c"><button class="btn" onclick="chkNum('a11c',6)">Проверить</button></div>
+<div class="fb" id="fb_a11c"></div>
+<div class="ansrow"><label>ни одной:</label><input id="a11d"><button class="btn" onclick="chkNum('a11d',1)">Проверить</button></div>
+<div class="fb" id="fb_a11d"></div>
+<div class="hint">Покрашенные с трёх сторон стоят в уголках. Сколько у куба уголков?</div>
+</div>
+
+<div class="task"><span class="task-num">12</span><span class="star">⭐⭐⭐</span>
+<p>Лестницу из четырёх ступенек сложили из кубиков. Сколько кубиков понадобилось? А сколько кубиков нужно на такую же лестницу из десяти ступенек?</p>
+<div class="figs" id="t12fig"></div>
+<div class="ansrow"><label>4 ступеньки:</label><input id="a12a"><button class="btn" onclick="chkNum('a12a',10)">Проверить</button></div>
+<div class="fb" id="fb_a12a"></div>
+<div class="ansrow"><label>10 ступенек:</label><input id="a12b"><button class="btn" onclick="chkNum('a12b',55)">Проверить</button></div>
+<div class="fb" id="fb_a12b"></div>
+<div class="hint">Вспомни, как маленький Гаусс складывал числа парами.</div>
+</div>
+</section>
+
+<script>
+/* LOGIC-START */
+/* Постройки задаются планом: строки сзади вперёд, в строке столбики слева направо, число = высота столбика. */
+var DATA = {
+  t1: [ {name:"А", plan:[[3,2,1]]}, {name:"Б", plan:[[1,3,1]]}, {name:"В", plan:[[2,2,2,1]]} ],
+  t1ans: [6,5,7],
+  t2: [ {name:"Г", plan:[[2,1],[1,1]]}, {name:"Д", plan:[[3,2,1],[3,2,1]]}, {name:"Е", plan:[[3,2,1],[2,2,1],[1,1,1]]} ],
+  t2ans: [5,12,14],
+  memoPlan: [[3,1],[2,1]],
+  t3: [
+    {fig:[[3,1],[2,0]], opts:[ [[1,3],[0,2]], [[3,1],[2,0]], [[2,0],[3,1]] ], right:1},
+    {fig:[[2,2,1],[1,0,1]], opts:[ [[1,0,1],[2,2,1]], [[1,2,2],[1,0,1]], [[2,2,1],[1,0,1]] ], right:2}
+  ],
+  t4target: [[3,2,1],[2,1,1],[1,0,0]],
+  t5: [ {name:"Ж", plan:[[2,1],[3,1]]}, {name:"З", plan:[[1,2,1],[2,4,2],[1,2,1]]} ],
+  t5ans: [7,16],
+  t6: [ {name:"И", plan:[[2,2],[1,0]], side:2}, {name:"К", plan:[[2,2,2],[1,1,1],[1,1,1]], side:3} ],
+  t6ans: [3,15],
+  t7: {w:4, d:3, h:2}, t7ans:[12,24],
+  t11ans: [8,12,6,1],
+  t12: [[4,3,2,1]], t12ans:[10,55],
+  /* развёртки: клетки [столбец, строка] */
+  t8: [
+    {name:"1", cells:[[1,0],[0,1],[1,1],[2,1],[3,1],[1,2]], ans:true},
+    {name:"2", cells:[[0,0],[0,1],[1,1],[2,1],[3,1],[3,2]], ans:true},
+    {name:"3", cells:[[0,0],[1,0],[2,0],[0,1],[1,1],[2,1]], ans:false},
+    {name:"4", cells:[[0,1],[1,1],[2,1],[3,1],[4,1],[2,0]], ans:false},
+    {name:"5", cells:[[0,0],[1,0],[1,1],[2,1],[2,2],[3,2]], ans:true},
+    {name:"6", cells:[[0,0],[2,0],[0,1],[1,1],[2,1],[3,1]], ans:false}
+  ],
+  t9: [
+    {cells:[[1,0],[0,1],[1,1],[2,1],[3,1],[1,2]], star:[0,1], ans:[2,1]},
+    {cells:[[0,0],[1,0],[2,0],[1,1],[1,2],[1,3]], star:[1,1], ans:[1,3]},
+    {cells:[[0,0],[1,0],[1,1],[2,1],[2,2],[3,2]], star:[0,0], ans:[2,1]}
+  ],
+  t10: {cells:[[1,0],[0,1],[1,1],[2,1],[3,1],[1,2]], given:{"1,0":1,"0,1":2,"1,1":3}}
+};
+
+/* косоугольная проекция: передняя грань квадрат, глубина уходит вправо-вверх */
+function vox(plan){
+  var out=[], R=plan.length;
+  for(var r=0;r<R;r++) for(var x=0;x<plan[r].length;x++){
+    var y=R-1-r; for(var z=0;z<plan[r][x];z++) out.push([x,y,z]);
+  }
+  return out;
+}
+function countPlan(plan){ var s=0; plan.forEach(function(r){r.forEach(function(h){s+=h;});}); return s; }
+
+var PAL = {
+  gold:["#fde68a","#fbbf24","#d97706"], blue:["#c7d2fe","#818cf8","#4f46e5"],
+  mint:["#bbf7d0","#4ade80","#16a34a"], coral:["#fecaca","#f87171","#dc2626"],
+  sky:["#bae6fd","#38bdf8","#0284c7"]
+};
+function svgCubes(cubes, opt){
+  opt=opt||{}; var s=opt.s||28, dx=Math.round(s*0.5), dy=Math.round(s*0.42);
+  var pal=PAL[opt.pal||"gold"], stroke="#1e293b";
+  var set={}; cubes.forEach(function(c){ set[c.join(",")]=1; });
+  var has=function(x,y,z){ return !!set[x+","+y+","+z]; };
+  var maxX=0,maxY=0,maxZ=0;
+  cubes.forEach(function(c){ maxX=Math.max(maxX,c[0]+1); maxY=Math.max(maxY,c[1]+1); maxZ=Math.max(maxZ,c[2]+1); });
+  if(opt.minW){ maxX=Math.max(maxX,opt.minW[0]); maxY=Math.max(maxY,opt.minW[1]); maxZ=Math.max(maxZ,opt.minW[2]); }
+  var W=maxX*s+maxY*dx+6, H=maxZ*s+maxY*dy+6;
+  var P=function(x,y,z){ return [3+x*s+y*dx, H-3-z*s-y*dy]; };
+  var pts=function(a){ return a.map(function(p){ var q=P(p[0],p[1],p[2]); return q[0].toFixed(1)+","+q[1].toFixed(1); }).join(" "); };
+  var sorted=cubes.slice().sort(function(a,b){ return (b[1]-a[1])||(a[2]-b[2])||(a[0]-b[0]); });
+  var g="";
+  if(opt.floor){
+    for(var fx=0;fx<maxX;fx++) for(var fy=0;fy<maxY;fy++)
+      g+='<polygon points="'+pts([[fx,fy,0],[fx+1,fy,0],[fx+1,fy+1,0],[fx,fy+1,0]])+'" fill="none" stroke="#cbd5e1" stroke-width="1"/>';
+  }
+  sorted.forEach(function(c){
+    var x=c[0],y=c[1],z=c[2];
+    if(!has(x,y-1,z)) g+='<polygon points="'+pts([[x,y,z],[x+1,y,z],[x+1,y,z+1],[x,y,z+1]])+'" fill="'+pal[1]+'" stroke="'+stroke+'" stroke-width="1.4" stroke-linejoin="round"/>';
+    if(!has(x+1,y,z)) g+='<polygon points="'+pts([[x+1,y,z],[x+1,y+1,z],[x+1,y+1,z+1],[x+1,y,z+1]])+'" fill="'+pal[2]+'" stroke="'+stroke+'" stroke-width="1.4" stroke-linejoin="round"/>';
+    if(!has(x,y,z+1)) g+='<polygon points="'+pts([[x,y,z+1],[x+1,y,z+1],[x+1,y+1,z+1],[x,y+1,z+1]])+'" fill="'+pal[0]+'" stroke="'+stroke+'" stroke-width="1.4" stroke-linejoin="round"/>';
+  });
+  return '<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img">'+g+'</svg>';
+}
+function svgPlan(plan, opt){
+  opt=opt||{}; var s=opt.s||32, R=plan.length, C=plan[0].length, pad=4, lab=opt.nolabel?0:20;
+  var W=C*s+pad*2, H=R*s+pad*2+lab, g="";
+  for(var r=0;r<R;r++) for(var c=0;c<C;c++){
+    var v=plan[r][c], x=pad+c*s, y=pad+r*s;
+    var cls=opt.click?' class="plan-cell" data-r="'+r+'" data-c="'+c+'"':'';
+    g+='<g'+cls+'><rect x="'+x+'" y="'+y+'" width="'+s+'" height="'+s+'" fill="'+(v?"#fff":"#f1f5f9")+'" stroke="#334155" stroke-width="1.6"/>';
+    if(v||opt.zeros) g+='<text x="'+(x+s/2)+'" y="'+(y+s/2+7)+'" text-anchor="middle" font-size="20" font-weight="800" fill="#1e293b" font-family="Segoe UI,Arial">'+(v||"")+'</text>';
+    g+='</g>';
+  }
+  if(lab) g+='<text x="'+(W/2)+'" y="'+(H-4)+'" text-anchor="middle" font-size="13" fill="#64748b" font-family="Segoe UI,Arial">спереди</text>';
+  return '<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'">'+g+'</svg>';
+}
+
+/* развёртка куба: катаем кубик по клеткам и смотрим, какая грань легла на клетку */
+function foldNet(cells){
+  var key=function(c){ return c[0]+","+c[1]; };
+  var inNet={}; cells.forEach(function(c){ inNet[key(c)]=1; });
+  var mul=function(M,v){ return [M[0][0]*v[0]+M[0][1]*v[1]+M[0][2]*v[2], M[1][0]*v[0]+M[1][1]*v[1]+M[1][2]*v[2], M[2][0]*v[0]+M[2][1]*v[1]+M[2][2]*v[2]]; };
+  var mm=function(A,B){ var C=[[0,0,0],[0,0,0],[0,0,0]]; for(var i=0;i<3;i++)for(var j=0;j<3;j++)for(var k=0;k<3;k++)C[i][j]+=A[i][k]*B[k][j]; return C; };
+  var T=function(A){ return [[A[0][0],A[1][0],A[2][0]],[A[0][1],A[1][1],A[2][1]],[A[0][2],A[1][2],A[2][2]]]; };
+  /* мир: x вправо, y вниз по листу, z вверх. Перекат вправо: (x,y,z)->(z,y,-x); вниз: (x,y,z)->(x,z,-y) */
+  var ROLL={ "1,0":[[0,0,1],[0,1,0],[-1,0,0]], "0,1":[[1,0,0],[0,0,1],[0,-1,0]] };
+  ROLL["-1,0"]=T(ROLL["1,0"]); ROLL["0,-1"]=T(ROLL["0,1"]);
+  var face={}, start=cells[0], I=[[1,0,0],[0,1,0],[0,0,1]];
+  var stack=[[start,I]], seen={}; seen[key(start)]=1;
+  while(stack.length){
+    var it=stack.pop(), c=it[0], Rm=it[1];
+    face[key(c)]=mul(T(Rm),[0,0,-1]).join(",");
+    [[1,0],[-1,0],[0,1],[0,-1]].forEach(function(d){
+      var n=[c[0]+d[0],c[1]+d[1]];
+      if(inNet[key(n)] && !seen[key(n)]){ seen[key(n)]=1; stack.push([n, mm(ROLL[d.join(",")],Rm)]); }
+    });
+  }
+  var vals={}; Object.keys(face).forEach(function(k){ vals[face[k]]=1; });
+  var ok = Object.keys(vals).length===6;
+  var opp=function(k){ var f=face[k].split(",").map(Number).map(function(v){return -v;}).join(","); return Object.keys(face).filter(function(q){ return face[q]===f; })[0]; };
+  return {ok:ok, face:face, opp:opp};
+}
+/* LOGIC-END */
+
+function norm(s){ return (s||"").toString().trim().replace(/\s+/g,""); }
+function say(id, ok, text){
+  var fb=document.getElementById("fb_"+id); if(!fb) return;
+  fb.className="fb "+(ok?"ok":"no"); fb.textContent=text;
+}
+function chkNum(id, answer){
+  var el=document.getElementById(id);
+  var ok=norm(el.value)===norm(answer);
+  el.classList.remove("ok","no"); el.classList.add(ok?"ok":"no");
+  say(id, ok, ok?"Верно":"Пока нет");
+}
+function toggleLayers(id){ document.getElementById(id).classList.toggle("show"); }
+function fig(svg, cap){ return '<figure>'+svg+(cap?'<figcaption>'+cap+'</figcaption>':'')+'</figure>'; }
+function $(id){ return document.getElementById(id); }
+
+/* шапка */
+(function(){
+  var g="", pals=["#a5b4fc","#fcd34d","#86efac","#fca5a5","#7dd3fc"];
+  for(var i=0;i<22;i++){
+    var x=12+i*56, y=(i%2?58:20), s=26, d=12, c=pals[i%5];
+    g+='<polygon points="'+x+','+(y+s)+' '+(x+s)+','+(y+s)+' '+(x+s)+','+y+' '+x+','+y+'" fill="'+c+'" opacity=".55" stroke="#6366f1" stroke-opacity=".35"/>';
+    g+='<polygon points="'+x+','+y+' '+(x+s)+','+y+' '+(x+s+d)+','+(y-d)+' '+(x+d)+','+(y-d)+'" fill="#fff" opacity=".6" stroke="#6366f1" stroke-opacity=".35"/>';
+    g+='<polygon points="'+(x+s)+','+y+' '+(x+s+d)+','+(y-d)+' '+(x+s+d)+','+(y+s-d)+' '+(x+s)+','+(y+s)+'" fill="'+c+'" opacity=".8" stroke="#6366f1" stroke-opacity=".35"/>';
+  }
+  $("deco").innerHTML=g;
+})();
+
+/* 1, 2 */
+$("t1figs").innerHTML=DATA.t1.map(function(f,i){ return fig(svgCubes(vox(f.plan),{pal:["gold","blue","mint"][i]}), f.name); }).join("");
+$("t2figs").innerHTML=DATA.t2.map(function(f,i){ return fig(svgCubes(vox(f.plan),{pal:["coral","sky","gold"][i]}), f.name); }).join("");
+
+/* памятка про план */
+$("memoPlan").innerHTML=fig(svgCubes(vox(DATA.memoPlan),{pal:"blue",floor:true}),"постройка")+fig(svgPlan(DATA.memoPlan),"её план");
+
+/* 3 */
+DATA.t3.forEach(function(t,k){
+  $("t3fig"+(k+1)).innerHTML=fig(svgCubes(vox(t.fig),{pal:k?"mint":"gold",floor:true}),"");
+  var box=$("t3ch"+(k+1));
+  box.innerHTML=t.opts.map(function(p,i){ return '<div class="choice" data-i="'+i+'">'+svgPlan(p)+'<b>'+(i+1)+'</b></div>'; }).join("");
+  box.querySelectorAll(".choice").forEach(function(el){
+    el.onclick=function(){
+      var i=+el.getAttribute("data-i"), ok=i===t.right;
+      el.classList.remove("ok","no"); el.classList.add(ok?"ok":"no");
+      say(k?"t3b":"t3a", ok, ok?"Верно":"Пока нет: проверь, где перед, а где лево и право");
+    };
+  });
+});
+
+/* 4: шесть конструкторов */
+$("t4target").innerHTML=fig(svgCubes(vox(DATA.t4target),{pal:"sky",floor:true}),"образец");
+(function(){
+  var R=DATA.t4target.length, C=DATA.t4target[0].length, html="";
+  for(var b=0;b<6;b++) html+='<div class="builder" id="bld'+b+'"><div class="bt">Конструктор '+(b+1)+'</div><div class="row2"><div class="pl"></div><div class="vw"></div></div><div class="acts"><button class="btn" data-a="chk">Проверить</button><button class="btn" data-a="clr">Очистить</button></div><div class="fb"></div></div>';
+  $("t4builders").innerHTML=html;
+  for(var b2=0;b2<6;b2++) (function(el){
+    var st=[]; for(var r=0;r<R;r++){ st.push([]); for(var c=0;c<C;c++) st[r].push(0); }
+    var draw=function(){
+      el.querySelector(".pl").innerHTML=svgPlan(st,{click:true,s:30});
+      el.querySelector(".vw").innerHTML=svgCubes(vox(st),{pal:"sky",s:20,floor:true,minW:[C,R,4]});
+      el.querySelectorAll(".plan-cell").forEach(function(g){
+        g.onclick=function(){ var r=+g.getAttribute("data-r"), c=+g.getAttribute("data-c"); st[r][c]=(st[r][c]+1)%5; el.querySelector(".fb").textContent=""; draw(); };
+      });
+    };
+    el.querySelector('[data-a="clr"]').onclick=function(){ st.forEach(function(row){ for(var i=0;i<row.length;i++) row[i]=0; }); el.querySelector(".fb").textContent=""; draw(); };
+    el.querySelector('[data-a="chk"]').onclick=function(){
+      var ok=JSON.stringify(st)===JSON.stringify(DATA.t4target), fb=el.querySelector(".fb");
+      fb.className="fb "+(ok?"ok":"no"); fb.textContent=ok?"Точно как образец":"Пока не совпадает";
+    };
+    draw();
+  })($("bld"+b2));
+})();
+
+/* 5 */
+$("t5plans").innerHTML=DATA.t5.map(function(f){ return fig(svgPlan(f.plan),f.name); }).join("");
+function showT5(){ $("t5show").innerHTML=DATA.t5.map(function(f,i){ return fig(svgCubes(vox(f.plan),{pal:i?"coral":"gold",floor:true}),f.name); }).join(""); }
+
+/* 6 */
+$("t6figs").innerHTML=DATA.t6.map(function(f,i){ return fig(svgCubes(vox(f.plan),{pal:i?"blue":"mint",floor:true}),f.name); }).join("");
+
+/* 7 */
+(function(){
+  var t=DATA.t7, full=[], layer=[];
+  for(var z=0;z<t.h;z++) for(var y=0;y<t.d;y++) for(var x=0;x<t.w;x++){ full.push([x,y,z]); if(z===0) layer.push([x,y,0]); }
+  $("t7fig").innerHTML=fig(svgCubes(full,{pal:"gold"}),"брусок");
+  $("t7layers").innerHTML=fig(svgCubes(layer,{pal:"gold"}),"верхний этаж")+fig(svgCubes(layer,{pal:"gold"}),"нижний этаж");
+})();
+
+/* 11 */
+(function(){
+  var full=[], layer=[];
+  for(var z=0;z<3;z++) for(var y=0;y<3;y++) for(var x=0;x<3;x++){ full.push([x,y,z]); if(z===0) layer.push([x,y,0]); }
+  $("t11fig").innerHTML=fig(svgCubes(full,{pal:"coral",s:32}),"");
+  $("t11layers").innerHTML=["верхний","средний","нижний"].map(function(n){ return fig(svgCubes(layer,{pal:"coral",s:32}),n+" этаж"); }).join("");
+})();
+
+/* 12 */
+$("t12fig").innerHTML=fig(svgCubes(vox(DATA.t12),{pal:"blue"}),"");
+
+/* развёртки */
+function netHTML(cells, cls, inner){
+  var mx=0,my=0; cells.forEach(function(c){ mx=Math.max(mx,c[0]); my=Math.max(my,c[1]); });
+  var on={}; cells.forEach(function(c){ on[c[0]+","+c[1]]=1; });
+  var h='<div class="net '+(cls||"")+'" style="grid-template-columns:repeat('+(mx+1)+',auto)">';
+  for(var y=0;y<=my;y++) for(var x=0;x<=mx;x++){
+    var k=x+","+y;
+    h+= on[k] ? '<div class="f" data-k="'+k+'">'+(inner?inner(k):"")+'</div>' : '<div></div>';
+  }
+  return h+'</div>';
+}
+/* 8 */
+$("t8nets").innerHTML=DATA.t8.map(function(n,i){
+  return '<div class="netbox"><div class="nl">'+n.name+'</div>'+netHTML(n.cells)+'<div class="yn" data-i="'+i+'"><button class="btn" data-v="1">да</button><button class="btn" data-v="0">нет</button></div><div class="fb" id="fb_n8_'+i+'"></div></div>';
+}).join("");
+document.querySelectorAll("#t8nets .yn").forEach(function(box){
+  var i=+box.getAttribute("data-i");
+  box.querySelectorAll(".btn").forEach(function(b){
+    b.onclick=function(){
+      var v=b.getAttribute("data-v")==="1", ok=v===DATA.t8[i].ans;
+      box.querySelectorAll(".btn").forEach(function(q){ q.classList.remove("ok","no"); });
+      b.classList.add(ok?"ok":"no");
+      say("n8_"+i, ok, ok?"Верно":"Пока нет");
+    };
+  });
+});
+/* 9 */
+$("t9nets").innerHTML=DATA.t9.map(function(n,i){
+  var sk=n.star.join(",");
+  return '<div class="netbox" data-i="'+i+'">'+netHTML(n.cells,"big",function(k){ return k===sk?"⭐":""; })+'<div class="fb" id="fb_n9_'+i+'"></div></div>';
+}).join("");
+document.querySelectorAll("#t9nets .netbox").forEach(function(box){
+  var i=+box.getAttribute("data-i"), n=DATA.t9[i], sk=n.star.join(","), ak=n.ans.join(",");
+  box.querySelectorAll(".f").forEach(function(f){
+    var k=f.getAttribute("data-k"); if(k===sk) return;
+    f.classList.add("click");
+    f.onclick=function(){
+      box.querySelectorAll(".f").forEach(function(q){ q.classList.remove("sel-ok","sel-no"); });
+      var ok=k===ak; f.classList.add(ok?"sel-ok":"sel-no");
+      say("n9_"+i, ok, ok?"Верно":"Пока нет");
+    };
+  });
+});
+/* 10 */
+(function(){
+  var t=DATA.t10;
+  $("t10net").innerHTML='<div class="netbox">'+netHTML(t.cells,"big",function(k){ return t.given[k]?String(t.given[k]):'<input maxlength="1" placeholder="?" data-k="'+k+'">'; })+'</div>';
+})();
+function chkDice(){
+  var t=DATA.t10, F=foldNet(t.cells), bad=0, empty=0;
+  document.querySelectorAll("#t10net input").forEach(function(inp){
+    var k=inp.getAttribute("data-k"), need=7-t.given[F.opp(k)];
+    inp.classList.remove("ok","no");
+    if(!norm(inp.value)){ empty++; return; }
+    if(+norm(inp.value)===need) inp.classList.add("ok"); else { inp.classList.add("no"); bad++; }
+  });
+  if(bad===0&&empty===0) say("dice",true,"Кубик собран верно");
+  else if(bad===0) say("dice",true,"Пока верно, осталось граней: "+empty);
+  else say("dice",false,"Граней с ошибкой: "+bad);
+}
+</script>
+</div></body></html>

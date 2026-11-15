@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Табличная логика (3 класс)</title>
+<style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+        font-family:'Segoe UI',Arial,sans-serif;
+        background:linear-gradient(180deg,#e3effc 0%,#eef4fb 55%,#f5f8fc 100%);
+        background-attachment:fixed;
+        color:#1e2430;padding:22px;line-height:1.55;
+    }
+    .container{max-width:900px;margin:0 auto}
+
+    .header{
+        position:relative;overflow:hidden;
+        border:3px solid #1d4ed8;border-radius:14px;padding:26px 24px 30px;margin-bottom:8px;text-align:center;
+        background:linear-gradient(160deg,#dbeafe 0%,#e0e7ff 60%,#f1f5f9 100%);
+        box-shadow:0 3px 10px rgba(0,0,0,.10);
+    }
+    .header .deco{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0}
+    .header h1{position:relative;z-index:1;display:inline-block;padding:5px 22px;border-radius:14px;
+        background:rgba(255,255,255,.82);box-shadow:0 1px 4px rgba(0,0,0,.07);font-size:1.7em;color:#1e3a8a}
+
+    .sec{--c:#44403c;--bg:#fafaf9;--grid:#e2dfdb}
+    .sec-sky   {--c:#0369a1;--bg:#f0f9ff;--grid:#c4e2f5}
+    .sec-grass {--c:#15803d;--bg:#f0fdf4;--grid:#bfe6cb}
+    .sec-berry {--c:#be123c;--bg:#fff1f2;--grid:#f6c9d2}
+    .sec-earth {--c:#92400e;--bg:#fffbeb;--grid:#eed7b4}
+    .sec-indigo{--c:#4338ca;--bg:#eef2ff;--grid:#c9d0f7}
+    .sec-pond  {--c:#0e7490;--bg:#ecfeff;--grid:#bae3ec}
+    .sec-stone {--c:#44403c;--bg:#f6f5f4;--grid:#dcd8d4}
+
+    h2{font-size:1.26em;margin:26px 0 12px;padding:9px 16px;border-radius:9px;
+       background:var(--c);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.14)}
+
+    .memo{border:2px solid var(--c);border-left:8px solid var(--c);border-radius:9px;
+          padding:13px 18px;margin:12px 0;background:var(--bg)}
+    .memo p{font-size:1.02em;margin-bottom:7px}
+    .memo p:last-child{margin-bottom:0}
+    .rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:12px 0 2px}
+    .rules div{border:2px solid var(--c);border-radius:10px;background:#fff;padding:10px 13px;font-size:.98em}
+    .rules div b{color:var(--c);display:block;margin-bottom:3px;font-size:1.1em}
+
+    .task{border:2px solid var(--c);border-radius:10px;padding:15px 19px;margin:15px 0;
+          background:#fff;box-shadow:0 2px 7px rgba(0,0,0,.08)}
+    .task-num{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;
+              border-radius:50%;font-weight:800;font-size:.95em;color:#fff;background:var(--c);
+              margin-bottom:7px;padding:0 9px}
+    .task p{font-size:1.06em;margin-bottom:7px}
+    .task strong{color:var(--c)}
+    .task .star{float:right;font-size:1.05em;letter-spacing:2px}
+    .clues{list-style:none;margin:8px 0 4px}
+    .clues li{position:relative;padding:5px 0 5px 26px;font-size:1.06em}
+    .clues li:before{content:"•";position:absolute;left:8px;color:var(--c);font-weight:900}
+    .sub{font-weight:800;color:var(--c);margin:12px 0 4px;font-size:.92em;text-transform:uppercase;letter-spacing:.6px}
+
+    /* таблица с крестиками и галочками */
+    .gridwrap{overflow-x:auto;margin:8px 0 4px}
+    table.lg{border-collapse:collapse;margin:0 auto;background:#fff}
+    table.lg th{font-size:.92em;color:var(--c);padding:4px 6px;font-weight:800}
+    table.lg th.grp{border-bottom:2px solid var(--c);text-transform:uppercase;letter-spacing:.5px;font-size:.78em}
+    table.lg th.rh{text-align:right;padding-right:10px;white-space:nowrap}
+    table.lg th.ch{vertical-align:bottom;padding:2px 2px 6px;font-size:.8em;line-height:1.2;width:62px}
+    .e{margin-right:4px}
+    table.lg td.cell{width:62px;height:46px;border:2px solid var(--grid);text-align:center;font-size:1.45em;
+        font-weight:900;cursor:pointer;user-select:none;-webkit-user-select:none}
+    table.lg td.cell:hover{background:var(--bg)}
+    table.lg td.cell.cross{color:#dc2626}
+    table.lg td.cell.tick{color:#16a34a;background:#f0fdf4}
+    table.lg td.cell.wrong{outline:3px solid #f59e0b;outline-offset:-3px}
+    table.lg td.gap{border:none;background:transparent}
+    table.lg td.split, table.lg th.split{border-left:4px solid var(--c)}
+    table.lg tr.split td, table.lg tr.split th{border-top:4px solid var(--c)}
+
+    /* заключение: выбор вариантов */
+    .concl{margin-top:8px;border:2px dashed var(--c);border-radius:10px;padding:10px 12px;background:var(--bg)}
+    .crow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:5px 0;border-bottom:1px dashed var(--grid)}
+    .crow:last-child{border-bottom:none}
+    .crow .who{min-width:118px;font-weight:800}
+    .crow .grp{display:flex;flex-wrap:wrap;gap:5px;margin-right:12px}
+    .pill{border:2px solid var(--grid);border-radius:20px;padding:4px 11px;background:#fff;cursor:pointer;
+        font-family:inherit;font-size:.95em;font-weight:700;color:#334155}
+    .pill.on{border-color:var(--c);background:var(--c);color:#fff}
+    .pill.ok{border-color:#16a34a;background:#16a34a;color:#fff}
+    .pill.no{border-color:#dc2626;background:#dc2626;color:#fff}
+
+    /* расселение по домикам */
+    .pool{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;min-height:52px;margin:10px 0;padding:8px;
+        border:2px dashed var(--grid);border-radius:12px;background:var(--bg)}
+    .chip{display:inline-flex;align-items:center;gap:5px;border:2px solid var(--c);border-radius:22px;background:#fff;
+        padding:5px 12px;font-weight:800;cursor:pointer;user-select:none;-webkit-user-select:none;font-size:1.02em}
+    .chip .e{font-size:1.3em}
+    .chip.sel{background:var(--c);color:#fff;box-shadow:0 0 0 3px rgba(0,0,0,.12)}
+    .slots{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:8px 0}
+    .slot{width:132px;min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+        cursor:pointer;border-radius:12px;padding:4px 4px 8px;border:2px solid transparent}
+    .slot:hover{background:var(--bg)}
+    .slot .lbl{font-weight:800;color:var(--c);font-size:.95em;margin-top:2px;text-align:center}
+    .slot .seat{min-height:40px;margin-top:6px;display:flex;align-items:center;justify-content:center}
+    .slot.ok{border-color:#16a34a;background:#f0fdf4}
+    .slot.no{border-color:#dc2626;background:#fef2f2}
+    .slot svg{display:block}
+    .slot.item{min-height:118px;border:2px solid var(--grid);background:#fff}
+    .slot.item .pic{font-size:2.2em;line-height:1.2}
+    .street{height:6px;border-radius:3px;background:var(--grid);margin:-4px 8px 6px}
+    .dir{display:flex;justify-content:space-between;font-size:.85em;font-weight:800;color:var(--c);margin:0 8px}
+
+    /* лишняя подсказка */
+    .cluebtn{display:block;width:100%;text-align:left;border:2px solid var(--grid);border-radius:10px;background:#fff;
+        padding:9px 13px;margin:6px 0;font-family:inherit;font-size:1.04em;cursor:pointer}
+    .cluebtn b{color:var(--c);margin-right:6px}
+    .cluebtn:hover{border-color:var(--c)}
+    .cluebtn.ok{border-color:#16a34a;background:#f0fdf4}
+    .cluebtn.no{border-color:#dc2626;background:#fef2f2}
+
+    .ansrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+    .ansrow button{border:2px solid var(--c);border-radius:9px;background:var(--bg);color:var(--c);
+        font-weight:800;padding:7px 13px;cursor:pointer;font-family:inherit;font-size:.98em}
+    .ansrow button:hover{background:var(--c);color:#fff}
+    .ansrow button.light{border-color:#cbd5e1;color:#475569;background:#fff}
+    .ansrow button.light:hover{background:#e2e8f0;color:#1e2430}
+    .fb{margin-top:7px;font-weight:700;min-height:1.2em}
+    .fb.ok{color:#15803d}
+    .fb.no{color:#b91c1c}
+
+    @page{size:A4;margin:12mm}
+    @media print{
+        body{background:#fff;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+        .task,.memo,.header{page-break-inside:avoid}
+        .ansrow,.fb{display:none}
+    }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+  <svg class="deco" viewBox="0 0 900 110" preserveAspectRatio="xMidYMid slice" aria-hidden="true" id="deco"></svg>
+  <h1>Табличная логика: зимняя ярмарка</h1>
+</div>
+
+<section class="sec sec-indigo">
+  <h2>❄️ Как работает таблица</h2>
+  <div class="memo">
+    <p>В Лесной деревне открылась зимняя ярмарка. В каждой задаче у каждого героя ровно одна вещь (одно место, один домик), и вещи у всех разные.</p>
+    <p>Нажимай на клетку таблицы: первый раз ставится <b style="color:#dc2626">✕</b>, второй раз <b style="color:#16a34a">✓</b>, третий раз клетка очищается.</p>
+  </div>
+  <div class="rules">
+    <div><b>✕</b>точно нет</div>
+    <div><b>✓</b>точно да</div>
+    <div><b>Поставил ✓</b>закрой крестиками всю остальную строку и весь столбец</div>
+    <div><b>Осталась одна пустая клетка</b>в строке или столбце: там ✓</div>
+  </div>
+</section>
+
+<section class="sec sec-sky">
+  <h2>🧤 Разминка: двое героев</h2>
+  <div id="t1a"></div>
+  <div id="t1b"></div>
+</section>
+
+<section class="sec sec-grass">
+  <h2>🍪 Таблица 3 × 3</h2>
+  <div id="t2"></div>
+  <div id="t3"></div>
+</section>
+
+<section class="sec sec-berry">
+  <h2>🎄 Таблица 4 × 4</h2>
+  <div id="t4"></div>
+</section>
+
+<section class="sec sec-earth">
+  <h2>🏠 Домики в ряд</h2>
+  <div class="memo"><p><b>Крайний</b> домик это самый левый или самый правый. <b>Рядом</b> значит в соседнем домике. <b>Левее</b> значит где-то слева, не обязательно в соседнем.</p></div>
+  <div id="t5"></div>
+</section>
+
+<section class="sec sec-indigo">
+  <h2>🧣 Два признака сразу</h2>
+  <div class="memo"><p>Здесь у каждого героя две вещи. Справа в таблице второй признак, а внизу клетки, которые связывают признаки между собой: например, какой подарок у того, кто в красном шарфе.</p></div>
+  <div id="t6"></div>
+</section>
+
+<section class="sec sec-pond">
+  <h2>⛄ Лишняя подсказка</h2>
+  <div id="t7"></div>
+</section>
+
+<section class="sec sec-stone">
+  <h2>➕ Доп</h2>
+  <div id="t8"></div>
+  <div id="t9"></div>
+</section>
+
+</div>
+
+<script>
+/* ===== данные задач (решения проверены перебором, см. план) ===== */
+var EMO = {"Ёж":"🦔","Белка":"🐿️","Заяц":"🐰","Бобёр":"🦫","Енот":"🦝","Барсук":"🦡","Лиса":"🦊","Медведь":"🐻","Сова":"🦉","Волк":"🐺"};
+var TASKS = [
+ {id:"t1a", n:"1", star:"⭐", type:"place", kind:"item",
+  text:"Белка и Заяц купили на ярмарке варежки и шарф, каждый по одной вещи.",
+  clues:["Белка шарф не покупала."],
+  ask:"Кто что купил? Нажми на героя, потом на вещь.",
+  heroes:["Белка","Заяц"], slots:[["варежки","🧤"],["шарф","🧣"]], ans:["Белка","Заяц"]},
+ {id:"t1b", n:"2", star:"⭐", type:"place", kind:"item",
+  text:"Ёж и Бобёр взяли напрокат санки и коньки, каждый что-то одно.",
+  clues:["Тот, кто взял санки, живёт у реки.","Ёж живёт на холме, далеко от реки."],
+  ask:"Кто что взял?",
+  heroes:["Ёж","Бобёр"], slots:[["санки","🛷"],["коньки","⛸️"]], ans:["Бобёр","Ёж"]},
+ {id:"t2", n:"3", star:"⭐", type:"grid",
+  text:"Ёж, Белка и Заяц торгуют на ярмарке: один пряниками, другой свечами, третий игрушками.",
+  clues:["Ёж не продаёт ни свечи, ни пряники.","Белка не продаёт пряники."],
+  ask:"Кто чем торгует?",
+  rows:["Ёж","Белка","Заяц"], groups:[{t:"товар",v:["пряники","свечи","игрушки"]}],
+  sol:{"Ёж":["игрушки"],"Белка":["свечи"],"Заяц":["пряники"]}},
+ {id:"t3", n:"4", star:"⭐⭐", type:"grid",
+  text:"Енот, Бобёр и Барсук пришли на ярмарку друг за другом: первым, вторым и третьим.",
+  clues:["Барсук пришёл не первым.","Енот пришёл позже Бобра и позже Барсука."],
+  ask:"Кто каким пришёл?",
+  rows:["Енот","Бобёр","Барсук"], groups:[{t:"пришёл",v:["первым","вторым","третьим"]}],
+  sol:{"Енот":["третьим"],"Бобёр":["первым"],"Барсук":["вторым"]}},
+ {id:"t4", n:"5", star:"⭐⭐", type:"grid",
+  text:"Лиса, Медведь, Сова и Волк повесили на большую ёлку по одной игрушке: шар, звезду, шишку и сосульку.",
+  clues:["Звезду повесили не Волк и не Медведь.","Сова повесила не шар и не звезду.","Волк не вешал ни шар, ни сосульку."],
+  ask:"Кто какую игрушку повесил?",
+  rows:["Лиса","Медведь","Сова","Волк"], groups:[{t:"игрушка",v:["шар","звезда","шишка","сосулька"]}],
+  sol:{"Лиса":["звезда"],"Медведь":["шар"],"Сова":["сосулька"],"Волк":["шишка"]}},
+ {id:"t5", n:"6", star:"⭐⭐", type:"place", kind:"house",
+  text:"На улице четыре домика в ряд, считаем слева направо. В них живут Ёж, Белка, Заяц и Бобёр.",
+  clues:["Белка живёт в крайнем домике.","Бобёр тоже живёт в крайнем домике.","Заяц живёт рядом с Белкой.","Ёж живёт левее Зайца."],
+  ask:"Кто в каком домике живёт? Нажми на героя, потом на домик.",
+  heroes:["Ёж","Белка","Заяц","Бобёр"], slots:[["1"],["2"],["3"],["4"]], ans:["Бобёр","Ёж","Заяц","Белка"]},
+ {id:"t6", n:"7", star:"⭐⭐⭐", type:"grid",
+  text:"Енот, Барсук и Бобёр получили на ярмарке подарки: книгу, коньки и санки. Все трое были в шарфах: красном, синем и жёлтом.",
+  clues:["Енот был в синем шарфе.","Коньки получил тот, кто был в красном шарфе.","Барсуку подарили не коньки и не книгу."],
+  ask:"Какой у каждого шарф и какой подарок?",
+  rows:["Енот","Барсук","Бобёр"], groups:[{t:"шарф",v:["красный","синий","жёлтый"]},{t:"подарок",v:["книга","коньки","санки"]}],
+  sol:{"Енот":["синий","книга"],"Барсук":["жёлтый","санки"],"Бобёр":["красный","коньки"]}},
+ {id:"t7", n:"8", star:"⭐⭐", type:"grid", extra:true,
+  text:"Заяц, Енот и Сова лепили из снега: один снеговика, другой крепость, третий горку.",
+  clues:["Горку лепили не Заяц и не Енот.","Заяц не лепил крепость.","Сова не лепила снеговика."],
+  ask:"Сначала реши задачу. Потом найди подсказку, без которой ответ всё равно получается, и нажми на неё.",
+  rows:["Заяц","Енот","Сова"], groups:[{t:"лепил",v:["снеговик","крепость","горка"]}],
+  sol:{"Заяц":["снеговик"],"Енот":["крепость"],"Сова":["горка"]}, spare:2},
+ {id:"t8", n:"9", star:"⭐⭐⭐", type:"grid",
+  text:"Лиса, Медведь, Волк и Белка по очереди съехали с горки на санках: красных, синих, зелёных и жёлтых.",
+  clues:["Медведь съехал последним.","Белка съехала раньше Волка, а Волк раньше Лисы.","Первым съехал тот, кто был на красных санках.","Лиса была не на жёлтых санках.","Зелёные санки были не у Лисы и не у Волка."],
+  ask:"Кто каким съехал и на каких санках?",
+  rows:["Лиса","Медведь","Волк","Белка"], groups:[{t:"очередь",v:["1-й","2-й","3-й","4-й"]},{t:"санки",v:["красные","синие","зелёные","жёлтые"]}],
+  sol:{"Лиса":["3-й","синие"],"Медведь":["4-й","зелёные"],"Волк":["2-й","жёлтые"],"Белка":["1-й","красные"]}},
+ {id:"t9", n:"10", star:"⭐⭐⭐", type:"place", kind:"house",
+  text:"На другой улице пять домиков в ряд, считаем слева направо. В них живут Ёж, Белка, Заяц, Бобёр и Енот.",
+  clues:["Ёж живёт в среднем домике.","Заяц и Бобёр живут в крайних домиках.","Белка живёт рядом с Бобром.","Енот живёт левее Ежа."],
+  ask:"Кто в каком домике живёт?",
+  heroes:["Ёж","Белка","Заяц","Бобёр","Енот"], slots:[["1"],["2"],["3"],["4"],["5"]], ans:["Заяц","Енот","Ёж","Белка","Бобёр"]}
+];
+
+/* ===== общее ===== */
+function h(tag, cls, html){ var e=document.createElement(tag); if(cls) e.className=cls; if(html!=null) e.innerHTML=html; return e; }
+function hero(n){ return (EMO[n]? '<span class="e">'+EMO[n]+'</span>':'')+n; }
+function say(fb, ok, text){ fb.className="fb "+(ok?"ok":"no"); fb.textContent=text; }
+function head(t, box){
+  var card=h("div","task");
+  card.appendChild(h("span","task-num",t.n));
+  card.appendChild(h("span","star",t.star));
+  card.appendChild(h("p",null,t.text));
+  var ul=h("ul","clues");
+  t.clues.forEach(function(c){ ul.appendChild(h("li",null,c)); });
+  card.appendChild(ul);
+  card.appendChild(h("p",null,"<strong>"+t.ask+"</strong>"));
+  box.appendChild(card);
+  return card;
+}
+
+/* ===== механика 1: расставить героев ===== */
+var SEL=null;
+function houseSVG(num){
+  return '<svg viewBox="0 0 110 92" width="104" height="87"><path d="M8 44 L55 8 L102 44 Z" fill="#fca5a5" stroke="#7f1d1d" stroke-width="2.5" stroke-linejoin="round"/>'+
+    '<path d="M22 22 l20 -15 M70 9 l14 10" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".9"/>'+
+    '<rect x="18" y="44" width="74" height="44" fill="#fef3c7" stroke="#7f1d1d" stroke-width="2.5"/>'+
+    '<rect x="46" y="60" width="18" height="28" fill="#b45309"/><text x="55" y="36" text-anchor="middle" font-size="17" font-weight="800" fill="#7f1d1d" font-family="Segoe UI,Arial">'+num+'</text></svg>';
+}
+function buildPlace(t){
+  var box=document.getElementById(t.id), card=head(t,box);
+  var pool=h("div","pool"); card.appendChild(pool);
+  var chips={};
+  t.heroes.forEach(function(n){
+    var c=h("span","chip",hero(n)); c.setAttribute("data-n",n); c.draggable=true;
+    c.onclick=function(ev){ ev.stopPropagation();
+      if(c.parentNode.classList.contains("seat")){ pool.appendChild(c); c.classList.remove("sel"); if(SEL===c) SEL=null; clear(); return; }
+      if(SEL===c){ c.classList.remove("sel"); SEL=null; return; }
+      if(SEL) SEL.classList.remove("sel"); SEL=c; c.classList.add("sel"); };
+    c.ondragstart=function(){ if(SEL) SEL.classList.remove("sel"); SEL=c; };
+    chips[n]=c; pool.appendChild(c);
+  });
+  if(t.kind==="house") card.appendChild(h("div","dir","<span>← слева</span><span>справа →</span>"));
+  var slots=h("div","slots"); card.appendChild(slots);
+  if(t.kind==="house") card.appendChild(h("div","street"));
+  var seats=[];
+  t.slots.forEach(function(s,i){
+    var sl=h("div","slot"+(t.kind==="item"?" item":""));
+    if(t.kind==="house") sl.innerHTML=houseSVG(s[0])+'<div class="lbl">домик '+s[0]+'</div>';
+    else sl.innerHTML='<div class="pic">'+s[1]+'</div><div class="lbl">'+s[0]+'</div>';
+    var seat=h("div","seat"); sl.appendChild(seat); seats.push({sl:sl,seat:seat});
+    function put(){ if(!SEL) return; var old=seat.querySelector(".chip"); if(old) pool.appendChild(old);
+      seat.appendChild(SEL); SEL.classList.remove("sel"); SEL=null; clear(); }
+    sl.onclick=put; sl.ondragover=function(e){e.preventDefault();}; sl.ondrop=function(e){e.preventDefault(); put();};
+    slots.appendChild(sl);
+  });
+  var fb=h("div","fb");
+  function clear(){ seats.forEach(function(s){ s.sl.classList.remove("ok","no"); }); fb.textContent=""; }
+  var row=h("div","ansrow"), b=h("button",null,"Проверить"), r=h("button","light","Сначала");
+  b.onclick=function(){ var bad=0, empty=0;
+    seats.forEach(function(s,i){ var c=s.seat.querySelector(".chip"); s.sl.classList.remove("ok","no");
+      if(!c){ empty++; return; } if(c.getAttribute("data-n")===t.ans[i]) s.sl.classList.add("ok"); else { s.sl.classList.add("no"); bad++; } });
+    if(!bad && !empty) say(fb,true,"Верно");
+    else if(!bad) say(fb,true,"Пока верно, осталось расставить: "+empty);
+    else say(fb,false,"Неверно стоят: "+bad); };
+  r.onclick=function(){ t.heroes.forEach(function(n){ pool.appendChild(chips[n]); chips[n].classList.remove("sel"); }); SEL=null; clear(); };
+  row.appendChild(b); row.appendChild(r); card.appendChild(row); card.appendChild(fb);
+}
+
+/* ===== механика 2: таблица ✕ / ✓ и заключение ===== */
+function cellClick(td){
+  var s=(+td.getAttribute("data-s")+1)%3; td.setAttribute("data-s",s);
+  td.textContent=s===1?"✕":(s===2?"✓":""); td.classList.remove("cross","tick","wrong");
+  if(s===1) td.classList.add("cross"); if(s===2) td.classList.add("tick");
+}
+function mkCell(truth){ var td=h("td","cell"); td.setAttribute("data-s","0"); td.setAttribute("data-ok",truth?"1":"0"); td.onclick=function(){cellClick(td);}; return td; }
+function buildGrid(t){
+  var box=document.getElementById(t.id), card=head(t,box);
+  var G=t.groups, two=G.length===2;
+  card.appendChild(h("div","sub","таблица"));
+  var wrap=h("div","gridwrap"), tb=h("table","lg");
+  // строка с названиями групп
+  var tr=h("tr"); tr.appendChild(h("th"));
+  G.forEach(function(g,gi){ var th=h("th","grp"+(gi?" split":""),g.t); th.colSpan=g.v.length; tr.appendChild(th); }); tb.appendChild(tr);
+  tr=h("tr"); tr.appendChild(h("th"));
+  G.forEach(function(g,gi){ g.v.forEach(function(v,vi){ var th=h("th","ch"+(gi&&!vi?" split":""),"<span>"+v+"</span>"); tr.appendChild(th); }); }); tb.appendChild(tr);
+  t.rows.forEach(function(r){ var tr=h("tr"); tr.appendChild(h("th","rh",hero(r)));
+    G.forEach(function(g,gi){ g.v.forEach(function(v,vi){ var td=mkCell(t.sol[r][gi]===v); if(gi&&!vi) td.classList.add("split"); tr.appendChild(td); }); });
+    tb.appendChild(tr); });
+  if(two){ // нижний блок: второй признак против первого
+    G[1].v.forEach(function(b,bi){ var tr=h("tr",bi?null:"split"); tr.appendChild(h("th","rh",b));
+      G[0].v.forEach(function(a){ var linked=t.rows.some(function(r){ return t.sol[r][0]===a && t.sol[r][1]===b; }); tr.appendChild(mkCell(linked)); });
+      G[1].v.forEach(function(){ tr.appendChild(h("td","gap")); });
+      tb.appendChild(tr); });
+  }
+  wrap.appendChild(tb); card.appendChild(wrap);
+  // заключение
+  card.appendChild(h("div","sub","ответ"));
+  var cc=h("div","concl"); card.appendChild(cc);
+  var picks=[];
+  t.rows.forEach(function(r){ var row=h("div","crow"); row.appendChild(h("span","who",hero(r)));
+    G.forEach(function(g,gi){ var grp=h("div","grp");
+      g.v.forEach(function(v){ var p=h("button","pill",v); p.type="button";
+        p.onclick=function(){ var was=p.classList.contains("on"); grp.querySelectorAll(".pill").forEach(function(x){x.classList.remove("on","ok","no");}); if(!was) p.classList.add("on"); fb.textContent=""; };
+        grp.appendChild(p); });
+      picks.push({grp:grp, want:t.sol[r][gi]}); row.appendChild(grp); });
+    cc.appendChild(row); });
+  var spareBtns=[];
+  if(t.extra){
+    card.appendChild(h("div","sub","какая подсказка лишняя"));
+    t.clues.forEach(function(c,i){ var b=h("button","cluebtn","<b>"+(i+1)+".</b>"+c); b.type="button";
+      b.onclick=function(){ spareBtns.forEach(function(x){x.classList.remove("ok","no");});
+        if(i===t.spare){ b.classList.add("ok"); say(fb2,true,"Да: Сова лепила горку, значит снеговика она точно не лепила. Это уже известно из первой подсказки."); }
+        else { b.classList.add("no"); say(fb2,false,"Без этой подсказки ответов получается несколько. Попробуй другую."); } };
+      spareBtns.push(b); card.appendChild(b); });
+    var fb2=h("div","fb"); card.appendChild(fb2);
+  }
+  var fb=h("div","fb");
+  var row=h("div","ansrow"), b1=h("button",null,"Проверить ответ"), b2=h("button","light","Проверить таблицу"), b3=h("button","light","Очистить");
+  b1.onclick=function(){ var bad=0, empty=0;
+    picks.forEach(function(p){ var on=p.grp.querySelector(".pill.on,.pill.ok,.pill.no");
+      p.grp.querySelectorAll(".pill").forEach(function(x){ if(x.classList.contains("ok")||x.classList.contains("no")){ x.classList.remove("ok","no"); x.classList.add("on"); } });
+      on=p.grp.querySelector(".pill.on");
+      if(!on){ empty++; return; } on.classList.remove("on");
+      if(on.textContent===p.want) on.classList.add("ok"); else { on.classList.add("no"); bad++; } });
+    if(!bad && !empty) say(fb,true,"Верно, задача решена");
+    else if(!bad) say(fb,true,"Пока верно, осталось выбрать: "+empty);
+    else say(fb,false,"Неверных ответов: "+bad); };
+  b2.onclick=function(){ var bad=0, empty=0;
+    tb.querySelectorAll("td.cell").forEach(function(td){ td.classList.remove("wrong"); var s=+td.getAttribute("data-s"), ok=td.getAttribute("data-ok")==="1";
+      if(!s){ empty++; return; } if((s===2)!==ok){ td.classList.add("wrong"); bad++; } });
+    if(!bad && !empty) say(fb,true,"Таблица заполнена верно");
+    else if(!bad) say(fb,true,"Ошибок нет, пустых клеток: "+empty);
+    else say(fb,false,"Ошибок в таблице: "+bad+" (обведены)"); };
+  b3.onclick=function(){ tb.querySelectorAll("td.cell").forEach(function(td){ td.setAttribute("data-s","0"); td.textContent=""; td.classList.remove("cross","tick","wrong"); });
+    cc.querySelectorAll(".pill").forEach(function(x){x.classList.remove("on","ok","no");}); spareBtns.forEach(function(x){x.classList.remove("ok","no");}); fb.textContent=""; };
+  row.appendChild(b1); row.appendChild(b2); row.appendChild(b3); card.appendChild(row); card.appendChild(fb);
+}
+
+/* ===== снежинки в шапке ===== */
+(function(){ var s=document.getElementById("deco"), out="", seed=7;
+  function rnd(){ seed=(seed*9301+49297)%233280; return seed/233280; }
+  for(var i=0;i<34;i++){ var x=rnd()*900, y=rnd()*110, r=5+rnd()*9, o=.25+rnd()*.35, g="";
+    for(var k=0;k<6;k++){ var a=k*Math.PI/3, x2=x+r*Math.cos(a), y2=y+r*Math.sin(a);
+      g+='<line x1="'+x.toFixed(1)+'" y1="'+y.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'"/>'; }
+    out+='<g stroke="#3b82f6" stroke-width="1.6" stroke-linecap="round" opacity="'+o.toFixed(2)+'">'+g+'</g>'; }
+  s.innerHTML=out; })();
+
+TASKS.forEach(function(t){ if(t.type==="place") buildPlace(t); else buildGrid(t); });
+document.addEventListener("click",function(){ if(SEL){ SEL.classList.remove("sel"); SEL=null; } });
+</script>
+</body>
+</html>
