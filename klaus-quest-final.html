@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Мешок с подарками</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;color:#fff;
+    background:linear-gradient(180deg,#060c2b 0%,#0f1f4d 55%,#1e3a8a 100%);
+    display:flex;align-items:center;justify-content:center;padding:24px;overflow:hidden}
+.stars{position:fixed;inset:0;pointer-events:none}
+.stars i{position:absolute;background:#fff;border-radius:50%;opacity:.8;animation:tw 3s infinite alternate}
+@keyframes tw{from{opacity:.25}to{opacity:.95}}
+.wrap{max-width:640px;width:100%;text-align:center;position:relative;z-index:1}
+h1{font-size:1.9em;margin-bottom:6px;text-shadow:0 2px 10px rgba(0,0,30,.8)}
+.sub{color:#93c5fd;font-weight:600;margin-bottom:22px}
+.sackbox{margin:0 auto 24px;width:230px;transition:transform .15s}
+.sackbox.shake{animation:sh .5s}
+@keyframes sh{0%,100%{transform:translateX(0)}20%{transform:translateX(-12px) rotate(-3deg)}40%{transform:translateX(12px) rotate(3deg)}60%{transform:translateX(-9px)}80%{transform:translateX(9px)}}
+.code{display:flex;gap:10px;justify-content:center;margin-bottom:18px}
+.code input{width:58px;height:70px;font-size:2em;font-weight:800;text-align:center;border-radius:12px;
+    border:3px solid #3b82f6;background:#0b1538;color:#fff;font-family:inherit}
+.code input:focus{outline:none;border-color:#93c5fd;background:#12205a}
+button{border:none;border-radius:12px;background:#dc2626;color:#fff;font-weight:800;font-size:1.2em;
+    padding:13px 34px;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(220,38,38,.4)}
+button:hover{background:#ef4444}
+.msg{min-height:1.6em;margin-top:14px;font-weight:700;font-size:1.1em;color:#fca5a5}
+.win{display:none}
+.win.show{display:block;animation:pop .6s}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+.win h2{font-size:2.1em;color:#fde68a;margin:14px 0 8px;text-shadow:0 2px 12px rgba(250,204,21,.45)}
+.win .motto{font-size:1.25em;color:#e0f2fe;font-style:italic}
+.win .gifts{font-size:2.2em;letter-spacing:10px;margin-top:14px}
+.conf{position:fixed;top:-20px;font-size:1.4em;animation:fall linear forwards;pointer-events:none}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+</style>
+</head>
+<body>
+<div class="stars" id="stars"></div>
+<div class="wrap">
+<h1>❄ Мешок с подарками ❄</h1>
+<div class="sub">введите код из шести цифр — по одной из каждой главы</div>
+
+<div class="sackbox" id="sack">
+<svg viewBox="0 0 200 220" width="230" role="img">
+  <ellipse cx="100" cy="208" rx="70" ry="10" fill="#000" opacity=".35"/>
+  <g id="closed">
+    <path d="M100 36 Q40 68 36 140 Q36 200 100 200 Q164 200 164 140 Q160 68 100 36 Z" fill="#b45309"/>
+    <path d="M100 36 Q40 68 36 140 Q36 200 100 200 Q164 200 164 140 Q160 68 100 36 Z" fill="none" stroke="#7c3a06" stroke-width="3"/>
+    <path d="M84 28 Q100 16 116 28 L112 44 Q100 36 88 44 Z" fill="#92400e"/>
+    <path d="M76 46 Q100 62 124 46" stroke="#fde68a" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <path d="M60 120 Q100 140 140 120" stroke="#92400e" stroke-width="4" fill="none" opacity=".6"/>
+    <path d="M70 160 Q100 176 130 160" stroke="#92400e" stroke-width="4" fill="none" opacity=".5"/>
+  </g>
+  <g id="opened" style="display:none">
+    <path d="M100 90 Q46 104 42 150 Q42 200 100 200 Q158 200 158 150 Q154 104 100 90 Z" fill="#b45309" stroke="#7c3a06" stroke-width="3"/>
+    <path d="M42 120 Q30 104 44 92 M158 120 Q170 104 156 92" stroke="#92400e" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <rect x="62" y="62" width="34" height="30" rx="4" fill="#dc2626" stroke="#7f1d1d" stroke-width="2"/>
+    <line x1="79" y1="62" x2="79" y2="92" stroke="#fde68a" stroke-width="5"/>
+    <rect x="104" y="52" width="30" height="40" rx="4" fill="#16a34a" stroke="#14532d" stroke-width="2"/>
+    <line x1="104" y1="72" x2="134" y2="72" stroke="#fde68a" stroke-width="5"/>
+    <circle cx="100" cy="44" r="12" fill="#facc15" stroke="#b45309" stroke-width="2"/>
+    <path d="M100 32 l0 -8 M90 36 l-7 -6 M110 36 l7 -6" stroke="#fde68a" stroke-width="3" stroke-linecap="round"/>
+  </g>
+</svg>
+</div>
+
+<div class="code" id="codeinputs">
+<input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric">
+</div>
+<button onclick="tryOpen()">Открыть мешок</button>
+<div class="msg" id="msg"></div>
+
+<div class="win" id="win">
+<h2>С Новым годом!</h2>
+<div class="motto">«Добрый поступок всегда рождает другой»</div>
+<div class="gifts">🎁 🎄 ⛸ 🧸 ✨</div>
+</div>
+</div>
+
+<script>
+// звёзды
+(function(){
+  var s = document.getElementById('stars');
+  for(var i = 0; i < 60; i++){
+    var d = document.createElement('i');
+    d.style.left = Math.random()*100 + 'vw';
+    d.style.top = Math.random()*100 + 'vh';
+    var sz = 1 + Math.random()*2.5;
+    d.style.width = d.style.height = sz + 'px';
+    d.style.animationDelay = (Math.random()*3) + 's';
+    s.appendChild(d);
+  }
+})();
+// автопереход между клетками
+var inputs = document.querySelectorAll('#codeinputs input');
+inputs.forEach(function(el, i){
+  el.addEventListener('input', function(){
+    el.value = el.value.replace(/\D/g, '');
+    if(el.value && i < inputs.length-1) inputs[i+1].focus();
+  });
+  el.addEventListener('keydown', function(e){
+    if(e.key === 'Backspace' && !el.value && i > 0) inputs[i-1].focus();
+  });
+});
+function tryOpen(){
+  var code = Array.prototype.map.call(inputs, function(el){ return el.value; }).join('');
+  var msg = document.getElementById('msg');
+  if(code.length < 6){ msg.textContent = 'Нужны все шесть цифр'; return; }
+  var w = 0, q = 0;
+  for(var i = 0; i < 6; i++){
+    w += (i+1) * code.charCodeAt(i);
+    q += (+code[i]) * (+code[i]);
+  }
+  if(w === 1119 && q === 162){
+    msg.textContent = '';
+    document.getElementById('closed').style.display = 'none';
+    document.getElementById('opened').style.display = '';
+    document.getElementById('win').classList.add('show');
+    document.getElementById('codeinputs').style.display = 'none';
+    document.querySelector('button').style.display = 'none';
+    var em = ['❄','🎁','✨','⭐','🎄'];
+    for(var j = 0; j < 40; j++){
+      var c = document.createElement('div');
+      c.className = 'conf';
+      c.textContent = em[j % em.length];
+      c.style.left = Math.random()*100 + 'vw';
+      c.style.animationDuration = (2.5 + Math.random()*3) + 's';
+      c.style.animationDelay = (Math.random()*1.5) + 's';
+      document.body.appendChild(c);
+    }
+  } else {
+    msg.textContent = 'Мешок не поддаётся… проверьте цифры!';
+    var sack = document.getElementById('sack');
+    sack.classList.remove('shake'); void sack.offsetWidth; sack.classList.add('shake');
+  }
+}
+</script>
+</body>
+</html>

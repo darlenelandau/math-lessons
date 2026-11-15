@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Квест: Почта Смиренсбурга (5 класс)</title>
+<style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',Arial,sans-serif;
+        background:linear-gradient(180deg,#bfdbfe 0%,#dbeafe 40%,#e0f2fe 100%);
+        background-attachment:fixed;color:#1e2430;padding:22px;line-height:1.55}
+    body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+        background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="190" height="190"><g stroke="%23ffffff" stroke-width="2.2" stroke-linecap="round" opacity="0.55"><path d="M38 12v30M23 19.5l30 15M53 19.5l-30 15M38 17l-6-6M38 17l6-6M38 37l-6 6M38 37l6 6"/><path d="M135 95v22M124 100.5l22 11M146 100.5l-22 11"/><path d="M62 140v16M54 144l16 8M70 144l-16 8"/></g></svg>')}
+    .container{max-width:900px;margin:0 auto;position:relative;z-index:1}
+    .header{border:3px solid #1e3a8a;border-radius:14px;padding:18px 24px 64px;margin-bottom:8px;text-align:center;
+        background:linear-gradient(175deg,#0f1f4d 0%,#1e3a8a 55%,#3b82f6 100%);
+        box-shadow:0 3px 10px rgba(0,0,0,.2);position:relative;overflow:hidden}
+    .header .mts{position:absolute;left:0;right:0;bottom:-2px;width:100%;height:auto;display:block}
+    .header h1{font-size:1.7em;color:#fff;position:relative;z-index:1;text-shadow:0 2px 8px rgba(2,10,40,.8)}
+    .header .sub{color:#bfdbfe;position:relative;z-index:1;font-size:1.02em;margin-top:4px;font-weight:600}
+    .sec{--c:#1e3a8a;--bg:#eff6ff;--grid:#c7d8f7}
+    .sec:nth-of-type(even){--c:#0e7490;--bg:#ecfeff;--grid:#bae3ec}
+    h2{font-size:1.22em;margin:26px 0 12px;padding:9px 16px;border-radius:9px;
+       background:var(--c);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.14)}
+    .task{border:2px solid var(--c);border-radius:10px;padding:15px 19px;margin:15px 0;
+          background:#fff;box-shadow:0 2px 7px rgba(0,0,0,.08)}
+    .task p{font-size:1.06em;margin-bottom:7px}
+    .task strong{color:var(--c)}
+    .scene{display:flex;gap:16px;align-items:flex-start}
+    .scene .art{flex:none}
+    .scene .txt{flex:1}
+    @media(max-width:620px){.scene{flex-direction:column;align-items:center}}
+    .grid-space{margin-top:9px;border:2px solid var(--c);border-radius:6px;min-height:200px;background:#fff;
+        background-image:repeating-linear-gradient(0deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px),
+                         repeating-linear-gradient(90deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px);
+        background-size:24px 24px}
+    .grid-low{min-height:130px}
+    .frac{display:inline-block;text-align:center;vertical-align:middle;font-weight:800;line-height:1.05;margin:0 3px}
+    .frac span{display:block;padding:0 4px}
+    .frac span.d{border-top:2px solid currentColor}
+    .blank{display:inline-block;min-width:90px;border-bottom:2px solid var(--c);height:1.15em;vertical-align:-3px;margin:0 4px;opacity:.65}
+    .blank.w60{min-width:60px}
+    .ansline{margin-top:10px;font-weight:700;color:var(--c);font-size:1.05em}
+    .codebox{margin-top:11px;border:3px solid #b45309;border-radius:10px;background:#fffbeb;padding:10px 15px;
+        font-weight:800;color:#92400e;font-size:1.05em}
+    .codebox .blank{border-bottom-color:#b45309}
+    .boards{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin:12px 0 4px}
+    .boards figure{margin:0;text-align:center}
+    .boards figcaption{font-size:.9em;font-weight:700;color:var(--c);margin-top:4px}
+    .alpha{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin:10px 0 4px}
+    .alpha div{width:40px;border:2px solid var(--c);border-radius:7px;background:#fff;text-align:center;padding:3px 0}
+    .alpha b{display:block;font-size:1.0em}
+    .alpha span{display:block;font-size:.8em;color:#64748b;font-weight:700}
+    .cipher{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin:12px 0 4px}
+    .cipher div{width:52px;height:64px;border:2px solid var(--c);border-radius:9px;background:#fff;
+        display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:6px 0}
+    .cipher b{font-size:1.1em;color:var(--c)}
+    .cipher i{font-style:normal;width:30px;border-bottom:2px solid #94a3b8;height:1.3em}
+    .keep{page-break-inside:avoid;break-inside:avoid}
+    @page{size:A4;margin:12mm}
+    @media print{body{background:#fff;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+        body::before{display:none}
+        .task,.header{page-break-inside:avoid}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="jesper" viewBox="0 0 90 130">
+<ellipse cx="45" cy="124" rx="26" ry="5" fill="#0d2860" opacity=".15"/>
+<rect x="33" y="58" width="24" height="46" rx="9" fill="#1d4ed8"/>
+<rect x="33" y="58" width="24" height="12" fill="#1e3a8a"/>
+<line x1="38" y1="104" x2="38" y2="120" stroke="#1e293b" stroke-width="6" stroke-linecap="round"/>
+<line x1="52" y1="104" x2="52" y2="120" stroke="#1e293b" stroke-width="6" stroke-linecap="round"/>
+<line x1="33" y1="68" x2="20" y2="84" stroke="#1d4ed8" stroke-width="7" stroke-linecap="round"/>
+<line x1="57" y1="68" x2="70" y2="82" stroke="#1d4ed8" stroke-width="7" stroke-linecap="round"/>
+<rect x="62" y="74" width="20" height="14" rx="2" fill="#fff" stroke="#b45309" stroke-width="1.6"/>
+<path d="M62 74 L72 83 L82 74" fill="none" stroke="#b45309" stroke-width="1.6"/>
+<circle cx="45" cy="38" r="17" fill="#fcd7b8"/>
+<path d="M28 34 Q45 20 62 34 L62 28 Q45 14 28 28 Z" fill="#7c2d12"/>
+<rect x="27" y="24" width="36" height="9" rx="4" fill="#1e40af"/>
+<rect x="40" y="16" width="10" height="9" rx="2" fill="#1e40af"/>
+<circle cx="39" cy="38" r="2.2" fill="#1e293b"/><circle cx="51" cy="38" r="2.2" fill="#1e293b"/>
+<path d="M39 46 Q45 50 51 46" stroke="#1e293b" stroke-width="2" fill="none" stroke-linecap="round"/>
+</symbol>
+<symbol id="klaus" viewBox="0 0 110 130">
+<ellipse cx="55" cy="124" rx="34" ry="5" fill="#0d2860" opacity=".15"/>
+<rect x="30" y="56" width="50" height="52" rx="16" fill="#b91c1c"/>
+<line x1="38" y1="106" x2="38" y2="121" stroke="#1e293b" stroke-width="8" stroke-linecap="round"/>
+<line x1="72" y1="106" x2="72" y2="121" stroke="#1e293b" stroke-width="8" stroke-linecap="round"/>
+<line x1="31" y1="66" x2="16" y2="84" stroke="#b91c1c" stroke-width="9" stroke-linecap="round"/>
+<line x1="79" y1="66" x2="94" y2="84" stroke="#b91c1c" stroke-width="9" stroke-linecap="round"/>
+<circle cx="55" cy="36" r="19" fill="#fcd7b8"/>
+<path d="M36 40 Q38 70 55 72 Q72 70 74 40 Q66 50 55 50 Q44 50 36 40 Z" fill="#f1f5f9"/>
+<path d="M36 28 Q55 16 74 28 L74 24 Q55 10 36 24 Z" fill="#e2e8f0"/>
+<circle cx="48" cy="34" r="2.4" fill="#1e293b"/><circle cx="62" cy="34" r="2.4" fill="#1e293b"/>
+<circle cx="55" cy="41" r="4" fill="#f4a988"/>
+<circle cx="90" cy="98" r="9" fill="#facc15" stroke="#b45309" stroke-width="2"/>
+<path d="M90 89 l0 -6 M85 92 l-4 -4 M95 92 l4 -4" stroke="#b45309" stroke-width="2" stroke-linecap="round"/>
+</symbol>
+<symbol id="alva" viewBox="0 0 90 130">
+<ellipse cx="45" cy="124" rx="24" ry="5" fill="#0d2860" opacity=".15"/>
+<path d="M32 58 L58 58 L64 108 L26 108 Z" fill="#047857"/>
+<line x1="37" y1="108" x2="37" y2="121" stroke="#1e293b" stroke-width="6" stroke-linecap="round"/>
+<line x1="53" y1="108" x2="53" y2="121" stroke="#1e293b" stroke-width="6" stroke-linecap="round"/>
+<line x1="33" y1="66" x2="20" y2="82" stroke="#047857" stroke-width="7" stroke-linecap="round"/>
+<line x1="57" y1="66" x2="70" y2="80" stroke="#047857" stroke-width="7" stroke-linecap="round"/>
+<rect x="60" y="70" width="18" height="13" rx="2" fill="#fde68a" stroke="#92400e" stroke-width="1.6"/>
+<line x1="69" y1="70" x2="69" y2="83" stroke="#92400e" stroke-width="1.4"/>
+<circle cx="45" cy="38" r="16" fill="#fcd7b8"/>
+<path d="M30 36 Q30 20 45 20 Q60 20 60 36 L60 30 Q60 14 45 14 Q30 14 30 30 Z" fill="#b45309"/>
+<circle cx="45" cy="15" r="7" fill="#b45309"/>
+<circle cx="39" cy="38" r="2.2" fill="#1e293b"/><circle cx="51" cy="38" r="2.2" fill="#1e293b"/>
+<path d="M39 45 Q45 49 51 45" stroke="#1e293b" stroke-width="2" fill="none" stroke-linecap="round"/>
+</symbol>
+<symbol id="margu" viewBox="0 0 80 110">
+<ellipse cx="40" cy="104" rx="21" ry="4.5" fill="#0d2860" opacity=".15"/>
+<path d="M28 52 L52 52 L57 92 L23 92 Z" fill="#1d4ed8"/>
+<path d="M23 92 L57 92 L57 86 L23 86 Z" fill="#dc2626"/>
+<line x1="33" y1="92" x2="33" y2="102" stroke="#1e293b" stroke-width="6" stroke-linecap="round"/>
+<line x1="47" y1="92" x2="47" y2="102" stroke="#1e293b" stroke-width="6" stroke-linecap="round"/>
+<line x1="29" y1="58" x2="18" y2="70" stroke="#1d4ed8" stroke-width="6" stroke-linecap="round"/>
+<line x1="51" y1="58" x2="62" y2="70" stroke="#1d4ed8" stroke-width="6" stroke-linecap="round"/>
+<circle cx="40" cy="34" r="14" fill="#f8c89d"/>
+<path d="M26 32 Q26 16 40 16 Q54 16 54 32 L54 36 Q40 28 26 36 Z" fill="#dc2626"/>
+<path d="M26 33 L54 33 L54 38 L26 38 Z" fill="#1d4ed8"/>
+<circle cx="40" cy="12" r="5" fill="#facc15"/>
+<circle cx="35" cy="36" r="2" fill="#1e293b"/><circle cx="45" cy="36" r="2" fill="#1e293b"/>
+<path d="M35 42 Q40 46 45 42" stroke="#1e293b" stroke-width="2" fill="none" stroke-linecap="round"/>
+</symbol>
+<symbol id="deer" viewBox="0 0 120 110">
+<ellipse cx="60" cy="104" rx="34" ry="5" fill="#0d2860" opacity=".15"/>
+<rect x="30" y="52" width="54" height="30" rx="14" fill="#92400e"/>
+<line x1="38" y1="80" x2="38" y2="100" stroke="#78350f" stroke-width="7" stroke-linecap="round"/>
+<line x1="74" y1="80" x2="74" y2="100" stroke="#78350f" stroke-width="7" stroke-linecap="round"/>
+<circle cx="90" cy="46" r="13" fill="#92400e"/>
+<circle cx="99" cy="49" r="4.5" fill="#dc2626"/>
+<circle cx="88" cy="42" r="2" fill="#1e293b"/>
+<path d="M84 34 L78 20 M84 34 L88 18 M88 24 L82 24 M86 20 L92 22" stroke="#78350f" stroke-width="3" stroke-linecap="round" fill="none"/>
+<path d="M30 60 Q22 64 24 72" stroke="#92400e" stroke-width="6" fill="none" stroke-linecap="round"/>
+</symbol>
+<symbol id="sack" viewBox="0 0 100 110">
+<ellipse cx="50" cy="104" rx="30" ry="5" fill="#0d2860" opacity=".15"/>
+<path d="M50 18 Q20 34 18 70 Q18 100 50 100 Q82 100 82 70 Q80 34 50 18 Z" fill="#b45309"/>
+<path d="M42 14 Q50 8 58 14 L56 22 Q50 18 44 22 Z" fill="#92400e"/>
+<path d="M38 22 Q50 30 62 22" stroke="#fde68a" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M34 60 Q50 70 66 60" stroke="#92400e" stroke-width="2.5" fill="none" opacity=".7"/>
+</symbol>
+</defs></svg><div class="container">
+<div class="header">
+    <svg class="mts" viewBox="0 0 1200 190" preserveAspectRatio="none" aria-hidden="true">
+      <circle cx="1050" cy="40" r="26" fill="#fef9c3" opacity=".95"/>
+      <circle cx="140" cy="34" r="2.2" fill="#fff"/><circle cx="330" cy="20" r="1.8" fill="#fff"/>
+      <circle cx="520" cy="42" r="2.4" fill="#fff"/><circle cx="760" cy="26" r="2" fill="#fff"/>
+      <circle cx="930" cy="52" r="2.2" fill="#fff"/><circle cx="240" cy="58" r="1.8" fill="#fff"/>
+      <polygon points="-40,190 230,56 520,190" fill="#dbeafe" opacity=".95"/>
+      <polygon points="230,56 290,92 160,132" fill="#ffffff"/>
+      <polygon points="420,190 700,80 980,190" fill="#bfdbfe" opacity=".9"/>
+      <polygon points="860,190 1080,100 1300,190" fill="#93c5fd" opacity=".8"/>
+      <g transform="translate(180,120)">
+        <rect x="0" y="12" width="22" height="22" fill="#fecaca" stroke="#7f1d1d" stroke-width="1.5"/>
+        <polygon points="-3,12 11,0 25,12" fill="#7f1d1d"/>
+        <rect x="30" y="16" width="20" height="18" fill="#bbf7d0" stroke="#14532d" stroke-width="1.5"/>
+        <polygon points="27,16 40,5 53,16" fill="#14532d"/>
+        <rect x="58" y="12" width="22" height="22" fill="#fecaca" stroke="#7f1d1d" stroke-width="1.5"/>
+        <polygon points="55,12 69,0 83,12" fill="#7f1d1d"/>
+      </g>
+      <g transform="translate(640,52)">
+        <path d="M0 26 Q14 14 30 20 L58 20 Q66 30 56 36 L8 36 Q-4 34 0 26 Z" fill="#7f1d1d"/>
+        <path d="M58 20 Q74 10 82 16 L76 24 Z" fill="#92400e"/>
+        <circle cx="86" cy="12" r="7" fill="#92400e"/>
+        <path d="M82 6 L76 -4 M88 5 L92 -6" stroke="#78350f" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <path d="M30 20 Q24 8 34 4 Q44 10 40 20 Z" fill="#b45309"/>
+      </g>
+    </svg>
+    <h1>❄ Почта Смиренсбурга ❄</h1>
+    <div class="sub">новогодний квест · соберите код из шести цифр</div>
+</div>
+<section class="sec"><h2>Глава 1. Назначение</h2>
+<div class="task keep"><div class="scene"><div class="art"><svg width="86" height="124"><use href="#jesper"/></svg></div>
+<div class="txt"><p>Почтальона Джеспера отправили в самый северный город на свете. Вернуться домой он сможет, только когда отправит <strong>6000 писем</strong>. В первый месяц он отправил <span class="frac"><span>1</span><span class="d">8</span></span> всех писем, во второй — <span class="frac"><span>2</span><span class="d">5</span></span> <strong>остатка</strong>. Сколько писем ему осталось отправить?</p>
+<p class="ansline">осталось: <span class="blank"></span> писем</p>
+<div class="codebox">В КОД · цифра №1 — первая цифра ответа: <span class="blank w60"></span></div></div></div>
+<div class="grid-space"></div>
+</div></section><section class="sec"><h2>Глава 2. Город вражды</h2>
+<div class="task keep"><div class="scene"><div class="art"><svg viewBox="0 0 184 184" width="200" role="img"><rect x="8" y="8" width="24" height="24" fill="#fca5a5"/><rect x="32" y="8" width="24" height="24" fill="#86efac"/><rect x="56" y="8" width="24" height="24" fill="#fca5a5"/><rect x="80" y="8" width="24" height="24" fill="#86efac"/><rect x="104" y="8" width="24" height="24" fill="#fca5a5"/><rect x="128" y="8" width="24" height="24" fill="#86efac"/><rect x="152" y="8" width="24" height="24" fill="#fca5a5"/><rect x="8" y="32" width="24" height="24" fill="#86efac"/><rect x="32" y="32" width="24" height="24" fill="#fca5a5"/><rect x="56" y="32" width="24" height="24" fill="#86efac"/><rect x="80" y="32" width="24" height="24" fill="#fca5a5"/><rect x="104" y="32" width="24" height="24" fill="#86efac"/><rect x="128" y="32" width="24" height="24" fill="#fca5a5"/><rect x="152" y="32" width="24" height="24" fill="#86efac"/><rect x="8" y="56" width="24" height="24" fill="#fca5a5"/><rect x="32" y="56" width="24" height="24" fill="#86efac"/><rect x="56" y="56" width="24" height="24" fill="#fca5a5"/><rect x="80" y="56" width="24" height="24" fill="#86efac"/><rect x="104" y="56" width="24" height="24" fill="#fca5a5"/><rect x="128" y="56" width="24" height="24" fill="#86efac"/><rect x="152" y="56" width="24" height="24" fill="#fca5a5"/><rect x="8" y="80" width="24" height="24" fill="#86efac"/><rect x="32" y="80" width="24" height="24" fill="#fca5a5"/><rect x="56" y="80" width="24" height="24" fill="#86efac"/><rect x="80" y="80" width="24" height="24" fill="#fca5a5"/><rect x="104" y="80" width="24" height="24" fill="#86efac"/><rect x="128" y="80" width="24" height="24" fill="#fca5a5"/><rect x="152" y="80" width="24" height="24" fill="#86efac"/><rect x="8" y="104" width="24" height="24" fill="#fca5a5"/><rect x="32" y="104" width="24" height="24" fill="#86efac"/><rect x="56" y="104" width="24" height="24" fill="#fca5a5"/><rect x="80" y="104" width="24" height="24" fill="#86efac"/><rect x="104" y="104" width="24" height="24" fill="#fca5a5"/><rect x="128" y="104" width="24" height="24" fill="#86efac"/><rect x="152" y="104" width="24" height="24" fill="#fca5a5"/><rect x="8" y="128" width="24" height="24" fill="#86efac"/><rect x="32" y="128" width="24" height="24" fill="#fca5a5"/><rect x="56" y="128" width="24" height="24" fill="#86efac"/><rect x="80" y="128" width="24" height="24" fill="#fca5a5"/><rect x="104" y="128" width="24" height="24" fill="#86efac"/><rect x="128" y="128" width="24" height="24" fill="#fca5a5"/><rect x="152" y="128" width="24" height="24" fill="#86efac"/><rect x="8" y="152" width="24" height="24" fill="#fca5a5"/><rect x="32" y="152" width="24" height="24" fill="#86efac"/><rect x="56" y="152" width="24" height="24" fill="#fca5a5"/><rect x="80" y="152" width="24" height="24" fill="#86efac"/><rect x="104" y="152" width="24" height="24" fill="#fca5a5"/><rect x="128" y="152" width="24" height="24" fill="#86efac"/><rect x="152" y="152" width="24" height="24" fill="#fca5a5"/><line x1="8" y1="8" x2="8" y2="176" stroke="#7f1d1d" stroke-width="1"/><line x1="8" y1="8" x2="176" y2="8" stroke="#7f1d1d" stroke-width="1"/><line x1="32" y1="8" x2="32" y2="176" stroke="#7f1d1d" stroke-width="1"/><line x1="8" y1="32" x2="176" y2="32" stroke="#7f1d1d" stroke-width="1"/><line x1="56" y1="8" x2="56" y2="176" stroke="#7f1d1d" stroke-width="1"/><line x1="8" y1="56" x2="176" y2="56" stroke="#7f1d1d" stroke-width="1"/><line x1="80" y1="8" x2="80" y2="176" stroke="#7f1d1d" stroke-width="1"/><line x1="8" y1="80" x2="176" y2="80" stroke="#7f1d1d" stroke-width="1"/><line x1="104" y1="8" x2="104" y2="176" stroke="#7f1d1d" stroke-width="1"/><line x1="8" y1="104" x2="176" y2="104" stroke="#7f1d1d" stroke-width="1"/><line x1="128" y1="8" x2="128" y2="176" stroke="#7f1d1d" stroke-width="1"/><line x1="8" y1="128" x2="176" y2="128" stroke="#7f1d1d" stroke-width="1"/><line x1="152" y1="8" x2="152" y2="176" stroke="#7f1d1d" stroke-width="1"/><line x1="8" y1="152" x2="176" y2="152" stroke="#7f1d1d" stroke-width="1"/><line x1="176" y1="8" x2="176" y2="176" stroke="#7f1d1d" stroke-width="1"/><line x1="8" y1="176" x2="176" y2="176" stroke="#7f1d1d" stroke-width="1"/><rect x="8" y="8" width="168" height="168" fill="none" stroke="#7f1d1d" stroke-width="2.5"/></svg></div>
+<div class="txt"><p>В Смиренсбурге испокон веку враждуют <strong>Крумы</strong> (красные кварталы) и <strong>Эллингбо</strong> (зелёные). Кварталы чередуются, как на карте, угловые — крумские. Джеспер хочет разнести письма, пройдя по всем <strong>49 кварталам по одному разу</strong> (переходить можно только в соседний по стороне), причём <strong>начать и закончить у Эллингбо</strong>. Получится ли?</p>
+<p class="ansline">ответ и объяснение — в поле ниже</p></div></div>
+<div class="grid-space grid-low"></div>
+</div></section><section class="sec"><h2>Глава 3. Путь к Клаусу</h2>
+<div class="task keep"><div class="scene"><div class="art"><svg width="110" height="100"><use href="#deer"/></svg></div>
+<div class="txt"><p>За лесом живёт загадочный мастер Клаус. До его хижины <strong>18 км</strong>. Джеспер вышел пешком со скоростью <strong>4 км/ч</strong>, а через <strong>2 часа</strong> следом выехала Маргу на оленьей упряжке со скоростью <strong>12 км/ч</strong>. На сколько часов раньше Джеспера Маргу будет у хижины?</p>
+<p class="ansline">раньше на: <span class="blank w60"></span> ч</p>
+<div class="codebox">В КОД · цифра №2 — это число часов: <span class="blank w60"></span></div></div></div>
+<div class="grid-space"></div>
+</div></section><section class="sec"><h2>Глава 4. Мастерская игрушек</h2>
+<div class="task keep"><div class="scene"><div class="art"><svg width="104" height="124"><use href="#klaus"/></svg></div>
+<div class="txt"><p>У Клауса полон дом игрушек, которые он когда-то смастерил. Он отдал Джесперу для детей <span class="frac"><span>2</span><span class="d">5</span></span> всех игрушек и <strong>ещё 6</strong> штук — и у него осталось <strong>30</strong>. Сколько игрушек было у Клауса сначала? Запиши уравнение и реши.</p>
+<p class="ansline">было: <span class="blank w60"></span> игрушек</p>
+<div class="codebox">В КОД · цифра №3 — первая цифра ответа: <span class="blank w60"></span></div></div></div>
+<div class="grid-space"></div>
+</div></section><section class="sec"><h2>Глава 5. Письмо Маргу</h2>
+<div class="task keep"><div class="scene"><div class="art"><svg width="76" height="104"><use href="#margu"/></svg></div>
+<div class="txt"><p>Маргу говорит на своём языке и писать пока не умеет — но очень хочет кое-что получить. Она прислала шифр: каждая буква заменена её номером в алфавите. Что просит Маргу?</p></div></div>
+<div class="alpha"><div><b>А</b><span>1</span></div><div><b>Б</b><span>2</span></div><div><b>В</b><span>3</span></div><div><b>Г</b><span>4</span></div><div><b>Д</b><span>5</span></div><div><b>Е</b><span>6</span></div><div><b>Ё</b><span>7</span></div><div><b>Ж</b><span>8</span></div><div><b>З</b><span>9</span></div><div><b>И</b><span>10</span></div><div><b>Й</b><span>11</span></div><div><b>К</b><span>12</span></div><div><b>Л</b><span>13</span></div><div><b>М</b><span>14</span></div><div><b>Н</b><span>15</span></div><div><b>О</b><span>16</span></div><div><b>П</b><span>17</span></div><div><b>Р</b><span>18</span></div><div><b>С</b><span>19</span></div><div><b>Т</b><span>20</span></div><div><b>У</b><span>21</span></div><div><b>Ф</b><span>22</span></div><div><b>Х</b><span>23</span></div><div><b>Ц</b><span>24</span></div><div><b>Ч</b><span>25</span></div><div><b>Ш</b><span>26</span></div><div><b>Щ</b><span>27</span></div><div><b>Ъ</b><span>28</span></div><div><b>Ы</b><span>29</span></div><div><b>Ь</b><span>30</span></div><div><b>Э</b><span>31</span></div><div><b>Ю</b><span>32</span></div><div><b>Я</b><span>33</span></div></div>
+<div class="cipher"><div><b>17</b><i></i></div><div><b>16</b><i></i></div><div><b>5</b><i></i></div><div><b>1</b><i></i></div><div><b>18</b><i></i></div><div><b>16</b><i></i></div><div><b>12</b><i></i></div></div>
+</div></section><section class="sec"><h2>Глава 6. Школа Альвы</h2>
+<div class="task keep"><div class="scene"><div class="art"><svg width="86" height="124"><use href="#alva"/></svg></div>
+<div class="txt"><p>Учительница Альва так и не дождалась учеников и торговала рыбой. Но письма меняют город! В Смиренсбурге <strong>96 детей</strong>: в первый день в школу пришла лишь <span class="frac"><span>1</span><span class="d">12</span></span> всех, а через месяц — уже <span class="frac"><span>3</span><span class="d">8</span></span> всех. Сколько детей пришло в первый день? На сколько учеников стало больше через месяц?</p>
+<p class="ansline">в первый день: <span class="blank w60"></span> &nbsp;&nbsp; больше на: <span class="blank w60"></span></p>
+<div class="codebox">В КОД · цифра №4 — сколько детей пришло в первый день: <span class="blank w60"></span></div></div></div>
+<div class="grid-space"></div>
+</div></section><section class="sec"><h2>Глава 7. Снежное перемирие</h2>
+<div class="task keep"><p>Город оттаивает. Альва устроила снежный турнир, чтобы подружить детей кланов: участвуют <strong>15 детей</strong>, и каждый должен сыграть ровно <strong>3</strong> снежные дуэли. Удастся ли составить такое расписание?</p>
+<p class="ansline">ответ и объяснение — в поле ниже</p>
+<div class="grid-space grid-low"></div>
+</div></section><section class="sec"><h2>Глава 8. Доставка по крышам</h2>
+<div class="task keep"><div class="scene"><div class="art"><svg viewBox="0 0 184 184" width="210" role="img"><rect x="12" y="12" width="20" height="20" fill="#bfdbfe"/><rect x="32" y="12" width="20" height="20" fill="#ffffff"/><rect x="52" y="12" width="20" height="20" fill="#bfdbfe"/><rect x="72" y="12" width="20" height="20" fill="#ffffff"/><rect x="92" y="12" width="20" height="20" fill="#bfdbfe"/><rect x="112" y="12" width="20" height="20" fill="#ffffff"/><rect x="132" y="12" width="20" height="20" fill="#bfdbfe"/><rect x="152" y="12" width="20" height="20" fill="#ffffff"/><rect x="12" y="32" width="20" height="20" fill="#ffffff"/><rect x="32" y="32" width="20" height="20" fill="#bfdbfe"/><rect x="52" y="32" width="20" height="20" fill="#ffffff"/><rect x="72" y="32" width="20" height="20" fill="#bfdbfe"/><rect x="92" y="32" width="20" height="20" fill="#ffffff"/><rect x="112" y="32" width="20" height="20" fill="#bfdbfe"/><rect x="132" y="32" width="20" height="20" fill="#ffffff"/><rect x="152" y="32" width="20" height="20" fill="#bfdbfe"/><rect x="12" y="52" width="20" height="20" fill="#bfdbfe"/><rect x="32" y="52" width="20" height="20" fill="#ffffff"/><rect x="52" y="52" width="20" height="20" fill="#bfdbfe"/><rect x="72" y="52" width="20" height="20" fill="#ffffff"/><rect x="92" y="52" width="20" height="20" fill="#bfdbfe"/><rect x="112" y="52" width="20" height="20" fill="#ffffff"/><rect x="132" y="52" width="20" height="20" fill="#bfdbfe"/><rect x="152" y="52" width="20" height="20" fill="#ffffff"/><rect x="12" y="72" width="20" height="20" fill="#ffffff"/><rect x="32" y="72" width="20" height="20" fill="#bfdbfe"/><rect x="52" y="72" width="20" height="20" fill="#ffffff"/><rect x="72" y="72" width="20" height="20" fill="#bfdbfe"/><rect x="92" y="72" width="20" height="20" fill="#ffffff"/><rect x="112" y="72" width="20" height="20" fill="#bfdbfe"/><rect x="132" y="72" width="20" height="20" fill="#ffffff"/><rect x="152" y="72" width="20" height="20" fill="#bfdbfe"/><rect x="12" y="92" width="20" height="20" fill="#bfdbfe"/><rect x="32" y="92" width="20" height="20" fill="#ffffff"/><rect x="52" y="92" width="20" height="20" fill="#bfdbfe"/><rect x="72" y="92" width="20" height="20" fill="#ffffff"/><rect x="92" y="92" width="20" height="20" fill="#bfdbfe"/><rect x="112" y="92" width="20" height="20" fill="#ffffff"/><rect x="132" y="92" width="20" height="20" fill="#bfdbfe"/><rect x="152" y="92" width="20" height="20" fill="#ffffff"/><rect x="12" y="112" width="20" height="20" fill="#ffffff"/><rect x="32" y="112" width="20" height="20" fill="#bfdbfe"/><rect x="52" y="112" width="20" height="20" fill="#ffffff"/><rect x="72" y="112" width="20" height="20" fill="#bfdbfe"/><rect x="92" y="112" width="20" height="20" fill="#ffffff"/><rect x="112" y="112" width="20" height="20" fill="#bfdbfe"/><rect x="132" y="112" width="20" height="20" fill="#ffffff"/><rect x="152" y="112" width="20" height="20" fill="#bfdbfe"/><rect x="12" y="132" width="20" height="20" fill="#bfdbfe"/><rect x="32" y="132" width="20" height="20" fill="#ffffff"/><rect x="52" y="132" width="20" height="20" fill="#bfdbfe"/><rect x="72" y="132" width="20" height="20" fill="#ffffff"/><rect x="92" y="132" width="20" height="20" fill="#bfdbfe"/><rect x="112" y="132" width="20" height="20" fill="#ffffff"/><rect x="132" y="132" width="20" height="20" fill="#bfdbfe"/><rect x="152" y="132" width="20" height="20" fill="#ffffff"/><rect x="12" y="152" width="20" height="20" fill="#ffffff"/><rect x="32" y="152" width="20" height="20" fill="#bfdbfe"/><rect x="52" y="152" width="20" height="20" fill="#ffffff"/><rect x="72" y="152" width="20" height="20" fill="#bfdbfe"/><rect x="92" y="152" width="20" height="20" fill="#ffffff"/><rect x="112" y="152" width="20" height="20" fill="#bfdbfe"/><rect x="132" y="152" width="20" height="20" fill="#ffffff"/><rect x="152" y="152" width="20" height="20" fill="#bfdbfe"/><line x1="12" y1="12" x2="12" y2="172" stroke="#1e3a8a" stroke-width="1"/><line x1="12" y1="12" x2="172" y2="12" stroke="#1e3a8a" stroke-width="1"/><line x1="32" y1="12" x2="32" y2="172" stroke="#1e3a8a" stroke-width="1"/><line x1="12" y1="32" x2="172" y2="32" stroke="#1e3a8a" stroke-width="1"/><line x1="52" y1="12" x2="52" y2="172" stroke="#1e3a8a" stroke-width="1"/><line x1="12" y1="52" x2="172" y2="52" stroke="#1e3a8a" stroke-width="1"/><line x1="72" y1="12" x2="72" y2="172" stroke="#1e3a8a" stroke-width="1"/><line x1="12" y1="72" x2="172" y2="72" stroke="#1e3a8a" stroke-width="1"/><line x1="92" y1="12" x2="92" y2="172" stroke="#1e3a8a" stroke-width="1"/><line x1="12" y1="92" x2="172" y2="92" stroke="#1e3a8a" stroke-width="1"/><line x1="112" y1="12" x2="112" y2="172" stroke="#1e3a8a" stroke-width="1"/><line x1="12" y1="112" x2="172" y2="112" stroke="#1e3a8a" stroke-width="1"/><line x1="132" y1="12" x2="132" y2="172" stroke="#1e3a8a" stroke-width="1"/><line x1="12" y1="132" x2="172" y2="132" stroke="#1e3a8a" stroke-width="1"/><line x1="152" y1="12" x2="152" y2="172" stroke="#1e3a8a" stroke-width="1"/><line x1="12" y1="152" x2="172" y2="152" stroke="#1e3a8a" stroke-width="1"/><line x1="172" y1="12" x2="172" y2="172" stroke="#1e3a8a" stroke-width="1"/><line x1="12" y1="172" x2="172" y2="172" stroke="#1e3a8a" stroke-width="1"/><rect x="12" y="12" width="160" height="160" fill="none" stroke="#1e3a8a" stroke-width="2.5"/><text x="22" y="166" font-size="13" font-weight="800" fill="#b91c1c" font-family="Segoe UI,Arial">С</text><text x="160" y="27" font-size="13" font-weight="800" fill="#b91c1c" font-family="Segoe UI,Arial">Ф</text></svg></div>
+<div class="txt"><p>Ночью сани Клауса прыгают по крышам <strong>ходом шахматного коня</strong>. В квартале <strong>8 × 8</strong> крыш сани стартуют с крыши <strong>С</strong> (левый нижний угол). Можно ли побывать на каждой крыше ровно один раз и закончить на крыше <strong>Ф</strong> (правый верхний угол)?</p>
+<p class="ansline">ответ и объяснение — в поле ниже</p></div></div>
+<div class="grid-space grid-low"></div>
+</div></section><section class="sec"><h2>Глава 9. Северное сияние</h2>
+<div class="task keep"><div class="scene"><div class="art"><svg viewBox="0 0 188 188" width="215" role="img"><rect x="6" y="6" width="44" height="44" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="50" y="6" width="44" height="44" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="94" y="6" width="44" height="44" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="138" y="6" width="44" height="44" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="6" y="50" width="44" height="44" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="50" y="50" width="44" height="44" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="94" y="50" width="44" height="44" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="138" y="50" width="44" height="44" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="6" y="94" width="44" height="44" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="50" y="94" width="44" height="44" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="94" y="94" width="44" height="44" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="138" y="94" width="44" height="44" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="6" y="138" width="44" height="44" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="50" y="138" width="44" height="44" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="94" y="138" width="44" height="44" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><rect x="138" y="138" width="44" height="44" fill="#fff" stroke="#cbd5e1" stroke-width="1"/><text x="83" y="108" font-size="13" fill="#0284c7" text-anchor="middle">❄</text><line x1="6" y1="6" x2="50" y2="6" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="6" y1="6" x2="6" y2="50" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="50" y1="6" x2="94" y2="6" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="94" y1="6" x2="138" y2="6" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="94" y1="6" x2="94" y2="50" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="138" y1="6" x2="182" y2="6" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="6" y1="50" x2="50" y2="50" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="6" y1="50" x2="6" y2="94" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="50" y1="50" x2="94" y2="50" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="50" y1="50" x2="50" y2="94" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="94" y1="50" x2="138" y2="50" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="138" y1="50" x2="138" y2="94" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="6" y1="94" x2="6" y2="138" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="50" y1="94" x2="94" y2="94" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="50" y1="94" x2="50" y2="138" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="94" y1="94" x2="138" y2="94" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="94" y1="94" x2="94" y2="138" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="138" y1="94" x2="182" y2="94" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="6" y1="138" x2="50" y2="138" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="6" y1="138" x2="6" y2="182" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="94" y1="138" x2="138" y2="138" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="94" y1="138" x2="94" y2="182" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><line x1="138" y1="138" x2="182" y2="138" stroke="#1e2430" stroke-width="3" stroke-linecap="square"/><rect x="6" y="6" width="176" height="176" fill="none" stroke="#1e2430" stroke-width="3"/><text x="9" y="20" font-size="12" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">1−</text><text x="97" y="20" font-size="12" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">16×</text><text x="9" y="64" font-size="12" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">2×</text><text x="53" y="64" font-size="12" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">6×</text><text x="53" y="108" font-size="12" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">16×</text><text x="97" y="108" font-size="12" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">3×</text><text x="97" y="152" font-size="12" font-weight="800" fill="#1d4ed8" font-family="Segoe UI,Arial">6×</text></svg></div>
+<div class="txt"><p>Маргу ведёт Джеспера домой под северным сиянием, а оно сложилось в кенкен: в каждой строке и столбце числа <strong>1, 2, 3, 4</strong> по одному разу; «16×» — произведение чисел области, «1−» — разность.</p>
+<div class="codebox">В КОД · цифра №5 — число в клетке со снежинкой ❄: <span class="blank w60"></span></div></div></div>
+</div></section><section class="sec"><h2>Глава 10. Сани летят</h2>
+<div class="task keep"><div class="scene"><div class="art"><svg width="92" height="102"><use href="#sack"/></svg></div>
+<div class="txt"><p>Рождественская ночь! Сани с мешком подарков летели <strong><span class="frac"><span>3</span><span class="d">4</span></span> часа</strong> со скоростью <strong>48 км/ч</strong>, а потом ещё <strong>полчаса</strong> со скоростью <strong>60 км/ч</strong>. Сколько километров они пролетели над Смиренсбургом?</p>
+<p class="ansline">пролетели: <span class="blank w60"></span> км</p>
+<div class="codebox">В КОД · цифра №6 — последняя цифра ответа: <span class="blank w60"></span></div></div></div>
+<div class="grid-space grid-low"></div>
+</div></section><section class="sec"><h2>Финал. Мешок с подарками</h2>
+<div class="task keep"><div class="scene"><div class="art"><svg width="92" height="102"><use href="#sack"/></svg></div>
+<div class="txt"><p>Код собран! Выпишите все шесть цифр по порядку глав и продиктуйте — мешок открывается на экране.</p>
+<div class="codebox" style="font-size:1.25em;letter-spacing:4px">КОД: <span class="blank w60"></span> <span class="blank w60"></span> <span class="blank w60"></span> <span class="blank w60"></span> <span class="blank w60"></span> <span class="blank w60"></span></div></div></div>
+</div></section>
+</div>
+</body>
+</html>
