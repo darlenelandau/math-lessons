@@ -46,11 +46,11 @@
     .task p{font-size:1.06em;margin-bottom:7px}
     .task strong{color:var(--c)}
 
-    .grid-space{margin-top:9px;border:2px solid var(--c);border-radius:6px;min-height:120px;background:#fff;
+    .grid-space{margin-top:9px;border:2px solid var(--c);border-radius:6px;min-height:200px;background:#fff;
         background-image:repeating-linear-gradient(0deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px),
                          repeating-linear-gradient(90deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px);
         background-size:24px 24px}
-    .grid-tall{min-height:165px}
+    .grid-tall{min-height:320px}
 
     .frac{display:inline-block;text-align:center;vertical-align:middle;font-weight:800;line-height:1.05;margin:0 3px}
     .frac span{display:block;padding:0 4px}
@@ -113,6 +113,28 @@
 <div class="memo">
 <p>Найти <strong>3/7 от 28</strong> мы умели ещё на прошлом занятии: разделить на 7, умножить на 3. Теперь это записывается одним действием: <strong>28 × <span class="frac"><span>3</span><span class="d">7</span></span></strong>. Умножить на дробь значит <strong>взять часть</strong>.</p>
 <p>Правило: числитель на числитель, знаменатель на знаменатель. И главное: <strong>сокращай до умножения</strong>, а не после.</p>
+<div class="scheme"><svg viewBox="0 0 520 220" width="460" role="img">
+<rect x="40" y="26" width="300" height="132" fill="#fff" stroke="none"/>
+<rect x="40" y="26" width="180" height="132" fill="#bae6fd"/>
+<rect x="40" y="26" width="180" height="88" fill="#0369a1" opacity=".45"/>
+<line x1="100" y1="26" x2="100" y2="158" stroke="#0369a1" stroke-width="1.5"/>
+<line x1="160" y1="26" x2="160" y2="158" stroke="#0369a1" stroke-width="1.5"/>
+<line x1="220" y1="26" x2="220" y2="158" stroke="#0369a1" stroke-width="1.5"/>
+<line x1="280" y1="26" x2="280" y2="158" stroke="#0369a1" stroke-width="1.5"/>
+<line x1="40" y1="70" x2="340" y2="70" stroke="#0369a1" stroke-width="1.5"/>
+<line x1="40" y1="114" x2="340" y2="114" stroke="#0369a1" stroke-width="1.5"/>
+<rect x="40" y="26" width="300" height="132" fill="none" stroke="#0369a1" stroke-width="2.5"/>
+<path d="M40 176 L220 176" stroke="#0369a1" stroke-width="2"/>
+<line x1="40" y1="170" x2="40" y2="182" stroke="#0369a1" stroke-width="2"/>
+<line x1="220" y1="170" x2="220" y2="182" stroke="#0369a1" stroke-width="2"/>
+<text x="130" y="200" font-size="16" font-weight="800" text-anchor="middle" fill="#0369a1" font-family="Segoe UI,Arial">3/5</text>
+<path d="M358 26 L358 114" stroke="#0369a1" stroke-width="2"/>
+<line x1="352" y1="26" x2="364" y2="26" stroke="#0369a1" stroke-width="2"/>
+<line x1="352" y1="114" x2="364" y2="114" stroke="#0369a1" stroke-width="2"/>
+<text x="376" y="76" font-size="16" font-weight="800" fill="#0369a1" font-family="Segoe UI,Arial">2/3</text>
+<text x="430" y="100" font-size="15" font-weight="700" fill="#1e2430" font-family="Segoe UI,Arial"> </text>
+</svg>
+<p style="font-size:.98em;color:#0369a1;font-weight:700;margin-top:2px">Часть от части: 2/3 от 3/5 — это 6 клеток из 15, то есть 2/5</p></div>
 </div>
 
 <div class="task keep"><span class="task-num">2</span>
@@ -153,6 +175,20 @@
 <div class="memo">
 <p>Два смысла деления. <strong>Поделить поровну</strong>: 5 кг ягод на 8 пакетов — в каждом <span class="frac"><span>5</span><span class="d">8</span></span> кг. Теперь любое частное записывается дробью: 5 : 8 = <span class="frac"><span>5</span><span class="d">8</span></span>.</p>
 <p><strong>Сколько раз помещается</strong>: 1 : <span class="frac"><span>1</span><span class="d">4</span></span> = 4, в целом четыре четверти. Отсюда правило: разделить значит <strong>умножить на обратную</strong>.</p>
+<div class="scheme"><svg viewBox="0 0 520 130" width="460" role="img">
+<g font-family="Segoe UI,Arial" font-size="17" font-weight="800" fill="#15803d">
+<rect x="30" y="20" width="130" height="70" fill="#f0fdf4" stroke="#15803d" stroke-width="2.5"/>
+<line x1="95" y1="20" x2="95" y2="90" stroke="#15803d" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="62" y="62" text-anchor="middle">1</text><text x="128" y="62" text-anchor="middle">2</text>
+<rect x="190" y="20" width="130" height="70" fill="#f0fdf4" stroke="#15803d" stroke-width="2.5"/>
+<line x1="255" y1="20" x2="255" y2="90" stroke="#15803d" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="222" y="62" text-anchor="middle">3</text><text x="288" y="62" text-anchor="middle">4</text>
+<rect x="350" y="20" width="130" height="70" fill="#f0fdf4" stroke="#15803d" stroke-width="2.5"/>
+<line x1="415" y1="20" x2="415" y2="90" stroke="#15803d" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="382" y="62" text-anchor="middle">5</text><text x="448" y="62" text-anchor="middle">6</text>
+</g>
+</svg>
+<p style="font-size:.98em;color:#15803d;font-weight:700;margin-top:2px">3 : 1/2 = 6 — в трёх целых шесть половинок</p></div>
 </div>
 
 <div class="task keep"><span class="task-num">6</span>
@@ -177,95 +213,30 @@
 
 <div class="task keep"><span class="task-num">8</span>
 <p>Два автомобиля едут по прямому шоссе со скоростями <strong>60 км/ч</strong> и <strong>80 км/ч</strong>. Сейчас между ними <strong>200 км</strong>. Какое расстояние может быть между ними через час? Найди <strong>все</strong> варианты.</p>
-<div class="scheme"><svg viewBox="0 0 760 120" width="720" role="img">
-<line x1="20" y1="78" x2="740" y2="78" stroke="#92400e" stroke-width="3"/>
-<rect x="170" y="56" width="52" height="22" rx="6" fill="#fde68a" stroke="#92400e" stroke-width="2"/>
-<circle cx="183" cy="80" r="7" fill="#fff" stroke="#92400e" stroke-width="2"/><circle cx="209" cy="80" r="7" fill="#fff" stroke="#92400e" stroke-width="2"/>
-<rect x="540" y="56" width="52" height="22" rx="6" fill="#bfdbfe" stroke="#92400e" stroke-width="2"/>
-<circle cx="553" cy="80" r="7" fill="#fff" stroke="#92400e" stroke-width="2"/><circle cx="579" cy="80" r="7" fill="#fff" stroke="#92400e" stroke-width="2"/>
-<text x="196" y="47" font-size="15" font-weight="800" text-anchor="middle" fill="#92400e" font-family="Segoe UI,Arial">60 км/ч</text>
-<text x="566" y="47" font-size="15" font-weight="800" text-anchor="middle" fill="#92400e" font-family="Segoe UI,Arial">80 км/ч</text>
-<line x1="230" y1="106" x2="532" y2="106" stroke="#92400e" stroke-width="1.6"/>
-<line x1="230" y1="100" x2="230" y2="112" stroke="#92400e" stroke-width="1.6"/>
-<line x1="532" y1="100" x2="532" y2="112" stroke="#92400e" stroke-width="1.6"/>
-<text x="381" y="101" font-size="14" font-weight="700" text-anchor="middle" fill="#92400e" font-family="Segoe UI,Arial">200 км</text>
-<path d="M150 66 L118 66 M124 61 L116 66 L124 71" stroke="#b45309" stroke-width="2" fill="none" stroke-dasharray="5 4"/>
-<path d="M242 66 L274 66 M268 61 L276 66 L268 71" stroke="#b45309" stroke-width="2" fill="none" stroke-dasharray="5 4"/>
-<text x="131" y="31" font-size="16" font-weight="800" fill="#b45309" font-family="Segoe UI,Arial">?</text>
-<path d="M520 66 L488 66 M494 61 L486 66 L494 71" stroke="#b45309" stroke-width="2" fill="none" stroke-dasharray="5 4"/>
-<path d="M612 66 L644 66 M638 61 L646 66 L638 71" stroke="#b45309" stroke-width="2" fill="none" stroke-dasharray="5 4"/>
-<text x="625" y="31" font-size="16" font-weight="800" fill="#b45309" font-family="Segoe UI,Arial">?</text>
-</svg></div>
 <p class="ansline">Возможные расстояния: <span class="blank"></span> <span class="blank"></span> <span class="blank"></span> <span class="blank"></span></p>
 <div class="grid-space"></div>
 </div>
 
 <div class="task keep"><span class="task-num">9</span>
 <p>Юра вышел из дома на <strong>5 минут позже</strong> Лены, но шёл со скоростью <strong>в два раза больше</strong>. Через какое время после своего выхода Юра догонит Лену?</p>
-<div class="scheme"><svg viewBox="0 0 760 110" width="720" role="img">
-<path d="M38 88 L74 88 L74 58 L38 58 Z M34 58 L56 36 L78 58" fill="#fffbeb" stroke="#92400e" stroke-width="2.5"/>
-<line x1="92" y1="88" x2="740" y2="88" stroke="#92400e" stroke-width="3"/>
-<path d="M100 52 L380 52 M372 46 L382 52 L372 58" stroke="#92400e" stroke-width="2.5" fill="none"/>
-<text x="110" y="42" font-size="15" font-weight="700" fill="#92400e" font-family="Segoe UI,Arial">Лена: скорость v, вышла первой</text>
-<path d="M100 76 L320 76 M312 70 L322 76 L312 82" stroke="#b45309" stroke-width="2.5" fill="none" stroke-dasharray="6 4"/>
-<text x="110" y="70" font-size="15" font-weight="700" fill="#b45309" font-family="Segoe UI,Arial">Юра: скорость 2v, на 5 минут позже</text>
-</svg></div>
 <p class="ansline">Догонит через <span class="blank w60"></span> минут</p>
 <div class="grid-space"></div>
 </div>
 
 <div class="task keep"><span class="task-num">10</span>
 <p>Если Аня идёт в школу пешком, а обратно едет на автобусе, дорога занимает <strong>полтора часа</strong>. Если едет на автобусе в обе стороны — <strong>30 минут</strong>. Сколько минут займёт дорога пешком в обе стороны?</p>
-<div class="scheme"><svg viewBox="0 0 760 130" width="720" role="img">
-<path d="M38 96 L74 96 L74 66 L38 66 Z M34 66 L56 44 L78 66" fill="#fffbeb" stroke="#92400e" stroke-width="2.5"/>
-<rect x="676" y="58" width="48" height="38" fill="#fffbeb" stroke="#92400e" stroke-width="2.5"/>
-<line x1="684" y1="70" x2="716" y2="70" stroke="#92400e" stroke-width="1.5"/>
-<line x1="700" y1="58" x2="700" y2="96" stroke="#92400e" stroke-width="1.5"/>
-<text x="700" y="115" font-size="14" font-weight="700" text-anchor="middle" fill="#92400e" font-family="Segoe UI,Arial">школа</text>
-<text x="56" y="115" font-size="14" font-weight="700" text-anchor="middle" fill="#92400e" font-family="Segoe UI,Arial">дом</text>
-<line x1="92" y1="86" x2="662" y2="86" stroke="#92400e" stroke-width="3"/>
-<path d="M120 56 C 260 20, 500 20, 640 56" stroke="#92400e" stroke-width="2" fill="none"/>
-<text x="380" y="26" font-size="14.5" font-weight="700" text-anchor="middle" fill="#92400e" font-family="Segoe UI,Arial">пешком туда + автобус обратно: 90 мин</text>
-<text x="380" y="78" font-size="14.5" font-weight="700" text-anchor="middle" fill="#b45309" font-family="Segoe UI,Arial">автобус туда и обратно: 30 мин</text>
-</svg></div>
 <p class="ansline">Пешком в обе стороны: <span class="blank w60"></span> минут</p>
 <div class="grid-space"></div>
 </div>
 
 <div class="task keep"><span class="task-num">11</span>
 <p>Велосипедист проехал <span class="frac"><span>3</span><span class="d">7</span></span> моста и заметил сзади автомобиль. Если он повернёт назад, то встретит автомобиль у <strong>начала</strong> моста. Если поедет вперёд, автомобиль догонит его в <strong>конце</strong> моста. Во сколько раз скорость автомобиля больше?</p>
-<div class="scheme"><svg viewBox="0 0 760 120" width="720" role="img">
-<line x1="20" y1="84" x2="740" y2="84" stroke="#92400e" stroke-width="3"/>
-<rect x="300" y="70" width="340" height="14" fill="#fde68a" stroke="#92400e" stroke-width="2.5"/>
-<line x1="300" y1="70" x2="300" y2="96" stroke="#92400e" stroke-width="2.5"/>
-<line x1="640" y1="70" x2="640" y2="96" stroke="#92400e" stroke-width="2.5"/>
-<text x="300" y="112" font-size="14" font-weight="700" text-anchor="middle" fill="#92400e" font-family="Segoe UI,Arial">начало</text>
-<text x="640" y="112" font-size="14" font-weight="700" text-anchor="middle" fill="#92400e" font-family="Segoe UI,Arial">конец</text>
-<circle cx="446" cy="62" r="9" fill="#fff" stroke="#0369a1" stroke-width="2.5"/>
-<text x="446" y="44" font-size="14.5" font-weight="800" text-anchor="middle" fill="#0369a1" font-family="Segoe UI,Arial">велосипедист: 3/7 моста</text>
-<rect x="70" y="62" width="52" height="22" rx="6" fill="#bfdbfe" stroke="#92400e" stroke-width="2"/>
-<circle cx="83" cy="86" r="7" fill="#fff" stroke="#92400e" stroke-width="2"/><circle cx="109" cy="86" r="7" fill="#fff" stroke="#92400e" stroke-width="2"/>
-<text x="96" y="52" font-size="14.5" font-weight="800" text-anchor="middle" fill="#92400e" font-family="Segoe UI,Arial">автомобиль</text>
-</svg></div>
 <p class="ansline">Автомобиль быстрее в <span class="blank w60"></span> раз</p>
 <div class="grid-space grid-tall"></div>
 </div>
 
 <div class="task keep"><span class="task-num">12</span>
 <p>За почтой на аэродром выслали «Москвич». Самолёт сел <strong>раньше срока</strong>, и почту повезли навстречу на попутном грузовике. Через <strong>30 минут</strong> пути грузовик встретил «Москвич», тот забрал почту, сразу развернулся и приехал в отделение на <strong>20 минут раньше</strong> обычного. На сколько минут раньше срока сел самолёт?</p>
-<div class="scheme"><svg viewBox="0 0 760 110" width="720" role="img">
-<line x1="60" y1="72" x2="700" y2="72" stroke="#92400e" stroke-width="3"/>
-<circle cx="60" cy="72" r="6" fill="#92400e"/>
-<circle cx="700" cy="72" r="6" fill="#92400e"/>
-<text x="22" y="98" font-size="14" font-weight="700" text-anchor="start" fill="#92400e" font-family="Segoe UI,Arial">почтовое отделение</text>
-<text x="700" y="98" font-size="14" font-weight="700" text-anchor="middle" fill="#92400e" font-family="Segoe UI,Arial">аэродром</text>
-<line x1="420" y1="62" x2="420" y2="82" stroke="#b45309" stroke-width="2.5"/>
-<text x="420" y="52" font-size="14.5" font-weight="800" text-anchor="middle" fill="#b45309" font-family="Segoe UI,Arial">встреча</text>
-<path d="M90 32 L240 32 M232 26 L242 32 L232 38" stroke="#92400e" stroke-width="2.5" fill="none"/>
-<text x="96" y="22" font-size="14" font-weight="700" fill="#92400e" font-family="Segoe UI,Arial">«Москвич»</text>
-<path d="M670 32 L520 32 M528 26 L518 32 L528 38" stroke="#0369a1" stroke-width="2.5" fill="none"/>
-<text x="538" y="22" font-size="14" font-weight="700" fill="#0369a1" font-family="Segoe UI,Arial">грузовик, 30 мин</text>
-</svg></div>
 <p class="ansline">Самолёт сел раньше на <span class="blank w60"></span> минут</p>
 <div class="grid-space grid-tall"></div>
 </div>
@@ -311,19 +282,6 @@
 
 <div class="task keep"><span class="task-num">19</span>
 <p>Из А в В одновременно вышли пешеход со скоростью <strong>6 км/ч</strong> и велосипедист со скоростью <strong>15 км/ч</strong>. В то же время из В в А выехал автомобиль: с велосипедистом он встретился через <strong>4 часа</strong>, а с пешеходом через <strong>5 часов</strong>. Найди расстояние от А до В.</p>
-<div class="scheme"><svg viewBox="0 0 760 120" width="720" role="img">
-<line x1="60" y1="80" x2="700" y2="80" stroke="#0e7490" stroke-width="3"/>
-<circle cx="60" cy="80" r="6" fill="#0e7490"/>
-<circle cx="700" cy="80" r="6" fill="#0e7490"/>
-<text x="60" y="106" font-size="16" font-weight="800" text-anchor="middle" fill="#0e7490" font-family="Segoe UI,Arial">А</text>
-<text x="700" y="106" font-size="16" font-weight="800" text-anchor="middle" fill="#0e7490" font-family="Segoe UI,Arial">В</text>
-<path d="M80 30 L200 30 M192 24 L202 30 L192 36" stroke="#0e7490" stroke-width="2.5" fill="none"/>
-<text x="84" y="20" font-size="14" font-weight="700" fill="#0e7490" font-family="Segoe UI,Arial">пешеход, 6 км/ч</text>
-<path d="M80 58 L300 58 M292 52 L302 58 L292 64" stroke="#0369a1" stroke-width="2.5" fill="none"/>
-<text x="84" y="48" font-size="14" font-weight="700" fill="#0369a1" font-family="Segoe UI,Arial">велосипедист, 15 км/ч</text>
-<path d="M680 44 L540 44 M548 38 L538 44 L548 50" stroke="#b45309" stroke-width="2.5" fill="none"/>
-<text x="545" y="34" font-size="14" font-weight="700" fill="#b45309" font-family="Segoe UI,Arial">автомобиль, ? км/ч</text>
-</svg></div>
 <p class="ansline">Расстояние от А до В: <span class="blank w60"></span> км</p>
 <div class="grid-space grid-tall"></div>
 </div>
