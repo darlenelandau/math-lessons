@@ -124,7 +124,6 @@
 <p>Трое часов показывают время, и все три <strong>неправильно</strong>: какие-то ошибаются на <strong>4 минуты</strong>, какие-то на <strong>7</strong>, какие-то на <strong>9</strong> — в какую сторону, неизвестно. Какое время на самом деле?</p>
 <div class="clocks"><div>7:50</div><div>7:53</div><div>8:06</div></div>
 <div class="ansrow"><label>на самом деле:</label><input id="t1" placeholder="ч:мм"><button onclick="chkTime('t1')">Проверить</button><span class="fb" id="fb_t1"></span></div>
-<p class="hint">Истинное время где-то между показаниями. Начни с прикидки от среднего.</p>
 </div>
 </section>
 
@@ -153,7 +152,6 @@
 <div class="ansrow"><label>за 1/3 ч:</label><input id="v2"><button onclick="chkNum('v2','4')">Проверить</button><span class="fb" id="fb_v2"></span></div>
 <div class="ansrow"><label>за 5/6 ч:</label><input id="v3"><button onclick="chkNum('v3','10')">Проверить</button><span class="fb" id="fb_v3"></span></div>
 <div class="ansrow"><label>за 2 1/2 ч:</label><input id="v4"><button onclick="chkNum('v4','30')">Проверить</button><span class="fb" id="fb_v4"></span></div>
-<p class="hint">Формула s = v × t работает и с дробным временем.</p>
 </div>
 
 <div class="task"><span class="task-num">4</span>
@@ -167,7 +165,6 @@
 <div class="ansrow"><label>обратное к <span class="frac"><span>5</span><span class="d">7</span></span>:</label><input id="r1" placeholder="a/b"><button onclick="chkFrac('r1',7,5)">Проверить</button><span class="fb" id="fb_r1"></span></div>
 <div class="ansrow"><label>обратное к 8:</label><input id="r2" placeholder="a/b"><button onclick="chkFrac('r2',1,8)">Проверить</button><span class="fb" id="fb_r2"></span></div>
 <div class="ansrow"><label>обратное к <span class="mixn">2</span><span class="frac"><span>1</span><span class="d">3</span></span>:</label><input id="r3" placeholder="a/b"><button onclick="chkFrac('r3',3,7)">Проверить</button><span class="fb" id="fb_r3"></span></div>
-<p class="hint">Смешанное число сначала переведи в неправильную дробь.</p>
 </div>
 </section>
 
@@ -192,7 +189,6 @@
 <div class="ansrow"><label>б)</label><input id="d4"><button onclick="chkNum('d4','3')">Проверить</button><span class="fb" id="fb_d4"></span></div>
 <p class="ex">в)&nbsp; <span class="mixn">1</span><span class="frac"><span>5</span><span class="d">9</span></span> : <span class="mixn">2</span><span class="frac"><span>1</span><span class="d">3</span></span></p>
 <div class="ansrow"><label>в)</label><input id="d5" placeholder="a/b"><button onclick="chkFrac('d5',2,3)">Проверить</button><span class="fb" id="fb_d5"></span></div>
-<p class="hint">В пункте «а» прикинь заранее: ответ будет больше единицы или меньше? Почему?</p>
 </div>
 </section>
 
@@ -218,21 +214,18 @@
 <p>Если Аня идёт в школу пешком, а обратно едет на автобусе, дорога занимает <strong>полтора часа</strong>. Если едет на автобусе в обе стороны — <strong>30 минут</strong>. Сколько минут займёт дорога пешком в обе стороны?</p>
 <div class="ansrow"><label>минут:</label><input id="an"><button onclick="chkNum('an','150')">Проверить</button><span class="fb" id="fb_an"></span></div>
 <div class="grid-space"></div>
-<p class="hint">Сначала узнай, сколько занимает автобус в одну сторону.</p>
 </div>
 
 <div class="task"><span class="task-num">11</span>
 <p>Велосипедист проехал <span class="frac"><span>3</span><span class="d">7</span></span> моста и заметил сзади автомобиль. Если он повернёт назад, то встретит автомобиль у <strong>начала</strong> моста. Если поедет вперёд, автомобиль догонит его в <strong>конце</strong> моста. Во сколько раз скорость автомобиля больше?</p>
 <div class="ansrow"><label>в</label><input id="br"><label>раз</label><button onclick="chkNum('br','7')">Проверить</button><span class="fb" id="fb_br"></span></div>
 <div class="grid-space grid-tall"></div>
-<p class="hint">Сравни два случая: на сколько больше проехал велосипедист во втором — и на сколько автомобиль?</p>
 </div>
 
 <div class="task"><span class="task-num">12</span>
 <p>За почтой на аэродром выслали «Москвич». Самолёт сел <strong>раньше срока</strong>, и почту повезли навстречу на попутном грузовике. Через <strong>30 минут</strong> пути грузовик встретил «Москвич», тот забрал почту, сразу развернулся и приехал в отделение на <strong>20 минут раньше</strong> обычного. На сколько минут раньше срока сел самолёт?</p>
 <div class="ansrow"><label>на, мин:</label><input id="po"><button onclick="chkNum('po','40')">Проверить</button><span class="fb" id="fb_po"></span></div>
 <div class="grid-space grid-tall"></div>
-<p class="hint">Откуда взялась экономия в 20 минут? Из какого непройденного пути?</p>
 </div>
 </section>
 
@@ -243,21 +236,18 @@
 <p>Вася умножил некоторое число на <strong>10</strong> и получил простое число. Петя умножил то же число на <strong>15</strong> — и тоже получил простое. Может ли так быть?</p>
 <div class="cmp"><span class="side lbl">Может ли так быть?</span><span class="signs"><button onclick="chkCmp(this,'pr',0,0)">может</button><button onclick="chkCmp(this,'pr',1,0)">не может</button></span><span class="fb" id="fb_pr"></span></div>
 <div class="ansrow"><label>это число:</label><input id="prx" placeholder="a/b"><button onclick="chkFrac('prx',1,5)">Проверить</button><span class="fb" id="fb_prx"></span></div>
-<p class="hint">Никто не обещал, что число натуральное.</p>
 </div>
 
 <div class="task"><span class="task-num">14</span>
 <p>Мартышка сорвала гроздь бананов. Три самых больших банана (<span class="frac"><span>7</span><span class="d">20</span></span> общего веса) она съела на завтрак, три самых маленьких (<span class="frac"><span>1</span><span class="d">4</span></span> общего веса) — на ужин, остальные на обед. Сколько всего бананов съела Мартышка?</p>
 <div class="ansrow"><label>всего бананов:</label><input id="bn"><button onclick="chkNum('bn','10')">Проверить</button><span class="fb" id="fb_bn"></span></div>
 <div class="grid-space grid-tall"></div>
-<p class="hint">Каждый «обеденный» банан легче среднего большого, но тяжелее среднего маленького. Оцени, сколько их может быть.</p>
 </div>
 
 <div class="task"><span class="task-num">15</span>
 <p>Можно ли расставить в клетках квадрата <strong>3 × 3</strong> цифры от 1 до 9 (каждую по одному разу) так, чтобы в каждой строке сумма двух меньших цифр равнялась большей?</p>
 <div class="cmp"><span class="side lbl">Можно ли?</span><span class="signs"><button onclick="chkCmp(this,'q9',0,1)">можно</button><button onclick="chkCmp(this,'q9',1,1)">нельзя</button></span><span class="fb" id="fb_q9"></span></div>
 <div class="grid-space"></div>
-<p class="hint">Если a + b = c, какой будет сумма a + b + c? А сумма всех цифр от 1 до 9?</p>
 </div>
 
 <div class="task"><span class="task-num">16</span>
@@ -270,20 +260,17 @@
 <p>Том Сойер и Гек красили забор. Том покрасил <strong>каждую пятую</strong> по счёту дощечку. Потом Гек — <strong>каждую четвёртую</strong> из неокрашенных. Потом Том — <strong>каждую третью</strong> из оставшихся. Последние <strong>7</strong> дощечек докрасил Гек. Сколько всего дощечек в заборе?</p>
 <div class="ansrow"><label>дощечек:</label><input id="tm"><button onclick="chkNum('tm','16')">Проверить</button><span class="fb" id="fb_tm"></span></div>
 <div class="grid-space grid-tall"></div>
-<p class="hint">Иди с конца: сколько дощечек было перед последним проходом Тома?</p>
 </div>
 
 <div class="task"><span class="task-num">18</span>
 <p>Блиц. Два охотника вышли навстречу друг другу из деревень, между которыми <strong>18 км</strong>, со скоростями <strong>5 км/ч</strong> и <strong>4 км/ч</strong>. Собака первого бегала между ними со скоростью <strong>8 км/ч</strong>, пока охотники не встретились. Сколько километров пробежала собака?</p>
 <div class="ansrow"><label>км:</label><input id="dg"><button onclick="chkNum('dg','16')">Проверить</button><span class="fb" id="fb_dg"></span></div>
-<p class="hint">Никого эта задача не напоминает?</p>
 </div>
 
 <div class="task"><span class="task-num">19</span>
 <p>Из А в В одновременно вышли пешеход со скоростью <strong>6 км/ч</strong> и велосипедист со скоростью <strong>15 км/ч</strong>. В то же время из В в А выехал автомобиль: с велосипедистом он встретился через <strong>4 часа</strong>, а с пешеходом через <strong>5 часов</strong>. Найди расстояние от А до В.</p>
 <div class="ansrow"><label>км:</label><input id="ab"><button onclick="chkNum('ab','180')">Проверить</button><span class="fb" id="fb_ab"></span></div>
 <div class="grid-space grid-tall"></div>
-<p class="hint">К каждой встрече автомобиль и его попутчик вместе проезжают весь путь. Запиши это для обеих встреч.</p>
 </div>
 </section>
 
