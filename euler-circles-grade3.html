@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Круги Эйлера (3 класс)</title>
+<style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+        font-family:'Segoe UI',Arial,sans-serif;
+        background:linear-gradient(180deg,#dff1fd 0%,#eaf7ee 55%,#f2f9e6 100%);
+        background-attachment:fixed;
+        color:#1e2430;padding:22px;line-height:1.55;
+    }
+    .container{max-width:900px;margin:0 auto}
+
+    .header{
+        border:3px solid #15803d;border-radius:14px;padding:18px 24px;margin-bottom:8px;text-align:center;
+        background:linear-gradient(160deg,#e0f2fe 0%,#d1fae5 62%,#dcfce7 100%);
+        box-shadow:0 3px 10px rgba(0,0,0,.10);
+    }
+    .header .emo{font-size:2em;margin-bottom:6px;letter-spacing:6px}
+    .header h1{font-size:1.7em;color:#14532d}
+    .header .lead{margin-top:8px;font-size:1.02em;color:#334155}
+
+    .sec{--c:#44403c;--bg:#fafaf9;--grid:#e2dfdb}
+    .sec-sky   {--c:#0369a1;--bg:#f0f9ff;--grid:#c4e2f5}
+    .sec-grass {--c:#15803d;--bg:#f0fdf4;--grid:#bfe6cb}
+    .sec-pond  {--c:#0e7490;--bg:#ecfeff;--grid:#bae3ec}
+    .sec-meadow{--c:#4d7c0f;--bg:#f7fee7;--grid:#d5e8a9}
+    .sec-earth {--c:#92400e;--bg:#fffbeb;--grid:#eed7b4}
+    .sec-stone {--c:#44403c;--bg:#f6f5f4;--grid:#dcd8d4}
+    .sec-indigo{--c:#4338ca;--bg:#eef2ff;--grid:#c9d0f7}
+
+    h2{font-size:1.26em;margin:26px 0 12px;padding:9px 16px;border-radius:9px;
+       background:var(--c);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.14)}
+
+    .memo{border:2px solid var(--c);border-left:8px solid var(--c);border-radius:9px;
+          padding:13px 18px;margin:12px 0;background:var(--bg)}
+    .memo p{font-size:1.02em;margin-bottom:7px}
+    .memo p:last-child{margin-bottom:0}
+
+    .rule{border:2px dashed var(--c);border-radius:10px;padding:14px 18px;margin:12px 0;background:var(--bg)}
+    .rule .lbl{font-weight:700;color:var(--c);font-size:1.02em}
+    .rule .ex{font-size:1.3em;font-weight:700;color:var(--c);margin-top:8px;text-align:center;letter-spacing:.5px}
+
+    .calc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(238px,1fr));gap:11px;margin-top:12px}
+    .calc{
+        position:relative;border:2px solid var(--c);border-radius:9px;padding:12px 10px 10px;
+        background:#fff;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.07);
+    }
+    .calc .eq{font-size:1.3em;font-weight:600;letter-spacing:.5px;white-space:nowrap}
+    .calc .eq.long{font-size:1.05em;letter-spacing:0}
+    .calc .blank{display:block;border-bottom:2px solid var(--grid);height:1.5em;margin:8px 12px 0}
+    .calc.hard{border-style:dashed;background:var(--bg)}
+    .calc .st{position:absolute;top:3px;right:7px;font-size:.72em}
+
+    .oral{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:9px;margin-top:10px}
+    .oral div{border:2px solid var(--c);border-radius:8px;padding:9px 6px;background:#fff;
+              text-align:center;font-size:1.3em;font-weight:600}
+
+    .task{border:2px solid var(--c);border-radius:10px;padding:15px 19px;margin:15px 0;
+          background:#fff;box-shadow:0 2px 7px rgba(0,0,0,.08)}
+    .task-num{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;
+              border-radius:50%;font-weight:800;font-size:.95em;color:#fff;background:var(--c);
+              margin-bottom:7px;padding:0 9px}
+    .task p{font-size:1.06em;margin-bottom:7px}
+    .task strong{color:var(--c)}
+    .task .star{float:right;font-size:1.05em;letter-spacing:2px}
+
+    .grid-space{margin-top:9px;border:2px solid var(--c);border-radius:6px;min-height:120px;background:#fff;
+        background-image:repeating-linear-gradient(0deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px),
+                         repeating-linear-gradient(90deg,transparent,transparent 23px,var(--grid) 23px,var(--grid) 24px);
+        background-size:24px 24px}
+    .grid-tall{min-height:165px}
+
+    .card4{border:3px solid var(--c);border-radius:12px;padding:16px 20px;background:var(--bg);margin:12px 0}
+    .card4 .row{display:flex;gap:14px;align-items:baseline;padding:9px 0;border-bottom:1px dashed var(--c)}
+    .card4 .row:last-child{border-bottom:none}
+    .card4 .n{flex:none;width:26px;height:26px;border-radius:50%;background:var(--c);color:#fff;
+              font-weight:800;font-size:.85em;display:flex;align-items:center;justify-content:center}
+    .card4 .t{flex:1}
+    .card4 .t b{color:var(--c)}
+    .card4 .t .e{display:block;font-size:1.12em;font-weight:700;margin-top:3px}
+
+    .hint{font-size:.95em;color:var(--c);font-style:italic;margin-top:7px;opacity:.95}
+
+
+    .inv{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0 2px}
+    .inv div{border:2px solid var(--c);border-radius:9px;background:#fff;padding:10px 8px;text-align:center;
+        font-size:1.12em;font-weight:700;color:#1e2430}
+    .inv div b{color:var(--c);font-weight:800}
+    .chainfig{text-align:center;margin:10px 0 2px}
+    .chainfig svg{max-width:100%;height:auto}
+    .calcs{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:9px;margin-top:10px}
+    .calcs div{border:2px solid var(--c);border-radius:8px;background:#fff;padding:9px 6px;text-align:center;
+        font-size:1.06em;font-weight:700;white-space:nowrap}
+    .calcs div i{font-style:normal;color:var(--c);font-weight:800;margin-right:6px;font-size:.9em}
+    .box{display:inline-block;min-width:38px;height:1.35em;border:2px solid var(--c);border-radius:6px;
+        background:var(--bg);vertical-align:-.3em;margin:0 3px}
+
+
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:12px 0 2px}
+    @media(max-width:620px){.two{grid-template-columns:1fr}}
+    .two .col{border:2px solid var(--c);border-radius:10px;background:#fff;padding:12px 16px}
+    .two .col h3{color:var(--c);font-size:1.02em;margin-bottom:7px;text-transform:uppercase;letter-spacing:.6px}
+    .two .col div{font-size:1.1em;font-weight:700;padding:3px 0}
+    .two .col .chk{color:#64748b;font-weight:600;font-size:.95em;border-top:1px dashed var(--grid);margin-top:7px;padding-top:6px}
+    .vals{width:100%;border-collapse:collapse;margin:10px 0 2px;font-size:1.1em}
+    .vals th,.vals td{border:2px solid var(--c);padding:9px 6px;text-align:center}
+    .vals th{background:var(--bg);color:var(--c)}
+    .vals td{background:#fff;height:44px}
+    .scales{text-align:center;margin:10px 0 2px}
+    .lets{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:9px;margin-top:10px}
+    .lets div{border:2px solid var(--c);border-radius:8px;background:#fff;padding:10px 6px;text-align:center;
+        font-size:1.1em;font-weight:700;white-space:nowrap}
+    .lets div i{font-style:normal;color:var(--c);font-weight:800;margin-right:6px;font-size:.88em}
+    .calcbox{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:11px;margin:10px 0 2px}
+    .calcbox .c{border:2px solid var(--c);border-radius:10px;background:#fff;padding:12px 14px 10px;
+        box-shadow:0 1px 4px rgba(0,0,0,.07)}
+    .calcbox .c b{display:block;color:var(--c);font-size:.9em;font-weight:800;margin-bottom:4px}
+    .calcbox .c .e{font-size:1.14em;font-weight:700;line-height:1.3}
+    .calcbox .c .ans{margin-top:9px;border-bottom:2px solid var(--grid);height:26px}
+    .subhead{font-weight:800;color:var(--c);margin:14px 0 2px;font-size:1.04em}
+
+
+    .header{position:relative;overflow:hidden;padding:26px 24px 30px}
+    .header .deco{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0}
+    .header h1{position:relative;z-index:1;display:inline-block;padding:5px 22px;border-radius:14px;background:rgba(255,255,255,.78);box-shadow:0 1px 4px rgba(0,0,0,.07)}
+
+    .ansrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:9px}
+    .ansrow label{font-weight:800;color:var(--c);font-size:1.1em}
+    .ansrow input{width:62px;padding:7px 8px;font-size:1.1em;font-weight:800;text-align:center;
+        border:2px solid #cbd5e1;border-radius:9px;font-family:inherit}
+    .ansrow input:focus{outline:none;border-color:var(--c)}
+    .ansrow input.ok{border-color:#16a34a;background:#f0fdf4}
+    .ansrow input.no{border-color:#dc2626;background:#fef2f2}
+    .ansrow button{border:2px solid var(--c);border-radius:9px;background:var(--bg);color:var(--c);
+        font-weight:800;padding:7px 13px;cursor:pointer;font-family:inherit;font-size:.98em}
+    .ansrow button:hover{background:var(--c);color:#fff}
+    .fb{margin-top:7px;font-weight:700;min-height:1.2em}
+    .fb.ok{color:#15803d}
+    .fb.no{color:#b91c1c}
+    .colsum{display:flex;flex-direction:column;align-items:center;margin:12px 0 4px;font-weight:800}
+    .colsum .line{display:flex;align-items:baseline;gap:10px;font-size:1.55em;letter-spacing:.14em}
+    .colsum .op{width:20px;text-align:right;color:var(--c)}
+    .colsum .word{min-width:150px;text-align:right}
+    .colsum .bar{height:3px;background:#1e2430;border-radius:2px;margin:5px 0;width:190px}
+    .picreb{text-align:center;margin:10px 0 2px}
+    .picreb img{max-width:330px;width:100%;height:auto;border:2px solid var(--c);border-radius:12px;
+        background:#fff;padding:6px}
+    .inline-reb{text-align:center;font-size:1.5em;font-weight:800;letter-spacing:.1em;margin:10px 0 2px}
+    .five{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:10px 0 2px}
+    .five figure{margin:0;flex:0 0 auto;border:2px solid var(--c);border-radius:10px;background:#fff;padding:6px 6px 2px;width:168px}
+    .five figure img{display:block;width:100%;height:auto}
+    .five figcaption{text-align:center;font-weight:800;color:var(--c);font-size:.9em;margin-top:2px}
+
+
+
+    .slnav{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;align-items:center;margin:10px 0}
+    .slnav .sllead{font-weight:700;color:var(--c);font-size:.98em;margin-right:3px}
+    .slnav button{font-family:inherit;font-size:.98em;font-weight:800;cursor:pointer;
+        border:2px solid var(--c);border-radius:9px;background:#fff;color:var(--c);
+        min-width:36px;height:34px;padding:0 10px}
+    .slnav button:hover{background:var(--bg)}
+    .sllegend{text-align:center;font-size:.92em;color:#475569;margin:6px 0 2px}
+    .slcard figcaption{margin-top:4px}
+    .slcard .slwho{display:block;text-align:center;font-weight:800;color:var(--c);font-size:.84em}
+    .slcard .slrow{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:3px}
+    .slcard .sllab{font-weight:800;color:var(--c);font-size:.84em}
+    .slcard .slar{font-family:inherit;font-size:1.1em;line-height:1;font-weight:800;cursor:pointer;
+        border:2px solid var(--c);border-radius:7px;background:#fff;color:var(--c);width:26px;height:26px;padding:0}
+    .slcard .slar:hover{background:var(--bg)}
+    .slslot[hidden]{display:none}
+    @media print{.slnav{display:none}.slcard .slar{display:none}}
+
+    @page{size:A4;margin:12mm}
+    @media print{
+        body{background:#fff;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+        .task,.memo,.rule,.header,.card4{page-break-inside:avoid}
+        .break{page-break-before:always}
+    }
+
+    .calc .eq.xlong{font-size:.92em;letter-spacing:0}
+    .figure{border:2px solid var(--c);border-radius:10px;padding:14px;margin:12px 0;background:#fff;text-align:center;overflow-x:auto}
+    .figure .cap{margin-top:10px;font-size:1.12em;font-weight:700;color:var(--c)}
+    .figure .sub{margin-top:4px;font-size:.97em;color:#475569}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+    .eqlist{font-size:1.14em;line-height:1.95;font-weight:600}
+    .eqlist .tot{margin-top:9px;padding-top:9px;border-top:2px solid var(--c);color:var(--c);font-size:1.18em}
+    @media(max-width:700px){.two{grid-template-columns:1fr}}
+
+    .tbl{width:100%;border-collapse:collapse;margin-top:12px;background:#fff}
+    .tbl th{background:var(--c);color:#fff;padding:9px 10px;font-size:1em}
+    .tbl td{border:1.6px solid var(--grid);padding:11px 10px;text-align:center;font-size:1.08em;font-weight:600;height:42px}
+    .tbl td.filled{background:var(--bg);color:var(--c)}
+    .way{border:2px solid var(--c);border-radius:10px;padding:14px 18px;background:#fff;margin-top:12px}
+    .way .cap{font-weight:800;font-size:.88em;text-transform:uppercase;letter-spacing:.6px;
+              color:var(--c);margin-bottom:7px}
+    .way ol{margin-left:18px}
+    .way li{margin:7px 0;font-size:1.06em;line-height:1.6}
+
+    .blitz{display:grid;grid-template-columns:repeat(auto-fill,minmax(262px,1fr));gap:9px;margin:10px 0 2px}
+    .blitz .b{border:2px solid var(--c);border-radius:9px;background:#fff;padding:9px 10px 7px;display:flex;
+        align-items:center;gap:9px}
+    .blitz .b i{font-style:normal;flex:none;width:25px;height:25px;border-radius:50%;background:var(--c);color:#fff;
+        font-weight:800;font-size:.82em;display:flex;align-items:center;justify-content:center}
+    .blitz .b span{font-size:1.04em;font-weight:700}
+    .blitz .b u{flex:1;text-decoration:none;border-bottom:2px solid var(--grid);min-width:34px;height:20px}
+
+    .rulers{margin:10px 0 2px}
+    .rl{margin:12px 0}
+    .rl b{display:block;color:var(--c);font-size:1.12em;margin-bottom:2px}
+    .mathlang{width:100%;border-collapse:collapse;margin:10px 0 2px;font-size:1.02em}
+    .mathlang th,.mathlang td{border:2px solid var(--c);padding:9px 10px;text-align:left;vertical-align:middle}
+    .mathlang th{background:var(--bg);color:var(--c)}
+    .mathlang td.w{background:#fff;height:46px;width:34%}
+
+.venn{position:relative;margin:12px auto 4px;max-width:520px}
+.venn.small{max-width:300px}
+.venn svg{width:100%;height:auto;display:block;touch-action:manipulation}
+.venn .vin{position:absolute;transform:translate(-50%,-50%);width:13%;min-width:38px;max-width:62px;padding:4px 2px;font-size:1.05em;font-weight:800;text-align:center;border:2px solid #94a3b8;border-radius:8px;background:#fff;font-family:inherit}
+.venn .vin.ok{border-color:#16a34a;background:#f0fdf4}.venn .vin.no{border-color:#dc2626;background:#fef2f2}
+.poolcap{font-weight:800;color:var(--c);font-size:.9em;margin-top:6px}
+.pool{display:flex;flex-wrap:wrap;gap:7px;min-height:44px;padding:8px;border:2px dashed var(--grid);border-radius:10px;background:var(--bg);margin-top:4px}
+.chip{min-width:38px;height:38px;border-radius:50%;border:2px solid var(--c);background:#fff;font-weight:800;font-size:1.1em;cursor:pointer;font-family:inherit;color:#1e2430}
+.chip.sel{background:var(--c);color:#fff;box-shadow:0 0 0 3px rgba(0,0,0,.12)}
+.ansrow .ghost{background:#fff;color:#64748b;border-color:#cbd5e1}
+.shgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:8px}
+.shcell{border:2px solid var(--grid);border-radius:10px;padding:8px 10px;background:#fff}
+.shcell p{font-size:.98em;margin-bottom:2px}
+.qgrid .ansrow{margin-top:7px}.qgrid .ansrow label{font-weight:700;color:#1e2430;font-size:1em}
+.slider{display:flex;align-items:center;gap:12px;justify-content:center;margin:6px 0}
+.slider input{width:260px}.slider span{font-size:1.4em;font-weight:800;color:var(--c);min-width:30px}
+.namebar{font-size:.95em;color:var(--c);font-weight:700;min-height:1.3em;margin-top:4px}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header"><svg class="deco" viewBox="0 0 1200 104" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><circle cx="663" cy="29" r="28" fill="#e11d48" opacity=".13"/><circle cx="685" cy="29" r="28" fill="none" stroke="#e11d48" stroke-width="2" opacity=".25"/><circle cx="148" cy="78" r="19" fill="#16a34a" opacity=".13"/><circle cx="163" cy="78" r="19" fill="none" stroke="#16a34a" stroke-width="2" opacity=".25"/><circle cx="1193" cy="17" r="32" fill="#2563eb" opacity=".13"/><circle cx="1219" cy="17" r="32" fill="none" stroke="#2563eb" stroke-width="2" opacity=".25"/><circle cx="76" cy="21" r="29" fill="#d97706" opacity=".13"/><circle cx="99" cy="21" r="29" fill="none" stroke="#d97706" stroke-width="2" opacity=".25"/><circle cx="143" cy="40" r="18" fill="#7c3aed" opacity=".13"/><circle cx="157" cy="40" r="18" fill="none" stroke="#7c3aed" stroke-width="2" opacity=".25"/><circle cx="869" cy="17" r="34" fill="#e11d48" opacity=".13"/><circle cx="896" cy="17" r="34" fill="none" stroke="#e11d48" stroke-width="2" opacity=".25"/><circle cx="457" cy="90" r="34" fill="#e11d48" opacity=".13"/><circle cx="484" cy="90" r="34" fill="none" stroke="#e11d48" stroke-width="2" opacity=".25"/><circle cx="1181" cy="84" r="28" fill="#e11d48" opacity=".13"/><circle cx="1203" cy="84" r="28" fill="none" stroke="#e11d48" stroke-width="2" opacity=".25"/><circle cx="452" cy="15" r="33" fill="#2563eb" opacity=".13"/><circle cx="478" cy="15" r="33" fill="none" stroke="#2563eb" stroke-width="2" opacity=".25"/><circle cx="593" cy="63" r="20" fill="#7c3aed" opacity=".13"/><circle cx="609" cy="63" r="20" fill="none" stroke="#7c3aed" stroke-width="2" opacity=".25"/><circle cx="241" cy="83" r="25" fill="#7c3aed" opacity=".13"/><circle cx="261" cy="83" r="25" fill="none" stroke="#7c3aed" stroke-width="2" opacity=".25"/><circle cx="370" cy="23" r="34" fill="#7c3aed" opacity=".13"/><circle cx="397" cy="23" r="34" fill="none" stroke="#7c3aed" stroke-width="2" opacity=".25"/><circle cx="384" cy="57" r="19" fill="#7c3aed" opacity=".13"/><circle cx="399" cy="57" r="19" fill="none" stroke="#7c3aed" stroke-width="2" opacity=".25"/><circle cx="128" cy="82" r="17" fill="#7c3aed" opacity=".13"/><circle cx="142" cy="82" r="17" fill="none" stroke="#7c3aed" stroke-width="2" opacity=".25"/><circle cx="421" cy="73" r="33" fill="#d97706" opacity=".13"/><circle cx="447" cy="73" r="33" fill="none" stroke="#d97706" stroke-width="2" opacity=".25"/><circle cx="643" cy="69" r="34" fill="#d97706" opacity=".13"/><circle cx="670" cy="69" r="34" fill="none" stroke="#d97706" stroke-width="2" opacity=".25"/><circle cx="740" cy="48" r="23" fill="#2563eb" opacity=".13"/><circle cx="758" cy="48" r="23" fill="none" stroke="#2563eb" stroke-width="2" opacity=".25"/><circle cx="499" cy="20" r="34" fill="#16a34a" opacity=".13"/><circle cx="526" cy="20" r="34" fill="none" stroke="#16a34a" stroke-width="2" opacity=".25"/><circle cx="1075" cy="73" r="26" fill="#d97706" opacity=".13"/><circle cx="1096" cy="73" r="26" fill="none" stroke="#d97706" stroke-width="2" opacity=".25"/><circle cx="589" cy="87" r="18" fill="#e11d48" opacity=".13"/><circle cx="603" cy="87" r="18" fill="none" stroke="#e11d48" stroke-width="2" opacity=".25"/><circle cx="1048" cy="63" r="21" fill="#16a34a" opacity=".13"/><circle cx="1065" cy="63" r="21" fill="none" stroke="#16a34a" stroke-width="2" opacity=".25"/><circle cx="311" cy="72" r="29" fill="#e11d48" opacity=".13"/><circle cx="334" cy="72" r="29" fill="none" stroke="#e11d48" stroke-width="2" opacity=".25"/><circle cx="158" cy="81" r="34" fill="#16a34a" opacity=".13"/><circle cx="185" cy="81" r="34" fill="none" stroke="#16a34a" stroke-width="2" opacity=".25"/><circle cx="696" cy="54" r="31" fill="#7c3aed" opacity=".13"/><circle cx="721" cy="54" r="31" fill="none" stroke="#7c3aed" stroke-width="2" opacity=".25"/><circle cx="934" cy="18" r="18" fill="#16a34a" opacity=".13"/><circle cx="948" cy="18" r="18" fill="none" stroke="#16a34a" stroke-width="2" opacity=".25"/><circle cx="970" cy="95" r="18" fill="#e11d48" opacity=".13"/><circle cx="984" cy="95" r="18" fill="none" stroke="#e11d48" stroke-width="2" opacity=".25"/></svg><h1>Круги Эйлера</h1></div>
+<section class="sec sec-sky"><h2>🔵 Раскладываем по кругам</h2><div class="memo"><p><strong>Круг</strong> обводит всех, у кого есть свойство. Там, где круги <strong>пересекаются</strong>, стоят те, у кого есть оба свойства сразу. <strong>Снаружи</strong> кругов, но внутри рамки, стоят те, у кого нет ни одного.</p><p>Нажми на фишку, потом на нужное место диаграммы. Если передумал, нажми на фишку на диаграмме, и она вернётся вниз.</p></div><div class="task"><span class="task-num">1</span><span class="star">⭐</span><p>Разложи числа от 1 до 15.</p><div class="venn" data-id="s1"></div><div class="poolcap">числа</div><div class="pool" id="pool_s1"></div><div class="ansrow"><button onclick="chkSort('s1')">Проверить</button><button class="ghost" onclick="resetSort('s1')">Собрать обратно</button></div><div class="fb" id="fb_s1"></div></div><div class="task"><span class="task-num">2</span><span class="star">⭐⭐</span><p>Разложи животных. Наведи на фишку или нажми на неё, чтобы увидеть название.</p><div class="venn" data-id="s2"></div><div class="poolcap">животные</div><div class="pool" id="pool_s2"></div><div class="ansrow"><button onclick="chkSort('s2')">Проверить</button><button class="ghost" onclick="resetSort('s2')">Собрать обратно</button></div><div class="fb" id="fb_s2"></div></div></section><section class="sec sec-grass"><h2>🖍 Закрашиваем области</h2><div class="memo"><p>Левый круг: дети, которые любят <strong>каток</strong>. Правый круг: дети, которые любят <strong>лыжи</strong>. Нажимай на части диаграммы, чтобы закрасить или снять закраску.</p></div><div class="task"><span class="task-num">3</span><span class="star">⭐⭐</span><p>Закрась, где стоят дети, которые…</p><div class="shgrid"><div class="shcell"><p><b>а)</b> любят и каток, и лыжи</p><div class="venn small" data-id="h0"></div><div class="ansrow"><button onclick="chkShade('h0')">Проверить</button></div><div class="fb" id="fb_h0"></div></div><div class="shcell"><p><b>б)</b> любят только лыжи</p><div class="venn small" data-id="h1"></div><div class="ansrow"><button onclick="chkShade('h1')">Проверить</button></div><div class="fb" id="fb_h1"></div></div><div class="shcell"><p><b>в)</b> любят каток, но не любят лыжи</p><div class="venn small" data-id="h2"></div><div class="ansrow"><button onclick="chkShade('h2')">Проверить</button></div><div class="fb" id="fb_h2"></div></div><div class="shcell"><p><b>г)</b> не любят ни каток, ни лыжи</p><div class="venn small" data-id="h3"></div><div class="ansrow"><button onclick="chkShade('h3')">Проверить</button></div><div class="fb" id="fb_h3"></div></div><div class="shcell"><p><b>д)</b> любят хотя бы одно из двух</p><div class="venn small" data-id="h4"></div><div class="ansrow"><button onclick="chkShade('h4')">Проверить</button></div><div class="fb" id="fb_h4"></div></div><div class="shcell"><p><b>е)</b> любят ровно одно из двух</p><div class="venn small" data-id="h5"></div><div class="ansrow"><button onclick="chkShade('h5')">Проверить</button></div><div class="fb" id="fb_h5"></div></div><div class="shcell"><p><b>ж)</b> не любят каток</p><div class="venn small" data-id="h6"></div><div class="ansrow"><button onclick="chkShade('h6')">Проверить</button></div><div class="fb" id="fb_h6"></div></div></div></div></section><section class="sec sec-pond"><h2>🔎 Читаем диаграмму</h2><div class="task"><span class="task-num">4</span><span class="star">⭐⭐</span><p>На диаграмме записано, сколько детей класса стоит в каждой части. Ответь на вопросы.</p><div class="venn" data-id="v4"></div><div class="qgrid"><div class="ansrow"><label>Сколько детей любят каток?</label><input id="q4a"><button onclick="chkNum('q4a', '13')">Проверить</button><span class="fb" id="fb_q4a"></span></div><div class="ansrow"><label>Сколько любят лыжи?</label><input id="q4b"><button onclick="chkNum('q4b', '11')">Проверить</button><span class="fb" id="fb_q4b"></span></div><div class="ansrow"><label>Сколько всего детей в классе?</label><input id="q4c"><button onclick="chkNum('q4c', '22')">Проверить</button><span class="fb" id="fb_q4c"></span></div><div class="ansrow"><label>Сколько любят ровно одно из двух?</label><input id="q4d"><button onclick="chkNum('q4d', '14')">Проверить</button><span class="fb" id="fb_q4d"></span></div><div class="ansrow"><label>Сколько не любят лыжи?</label><input id="q4e"><button onclick="chkNum('q4e', '11')">Проверить</button><span class="fb" id="fb_q4e"></span></div><div class="ansrow"><label>Сколько любят хотя бы одно?</label><input id="q4f"><button onclick="chkNum('q4f', '19')">Проверить</button><span class="fb" id="fb_q4f"></span></div></div></div></section><section class="sec sec-meadow"><h2>🧮 Считаем по областям</h2><div class="memo"><p>Сначала впиши числа во все части диаграммы, потом отвечай на вопрос. Начинай с той части, про которую известно точно.</p></div><div class="task"><span class="task-num">5</span><span class="star">⭐</span><p>Одни подруги разводят дома растения. У четырёх есть кактусы, у трёх папоротники. И кактусы, и папоротники есть только у одной. Каждая подруга что-то разводит.</p><div class="venn" data-id="f5"></div><div class="ansrow"><button onclick="chkFill('f5')">Проверить числа на диаграмме</button></div><div class="fb" id="fb_f5"></div><div class="ansrow"><label>Сколько всего подруг?</label><input id="f5q"><button onclick="chkNum('f5q', '6')">Проверить</button><span class="fb" id="fb_f5q"></span></div></div><div class="task"><span class="task-num">6</span><span class="star">⭐⭐</span><p>В классе 30 детей. Какао любят 19 человек, морс 17, а и какао, и морс любят 8.</p><div class="venn" data-id="f6"></div><div class="ansrow"><button onclick="chkFill('f6')">Проверить числа на диаграмме</button></div><div class="fb" id="fb_f6"></div><div class="ansrow"><label>Сколько детей не любят ни какао, ни морс?</label><input id="f6q"><button onclick="chkNum('f6q', '2')">Проверить</button><span class="fb" id="fb_f6q"></span></div></div><div class="task"><span class="task-num">7</span><span class="star">⭐</span><p>24 ученика писали работу из уравнения и задачи. И то, и другое решили 18 человек, только уравнение 2, только задачу 3.</p><div class="venn" data-id="f7"></div><div class="ansrow"><button onclick="chkFill('f7')">Проверить числа на диаграмме</button></div><div class="fb" id="fb_f7"></div><div class="ansrow"><label>Сколько учеников не решили ни уравнение, ни задачу?</label><input id="f7q"><button onclick="chkNum('f7q', '1')">Проверить</button><span class="fb" id="fb_f7q"></span></div></div><div class="task"><span class="task-num">8</span><span class="star">⭐⭐</span><p>В кружке собирают только марки и монеты. Марки собирают 8 человек, монеты 5, а всего коллекционеров 11.</p><div class="venn" data-id="f8"></div><div class="ansrow"><button onclick="chkFill('f8')">Проверить числа на диаграмме</button></div><div class="fb" id="fb_f8"></div><div class="ansrow"><label>Сколько человек собирают только марки?</label><input id="f8q"><button onclick="chkNum('f8q', '6')">Проверить</button><span class="fb" id="fb_f8q"></span></div></div><div class="task"><span class="task-num">9</span><span class="star">⭐⭐⭐</span><p>У крольчихи 15 крольчат. Морковь любят 8, капусту 10, а одного крольчонка не интересует ни морковь, ни капуста.</p><div class="venn" data-id="f9"></div><div class="ansrow"><button onclick="chkFill('f9')">Проверить числа на диаграмме</button></div><div class="fb" id="fb_f9"></div><div class="ansrow"><label>Сколько крольчат любят и морковь, и капусту?</label><input id="f9q"><button onclick="chkNum('f9q', '4')">Проверить</button><span class="fb" id="fb_f9q"></span></div></div></section><section class="sec sec-earth"><h2>⚖️ Самое меньшее и самое большее</h2><div class="task"><span class="task-num">10</span><span class="star">⭐⭐⭐</span><p>В классе 20 детей. Каток любят 12 человек, лыжи 13. Больше ничего не известно.</p><p>Двигай ползунок: сколько детей любят и то, и другое. Диаграмма пересчитает остальные части. Если где-то получится меньше нуля, такого не бывает.</p><div class="venn" data-id="e10"></div><div class="slider"><input type="range" min="0" max="13" value="0" id="sl10" oninput="slide10()"><span id="sl10v">0</span></div><div class="fb" id="fb_sl10"></div><div class="qgrid"><div class="ansrow"><label>Самое меньшее, сколько любят и то, и другое:</label><input id="q10a"><button onclick="chkNum('q10a', '5')">Проверить</button><span class="fb" id="fb_q10a"></span></div><div class="ansrow"><label>Самое большее:</label><input id="q10b"><button onclick="chkNum('q10b', '12')">Проверить</button><span class="fb" id="fb_q10b"></span></div><div class="ansrow"><label>Может ли быть, что каждый ребёнок в классе любит хотя бы одно из двух? (да или нет)</label><input id="q10c"><button onclick="chkNum('q10c', 'да')">Проверить</button><span class="fb" id="fb_q10c"></span></div></div></div></section><section class="sec sec-indigo"><h2>🔺 Три круга</h2><div class="memo"><p>Кругов теперь три, и частей у диаграммы стало восемь, вместе с частью снаружи. Посередине стоят те, у кого есть все три свойства.</p></div><div class="task"><span class="task-num">11</span><span class="star">⭐⭐</span><p>Разложи числа от 1 до 20.</p><div class="venn" data-id="s11"></div><div class="poolcap">числа</div><div class="pool" id="pool_s11"></div><div class="ansrow"><button onclick="chkSort('s11')">Проверить</button><button class="ghost" onclick="resetSort('s11')">Собрать обратно</button></div><div class="fb" id="fb_s11"></div></div><div class="task"><span class="task-num">12</span><span class="star">⭐⭐</span><p>Закрась части, где стоят числа, которые…</p><div class="shgrid"><div class="shcell"><p><b>а)</b> есть во всех трёх кругах</p><div class="venn small" data-id="h30"></div><div class="ansrow"><button onclick="chkShade('h30')">Проверить</button></div><div class="fb" id="fb_h30"></div></div><div class="shcell"><p><b>б)</b> чётные и делятся на 3, но не больше 10</p><div class="venn small" data-id="h31"></div><div class="ansrow"><button onclick="chkShade('h31')">Проверить</button></div><div class="fb" id="fb_h31"></div></div><div class="shcell"><p><b>в)</b> больше 10, но не чётные и не делятся на 3</p><div class="venn small" data-id="h32"></div><div class="ansrow"><button onclick="chkShade('h32')">Проверить</button></div><div class="fb" id="fb_h32"></div></div><div class="shcell"><p><b>г)</b> есть ровно в двух кругах</p><div class="venn small" data-id="h33"></div><div class="ansrow"><button onclick="chkShade('h33')">Проверить</button></div><div class="fb" id="fb_h33"></div></div></div></div><div class="task"><span class="task-num">13</span><span class="star">⭐⭐⭐</span><p>Ребята из кружка рассказали, куда ходили на каникулах. Числа на диаграмме показывают, сколько человек в каждой части.</p><div class="venn" data-id="v13"></div><div class="qgrid"><div class="ansrow"><label>Сколько ребят ходили на каток?</label><input id="q13a"><button onclick="chkNum('q13a', '8')">Проверить</button><span class="fb" id="fb_q13a"></span></div><div class="ansrow"><label>Сколько были ровно в одном месте?</label><input id="q13b"><button onclick="chkNum('q13b', '12')">Проверить</button><span class="fb" id="fb_q13b"></span></div><div class="ansrow"><label>Сколько были во всех трёх?</label><input id="q13c"><button onclick="chkNum('q13c', '1')">Проверить</button><span class="fb" id="fb_q13c"></span></div><div class="ansrow"><label>Сколько были ровно в двух местах?</label><input id="q13d"><button onclick="chkNum('q13d', '5')">Проверить</button><span class="fb" id="fb_q13d"></span></div><div class="ansrow"><label>Сколько всего ребят в кружке?</label><input id="q13e"><button onclick="chkNum('q13e', '20')">Проверить</button><span class="fb" id="fb_q13e"></span></div><div class="ansrow"><label>Сколько ходили хоть куда-то?</label><input id="q13f"><button onclick="chkNum('q13f', '18')">Проверить</button><span class="fb" id="fb_q13f"></span></div></div></div></section><section class="sec sec-stone"><h2>Запасной блок</h2><div class="task"><span class="task-num">14</span><span class="star">⭐⭐⭐</span><p>Приехали 100 туристов. 10 из них не знали ни немецкого, ни французского, 75 знали немецкий, 83 французский.</p><div class="venn" data-id="f14"></div><div class="ansrow"><button onclick="chkFill('f14')">Проверить числа на диаграмме</button></div><div class="fb" id="fb_f14"></div><div class="ansrow"><label>Сколько туристов знали оба языка?</label><input id="f14q"><button onclick="chkNum('f14q', '68')">Проверить</button><span class="fb" id="fb_f14q"></span></div></div><div class="task"><span class="task-num">15</span><span class="star">⭐⭐</span><p>В доме 50 семей. 38 семей выписывают газеты, 24 журналы, 15 и газеты, и журналы.</p><div class="venn" data-id="f15"></div><div class="ansrow"><button onclick="chkFill('f15')">Проверить числа на диаграмме</button></div><div class="fb" id="fb_f15"></div><div class="ansrow"><label>Сколько семей не выписывают ни газет, ни журналов?</label><input id="f15q"><button onclick="chkNum('f15q', '3')">Проверить</button><span class="fb" id="fb_f15q"></span></div></div><div class="task"><span class="task-num">16</span><span class="star">⭐⭐⭐</span><p>Во дворе гуляли 10 девочек. 7 из них были с бантиками, 6 с косичками. Как такое могло быть?</p><div class="qgrid"><div class="ansrow"><label>Сколько девочек точно были и с бантиками, и с косичками (самое меньшее)?</label><input id="q16a"><button onclick="chkNum('q16a', '3')">Проверить</button><span class="fb" id="fb_q16a"></span></div><div class="ansrow"><label>А самое большее?</label><input id="q16b"><button onclick="chkNum('q16b', '6')">Проверить</button><span class="fb" id="fb_q16b"></span></div></div><div class="grid-space"></div></div></section>
+</div>
+<script>
+var GEO={"2": {"w": 440, "h": 270, "c": {"A": [165, 140, 100], "B": [275, 140, 100]}, "lab": {"A": [70, 30], "B": [370, 30]}, "slots": {"O": [[217, 245], [105, 245], [329, 245], [77, 245], [357, 245], [63, 217], [371, 217], [49, 245], [385, 245], [49, 189], [385, 189], [35, 217], [399, 217], [21, 245], [413, 245], [35, 161], [399, 161], [49, 133], [21, 189], [413, 189], [217, 21], [189, 21], [245, 21], [21, 133], [413, 133], [35, 105], [399, 105], [161, 21], [273, 21], [49, 77], [385, 77], [133, 21], [301, 21], [21, 77], [413, 77]], "A": [[133, 133], [105, 133], [119, 105], [147, 105], [119, 161], [147, 161], [91, 105], [91, 161], [133, 77], [133, 189], [161, 77], [105, 189], [161, 189], [147, 217], [175, 217]], "B": [[301, 133], [329, 133], [287, 105], [315, 105], [287, 161], [315, 161], [343, 105], [343, 161], [301, 77], [357, 133], [301, 189], [273, 77], [329, 77], [273, 189], [329, 189], [287, 217], [259, 217]], "AB": [[217, 133], [245, 133], [203, 105], [231, 105], [203, 161], [231, 161], [217, 189]]}, "cen": {"O": [42, 246], "A": [133, 133], "B": [301, 133], "AB": [217, 133]}}, "3": {"w": 420, "h": 423, "c": {"A": [150, 160, 120], "B": [270, 160, 120], "C": [210, 264, 120]}, "lab": {"A": [52, 22], "B": [368, 22], "C": [368, 403]}, "slots": {"O": [[73, 281], [47, 281], [60, 307], [34, 255], [34, 307], [21, 281], [73, 333], [47, 333], [21, 229], [21, 333], [60, 359], [86, 359], [34, 359], [112, 359], [73, 385], [47, 385], [99, 385], [21, 385], [125, 385], [21, 73], [281, 385], [60, 47], [34, 47], [307, 385], [320, 359], [125, 21], [333, 333], [151, 21], [346, 307], [177, 21], [346, 359], [359, 281], [203, 21], [359, 333], [372, 255], [372, 307], [229, 21], [372, 359], [385, 281], [385, 333], [255, 21], [398, 255], [398, 307], [281, 21], [398, 203], [398, 359], [307, 21], [346, 47], [398, 99], [385, 73], [372, 47], [398, 47]], "A": [[86, 151], [60, 151], [112, 151], [73, 125], [99, 125], [73, 177], [99, 177], [125, 125], [47, 177], [86, 99], [86, 203], [112, 99], [60, 203], [138, 99], [99, 73], [73, 229], [125, 73], [151, 73]], "B": [[333, 125], [307, 125], [359, 125], [320, 99], [346, 99], [320, 151], [346, 151], [294, 99], [294, 151], [372, 151], [281, 125], [333, 177], [307, 73], [359, 177], [281, 73], [346, 203], [255, 73]], "AB": [[203, 125], [177, 125], [229, 125], [190, 99], [216, 99]], "ABC": [[216, 203], [190, 203], [242, 203], [203, 177], [229, 177], [203, 229], [229, 229], [177, 177]], "AC": [[125, 229], [151, 229], [138, 203], [112, 255], [138, 255], [164, 255]], "BC": [[281, 229], [307, 229], [294, 203], [268, 255], [294, 255]], "C": [[203, 333], [177, 333], [229, 333], [190, 307], [216, 307], [190, 359], [216, 359], [164, 307], [242, 307], [242, 359], [151, 333], [255, 333], [138, 307], [268, 307], [281, 333], [294, 307]]}, "cen": {"O": [40, 399], "A": [86, 151], "B": [333, 125], "AB": [203, 125], "ABC": [216, 203], "AC": [125, 229], "BC": [281, 229], "C": [203, 333]}}};
+var TASKS={"s1": {"mode": "sort", "k": 2, "labels": {"A": "чётные", "B": "делятся на 3"}, "items": [{"t": "1", "r": "O"}, {"t": "2", "r": "A"}, {"t": "3", "r": "B"}, {"t": "4", "r": "A"}, {"t": "5", "r": "O"}, {"t": "6", "r": "AB"}, {"t": "7", "r": "O"}, {"t": "8", "r": "A"}, {"t": "9", "r": "B"}, {"t": "10", "r": "A"}, {"t": "11", "r": "O"}, {"t": "12", "r": "AB"}, {"t": "13", "r": "O"}, {"t": "14", "r": "A"}, {"t": "15", "r": "B"}]}, "s2": {"mode": "sort", "k": 2, "labels": {"A": "птицы", "B": "летают"}, "items": [{"t": "🦆", "title": "утка", "r": "AB"}, {"t": "🦅", "title": "орёл", "r": "AB"}, {"t": "🦢", "title": "лебедь", "r": "AB"}, {"t": "🐧", "title": "пингвин", "r": "A"}, {"t": "🦋", "title": "бабочка", "r": "B"}, {"t": "🐝", "title": "пчела", "r": "B"}, {"t": "🦇", "title": "летучая мышь", "r": "B"}, {"t": "🐈", "title": "кошка", "r": "O"}, {"t": "🐟", "title": "рыба", "r": "O"}, {"t": "🦒", "title": "жираф", "r": "O"}]}, "h0": {"mode": "shade", "k": 2, "labels": {"A": "каток", "B": "лыжи"}, "target": ["AB"]}, "h1": {"mode": "shade", "k": 2, "labels": {"A": "каток", "B": "лыжи"}, "target": ["B"]}, "h2": {"mode": "shade", "k": 2, "labels": {"A": "каток", "B": "лыжи"}, "target": ["A"]}, "h3": {"mode": "shade", "k": 2, "labels": {"A": "каток", "B": "лыжи"}, "target": ["O"]}, "h4": {"mode": "shade", "k": 2, "labels": {"A": "каток", "B": "лыжи"}, "target": ["A", "AB", "B"]}, "h5": {"mode": "shade", "k": 2, "labels": {"A": "каток", "B": "лыжи"}, "target": ["A", "B"]}, "h6": {"mode": "shade", "k": 2, "labels": {"A": "каток", "B": "лыжи"}, "target": ["B", "O"]}, "v4": {"mode": "show", "k": 2, "labels": {"A": "каток", "B": "лыжи"}, "nums": {"A": 8, "AB": 5, "B": 6, "O": 3}}, "f5": {"mode": "fill", "k": 2, "labels": {"A": "кактусы", "B": "папоротники"}, "regs": {"A": 3, "AB": 1, "B": 2}}, "f6": {"mode": "fill", "k": 2, "labels": {"A": "какао", "B": "морс"}, "regs": {"A": 11, "AB": 8, "B": 9, "O": 2}}, "f7": {"mode": "fill", "k": 2, "labels": {"A": "уравнение", "B": "задача"}, "regs": {"A": 2, "AB": 18, "B": 3, "O": 1}}, "f8": {"mode": "fill", "k": 2, "labels": {"A": "марки", "B": "монеты"}, "regs": {"A": 6, "AB": 2, "B": 3}}, "f9": {"mode": "fill", "k": 2, "labels": {"A": "морковь", "B": "капуста"}, "regs": {"A": 4, "AB": 4, "B": 6, "O": 1}}, "e10": {"mode": "show", "k": 2, "labels": {"A": "каток", "B": "лыжи"}, "nums": {"A": 12, "AB": 0, "B": 13, "O": -5}}, "s11": {"mode": "sort", "k": 3, "labels": {"A": "чётные", "B": "делятся на 3", "C": "больше 10"}, "items": [{"t": "1", "r": "O"}, {"t": "2", "r": "A"}, {"t": "3", "r": "B"}, {"t": "4", "r": "A"}, {"t": "5", "r": "O"}, {"t": "6", "r": "AB"}, {"t": "7", "r": "O"}, {"t": "8", "r": "A"}, {"t": "9", "r": "B"}, {"t": "10", "r": "A"}, {"t": "11", "r": "C"}, {"t": "12", "r": "ABC"}, {"t": "13", "r": "C"}, {"t": "14", "r": "AC"}, {"t": "15", "r": "BC"}, {"t": "16", "r": "AC"}, {"t": "17", "r": "C"}, {"t": "18", "r": "ABC"}, {"t": "19", "r": "C"}, {"t": "20", "r": "AC"}]}, "h30": {"mode": "shade", "k": 3, "labels": {"A": "чётные", "B": "делятся на 3", "C": "больше 10"}, "target": ["ABC"]}, "h31": {"mode": "shade", "k": 3, "labels": {"A": "чётные", "B": "делятся на 3", "C": "больше 10"}, "target": ["AB"]}, "h32": {"mode": "shade", "k": 3, "labels": {"A": "чётные", "B": "делятся на 3", "C": "больше 10"}, "target": ["C"]}, "h33": {"mode": "shade", "k": 3, "labels": {"A": "чётные", "B": "делятся на 3", "C": "больше 10"}, "target": ["AB", "AC", "BC"]}, "v13": {"mode": "show", "k": 3, "labels": {"A": "каток", "B": "бассейн", "C": "музей"}, "nums": {"A": 4, "B": 3, "C": 5, "AB": 2, "AC": 1, "BC": 2, "ABC": 1, "O": 2}}, "f14": {"mode": "fill", "k": 2, "labels": {"A": "немецкий", "B": "французский"}, "regs": {"A": 7, "AB": 68, "B": 15, "O": 10}}, "f15": {"mode": "fill", "k": 2, "labels": {"A": "газеты", "B": "журналы"}, "regs": {"A": 23, "AB": 15, "B": 9, "O": 3}}};
+var NS="http://www.w3.org/2000/svg";
+var COL={A:"#e11d48",B:"#2563eb",C:"#16a34a"};
+var REGS={2:["A","AB","B","O"],3:["A","B","C","AB","AC","BC","ABC","O"]};
+var ST={};
+function norm(s){ return (s||"").toString().trim().toLowerCase().replace(/\s+/g,"").replace(/ё/g,"е"); }
+function say(id, ok, text){
+  var fb=document.getElementById("fb_"+id); if(!fb) return;
+  fb.className="fb "+(ok?"ok":"no"); fb.textContent=text;
+}
+function chkNum(id, answer){
+  var el=document.getElementById(id); var ok=norm(el.value)===norm(answer);
+  el.classList.remove("ok","no"); el.classList.add(ok?"ok":"no");
+  say(id, ok, ok?"Верно":"Пока нет");
+}
+function mk(tag, attrs, parent){
+  var e=document.createElementNS(NS,tag);
+  for(var k in attrs) e.setAttribute(k, attrs[k]);
+  if(parent) parent.appendChild(e); return e;
+}
+function regionAt(k,x,y){
+  var g=GEO[k], s="";
+  ["A","B","C"].forEach(function(L){ var c=g.c[L]; if(!c) return;
+    if((x-c[0])*(x-c[0])+(y-c[1])*(y-c[1])<c[2]*c[2]) s+=L; });
+  return s||"O";
+}
+function svgPoint(svg, ev){
+  var p=svg.createSVGPoint(); p.x=ev.clientX; p.y=ev.clientY;
+  return p.matrixTransform(svg.getScreenCTM().inverse());
+}
+function build(div){
+  var id=div.getAttribute("data-id"), t=TASKS[id], g=GEO[t.k];
+  var svg=mk("svg",{viewBox:"0 0 "+g.w+" "+g.h,role:"img"},div);
+  var defs=mk("defs",{},svg), letters=Object.keys(g.c);
+  letters.forEach(function(L){ var c=g.c[L];
+    var cp=mk("clipPath",{id:id+"_c"+L},defs); mk("circle",{cx:c[0],cy:c[1],r:c[2]},cp); });
+  REGS[t.k].forEach(function(R){
+    var excl=letters.filter(function(L){ return R.indexOf(L)<0; });
+    var m=mk("mask",{id:id+"_m"+R},defs);
+    mk("rect",{x:0,y:0,width:g.w,height:g.h,fill:"#fff"},m);
+    excl.forEach(function(L){ var c=g.c[L]; mk("circle",{cx:c[0],cy:c[1],r:c[2],fill:"#000"},m); });
+  });
+  mk("rect",{x:4,y:4,width:g.w-8,height:g.h-8,rx:12,fill:"#fff",stroke:"#64748b","stroke-width":2},svg);
+  var shade={};
+  REGS[t.k].forEach(function(R){
+    var grp=mk("g",{mask:"url(#"+id+"_m"+R+")"},svg), inner=grp;
+    if(R!=="O") R.split("").forEach(function(L){ inner=mk("g",{"clip-path":"url(#"+id+"_c"+L+")"},inner); });
+    var r=mk("rect",{x:5,y:5,width:g.w-10,height:g.h-10,rx:11,"class":"rg"},inner);
+    r.style.fill="var(--c)"; r.style.opacity="0"; shade[R]=r;
+  });
+  letters.forEach(function(L){ var c=g.c[L];
+    mk("circle",{cx:c[0],cy:c[1],r:c[2],fill:"none",stroke:COL[L],"stroke-width":3},svg);
+    var lb=g.lab[L], sm=div.classList.contains("small"), fs=sm?24:16;
+    var lx=(L==="A")?14:g.w-14, an=(L==="A")?"start":"end", ly=(L==="C")?g.h-16:(sm?32:28);
+    var tx=mk("text",{x:lx,y:ly,"text-anchor":an,"font-size":fs,"font-weight":800,fill:COL[L],"font-family":"Segoe UI,Arial"},svg);
+    tx.textContent=t.labels[L]; });
+  var layer=mk("g",{},svg);
+  ST[id]={svg:svg,shade:shade,layer:layer,t:t,on:{},placed:{},sel:null};
+  if(t.mode==="shade"){
+    svg.style.cursor="pointer";
+    svg.addEventListener("click",function(ev){ var p=svgPoint(svg,ev); var R=regionAt(t.k,p.x,p.y);
+      var st=ST[id]; st.on[R]=!st.on[R]; shade[R].style.opacity=st.on[R]?".45":"0"; say(id,true,""); });
+  }
+  if(t.mode==="show") drawNums(id,t.nums);
+  if(t.mode==="fill"){
+    Object.keys(t.regs).forEach(function(R){ var c=g.cen[R];
+      var inp=document.createElement("input"); inp.className="vin"; inp.setAttribute("data-r",R); inp.setAttribute("data-ans",t.regs[R]);
+      inp.setAttribute("inputmode","numeric");
+      inp.style.left=(c[0]/g.w*100)+"%"; inp.style.top=(c[1]/g.h*100)+"%"; div.appendChild(inp); });
+  }
+  if(t.mode==="sort") buildSort(id);
+}
+function drawNums(id,nums){
+  var st=ST[id], g=GEO[st.t.k]; while(st.layer.firstChild) st.layer.removeChild(st.layer.firstChild);
+  Object.keys(nums).forEach(function(R){ var c=g.cen[R];
+    var tx=mk("text",{x:c[0],y:c[1]+9,"text-anchor":"middle","font-size":26,"font-weight":800,fill:nums[R]<0?"#dc2626":"#1e2430","font-family":"Segoe UI,Arial"},st.layer);
+    tx.textContent=nums[R]; });
+}
+function slide10(){
+  var v=+document.getElementById("sl10").value; document.getElementById("sl10v").textContent=v;
+  var n={A:12-v,AB:v,B:13-v,O:20-(12+13-v)}; drawNums("e10",n);
+  var bad=Object.keys(n).some(function(R){ return n[R]<0; });
+  say("sl10",!bad,bad?"Где-то получилось меньше нуля. Так не бывает.":"Так может быть.");
+}
+/* ---------- раскладка ---------- */
+function buildSort(id){
+  var st=ST[id], pool=document.getElementById("pool_"+id);
+  var nb=document.createElement("div"); nb.className="namebar"; nb.id="nb_"+id; pool.parentNode.insertBefore(nb,pool.nextSibling);
+  st.t.items.forEach(function(it,i){
+    var b=document.createElement("button"); b.type="button"; b.className="chip"; b.textContent=it.t;
+    if(it.title) b.title=it.title; b.setAttribute("data-i",i); b.draggable=true;
+    b.onclick=function(){ selChip(id,i); };
+    b.ondragstart=function(ev){ ev.dataTransfer.setData("text",id+"|"+i); };
+    pool.appendChild(b); });
+  st.svg.style.cursor="pointer";
+  st.svg.addEventListener("click",function(ev){ if(st.sel===null) return; var p=svgPoint(st.svg,ev); put(id,st.sel,regionAt(st.t.k,p.x,p.y)); });
+  st.svg.addEventListener("dragover",function(ev){ ev.preventDefault(); });
+  st.svg.addEventListener("drop",function(ev){ ev.preventDefault(); var d=(ev.dataTransfer.getData("text")||"").split("|");
+    if(d[0]!==id) return; var p=svgPoint(st.svg,ev); put(id,+d[1],regionAt(st.t.k,p.x,p.y)); });
+}
+function selChip(id,i){
+  var st=ST[id]; st.sel=(st.sel===i)?null:i;
+  var bs=document.getElementById("pool_"+id).querySelectorAll(".chip");
+  for(var k=0;k<bs.length;k++) bs[k].classList.toggle("sel", +bs[k].getAttribute("data-i")===st.sel);
+  var it=st.t.items[i]; document.getElementById("nb_"+id).textContent=(st.sel!==null&&it.title)?it.title:"";
+}
+function put(id,i,R){
+  var st=ST[id]; st.placed[i]=R; st.sel=null;
+  var b=document.getElementById("pool_"+id).querySelector('.chip[data-i="'+i+'"]'); if(b) b.remove();
+  document.getElementById("nb_"+id).textContent=""; say(id,true,""); drawPlaced(id);
+}
+function drawPlaced(id){
+  var st=ST[id], g=GEO[st.t.k], used={};
+  while(st.layer.firstChild) st.layer.removeChild(st.layer.firstChild);
+  Object.keys(st.placed).forEach(function(i){
+    var R=st.placed[i], n=used[R]||0; used[R]=n+1; var sl=g.slots[R], p=sl[n%sl.length];
+    var it=st.t.items[i], gr=mk("g",{"class":"pc","data-i":i,style:"cursor:pointer"},st.layer);
+    var c=mk("circle",{cx:p[0],cy:p[1],r:13,fill:"#fff",stroke:"#334155","stroke-width":2},gr);
+    if(st.bad&&st.bad[i]) { c.setAttribute("stroke","#dc2626"); c.setAttribute("fill","#fef2f2"); }
+    var tx=mk("text",{x:p[0],y:p[1]+(it.title?6:5),"text-anchor":"middle","font-size":it.title?16:14,"font-weight":800,fill:"#1e2430","font-family":"Segoe UI,Arial"},gr);
+    tx.textContent=it.t;
+    if(it.title){ var tt=mk("title",{},gr); tt.textContent=it.title; }
+    gr.addEventListener("click",function(ev){ ev.stopPropagation(); back(id,+i); });
+  });
+}
+function back(id,i){
+  var st=ST[id]; delete st.placed[i]; if(st.bad) delete st.bad[i];
+  var pool=document.getElementById("pool_"+id), it=st.t.items[i];
+  var b=document.createElement("button"); b.type="button"; b.className="chip"; b.textContent=it.t; if(it.title) b.title=it.title;
+  b.setAttribute("data-i",i); b.draggable=true; b.onclick=function(){ selChip(id,i); };
+  b.ondragstart=function(ev){ ev.dataTransfer.setData("text",id+"|"+i); };
+  pool.appendChild(b); drawPlaced(id);
+}
+function resetSort(id){ Object.keys(ST[id].placed).forEach(function(i){ back(id,+i); }); say(id,true,""); }
+function chkSort(id){
+  var st=ST[id], bad=0, left=0; st.bad={};
+  st.t.items.forEach(function(it,i){ var R=st.placed[i]; if(R===undefined){ left++; return; } if(R!==it.r){ bad++; st.bad[i]=1; } });
+  drawPlaced(id);
+  if(bad) say(id,false,"Не на своём месте: "+bad+". Они обведены красным.");
+  else if(left) say(id,true,"Пока всё верно, осталось разложить: "+left);
+  else say(id,true,"Всё разложено верно");
+}
+function chkShade(id){
+  var st=ST[id], tg=st.t.target, ok=REGS[st.t.k].every(function(R){ return !!st.on[R]===(tg.indexOf(R)>=0); });
+  say(id,ok,ok?"Верно":"Пока нет");
+}
+function chkFill(id){
+  var ins=document.querySelector('.venn[data-id="'+id+'"]').querySelectorAll(".vin"), bad=0, empty=0;
+  for(var k=0;k<ins.length;k++){ var el=ins[k]; el.classList.remove("ok","no");
+    if(!norm(el.value)){ empty++; continue; }
+    if(norm(el.value)===el.getAttribute("data-ans")) el.classList.add("ok"); else { el.classList.add("no"); bad++; } }
+  if(bad) say(id,false,"Чисел с ошибкой: "+bad);
+  else if(empty) say(id,true,"Пока верно, осталось вписать: "+empty);
+  else say(id,true,"Все части заполнены верно");
+}
+document.querySelectorAll(".venn").forEach(build);
+slide10();
+
+</script>
+</body></html>
