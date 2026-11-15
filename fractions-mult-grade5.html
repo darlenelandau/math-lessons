@@ -52,44 +52,25 @@
         background-size:24px 24px}
     .grid-tall{min-height:165px}
 
-    .hint{font-size:.95em;color:var(--c);font-style:italic;margin-top:7px;opacity:.95}
-
     .frac{display:inline-block;text-align:center;vertical-align:middle;font-weight:800;line-height:1.05;margin:0 3px}
     .frac span{display:block;padding:0 4px}
     .frac span.d{border-top:2px solid currentColor}
     .mixn{font-size:1.1em;font-weight:800;margin-right:2px}
 
-    .ex{font-size:1.12em;font-weight:600;margin:9px 0 2px}
+    .ex{font-size:1.12em;font-weight:600;margin:10px 0 4px}
+    .blank{display:inline-block;min-width:110px;border-bottom:2px solid #94a3b8;height:1.15em;vertical-align:-3px;margin:0 4px}
+    .blank.w60{min-width:60px}
+    .ansline{margin-top:10px;font-weight:700;color:var(--c);font-size:1.05em}
+    .ansline .blank{border-bottom-color:var(--c);opacity:.65}
+    .circ{font-weight:800;color:var(--c);letter-spacing:.5px}
 
-    .ansrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:9px}
-    .ansrow label{font-weight:700;color:var(--c)}
-    .ansrow input{width:96px;padding:8px 10px;font-size:1.08em;font-weight:700;text-align:center;
-        border:2px solid var(--grid);border-radius:9px;background:#fff;color:#1e2430}
-    .ansrow input:focus{outline:none;border-color:var(--c)}
-    .ansrow input.ok{border-color:#16a34a;background:#f0fdf4}
-    .ansrow input.no{border-color:#dc2626;background:#fef2f2}
-    .ansrow button,.cmp button{border:2px solid var(--c);border-radius:9px;background:var(--bg);
-        color:var(--c);font-weight:700;font-size:1.0em;padding:8px 14px;cursor:pointer;transition:all .2s}
-    .ansrow button:hover,.cmp button:hover{background:var(--c);color:#fff}
-    .cmp{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;margin-top:9px}
-    .cmp .side.lbl{min-width:0;flex:1;text-align:left;font-size:1em;font-weight:700}
-    .cmp .signs{display:inline-flex;gap:6px;margin:0 4px}
-    .cmp button{min-width:46px;font-size:1.05em}
-    .cmp button.ok{background:#16a34a;border-color:#16a34a;color:#fff}
-    .cmp button.no{background:#fecaca;border-color:#dc2626;color:#7f1d1d}
-    .fb{margin-top:7px;font-weight:700;min-height:1.2em}
-    .fb.ok{color:#15803d}
-    .fb.no{color:#b91c1c}
-
-    .clocks{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0 2px}
+    .clocks{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0 10px}
     @media(max-width:600px){.clocks{grid-template-columns:1fr}}
     .clocks div{border:2px solid var(--c);border-radius:10px;background:var(--bg);padding:14px 8px;text-align:center;
         font-size:1.7em;font-weight:800;color:var(--c);letter-spacing:1px;font-variant-numeric:tabular-nums}
 
-    .rule3{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:10px 0 2px}
-    .rule3 div{border:2px dashed var(--c);border-radius:10px;background:#fff;padding:9px 16px;
-        font-size:1.12em;font-weight:700;white-space:nowrap}
-    .rule3 div b{color:var(--c)}
+    .scheme{margin:10px 0 4px;text-align:center}
+    .scheme svg{max-width:100%;height:auto}
 
     .keep{page-break-inside:avoid;break-inside:avoid}
     @page{size:A4;margin:12mm}
@@ -120,10 +101,10 @@
 
 <section class="sec sec-stone">
 <h2>🕰 Разминка: три циферблата</h2>
-<div class="task"><span class="task-num">1</span>
+<div class="task keep"><span class="task-num">1</span>
 <p>Трое часов показывают время, и все три <strong>неправильно</strong>: какие-то ошибаются на <strong>4 минуты</strong>, какие-то на <strong>7</strong>, какие-то на <strong>9</strong> — в какую сторону, неизвестно. Какое время на самом деле?</p>
 <div class="clocks"><div>7:50</div><div>7:53</div><div>8:06</div></div>
-<div class="ansrow"><label>на самом деле:</label><input id="t1" placeholder="ч:мм"><button onclick="chkTime('t1')">Проверить</button><span class="fb" id="fb_t1"></span></div>
+<p class="ansline">На самом деле сейчас <span class="blank w60"></span></p>
 </div>
 </section>
 
@@ -134,37 +115,36 @@
 <p>Правило: числитель на числитель, знаменатель на знаменатель. И главное: <strong>сокращай до умножения</strong>, а не после.</p>
 </div>
 
-<div class="task"><span class="task-num">2</span>
+<div class="task keep"><span class="task-num">2</span>
 <p>Вычисли. Ответы в пунктах «в» и «г» запиши <strong>неправильной дробью</strong>.</p>
-<p class="ex">а)&nbsp; <span class="frac"><span>3</span><span class="d">4</span></span> × <span class="frac"><span>8</span><span class="d">9</span></span></p>
-<div class="ansrow"><label>а)</label><input id="m1" placeholder="a/b"><button onclick="chkFrac('m1',2,3)">Проверить</button><span class="fb" id="fb_m1"></span></div>
-<p class="ex">б)&nbsp; <span class="frac"><span>5</span><span class="d">6</span></span> × <span class="frac"><span>9</span><span class="d">10</span></span></p>
-<div class="ansrow"><label>б)</label><input id="m2" placeholder="a/b"><button onclick="chkFrac('m2',3,4)">Проверить</button><span class="fb" id="fb_m2"></span></div>
-<p class="ex">в)&nbsp; <span class="mixn">2</span><span class="frac"><span>1</span><span class="d">3</span></span> × <span class="mixn">1</span><span class="frac"><span>1</span><span class="d">5</span></span></p>
-<div class="ansrow"><label>в)</label><input id="m3" placeholder="a/b"><button onclick="chkFrac('m3',14,5)">Проверить</button><span class="fb" id="fb_m3"></span></div>
-<p class="ex">г)&nbsp; <span class="mixn">1</span><span class="frac"><span>7</span><span class="d">8</span></span> × <span class="mixn">2</span><span class="frac"><span>2</span><span class="d">5</span></span></p>
-<div class="ansrow"><label>г)</label><input id="m4" placeholder="a/b"><button onclick="chkFrac('m4',9,2)">Проверить</button><span class="fb" id="fb_m4"></span></div>
-</div>
-
-<div class="task"><span class="task-num">3</span>
-<p>Велосипедист проезжает за час <strong>12 км</strong>. Сколько километров он проедет за <span class="frac"><span>3</span><span class="d">4</span></span> часа? За <span class="frac"><span>1</span><span class="d">3</span></span>? За <span class="frac"><span>5</span><span class="d">6</span></span>? За <span class="mixn">2</span><span class="frac"><span>1</span><span class="d">2</span></span>?</p>
-<div class="ansrow"><label>за 3/4 ч:</label><input id="v1"><button onclick="chkNum('v1','9')">Проверить</button><span class="fb" id="fb_v1"></span></div>
-<div class="ansrow"><label>за 1/3 ч:</label><input id="v2"><button onclick="chkNum('v2','4')">Проверить</button><span class="fb" id="fb_v2"></span></div>
-<div class="ansrow"><label>за 5/6 ч:</label><input id="v3"><button onclick="chkNum('v3','10')">Проверить</button><span class="fb" id="fb_v3"></span></div>
-<div class="ansrow"><label>за 2 1/2 ч:</label><input id="v4"><button onclick="chkNum('v4','30')">Проверить</button><span class="fb" id="fb_v4"></span></div>
-</div>
-
-<div class="task"><span class="task-num">4</span>
-<p>Найди площадь комнаты размером <span class="mixn">5</span><span class="frac"><span>1</span><span class="d">3</span></span> м на <span class="mixn">3</span><span class="frac"><span>3</span><span class="d">4</span></span> м.</p>
-<div class="ansrow"><label>площадь, м²:</label><input id="pl"><button onclick="chkNum('pl','20')">Проверить</button><span class="fb" id="fb_pl"></span></div>
+<p class="ex">а)&nbsp; <span class="frac"><span>3</span><span class="d">4</span></span> × <span class="frac"><span>8</span><span class="d">9</span></span> = <span class="blank"></span></p>
+<p class="ex">б)&nbsp; <span class="frac"><span>5</span><span class="d">6</span></span> × <span class="frac"><span>9</span><span class="d">10</span></span> = <span class="blank"></span></p>
+<p class="ex">в)&nbsp; <span class="mixn">2</span><span class="frac"><span>1</span><span class="d">3</span></span> × <span class="mixn">1</span><span class="frac"><span>1</span><span class="d">5</span></span> = <span class="blank"></span></p>
+<p class="ex">г)&nbsp; <span class="mixn">1</span><span class="frac"><span>7</span><span class="d">8</span></span> × <span class="mixn">2</span><span class="frac"><span>2</span><span class="d">5</span></span> = <span class="blank"></span></p>
 <div class="grid-space"></div>
 </div>
 
-<div class="task"><span class="task-num">5</span>
+<div class="task keep"><span class="task-num">3</span>
+<p>Велосипедист проезжает за час <strong>12 км</strong>. Сколько километров он проедет:</p>
+<p class="ex">за <span class="frac"><span>3</span><span class="d">4</span></span> ч: <span class="blank w60"></span>&nbsp;&nbsp;&nbsp; за <span class="frac"><span>1</span><span class="d">3</span></span> ч: <span class="blank w60"></span>&nbsp;&nbsp;&nbsp; за <span class="frac"><span>5</span><span class="d">6</span></span> ч: <span class="blank w60"></span>&nbsp;&nbsp;&nbsp; за <span class="mixn">2</span><span class="frac"><span>1</span><span class="d">2</span></span> ч: <span class="blank w60"></span></p>
+</div>
+
+<div class="task keep"><span class="task-num">4</span>
+<p>Найди площадь комнаты размером <span class="mixn">5</span><span class="frac"><span>1</span><span class="d">3</span></span> м на <span class="mixn">3</span><span class="frac"><span>3</span><span class="d">4</span></span> м.</p>
+<div class="scheme"><svg viewBox="0 0 340 170" width="300" role="img">
+<rect x="50" y="18" width="250" height="118" fill="#f0f9ff" stroke="#0369a1" stroke-width="2.5" rx="3"/>
+<text x="175" y="158" font-size="15" font-weight="700" text-anchor="middle" fill="#0369a1" font-family="Segoe UI,Arial">5 1/3 м</text>
+<text x="26" y="82" font-size="15" font-weight="700" text-anchor="middle" fill="#0369a1" font-family="Segoe UI,Arial">3 3/4</text>
+<text x="26" y="100" font-size="15" font-weight="700" text-anchor="middle" fill="#0369a1" font-family="Segoe UI,Arial">м</text>
+<text x="175" y="84" font-size="22" font-weight="800" text-anchor="middle" fill="#64748b" font-family="Segoe UI,Arial">S = ?</text>
+</svg></div>
+<p class="ansline">Площадь: <span class="blank w60"></span> м²</p>
+<div class="grid-space"></div>
+</div>
+
+<div class="task keep"><span class="task-num">5</span>
 <p>Числа называются <strong>взаимно обратными</strong>, если их произведение равно единице. Найди число, обратное каждому из этих, и проверь умножением.</p>
-<div class="ansrow"><label>обратное к <span class="frac"><span>5</span><span class="d">7</span></span>:</label><input id="r1" placeholder="a/b"><button onclick="chkFrac('r1',7,5)">Проверить</button><span class="fb" id="fb_r1"></span></div>
-<div class="ansrow"><label>обратное к 8:</label><input id="r2" placeholder="a/b"><button onclick="chkFrac('r2',1,8)">Проверить</button><span class="fb" id="fb_r2"></span></div>
-<div class="ansrow"><label>обратное к <span class="mixn">2</span><span class="frac"><span>1</span><span class="d">3</span></span>:</label><input id="r3" placeholder="a/b"><button onclick="chkFrac('r3',3,7)">Проверить</button><span class="fb" id="fb_r3"></span></div>
+<p class="ex">обратное к <span class="frac"><span>5</span><span class="d">7</span></span> : <span class="blank w60"></span>&nbsp;&nbsp;&nbsp;&nbsp; обратное к 8 : <span class="blank w60"></span>&nbsp;&nbsp;&nbsp;&nbsp; обратное к <span class="mixn">2</span><span class="frac"><span>1</span><span class="d">3</span></span> : <span class="blank w60"></span></p>
 </div>
 </section>
 
@@ -175,20 +155,17 @@
 <p><strong>Сколько раз помещается</strong>: 1 : <span class="frac"><span>1</span><span class="d">4</span></span> = 4, в целом четыре четверти. Отсюда правило: разделить значит <strong>умножить на обратную</strong>.</p>
 </div>
 
-<div class="task"><span class="task-num">6</span>
+<div class="task keep"><span class="task-num">6</span>
 <p>а) 3 кг конфет разделили поровну между 25 учениками. Сколько килограммов досталось каждому? б) Сколько раз <span class="frac"><span>1</span><span class="d">2</span></span> помещается в 3?</p>
-<div class="ansrow"><label>а) кг:</label><input id="d1" placeholder="a/b"><button onclick="chkFrac('d1',3,25)">Проверить</button><span class="fb" id="fb_d1"></span></div>
-<div class="ansrow"><label>б) раз:</label><input id="d2"><button onclick="chkNum('d2','6')">Проверить</button><span class="fb" id="fb_d2"></span></div>
+<p class="ansline">а) каждому по <span class="blank w60"></span> кг &nbsp;&nbsp;&nbsp;&nbsp; б) <span class="blank w60"></span> раз</p>
 </div>
 
-<div class="task"><span class="task-num">7</span>
+<div class="task keep"><span class="task-num">7</span>
 <p>Вычисли:</p>
-<p class="ex">а)&nbsp; <span class="frac"><span>3</span><span class="d">4</span></span> : <span class="frac"><span>9</span><span class="d">8</span></span></p>
-<div class="ansrow"><label>а)</label><input id="d3" placeholder="a/b"><button onclick="chkFrac('d3',2,3)">Проверить</button><span class="fb" id="fb_d3"></span></div>
-<p class="ex">б)&nbsp; <span class="mixn">2</span><span class="frac"><span>1</span><span class="d">2</span></span> : <span class="frac"><span>5</span><span class="d">6</span></span></p>
-<div class="ansrow"><label>б)</label><input id="d4"><button onclick="chkNum('d4','3')">Проверить</button><span class="fb" id="fb_d4"></span></div>
-<p class="ex">в)&nbsp; <span class="mixn">1</span><span class="frac"><span>5</span><span class="d">9</span></span> : <span class="mixn">2</span><span class="frac"><span>1</span><span class="d">3</span></span></p>
-<div class="ansrow"><label>в)</label><input id="d5" placeholder="a/b"><button onclick="chkFrac('d5',2,3)">Проверить</button><span class="fb" id="fb_d5"></span></div>
+<p class="ex">а)&nbsp; <span class="frac"><span>3</span><span class="d">4</span></span> : <span class="frac"><span>9</span><span class="d">8</span></span> = <span class="blank"></span></p>
+<p class="ex">б)&nbsp; <span class="mixn">2</span><span class="frac"><span>1</span><span class="d">2</span></span> : <span class="frac"><span>5</span><span class="d">6</span></span> = <span class="blank"></span></p>
+<p class="ex">в)&nbsp; <span class="mixn">1</span><span class="frac"><span>5</span><span class="d">9</span></span> : <span class="mixn">2</span><span class="frac"><span>1</span><span class="d">3</span></span> = <span class="blank"></span></p>
+<div class="grid-space"></div>
 </div>
 </section>
 
@@ -198,33 +175,98 @@
 <p>Тройка формул на месте: <strong>s = v × t</strong>, <strong>v = s : t</strong>, <strong>t = s : v</strong>. В каждой задаче рисуем схему: отрезок, кто откуда, стрелки. Ответ без схемы не считается решением.</p>
 </div>
 
-<div class="task"><span class="task-num">8</span>
+<div class="task keep"><span class="task-num">8</span>
 <p>Два автомобиля едут по прямому шоссе со скоростями <strong>60 км/ч</strong> и <strong>80 км/ч</strong>. Сейчас между ними <strong>200 км</strong>. Какое расстояние может быть между ними через час? Найди <strong>все</strong> варианты.</p>
-<div class="ansrow"><input id="s1" placeholder="км"><input id="s2" placeholder="км"><input id="s3" placeholder="км"><input id="s4" placeholder="км"><button onclick="chkSet(['s1','s2','s3','s4'],[60,180,220,340],'s1')">Проверить все</button><span class="fb" id="fb_s1"></span></div>
-<div class="grid-space grid-tall"></div>
+<div class="scheme"><svg viewBox="0 0 760 120" width="720" role="img">
+<line x1="20" y1="78" x2="740" y2="78" stroke="#92400e" stroke-width="3"/>
+<rect x="170" y="56" width="52" height="22" rx="6" fill="#fde68a" stroke="#92400e" stroke-width="2"/>
+<circle cx="183" cy="80" r="7" fill="#fff" stroke="#92400e" stroke-width="2"/><circle cx="209" cy="80" r="7" fill="#fff" stroke="#92400e" stroke-width="2"/>
+<rect x="540" y="56" width="52" height="22" rx="6" fill="#bfdbfe" stroke="#92400e" stroke-width="2"/>
+<circle cx="553" cy="80" r="7" fill="#fff" stroke="#92400e" stroke-width="2"/><circle cx="579" cy="80" r="7" fill="#fff" stroke="#92400e" stroke-width="2"/>
+<text x="196" y="47" font-size="15" font-weight="800" text-anchor="middle" fill="#92400e" font-family="Segoe UI,Arial">60 км/ч</text>
+<text x="566" y="47" font-size="15" font-weight="800" text-anchor="middle" fill="#92400e" font-family="Segoe UI,Arial">80 км/ч</text>
+<line x1="230" y1="106" x2="532" y2="106" stroke="#92400e" stroke-width="1.6"/>
+<line x1="230" y1="100" x2="230" y2="112" stroke="#92400e" stroke-width="1.6"/>
+<line x1="532" y1="100" x2="532" y2="112" stroke="#92400e" stroke-width="1.6"/>
+<text x="381" y="101" font-size="14" font-weight="700" text-anchor="middle" fill="#92400e" font-family="Segoe UI,Arial">200 км</text>
+<path d="M150 66 L118 66 M124 61 L116 66 L124 71" stroke="#b45309" stroke-width="2" fill="none" stroke-dasharray="5 4"/>
+<path d="M242 66 L274 66 M268 61 L276 66 L268 71" stroke="#b45309" stroke-width="2" fill="none" stroke-dasharray="5 4"/>
+<text x="131" y="31" font-size="16" font-weight="800" fill="#b45309" font-family="Segoe UI,Arial">?</text>
+<path d="M520 66 L488 66 M494 61 L486 66 L494 71" stroke="#b45309" stroke-width="2" fill="none" stroke-dasharray="5 4"/>
+<path d="M612 66 L644 66 M638 61 L646 66 L638 71" stroke="#b45309" stroke-width="2" fill="none" stroke-dasharray="5 4"/>
+<text x="625" y="31" font-size="16" font-weight="800" fill="#b45309" font-family="Segoe UI,Arial">?</text>
+</svg></div>
+<p class="ansline">Возможные расстояния: <span class="blank"></span> <span class="blank"></span> <span class="blank"></span> <span class="blank"></span></p>
+<div class="grid-space"></div>
 </div>
 
-<div class="task"><span class="task-num">9</span>
+<div class="task keep"><span class="task-num">9</span>
 <p>Юра вышел из дома на <strong>5 минут позже</strong> Лены, но шёл со скоростью <strong>в два раза больше</strong>. Через какое время после своего выхода Юра догонит Лену?</p>
-<div class="ansrow"><label>через, мин:</label><input id="yu"><button onclick="chkNum('yu','5')">Проверить</button><span class="fb" id="fb_yu"></span></div>
+<div class="scheme"><svg viewBox="0 0 760 110" width="720" role="img">
+<path d="M38 88 L74 88 L74 58 L38 58 Z M34 58 L56 36 L78 58" fill="#fffbeb" stroke="#92400e" stroke-width="2.5"/>
+<line x1="92" y1="88" x2="740" y2="88" stroke="#92400e" stroke-width="3"/>
+<path d="M100 52 L380 52 M372 46 L382 52 L372 58" stroke="#92400e" stroke-width="2.5" fill="none"/>
+<text x="110" y="42" font-size="15" font-weight="700" fill="#92400e" font-family="Segoe UI,Arial">Лена: скорость v, вышла первой</text>
+<path d="M100 76 L320 76 M312 70 L322 76 L312 82" stroke="#b45309" stroke-width="2.5" fill="none" stroke-dasharray="6 4"/>
+<text x="110" y="70" font-size="15" font-weight="700" fill="#b45309" font-family="Segoe UI,Arial">Юра: скорость 2v, на 5 минут позже</text>
+</svg></div>
+<p class="ansline">Догонит через <span class="blank w60"></span> минут</p>
 <div class="grid-space"></div>
 </div>
 
-<div class="task"><span class="task-num">10</span>
+<div class="task keep"><span class="task-num">10</span>
 <p>Если Аня идёт в школу пешком, а обратно едет на автобусе, дорога занимает <strong>полтора часа</strong>. Если едет на автобусе в обе стороны — <strong>30 минут</strong>. Сколько минут займёт дорога пешком в обе стороны?</p>
-<div class="ansrow"><label>минут:</label><input id="an"><button onclick="chkNum('an','150')">Проверить</button><span class="fb" id="fb_an"></span></div>
+<div class="scheme"><svg viewBox="0 0 760 130" width="720" role="img">
+<path d="M38 96 L74 96 L74 66 L38 66 Z M34 66 L56 44 L78 66" fill="#fffbeb" stroke="#92400e" stroke-width="2.5"/>
+<rect x="676" y="58" width="48" height="38" fill="#fffbeb" stroke="#92400e" stroke-width="2.5"/>
+<line x1="684" y1="70" x2="716" y2="70" stroke="#92400e" stroke-width="1.5"/>
+<line x1="700" y1="58" x2="700" y2="96" stroke="#92400e" stroke-width="1.5"/>
+<text x="700" y="115" font-size="14" font-weight="700" text-anchor="middle" fill="#92400e" font-family="Segoe UI,Arial">школа</text>
+<text x="56" y="115" font-size="14" font-weight="700" text-anchor="middle" fill="#92400e" font-family="Segoe UI,Arial">дом</text>
+<line x1="92" y1="86" x2="662" y2="86" stroke="#92400e" stroke-width="3"/>
+<path d="M120 56 C 260 20, 500 20, 640 56" stroke="#92400e" stroke-width="2" fill="none"/>
+<text x="380" y="26" font-size="14.5" font-weight="700" text-anchor="middle" fill="#92400e" font-family="Segoe UI,Arial">пешком туда + автобус обратно: 90 мин</text>
+<text x="380" y="78" font-size="14.5" font-weight="700" text-anchor="middle" fill="#b45309" font-family="Segoe UI,Arial">автобус туда и обратно: 30 мин</text>
+</svg></div>
+<p class="ansline">Пешком в обе стороны: <span class="blank w60"></span> минут</p>
 <div class="grid-space"></div>
 </div>
 
-<div class="task"><span class="task-num">11</span>
+<div class="task keep"><span class="task-num">11</span>
 <p>Велосипедист проехал <span class="frac"><span>3</span><span class="d">7</span></span> моста и заметил сзади автомобиль. Если он повернёт назад, то встретит автомобиль у <strong>начала</strong> моста. Если поедет вперёд, автомобиль догонит его в <strong>конце</strong> моста. Во сколько раз скорость автомобиля больше?</p>
-<div class="ansrow"><label>в</label><input id="br"><label>раз</label><button onclick="chkNum('br','7')">Проверить</button><span class="fb" id="fb_br"></span></div>
+<div class="scheme"><svg viewBox="0 0 760 120" width="720" role="img">
+<line x1="20" y1="84" x2="740" y2="84" stroke="#92400e" stroke-width="3"/>
+<rect x="300" y="70" width="340" height="14" fill="#fde68a" stroke="#92400e" stroke-width="2.5"/>
+<line x1="300" y1="70" x2="300" y2="96" stroke="#92400e" stroke-width="2.5"/>
+<line x1="640" y1="70" x2="640" y2="96" stroke="#92400e" stroke-width="2.5"/>
+<text x="300" y="112" font-size="14" font-weight="700" text-anchor="middle" fill="#92400e" font-family="Segoe UI,Arial">начало</text>
+<text x="640" y="112" font-size="14" font-weight="700" text-anchor="middle" fill="#92400e" font-family="Segoe UI,Arial">конец</text>
+<circle cx="446" cy="62" r="9" fill="#fff" stroke="#0369a1" stroke-width="2.5"/>
+<text x="446" y="44" font-size="14.5" font-weight="800" text-anchor="middle" fill="#0369a1" font-family="Segoe UI,Arial">велосипедист: 3/7 моста</text>
+<rect x="70" y="62" width="52" height="22" rx="6" fill="#bfdbfe" stroke="#92400e" stroke-width="2"/>
+<circle cx="83" cy="86" r="7" fill="#fff" stroke="#92400e" stroke-width="2"/><circle cx="109" cy="86" r="7" fill="#fff" stroke="#92400e" stroke-width="2"/>
+<text x="96" y="52" font-size="14.5" font-weight="800" text-anchor="middle" fill="#92400e" font-family="Segoe UI,Arial">автомобиль</text>
+</svg></div>
+<p class="ansline">Автомобиль быстрее в <span class="blank w60"></span> раз</p>
 <div class="grid-space grid-tall"></div>
 </div>
 
-<div class="task"><span class="task-num">12</span>
+<div class="task keep"><span class="task-num">12</span>
 <p>За почтой на аэродром выслали «Москвич». Самолёт сел <strong>раньше срока</strong>, и почту повезли навстречу на попутном грузовике. Через <strong>30 минут</strong> пути грузовик встретил «Москвич», тот забрал почту, сразу развернулся и приехал в отделение на <strong>20 минут раньше</strong> обычного. На сколько минут раньше срока сел самолёт?</p>
-<div class="ansrow"><label>на, мин:</label><input id="po"><button onclick="chkNum('po','40')">Проверить</button><span class="fb" id="fb_po"></span></div>
+<div class="scheme"><svg viewBox="0 0 760 110" width="720" role="img">
+<line x1="60" y1="72" x2="700" y2="72" stroke="#92400e" stroke-width="3"/>
+<circle cx="60" cy="72" r="6" fill="#92400e"/>
+<circle cx="700" cy="72" r="6" fill="#92400e"/>
+<text x="22" y="98" font-size="14" font-weight="700" text-anchor="start" fill="#92400e" font-family="Segoe UI,Arial">почтовое отделение</text>
+<text x="700" y="98" font-size="14" font-weight="700" text-anchor="middle" fill="#92400e" font-family="Segoe UI,Arial">аэродром</text>
+<line x1="420" y1="62" x2="420" y2="82" stroke="#b45309" stroke-width="2.5"/>
+<text x="420" y="52" font-size="14.5" font-weight="800" text-anchor="middle" fill="#b45309" font-family="Segoe UI,Arial">встреча</text>
+<path d="M90 32 L240 32 M232 26 L242 32 L232 38" stroke="#92400e" stroke-width="2.5" fill="none"/>
+<text x="96" y="22" font-size="14" font-weight="700" fill="#92400e" font-family="Segoe UI,Arial">«Москвич»</text>
+<path d="M670 32 L520 32 M528 26 L518 32 L528 38" stroke="#0369a1" stroke-width="2.5" fill="none"/>
+<text x="538" y="22" font-size="14" font-weight="700" fill="#0369a1" font-family="Segoe UI,Arial">грузовик, 30 мин</text>
+</svg></div>
+<p class="ansline">Самолёт сел раньше на <span class="blank w60"></span> минут</p>
 <div class="grid-space grid-tall"></div>
 </div>
 </section>
@@ -232,120 +274,61 @@
 <section class="sec sec-pond">
 <h2>🎲 Разнобой</h2>
 
-<div class="task"><span class="task-num">13</span>
+<div class="task keep"><span class="task-num">13</span>
 <p>Вася умножил некоторое число на <strong>10</strong> и получил простое число. Петя умножил то же число на <strong>15</strong> — и тоже получил простое. Может ли так быть?</p>
-<div class="cmp"><span class="side lbl">Может ли так быть?</span><span class="signs"><button onclick="chkCmp(this,'pr',0,0)">может</button><button onclick="chkCmp(this,'pr',1,0)">не может</button></span><span class="fb" id="fb_pr"></span></div>
-<div class="ansrow"><label>это число:</label><input id="prx" placeholder="a/b"><button onclick="chkFrac('prx',1,5)">Проверить</button><span class="fb" id="fb_prx"></span></div>
+<p class="ansline">Обведи: <span class="circ">может&nbsp;&nbsp;/&nbsp;&nbsp;не может</span>&nbsp;&nbsp;&nbsp;&nbsp; Если может — это число: <span class="blank w60"></span></p>
+<div class="grid-space"></div>
 </div>
 
-<div class="task"><span class="task-num">14</span>
+<div class="task keep"><span class="task-num">14</span>
 <p>Мартышка сорвала гроздь бананов. Три самых больших банана (<span class="frac"><span>7</span><span class="d">20</span></span> общего веса) она съела на завтрак, три самых маленьких (<span class="frac"><span>1</span><span class="d">4</span></span> общего веса) — на ужин, остальные на обед. Сколько всего бананов съела Мартышка?</p>
-<div class="ansrow"><label>всего бананов:</label><input id="bn"><button onclick="chkNum('bn','10')">Проверить</button><span class="fb" id="fb_bn"></span></div>
+<p class="ansline">Всего бананов: <span class="blank w60"></span></p>
 <div class="grid-space grid-tall"></div>
 </div>
 
-<div class="task"><span class="task-num">15</span>
+<div class="task keep"><span class="task-num">15</span>
 <p>Можно ли расставить в клетках квадрата <strong>3 × 3</strong> цифры от 1 до 9 (каждую по одному разу) так, чтобы в каждой строке сумма двух меньших цифр равнялась большей?</p>
-<div class="cmp"><span class="side lbl">Можно ли?</span><span class="signs"><button onclick="chkCmp(this,'q9',0,1)">можно</button><button onclick="chkCmp(this,'q9',1,1)">нельзя</button></span><span class="fb" id="fb_q9"></span></div>
+<p class="ansline">Обведи: <span class="circ">можно&nbsp;&nbsp;/&nbsp;&nbsp;нельзя</span> — и объясни</p>
 <div class="grid-space"></div>
 </div>
 
-<div class="task"><span class="task-num">16</span>
+<div class="task keep"><span class="task-num">16</span>
 <p>На острове любые две деревни соединены отдельной дорогой. После постройки <strong>трёх</strong> новых деревень туземцам пришлось построить <strong>33 новые дороги</strong>. Сколько деревень стало на острове?</p>
-<div class="ansrow"><label>стало деревень:</label><input id="vl"><button onclick="chkNum('vl','13')">Проверить</button><span class="fb" id="fb_vl"></span></div>
+<p class="ansline">Стало деревень: <span class="blank w60"></span></p>
 <div class="grid-space"></div>
 </div>
 
-<div class="task"><span class="task-num">17</span>
+<div class="task keep"><span class="task-num">17</span>
 <p>Том Сойер и Гек красили забор. Том покрасил <strong>каждую пятую</strong> по счёту дощечку. Потом Гек — <strong>каждую четвёртую</strong> из неокрашенных. Потом Том — <strong>каждую третью</strong> из оставшихся. Последние <strong>7</strong> дощечек докрасил Гек. Сколько всего дощечек в заборе?</p>
-<div class="ansrow"><label>дощечек:</label><input id="tm"><button onclick="chkNum('tm','16')">Проверить</button><span class="fb" id="fb_tm"></span></div>
+<p class="ansline">Дощечек в заборе: <span class="blank w60"></span></p>
 <div class="grid-space grid-tall"></div>
 </div>
 
-<div class="task"><span class="task-num">18</span>
+<div class="task keep"><span class="task-num">18</span>
 <p>Блиц. Два охотника вышли навстречу друг другу из деревень, между которыми <strong>18 км</strong>, со скоростями <strong>5 км/ч</strong> и <strong>4 км/ч</strong>. Собака первого бегала между ними со скоростью <strong>8 км/ч</strong>, пока охотники не встретились. Сколько километров пробежала собака?</p>
-<div class="ansrow"><label>км:</label><input id="dg"><button onclick="chkNum('dg','16')">Проверить</button><span class="fb" id="fb_dg"></span></div>
+<p class="ansline">Собака пробежала: <span class="blank w60"></span> км</p>
 </div>
 
-<div class="task"><span class="task-num">19</span>
+<div class="task keep"><span class="task-num">19</span>
 <p>Из А в В одновременно вышли пешеход со скоростью <strong>6 км/ч</strong> и велосипедист со скоростью <strong>15 км/ч</strong>. В то же время из В в А выехал автомобиль: с велосипедистом он встретился через <strong>4 часа</strong>, а с пешеходом через <strong>5 часов</strong>. Найди расстояние от А до В.</p>
-<div class="ansrow"><label>км:</label><input id="ab"><button onclick="chkNum('ab','180')">Проверить</button><span class="fb" id="fb_ab"></span></div>
+<div class="scheme"><svg viewBox="0 0 760 120" width="720" role="img">
+<line x1="60" y1="80" x2="700" y2="80" stroke="#0e7490" stroke-width="3"/>
+<circle cx="60" cy="80" r="6" fill="#0e7490"/>
+<circle cx="700" cy="80" r="6" fill="#0e7490"/>
+<text x="60" y="106" font-size="16" font-weight="800" text-anchor="middle" fill="#0e7490" font-family="Segoe UI,Arial">А</text>
+<text x="700" y="106" font-size="16" font-weight="800" text-anchor="middle" fill="#0e7490" font-family="Segoe UI,Arial">В</text>
+<path d="M80 30 L200 30 M192 24 L202 30 L192 36" stroke="#0e7490" stroke-width="2.5" fill="none"/>
+<text x="84" y="20" font-size="14" font-weight="700" fill="#0e7490" font-family="Segoe UI,Arial">пешеход, 6 км/ч</text>
+<path d="M80 58 L300 58 M292 52 L302 58 L292 64" stroke="#0369a1" stroke-width="2.5" fill="none"/>
+<text x="84" y="48" font-size="14" font-weight="700" fill="#0369a1" font-family="Segoe UI,Arial">велосипедист, 15 км/ч</text>
+<path d="M680 44 L540 44 M548 38 L538 44 L548 50" stroke="#b45309" stroke-width="2.5" fill="none"/>
+<text x="545" y="34" font-size="14" font-weight="700" fill="#b45309" font-family="Segoe UI,Arial">автомобиль, ? км/ч</text>
+</svg></div>
+<p class="ansline">Расстояние от А до В: <span class="blank w60"></span> км</p>
 <div class="grid-space grid-tall"></div>
 </div>
 </section>
 
-<script>
-function norm(s){ return (s||"").toString().trim().replace(/\s+/g,"").replace(",", "."); }
-function say(id, ok, text){
-  var fb = document.getElementById("fb_"+id);
-  if(!fb) return;
-  fb.className = "fb " + (ok ? "ok" : "no");
-  fb.textContent = text;
-}
-function gcd(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ var t=a%b; a=b; b=t; } return a; }
-function parseFrac(s){
-  var m = norm(s).match(/^(-?\d+)\/(\d+)$/);
-  if(!m) return null;
-  var d = parseInt(m[2],10);
-  if(!d) return null;
-  return {n: parseInt(m[1],10), d: d};
-}
-function chkFrac(id, n0, d0){
-  var el = document.getElementById(id);
-  var f = parseFrac(el.value);
-  var ok = false, msg = "Запиши ответ в виде a/b";
-  if(f){
-    var same = f.n * d0 === n0 * f.d;
-    var reduced = gcd(f.n, f.d) === 1;
-    ok = same && reduced;
-    msg = ok ? "Верно" : (same ? "Дробь равна, но её ещё можно сократить" : "Пока нет");
-  }
-  el.classList.remove("ok","no"); el.classList.add(ok ? "ok" : "no");
-  say(id, ok, msg);
-}
-function chkNum(id, answer){
-  var el = document.getElementById(id);
-  var ok = norm(el.value) === norm(answer);
-  el.classList.remove("ok","no"); el.classList.add(ok ? "ok" : "no");
-  say(id, ok, ok ? "Верно" : "Пока нет");
-}
-function chkCmp(btn, id, i, right){
-  var ok = (i === right);
-  btn.classList.remove("ok","no");
-  btn.classList.add(ok ? "ok" : "no");
-  say(id, ok, ok ? "Верно" : "Нет, посмотри ещё раз");
-}
-function chkTime(id){
-  var el = document.getElementById(id);
-  var ok = /^0?7[:.\-]57$/.test(norm(el.value));
-  el.classList.remove("ok","no"); el.classList.add(ok ? "ok" : "no");
-  say(id, ok, ok ? "Верно" : "Пока нет");
-}
-function chkSet(ids, answers, fbId){
-  var vals = [], empty = 0, badNum = 0;
-  for(var i = 0; i < ids.length; i++){
-    var el = document.getElementById(ids[i]);
-    el.classList.remove("ok","no");
-    var v = norm(el.value);
-    if(v === ""){ empty++; continue; }
-    var num = Number(v);
-    if(isNaN(num)){ badNum++; el.classList.add("no"); continue; }
-    vals.push(num);
-  }
-  if(empty || badNum){
-    say(fbId, false, empty ? "Заполни все четыре поля" : "Здесь нужны числа");
-    return;
-  }
-  var want = answers.slice().sort(function(a,b){return a-b});
-  var got = vals.slice().sort(function(a,b){return a-b});
-  var ok = want.length === got.length && want.every(function(x,i){ return x === got[i]; });
-  for(var j = 0; j < ids.length; j++){
-    var e = document.getElementById(ids[j]);
-    var good = answers.indexOf(Number(norm(e.value))) !== -1;
-    e.classList.add(ok ? "ok" : (good ? "ok" : "no"));
-  }
-  say(fbId, ok, ok ? "Верно, все четыре случая" : "Пока нет: порядок не важен, важно найти все четыре разных случая");
-}
-</script>
+</div>
 </body>
 </html>
