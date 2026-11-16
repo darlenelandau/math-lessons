@@ -73,6 +73,9 @@ sup sub { vertical-align: -.25em; }
 .chk.ok .hint { color: var(--ink); }
 .done { text-align: center; padding: 10px 0; }
 .done .big { font-size: 2.6rem; font-weight: 700; color: var(--accent); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips .opt { padding: 6px 12px; font-size: .9rem; }
+.go.ghost { background: transparent; color: var(--accent); border: 1px solid var(--line); }
 .code { display: inline-block; margin-top: 8px; padding: 8px 18px; border: 2px dashed var(--accent); border-radius: 10px;
   font: 700 1.3rem "Golos Text", sans-serif; letter-spacing: .5px; color: var(--accent); }
 /* ===== Оформление: тёмно-зелёная доска на фоне, светлый лист для работы (холодный контрастный тон) =====
@@ -298,7 +301,7 @@ var LEVELS = [
     ]
   },
   {
-    name: 'Как на ЕГЭ', title: 'Задачи как в задании 8', code: 'экзамен',
+    name: 'Как на ЕГЭ', title: 'Задачи как в задании 7', code: 'экзамен',
     theory: [
       'Последний уровень: задачи в том виде, в каком они бывают на экзамене. Подсказок по шагам нет, есть только ответ.',
       'Перед каждой задачей полезно спросить себя: <b>какие основания</b> тут можно сделать одинаковыми, <b>что стоит в показателе</b>, есть ли <b>дробь из логарифмов</b>. Решение пишите в тетради.'
@@ -342,6 +345,161 @@ function order(n, seed) {
   }
   return list;
 }
+
+// ===== Тренировка: задачи генерируются заново, числа каждый раз другие =====
+// Каждый генератор возвращает { q: условие, a: ответ, sol: решение, val: значение, посчитанное через Math.log (для проверки) }.
+function ri(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
+function pk(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function lnb(b, x) { return Math.log(x) / Math.log(b); }
+function nice(x) { return Math.abs(x * 1000 - Math.round(x * 1000)) < 1e-7; }   // не больше трёх знаков после запятой
+function fmt(x) {
+  x = Math.round(x * 1000) / 1000;
+  return String(x).replace('.', ',').replace('-', '−');
+}
+function base(b) { return b === 10 ? null : b; }
+function LL(b, x) { return b === 10 ? LG(x) : L(b, x); }   // lg вместо log по основанию 10
+function cf(k) { return k === 1 ? '' : k === -1 ? '−' : fmt(k) + '&#8201;'; }   // коэффициент перед логарифмом
+var DECS = [2, 3, 4, 5, 6, 8, 9, 12, 15, 16, 18, 20, 24, 25, 40, 45, 50, 0.5, 0.2, 0.4, 0.25, 2.5, 1.5, 0.75, 1.25, 7.5];
+
+var GENS = {
+  // логарифм по определению
+  def: function () {
+    var v = ri(1, 4), b, k, x, q, a, val;
+    if (v === 1) {
+      b = pk([2, 3, 5, 7]); k = ri(-3, 5); if (k === 0) k = 2;
+      while (Math.pow(b, Math.abs(k)) > 2500) k = k > 0 ? k - 1 : k + 1;
+      x = Math.pow(b, k); a = k;
+      q = L(b, k < 0 ? F(1, Math.pow(b, -k)) : x); val = lnb(b, x);
+      return { q: q, a: a, val: val, sol: (k < 0 ? M(F(1, Math.pow(b, -k)) + ' = ' + P(b, '−' + (-k))) : M(x + ' = ' + P(b, k))) + ', значит ответ ' + fmt(a) + '.' };
+    }
+    if (v === 2) {
+      k = ri(-3, 4); if (k === 0) k = 3; x = Math.pow(10, k);
+      return { q: LG(fmt(x)), a: k, val: Math.log10(x), sol: M(fmt(x) + ' = ' + P(10, fmt(k))) + '.' };
+    }
+    if (v === 3) {
+      b = pk([2, 3, 5, 7]);
+      var f = pk([[0.5, '√' + b], [1.5, b + '√' + b], [-0.5, F(1, '√' + b)], [2.5, (b * b) + '√' + b]]);
+      return { q: L(b, f[1]), a: f[0], val: f[0], sol: '√' + b + ' это ' + M(P(b, F(1, 2))) + ', а дальше показатели складываются.' };
+    }
+    b = pk([2, 3, 5]); k = ri(1, 4); while (Math.pow(b, k) > 625) k--;
+    return { q: L(F(1, b), Math.pow(b, k)), a: -k, val: lnb(1 / b, Math.pow(b, k)), sol: M(F(1, b) + ' = ' + P(b, '−1')) + ', поэтому знак меняется: ' + fmt(-k) + '.' };
+  },
+  // сумма и разность
+  sum: function () {
+    for (var t = 0; t < 200; t++) {
+      var b = pk([2, 3, 5, 6, 10, 10]), k = ri(-2, 4), N = Math.pow(b, k);
+      if (k === 0 || N > 1000) continue;
+      var y = pk(DECS), plus = Math.random() < 0.5;
+      var x = plus ? N / y : N * y;
+      if (!nice(x) || x === 1 || x === y || x > 2000 || x < 0.01 || Math.abs(lnb(b, x) - Math.round(lnb(b, x))) < 1e-9) continue;
+      var q = LL(b, fmt(x)) + (plus ? ' + ' : ' − ') + LL(b, fmt(y));
+      var val = plus ? lnb(b, x) + lnb(b, y) : lnb(b, x) - lnb(b, y);
+      return { q: q, a: k, val: val, sol: (plus ? 'Перемножаем: ' + M(fmt(x) + ' · ' + fmt(y) + ' = ' + fmt(N)) : 'Делим: ' + M(fmt(x) + ' : ' + fmt(y) + ' = ' + fmt(N))) +
+        ', а ' + M(fmt(N) + ' = ' + P(b, fmt(k))) + '.' };
+    }
+    return GENS.sum();
+  },
+  // степени в числе и в основании, множитель перед логарифмом
+  pow: function () {
+    var v = ri(1, 3), t;
+    if (v === 1) {
+      for (t = 0; t < 200; t++) {
+        var b = pk([2, 3, 5, 7]), m = ri(2, 4), n = ri(-3, 6);
+        if (n === 0 || n === m || Math.pow(b, m) > 625 || Math.pow(b, Math.abs(n)) > 3125 || !nice(n / m)) continue;
+        var B = Math.pow(b, m), X = n < 0 ? F(1, Math.pow(b, -n)) : Math.pow(b, n);
+        return { q: L(B, X), a: n / m, val: lnb(B, Math.pow(b, n)),
+          sol: M(B + ' = ' + P(b, m)) + ', ' + M((n < 0 ? F(1, Math.pow(b, -n)) : Math.pow(b, n)) + ' = ' + P(b, fmt(n))) + '. Показатель числа делим на показатель основания: ' + M(fmt(n) + ' : ' + m + ' = ' + fmt(n / m)) + '.' };
+      }
+    }
+    if (v === 2) {
+      for (t = 0; t < 300; t++) {
+        var b2 = pk([2, 3, 5, 6, 10]), x = pk([2, 3, 4, 5, 6, 8, 10, 12, 15, 20]), kk = pk([2, 3]), tt = ri(0, 3), plus = Math.random() < 0.5;
+        var y = plus ? Math.pow(b2, tt) / Math.pow(x, kk) : Math.pow(x, kk) / Math.pow(b2, tt);
+        if (!nice(y) || y === 1 || y === x || y > 2000 || y < 0.01 || x === b2) continue;
+        var val = plus ? kk * lnb(b2, x) + lnb(b2, y) : kk * lnb(b2, x) - lnb(b2, y);
+        return { q: kk + '&#8201;' + LL(b2, x) + (plus ? ' + ' : ' − ') + LL(b2, fmt(y)), a: tt, val: val,
+          sol: 'Вносим множитель: ' + M(kk + '&#8201;' + LL(b2, x) + ' = ' + LL(b2, Math.pow(x, kk))) + '. Дальше ' + (plus ? 'произведение' : 'частное') + ': ' +
+            M(fmt(Math.pow(x, kk)) + (plus ? ' · ' : ' : ') + fmt(y) + ' = ' + fmt(Math.pow(b2, tt))) + ' = ' + M(P(b2, tt)) + '.' };
+      }
+    }
+    var b3 = pk([2, 3, 5, 7]), n3 = ri(1, 4); while (Math.pow(b3, n3) > 1000) n3--;
+    return { q: L('√' + b3, Math.pow(b3, n3)), a: 2 * n3, val: lnb(Math.sqrt(b3), Math.pow(b3, n3)),
+      sol: M('√' + b3 + ' = ' + P(b3, F(1, 2))) + ', степень в основании выносится перевёрнутой: ' + M('2 · ' + n3 + ' = ' + 2 * n3) + '.' };
+  },
+  // переход к другому основанию
+  change: function () {
+    var v = ri(1, 3), t;
+    if (v === 1) {
+      for (t = 0; t < 200; t++) {
+        var b = pk([2, 3, 5, 7]), c = pk([2, 3, 5, 7, 10, 6]), n = ri(1, 6), m = ri(1, 4);
+        if (c === b || n === m || Math.pow(b, n) > 3125 || Math.pow(b, m) > 625 || !nice(n / m)) continue;
+        return { q: F(LL(c, Math.pow(b, n)), LL(c, Math.pow(b, m))), a: n / m, val: lnb(c, Math.pow(b, n)) / lnb(c, Math.pow(b, m)),
+          sol: 'По формуле перехода это ' + M(L(Math.pow(b, m), Math.pow(b, n))) + '. Оба числа степени ' + b + ': ' + M(fmt(n) + ' : ' + m + ' = ' + fmt(n / m)) + '.' };
+      }
+    }
+    if (v === 2) {
+      var a = pk([2, 3, 5]), mid = pk([3, 5, 6, 7, 10, 11, 13]), k = ri(2, 5);
+      if (mid === a) mid = 7;
+      while (Math.pow(a, k) > 625) k--;
+      var first = Math.random() < 0.5;
+      return { q: first ? L(a, mid) + ' · ' + L(mid, Math.pow(a, k)) : L(mid, Math.pow(a, k)) + ' · ' + L(a, mid), a: k, val: lnb(a, mid) * lnb(mid, Math.pow(a, k)),
+        sol: 'Цепочка ' + M(a + ' → ' + mid + ' → ' + Math.pow(a, k)) + ': остаётся ' + M(L(a, Math.pow(a, k)) + ' = ' + k) + '.' };
+    }
+    for (t = 0; t < 300; t++) {
+      var p = pk([2, 3, 5]), qb = pk([2, 3, 5, 7]), m1 = ri(1, 3), n1 = ri(1, 4), s1 = ri(1, 3), t1 = ri(1, 3);
+      var ans = (n1 / m1) * (t1 / s1);
+      if (qb === p || !nice(ans) || Math.pow(p, m1) > 125 || Math.pow(qb, n1) > 625 || Math.pow(qb, s1) > 125 || Math.pow(p, t1) > 125) continue;
+      if (m1 === 1 && n1 === 1 && s1 === 1 && t1 === 1) continue;
+      var A1 = Math.pow(p, m1), B1 = Math.pow(qb, n1), C1 = Math.pow(qb, s1), D1 = Math.pow(p, t1);
+      return { q: L(A1, B1) + ' · ' + L(C1, D1), a: ans, val: lnb(A1, B1) * lnb(C1, D1),
+        sol: 'Выносим показатели: ' + M(L(A1, B1) + ' = ' + cf(n1 / m1) + L(p, qb)) + ', ' + M(L(C1, D1) + ' = ' + cf(t1 / s1) + L(qb, p)) + ', а ' + M(L(p, qb) + ' · ' + L(qb, p) + ' = 1') + '.' };
+    }
+    return GENS.change();
+  },
+  // основное тождество
+  ident: function () {
+    var v = ri(1, 4), t;
+    if (v === 1) {
+      for (t = 0; t < 200; t++) {
+        var b = pk([2, 3, 5, 7, 10]), x = ri(2, 9), k = pk([2, 3, -1, -2]), r = Math.pow(x, k);
+        if (!nice(r) || Math.abs(r) > 1000 || x === b) continue;
+        return { q: P(b, cf(k) + LL(b, x)), a: r, val: Math.pow(b, k * lnb(b, x)),
+          sol: 'Вносим множитель в число: ' + M(cf(k) + LL(b, x) + ' = ' + LL(b, P(x, fmt(k)))) + ', дальше тождество: ' + fmt(r) + '.' };
+      }
+    }
+    if (v === 2) {
+      for (t = 0; t < 200; t++) {
+        var b2 = pk([2, 3, 5, 10]), x2 = ri(2, 9), m = pk([-2, -1, 1, 2, 3]), r2 = Math.pow(b2, m) * x2, plus = m > 0;
+        if (!nice(r2) || r2 > 2000 || x2 === b2) continue;
+        var e = plus ? m + ' + ' + LL(b2, x2) : LL(b2, x2) + ' − ' + (-m);
+        return { q: P(b2, e), a: r2, val: Math.pow(b2, m + lnb(b2, x2)),
+          sol: (plus ? 'Сумма в показателе это произведение: ' : 'Разность в показателе это частное: ') + M(P(b2, LL(b2, x2)) + (plus ? ' · ' : ' : ') + P(b2, Math.abs(m))) + ' = ' + fmt(r2) + '.' };
+      }
+    }
+    if (v === 3) {
+      for (t = 0; t < 200; t++) {
+        var b3 = pk([2, 3, 5, 7]), j = pk([2, 3]), x3 = ri(2, 9), B = Math.pow(b3, j), r3 = Math.pow(x3, j);
+        if (B > 343 || r3 > 1000 || x3 === b3) continue;
+        return { q: P(B, L(b3, x3)), a: r3, val: Math.pow(B, lnb(b3, x3)),
+          sol: M(B + ' = ' + P(b3, j)) + ', поэтому ' + M(P(B, L(b3, x3)) + ' = ' + P('(' + P(b3, L(b3, x3)) + ')', j) + ' = ' + P(x3, j)) + ' = ' + r3 + '.' };
+      }
+    }
+    for (t = 0; t < 200; t++) {
+      var b4 = pk([2, 3, 5, 7]), j4 = pk([2, 3]), y = ri(2, 9), B4 = Math.pow(b4, j4), X4 = Math.pow(y, j4);
+      if (B4 > 343 || X4 > 1000 || y === b4) continue;
+      return { q: P(b4, L(B4, X4)), a: y, val: Math.pow(b4, lnb(B4, X4)),
+        sol: 'Основание и число это степени: ' + M(L(B4, X4) + ' = ' + L(P(b4, j4), P(y, j4)) + ' = ' + L(b4, y)) + ', ответ ' + y + '.' };
+    }
+    return GENS.ident();
+  }
+};
+var GEN_NAMES = [['mix', 'Всё вперемешку'], ['def', 'Определение'], ['sum', 'Сумма и разность'], ['pow', 'Степени'], ['change', 'Переход'], ['ident', 'Тождество']];
+function generate(kind) {
+  if (kind === 'mix') kind = pk(['def', 'sum', 'sum', 'pow', 'pow', 'change', 'change', 'ident', 'ident']);
+  var g = GENS[kind]();
+  g.kind = kind;
+  return g;
+}
 /* LOGIC-END */
 
 var KEY = 'log-lab-v1';
@@ -349,14 +507,17 @@ var KEY = 'log-lab-v1';
 var st = { codes: {}, pos: {}, last: 0 };
 try {
   var saved = JSON.parse(localStorage.getItem(KEY) || 'null');
-  if (saved && typeof saved === 'object') { st.codes = saved.codes || {}; st.pos = saved.pos || {}; st.last = saved.last || 0; }
+  if (saved && typeof saved === 'object') { st.codes = saved.codes || {}; st.pos = saved.pos || {}; st.last = saved.last || 0; st.pr = saved.pr; }
 } catch (e) {}
 function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
 
 var lv = st.last, ti = 0, si = 0, phase = 'theory', tried = false, chosen = null, firstTry = 0, path = [];
 var hashLv = parseInt((location.hash || '').slice(1), 10);
-if (hashLv >= 1 && hashLv <= LEVELS.length) lv = hashLv - 1;
-if (!(lv >= 0 && lv < LEVELS.length)) lv = 0;
+if (hashLv >= 1 && hashLv <= LEVELS.length + 1) lv = hashLv - 1;
+if (!(lv >= 0 && lv <= LEVELS.length)) lv = 0;
+var PRACTICE = LEVELS.length;   // последняя вкладка: тренировка
+if (!st.pr) st.pr = { ok: 0, all: 0 };
+var pr = { kind: 'mix', cur: null, tried: false, shown: false, streak: 0 };
 
 function tabs() {
   var h = '';
@@ -366,6 +527,8 @@ function tabs() {
          (i + 1) + '. ' + LEVELS[i].name + (st.codes[i] ? ' <span class="tick">✓</span>' :
            (st.pos[i] ? ' <span style="opacity:.7;font-weight:500">' + st.pos[i].ti + '/' + LEVELS[i].tasks.length + '</span>' : '')) + '</button>';
   }
+  h += '<button class="tab" type="button" role="tab" data-l="' + PRACTICE + '"' + (lv === PRACTICE ? ' aria-selected="true"' : '') + '>' +
+       (PRACTICE + 1) + '. Тренировка</button>';
   document.getElementById('tabs').innerHTML = h;
   document.querySelectorAll('#tabs .tab').forEach(function (el) {
     el.onclick = function () { lv = +el.dataset.l; ti = 0; phase = 'theory'; st.last = lv; save(); render(); };
@@ -382,6 +545,7 @@ function optionsHtml(items, seed, cls) {
 function render() {
   tabs();
   var L0 = LEVELS[lv], s = document.getElementById('sheet');
+  if (lv === PRACTICE) { renderPractice(s); return; }
   if (phase === 'theory') {
     var body = L0.theory.map(function (p) { return /^<(div|p)/.test(p) ? p : '<p>' + p + '</p>'; }).join('');
     s.innerHTML = '<div class="lvl"><span>Уровень ' + (lv + 1) + ' из ' + LEVELS.length + '</span><span>' + L0.tasks.length + ' задач</span></div>' +
@@ -400,9 +564,9 @@ function render() {
     s.innerHTML = '<div class="done"><p>Уровень пройден</p><div class="big">' + firstTry + ' из ' + L0.tasks.length + '</div>' +
       '<p style="color:var(--muted)">решено с первой попытки</p>' +
       '<p style="margin-bottom:0">Кодовое слово для платформы:</p><div class="code">' + L0.code + '</div></div>' +
-      '<button class="go" id="go">' + (last ? 'К первому уровню' : 'Следующий уровень') + '</button>';
+      '<button class="go" id="go">' + (last ? 'К тренировке' : 'Следующий уровень') + '</button>';
     document.getElementById('go').onclick = function () {
-      lv = last ? 0 : lv + 1; ti = 0; phase = 'theory'; st.last = lv; save(); render();
+      lv = last ? PRACTICE : lv + 1; ti = 0; phase = 'theory'; st.last = lv; save(); render();
     };
     return;
   }
@@ -433,6 +597,50 @@ function render() {
   var iv = document.getElementById('iv');
   if (iv) { iv.focus(); iv.onkeydown = function (e) { if (e.key === 'Enter') document.getElementById('go').click(); }; }
   document.getElementById('go').onclick = submit;
+}
+
+
+function counter() { return 'верно с первой попытки: ' + st.pr.ok + ' из ' + st.pr.all + (pr.streak > 1 ? ' · подряд ' + pr.streak : ''); }
+function renderPractice(s) {
+  if (!pr.cur) { pr.cur = generate(pr.kind); pr.tried = false; pr.shown = false; }
+  var chips = GEN_NAMES.map(function (g) {
+    return '<button class="opt chip" type="button" data-k="' + g[0] + '"' + (pr.kind === g[0] ? ' aria-pressed="true"' : '') + '>' + g[1] + '</button>';
+  }).join('');
+  s.innerHTML = '<div class="lvl"><span>Тренировка: задачи не кончаются, числа каждый раз новые</span>' +
+      '<span id="cnt">' + counter() + '</span></div>' +
+    '<div class="chips">' + chips + '</div>' +
+    '<div class="q">Вычислите<span class="big">' + M(pr.cur.q) + '</span></div>' +
+    '<div class="one"><input type="text" id="iv" inputmode="decimal" autocomplete="off" placeholder="число"></div>' +
+    '<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="go" id="go">Проверить</button>' +
+    '<button class="go ghost" id="show">Показать решение</button></div><div id="fb"></div>';
+  s.querySelectorAll('.chip').forEach(function (el) {
+    el.onclick = function () { pr.kind = el.dataset.k; pr.cur = null; render(); };
+  });
+  var iv = document.getElementById('iv'), go = document.getElementById('go'), fb = document.getElementById('fb');
+  iv.focus();
+  iv.onkeydown = function (e) { if (e.key === 'Enter') go.click(); };
+  function next() { pr.cur = null; render(); }
+  function finish(okFirst) {
+    st.pr.all++; if (okFirst) { st.pr.ok++; pr.streak++; } else pr.streak = 0; save(); document.getElementById('cnt').textContent = counter();
+    go.textContent = 'Следующая'; go.onclick = next;
+    iv.onkeydown = function (e) { if (e.key === 'Enter') next(); };
+    document.getElementById('show').style.display = 'none';
+  }
+  go.onclick = function () {
+    var v = num(iv.value);
+    if (v === null) { fb.innerHTML = '<div class="chk no"><b>Введите число.</b><p class="hint">Дробь пишите десятичной через запятую, например 1,5.</p></div>'; return; }
+    if (Math.abs(v - pr.cur.a) < 1e-9) {
+      fb.innerHTML = '<div class="chk ok"><b>Верно.</b><p class="hint">' + pr.cur.sol + '</p></div>';
+      finish(!pr.tried);
+    } else {
+      pr.tried = true;
+      fb.innerHTML = '<div class="chk no"><b>Пока не сходится.</b><p class="hint">Попробуйте ещё раз или откройте решение.</p></div>';
+    }
+  };
+  document.getElementById('show').onclick = function () {
+    fb.innerHTML = '<div class="chk no"><b>Ответ: ' + fmt(pr.cur.a) + '.</b><p class="hint">' + pr.cur.sol + '</p></div>';
+    finish(false);
+  };
 }
 
 function answer(t) {
