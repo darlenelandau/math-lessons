@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Второй остров (2 класс)</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--sea:#0e7490;--sand:#f6e7c1;--ink:#1f2937;--gold:#d9a441;--green:#15803d;--red:#b3261e}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#0b3d4f;color:var(--ink);padding:16px 12px 40px;line-height:1.5}
+.wrap{max-width:960px;margin:0 auto}
+.top{position:relative;border:4px solid var(--gold);border-radius:14px;padding:18px 22px;margin-bottom:14px;
+    background:linear-gradient(160deg,#fdf6e3,#f6e7c1);box-shadow:0 6px 18px rgba(0,0,0,.35);text-align:center;overflow:hidden}
+.top h1{font-size:2em;color:#7c4a12;letter-spacing:.04em}
+.top .sub{color:#8a6a3a;margin-top:4px}
+.map-deco{position:absolute;inset:0;opacity:.14;z-index:0}
+.top h1,.top .sub{position:relative;z-index:1}
+.keys{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:12px 0 18px}
+.keybox{width:62px;height:62px;border:3px dashed var(--gold);border-radius:12px;background:#fdf6e3;
+    display:flex;align-items:center;justify-content:center;font-size:1.7em;font-weight:800;color:#b48a3a}
+.keybox.got{border-style:solid;background:#fff7d6;color:#7c4a12;box-shadow:0 0 0 4px rgba(217,164,65,.35)}
+.trial{background:#fdf6e3;border:3px solid #c9a86a;border-radius:14px;padding:16px 18px;margin-bottom:16px;
+    box-shadow:0 4px 12px rgba(0,0,0,.25)}
+.trial h2{font-size:1.25em;color:#7c4a12;border-bottom:2px solid #c9a86a;padding-bottom:6px;margin-bottom:10px}
+.story{background:#f1e2bb;border-left:6px solid var(--sea);padding:10px 13px;margin-bottom:12px;font-size:1.03em}
+.q{margin:10px 0 4px;font-size:1.06em}
+.ansrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0 2px}
+.ansrow label{font-weight:700;color:#7c4a12}
+.ansrow input{width:88px;padding:7px 9px;font-size:1.05em;font-weight:800;text-align:center;
+    border:2px solid #c9a86a;border-radius:8px;font-family:inherit;background:#fffdf6}
+.ansrow input:focus{outline:none;border-color:var(--sea)}
+.ansrow input.ok{border-color:var(--green);background:#e9f6ea}
+.ansrow input.no{border-color:var(--red);background:#fbeaea}
+.ansrow button{background:#7c4a12;color:#fdf6e3;border:none;border-radius:8px;padding:8px 14px;font-weight:700;
+    cursor:pointer;font-family:inherit}
+.ansrow button:hover{background:var(--sea)}
+.fb{width:100%;font-weight:700;min-height:1.1em;margin-top:4px}
+.fb.ok{color:var(--green)}
+.fb.no{color:var(--red)}
+.keyrow{margin-top:12px;border-top:2px dashed #c9a86a;padding-top:10px}
+.figs{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:10px 0 2px}
+.figs figure{margin:0}
+.figs figcaption{text-align:center;font-weight:700;color:#7c4a12;margin-top:3px}
+.hint{font-style:italic;color:#6b5a3a;margin-top:8px}
+table.ms{border-collapse:collapse;margin:10px auto}
+table.ms td{border:2px solid #7c4a12;width:52px;height:52px;text-align:center;font-size:1.3em;font-weight:800;
+    background:#fffdf6}
+table.ms td.fixed{background:#f1e2bb}
+table.ms input{width:46px;height:44px;border:none;background:transparent;text-align:center;font-size:1em;
+    font-weight:800;font-family:inherit;color:var(--ink)}
+table.ms input:focus{outline:2px solid var(--sea);border-radius:4px}
+table.ms input.ok{background:#e9f6ea;border-radius:4px}
+table.ms input.no{background:#fbeaea;border-radius:4px}
+.final{background:#fdf6e3;border:4px solid var(--gold);border-radius:14px;padding:18px;margin-top:6px}
+.final h2{color:#7c4a12;font-size:1.3em;margin-bottom:8px}
+table.map{border-collapse:collapse;margin:12px auto}
+table.map td{border:2px solid #0e7490;width:46px;height:46px;text-align:center;font-weight:700;
+    background:#d7f0f7;cursor:pointer;font-size:.95em;color:#0e4a5a}
+table.map td:hover{background:#b6e4ef}
+table.map td.dug{background:#f1e2bb;color:#8a6a3a}
+table.map td.treasure{background:var(--gold);font-size:1.4em}
+.big{font-size:1.25em;font-weight:800;color:#7c4a12;text-align:center;margin-top:10px}
+@media print{body{background:#fff}.trial,.final,.top{box-shadow:none}}
+@page{size:A4;margin:12mm}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="top">
+  <svg class="map-deco" viewBox="0 0 900 200" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 150 Q 120 110 240 150 T 480 150 T 720 150 T 960 150" stroke="#0e7490" stroke-width="6" fill="none"/>
+    <path d="M0 175 Q 120 135 240 175 T 480 175 T 720 175 T 960 175" stroke="#0e7490" stroke-width="4" fill="none"/>
+    <polygon points="430,30 470,120 390,120" fill="#7c4a12"/>
+    <polygon points="500,60 540,120 460,120" fill="#7c4a12"/>
+    <rect x="735" y="40" width="22" height="70" fill="#fdf6e3" stroke="#7c4a12" stroke-width="4"/>
+    <circle cx="746" cy="36" r="13" fill="#d9a441"/>
+  </svg>
+  <h1>Второй остров</h1>
+  <div class="sub">восемь испытаний · восемь ключей · один тайник</div>
+</div>
+<div class="story" style="background:#fdf6e3;border:3px solid #c9a86a;border-radius:14px;border-left:8px solid #0e7490">
+  <p>В сундуке с первого острова лежала карта второго. Здесь две горы, маяк,
+  и тайник спрятан в одной из клеток карты.</p>
+  <p>Испытаний стало восемь, и они потруднее прежних. За каждое дают <strong>ключ</strong>,
+  это одно число. Сложите все восемь ключей и узнаете, где копать.</p>
+</div>
+<div class="keys"><div class="keybox" id="box_k1">?</div><div class="keybox" id="box_k2">?</div><div class="keybox" id="box_k3">?</div><div class="keybox" id="box_k4">?</div><div class="keybox" id="box_k5">?</div><div class="keybox" id="box_k6">?</div><div class="keybox" id="box_k7">?</div><div class="keybox" id="box_k8">?</div></div>
+<div class="trial"><h2>🌉 Испытание 1. Мост чисел</h2>
+<div class="story">Мост из досок с номерами. Наступать можно только на ту доску, которая продолжает ряд.</div>
+<p class="q">1) Продолжи ряд: <strong>1, 3, 6, 10, 15, …</strong></p><div class="ansrow"><label>следующее число:</label><input id="a1"><button onclick="chk('a1', '21')">Проверить</button><span class="fb" id="fb_a1"></span></div>
+<p class="q">2) Продолжи ряд: <strong>1, 4, 9, 16, …</strong></p><div class="ansrow"><label>следующее число:</label><input id="a2"><button onclick="chk('a2', '25')">Проверить</button><span class="fb" id="fb_a2"></span></div>
+<p class="q">3) Продолжи ряд: <strong>2, 3, 5, 8, 13, 21, …</strong></p><div class="ansrow"><label>следующее число:</label><input id="a3"><button onclick="chk('a3', '34')">Проверить</button><span class="fb" id="fb_a3"></span></div>
+<p class="q">4) Продолжи ряд: <strong>48, 24, 12, 6, …</strong></p><div class="ansrow"><label>следующее число:</label><input id="a4"><button onclick="chk('a4', '3')">Проверить</button><span class="fb" id="fb_a4"></span></div>
+<p class="q">5) Продолжи ряд: <strong>100, 91, 82, 73, …</strong></p><div class="ansrow"><label>следующее число:</label><input id="a5"><button onclick="chk('a5', '64')">Проверить</button><span class="fb" id="fb_a5"></span></div>
+<p class="hint">В первом ряду прибавка растёт: +2, +3, +4. Во втором ряду числа получаются умножением числа на само себя. В третьем каждое число это сумма двух предыдущих.</p>
+<div class="keyrow ansrow"><label>Ключ: на сколько уменьшается последний ряд?</label><input id="k1"><button onclick="chkKey('k1')">Получить ключ</button><span class="fb" id="fb_k1"></span></div></div>
+<div class="trial"><h2>🚣 Испытание 2. Река</h2>
+<div class="story">Та же маленькая лодка, но народу больше. Рейс это одно движение лодки в одну сторону.</div>
+<p class="q">1) К реке подошли <strong>трое взрослых и двое детей</strong>. Лодка выдерживает <strong>или</strong> одного взрослого, <strong>или</strong> двоих детей. За сколько рейсов переправятся все?</p><div class="ansrow"><label>рейсов:</label><input id="b1"><button onclick="chk('b1', '13')">Проверить</button><span class="fb" id="fb_b1"></span></div>
+<p class="q">2) А если взрослых <strong>четверо</strong>, а детей по-прежнему двое?</p><div class="ansrow"><label>рейсов:</label><input id="b2"><button onclick="chk('b2', '17')">Проверить</button><span class="fb" id="fb_b2"></span></div>
+<p class="q">3) У берега <strong>5 солдат и 2 мальчика</strong>. Лодка выдерживает <strong>или</strong> одного солдата, <strong>или</strong> двоих мальчиков. За сколько рейсов все окажутся на другом берегу?</p><div class="ansrow"><label>рейсов:</label><input id="b3"><button onclick="chk('b3', '21')">Проверить</button><span class="fb" id="fb_b3"></span></div>
+<p class="hint">Посмотри, сколько рейсов уходит на одного взрослого: дети плывут вдвоём, один возвращается, плывёт взрослый, второй ребёнок возвращается. Потом всё повторяется, а в самом конце дети переправляются вдвоём.</p>
+<div class="keyrow ansrow"><label>Ключ: сколько рейсов уходит на одного взрослого?</label><input id="k2"><button onclick="chkKey('k2')">Получить ключ</button><span class="fb" id="fb_k2"></span></div></div>
+<div class="trial"><h2>🪨 Испытание 3. Пещера квадрата</h2>
+<div class="story">На двери второй пещеры квадрат без единицы: здесь числа от <strong>2 до 10</strong>, каждое по одному разу.</div>
+<div id="magic"><table class="ms">
+<tr><td><input data-ans="3"></td><td class="fixed">8</td><td><input data-ans="7"></td></tr>
+<tr><td class="fixed">10</td><td><input data-ans="6"></td><td class="fixed">2</td></tr>
+<tr><td><input data-ans="5"></td><td class="fixed">4</td><td><input data-ans="9"></td></tr>
+</table></div>
+<div class="ansrow"><button onclick="chkMagic()">Проверить квадрат</button><span class="fb" id="fb_magic"></span></div>
+<div class="ansrow"><label>сумма в любой строке:</label><input id="m1"><button onclick="chk('m1', '18')">Проверить</button><span class="fb" id="fb_m1"></span></div>
+<p class="q">А теперь квадрат побольше: числа от <strong>1 до 16</strong> надо расставить в квадрат четыре на четыре так, чтобы суммы во всех строках и столбцах были одинаковыми. Чему будет равна эта сумма?</p><div class="ansrow"><label>сумма:</label><input id="m2"><button onclick="chk('m2', '34')">Проверить</button><span class="fb" id="fb_m2"></span></div>
+<p class="hint">Сложи все числа от 1 до 16 и раздели на четыре строки.</p>
+<div class="keyrow ansrow"><label>Ключ: какое число в центре первого квадрата?</label><input id="k3"><button onclick="chkKey('k3')">Получить ключ</button><span class="fb" id="fb_k3"></span></div></div>
+<div class="trial"><h2>🧱 Испытание 4. Башня</h2>
+<div class="story">На вершине горы стоит башня из кубиков, а рядом лежит большой куб из маленьких кубиков.</div>
+<p class="q">1) Башню сложили так: внизу слой <strong>три на три</strong> кубика, на нём слой <strong>два на два</strong>, а сверху один кубик. Сколько всего кубиков в башне?</p><div class="ansrow"><label>кубиков:</label><input id="c1"><button onclick="chk('c1', '14')">Проверить</button><span class="fb" id="fb_c1"></span></div>
+<p class="q">2) Большой куб сложен из маленьких кубиков: <strong>три в длину, три в ширину и три в высоту</strong>. Сколько в нём маленьких кубиков?</p><div class="ansrow"><label>кубиков:</label><input id="c2"><button onclick="chk('c2', '27')">Проверить</button><span class="fb" id="fb_c2"></span></div>
+<p class="q">3) Этот большой куб покрасили снаружи, а потом разобрали на маленькие кубики. У скольких кубиков есть краска хотя бы на одной грани?</p><div class="ansrow"><label>кубиков:</label><input id="c3"><button onclick="chk('c3', '26')">Проверить</button><span class="fb" id="fb_c3"></span></div>
+<p class="q">4) Сколько у кубика уголков, то есть вершин?</p><div class="ansrow"><label>вершин:</label><input id="c4"><button onclick="chk('c4', '8')">Проверить</button><span class="fb" id="fb_c4"></span></div>
+<p class="hint">В третьей задаче подумай, какой кубик спрятан внутри и ни одной стороной не выходит наружу.</p>
+<div class="keyrow ansrow"><label>Ключ: сколько у кубика вершин?</label><input id="k4"><button onclick="chkKey('k4')">Получить ключ</button><span class="fb" id="fb_k4"></span></div></div>
+<div class="trial"><h2>🏮 Испытание 5. Лес фонарей</h2>
+<div class="story">Дорога к маяку идёт через лес, и снова надо считать промежутки.</div>
+<p class="q">1) По кругу растут <strong>12 деревьев</strong>, и между каждыми двумя висит фонарь. Сколько фонарей?</p><div class="ansrow"><label>фонарей:</label><input id="d1"><button onclick="chk('d1', '12')">Проверить</button><span class="fb" id="fb_d1"></span></div>
+<p class="q">2) Бревно распилили на <strong>10 частей</strong>. Сколько сделали распилов?</p><div class="ansrow"><label>распилов:</label><input id="d2"><button onclick="chk('d2', '9')">Проверить</button><span class="fb" id="fb_d2"></span></div>
+<p class="q">3) Посчитай быстро: <strong>1 + 2 + 3 + … + 20</strong></p><div class="ansrow"><label>сумма:</label><input id="d3"><button onclick="chk('d3', '210')">Проверить</button><span class="fb" id="fb_d3"></span></div>
+<p class="q">4) В маяке на лестнице от первого этажа до третьего <strong>36 ступенек</strong>. Сколько ступенек надо пройти от первого этажа до пятого?</p><div class="ansrow"><label>ступенек:</label><input id="d4"><button onclick="chk('d4', '72')">Проверить</button><span class="fb" id="fb_d4"></span></div>
+<p class="hint">Складывай парами: 1 и 20, 2 и 19, 3 и 18… А в последней задаче сначала посчитай, сколько ступенек между двумя соседними этажами.</p>
+<div class="keyrow ansrow"><label>Ключ: сколько распилов во второй задаче?</label><input id="k5"><button onclick="chkKey('k5')">Получить ключ</button><span class="fb" id="fb_k5"></span></div></div>
+<div class="trial"><h2>⚖️ Испытание 6. Весы у маяка</h2>
+<div class="story">У смотрителя маяка чашечные весы, бочка с водой и мешочек монет.</div>
+<p class="q">1) <strong>Два арбуза</strong> весят столько же, сколько <strong>три дыни</strong>, а одна дыня весит <strong>2 кг</strong>. Сколько весит один арбуз?</p><div class="ansrow"><label>килограммов:</label><input id="e1"><button onclick="chk('e1', '3')">Проверить</button><span class="fb" id="fb_e1"></span></div>
+<p class="q">2) Полная бочка воды весит <strong>50 кг</strong>, а бочка, в которой воды налили до половины, весит <strong>30 кг</strong>. Сколько весит пустая бочка?</p><div class="ansrow"><label>килограммов:</label><input id="e2"><button onclick="chk('e2', '10')">Проверить</button><span class="fb" id="fb_e2"></span></div>
+<p class="q">3) Есть <strong>9 монет</strong>, одна из них фальшивая и легче остальных. За сколько взвешиваний её точно найти?</p><div class="ansrow"><label>взвешиваний:</label><input id="e3"><button onclick="chk('e3', '2')">Проверить</button><span class="fb" id="fb_e3"></span></div>
+<p class="q">4) Кирпич весит <strong>2 кг и ещё треть кирпича</strong>. Сколько весит целый кирпич?</p><div class="ansrow"><label>килограммов:</label><input id="e4"><button onclick="chk('e4', '3')">Проверить</button><span class="fb" id="fb_e4"></span></div>
+<p class="hint">Во второй задаче сравни две бочки: разница в весе это половина воды. В третьей дели монеты на три кучки.</p>
+<div class="keyrow ansrow"><label>Ключ: сколько килограммов весит арбуз?</label><input id="k6"><button onclick="chkKey('k6')">Получить ключ</button><span class="fb" id="fb_k6"></span></div></div>
+<div class="trial"><h2>🔐 Испытание 7. Шифр тайника</h2>
+<div class="story">На камне у входа выбиты примеры с буквами. Одинаковые буквы это одинаковые цифры, разные буквы это разные цифры.</div>
+<p class="q">1) <strong>АА + АА = 110</strong>. Чему равна А?</p><div class="ansrow"><label>А =</label><input id="f1"><button onclick="chk('f1', '5')">Проверить</button><span class="fb" id="fb_f1"></span></div>
+<p class="q">2) <strong>АБ + БА = 110</strong>. Чему равна сумма А + Б?</p><div class="ansrow"><label>А + Б =</label><input id="f2"><button onclick="chk('f2', '10')">Проверить</button><span class="fb" id="fb_f2"></span></div>
+<p class="q">3) <strong>ВВ − В = 50</strong>. Чему равна В?</p><div class="ansrow"><label>В =</label><input id="f3"><button onclick="chk('f3', '5')">Проверить</button><span class="fb" id="fb_f3"></span></div>
+<p class="q">4) <strong>А + Б = 12</strong> и <strong>А − Б = 2</strong>. Чему равны А и Б?</p><div class="ansrow"><label>А =</label><input id="f4"><button onclick="chk('f4', '7')">Проверить</button><span class="fb" id="fb_f4"></span></div><div class="ansrow"><label>Б =</label><input id="f5"><button onclick="chk('f5', '5')">Проверить</button><span class="fb" id="fb_f5"></span></div>
+<p class="hint">АА это двузначное число из двух одинаковых цифр: 11, 22, 33 и так далее. В последней задаче попробуй подобрать пару чисел и проверить оба условия.</p>
+<div class="keyrow ansrow"><label>Ключ: чему равна А в первом примере?</label><input id="k7"><button onclick="chkKey('k7')">Получить ключ</button><span class="fb" id="fb_k7"></span></div></div>
+<div class="trial"><h2>🏠 Испытание 8. Дом смотрителя</h2>
+<div class="story">Смотритель маяка пустит в дом, если разберётесь, кто кому родня.</div>
+<p class="q">1) У Маши <strong>три брата</strong>, и у каждого брата есть <strong>одна сестра</strong>. Сколько всего детей в семье?</p><div class="ansrow"><label>детей:</label><input id="g1"><button onclick="chk('g1', '4')">Проверить</button><span class="fb" id="fb_g1"></span></div>
+<p class="q">2) <strong>Два отца и два сына</strong> пошли на рыбалку, поймали три рыбы, и каждому досталось по одной рыбе. Сколько человек было на рыбалке?</p><div class="ansrow"><label>человек:</label><input id="g2"><button onclick="chk('g2', '3')">Проверить</button><span class="fb" id="fb_g2"></span></div>
+<p class="q">3) У отца Мэри пять дочерей: Чача, Чече, Чичи, Чочо и ещё одна. Как зовут пятую дочь?</p><div class="ansrow"><label>имя:</label><input id="g3"><button onclick="chk('g3', 'Мэри')">Проверить</button><span class="fb" id="fb_g3"></span></div>
+<p class="hint">Во второй задаче один из рыбаков может быть сразу и отцом, и сыном.</p>
+<div class="keyrow ansrow"><label>Ключ: сколько человек было на рыбалке?</label><input id="k8"><button onclick="chkKey('k8')">Получить ключ</button><span class="fb" id="fb_k8"></span></div></div>
+<div class="final"><h2>🗺️ Карта второго острова</h2>
+<p>Сложи все восемь ключей. Получится номер клетки, где спрятан тайник.</p>
+<div class="ansrow"><label>сумма ключей:</label><input id="sum"><button onclick="chkSum()">Проверить</button><span class="fb" id="fb_sum"></span></div>
+<table class="map"><tr><td onclick="dig(this, 1)">1</td><td onclick="dig(this, 2)">2</td><td onclick="dig(this, 3)">3</td><td onclick="dig(this, 4)">4</td><td onclick="dig(this, 5)">5</td><td onclick="dig(this, 6)">6</td><td onclick="dig(this, 7)">7</td></tr><tr><td onclick="dig(this, 8)">8</td><td onclick="dig(this, 9)">9</td><td onclick="dig(this, 10)">10</td><td onclick="dig(this, 11)">11</td><td onclick="dig(this, 12)">12</td><td onclick="dig(this, 13)">13</td><td onclick="dig(this, 14)">14</td></tr><tr><td onclick="dig(this, 15)">15</td><td onclick="dig(this, 16)">16</td><td onclick="dig(this, 17)">17</td><td onclick="dig(this, 18)">18</td><td onclick="dig(this, 19)">19</td><td onclick="dig(this, 20)">20</td><td onclick="dig(this, 21)">21</td></tr><tr><td onclick="dig(this, 22)">22</td><td onclick="dig(this, 23)">23</td><td onclick="dig(this, 24)">24</td><td onclick="dig(this, 25)">25</td><td onclick="dig(this, 26)">26</td><td onclick="dig(this, 27)">27</td><td onclick="dig(this, 28)">28</td></tr><tr><td onclick="dig(this, 29)">29</td><td onclick="dig(this, 30)">30</td><td onclick="dig(this, 31)">31</td><td onclick="dig(this, 32)">32</td><td onclick="dig(this, 33)">33</td><td onclick="dig(this, 34)">34</td><td onclick="dig(this, 35)">35</td></tr><tr><td onclick="dig(this, 36)">36</td><td onclick="dig(this, 37)">37</td><td onclick="dig(this, 38)">38</td><td onclick="dig(this, 39)">39</td><td onclick="dig(this, 40)">40</td><td onclick="dig(this, 41)">41</td><td onclick="dig(this, 42)">42</td></tr><tr><td onclick="dig(this, 43)">43</td><td onclick="dig(this, 44)">44</td><td onclick="dig(this, 45)">45</td><td onclick="dig(this, 46)">46</td><td onclick="dig(this, 47)">47</td><td onclick="dig(this, 48)">48</td><td onclick="dig(this, 49)">49</td></tr></table>
+<div class="fb big" id="final-msg"></div></div>
+
+<script>
+var KEYS = {k1:9, k2:4, k3:6, k4:8, k5:9, k6:3, k7:5, k8:3};
+var TOTAL = 47;
+var GOT = {};
+function norm(s){ return (s||"").toString().trim().toLowerCase().replace(/\s+/g,"").replace(/ё/g,"е"); }
+function say(id, ok, text){
+  var fb = document.getElementById("fb_"+id);
+  if(!fb) return;
+  fb.className = "fb " + (ok ? "ok" : "no");
+  fb.textContent = text;
+}
+function chk(id, answer){
+  var el = document.getElementById(id);
+  var ok = norm(el.value) === norm(answer);
+  el.classList.remove("ok","no"); el.classList.add(ok ? "ok" : "no");
+  say(id, ok, ok ? "Верно" : "Пока нет");
+}
+function chkKey(id){
+  var el = document.getElementById(id);
+  var ok = parseInt(el.value, 10) === KEYS[id];
+  el.classList.remove("ok","no"); el.classList.add(ok ? "ok" : "no");
+  if(ok){
+    GOT[id] = true;
+    var box = document.getElementById("box_"+id);
+    if(box){ box.textContent = KEYS[id]; box.className = "keybox got"; }
+    say(id, true, "Ключ получен!");
+  } else {
+    say(id, false, "Это не тот ключ");
+  }
+}
+function chkMagic(){
+  var ins = document.querySelectorAll("#magic input");
+  var bad = 0, empty = 0;
+  for(var i = 0; i < ins.length; i++){
+    var el = ins[i];
+    el.classList.remove("ok","no");
+    if(!norm(el.value)){ empty++; continue; }
+    if(norm(el.value) === norm(el.getAttribute("data-ans"))) el.classList.add("ok");
+    else { el.classList.add("no"); bad++; }
+  }
+  if(bad === 0 && empty === 0) say("magic", true, "Квадрат собран!");
+  else if(bad === 0) say("magic", true, "Пока верно, осталось клеток: " + empty);
+  else say("magic", false, "Ошибок: " + bad);
+}
+function chkSum(){
+  var el = document.getElementById("sum");
+  var ok = parseInt(el.value, 10) === TOTAL;
+  el.classList.remove("ok","no"); el.classList.add(ok ? "ok" : "no");
+  say("sum", ok, ok ? "Верно! Теперь копай в этой клетке на карте" : "Сложи все восемь ключей ещё раз");
+}
+function dig(cell, n){
+  var msg = document.getElementById("final-msg");
+  if(n === TOTAL){
+    cell.className = "treasure";
+    cell.textContent = "💰";
+    msg.textContent = "Тайник найден! Внутри подзорная труба и записка: третий остров ждёт.";
+    msg.className = "fb ok big";
+  } else {
+    cell.className = "dug";
+    cell.textContent = "·";
+    msg.textContent = "Здесь пусто. Проверь сумму ключей.";
+    msg.className = "fb no big";
+  }
+}
+</script>
+
+</div></body></html>
